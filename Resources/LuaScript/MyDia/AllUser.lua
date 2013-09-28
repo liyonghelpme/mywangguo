@@ -82,7 +82,7 @@ function AllUser:touchEnded(x, y)
                 global.director:popView()
                 return
             else
-                global.director:pushView(AllFriend.new(self.mainDialog, self.allUser[i]), 1, 0)
+                global.director:pushView(AllFriend.new(self.mainDialog, self.allUser[i]), 1, 0, 1)
             end
         end
     end

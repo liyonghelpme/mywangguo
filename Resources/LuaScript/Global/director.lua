@@ -5,6 +5,9 @@ end
 
 Director = class()
 function Director:ctor()
+    --allSceneView 所有push的场景的view列表
+    self.allSceneView = {}
+    --当前场景中的view 列表
     self.stack = {}
     self.designSize = {800, 480}
     local vs = CCDirector:sharedDirector():getVisibleSize()
@@ -25,12 +28,12 @@ function Director:pushPage(view, z)
 end
 
 --view 封装了 CCNode
-function Director:pushView(view, dark, autoPop)
+function Director:pushView(view, dark, autoPop, gray, bigDark)
+    print('pushView', dark, autoPop, gray)
     if dark == 1 then
-        print('pushView', dark)
         local temp = {}
         temp.bg = CCNode:create()
-        local d = Dark.new()
+        local d = Dark.new(autoPop, gray, bigDark)
         temp.bg:addChild(d.bg)
         temp.bg:addChild(view.bg)
         self.curScene.bg:addChild(temp.bg)
@@ -53,11 +56,12 @@ function Director:replaceScene(view)
     CCDirector:sharedDirector():replaceScene(view.bg)
     self.curScene = view
     self.stack = {}
-    
 end
 function Director:pushScene(view)
     CCDirector:sharedDirector():pushScene(view.bg)
     self.curScene = view
+    table.insert(self.allSceneView, self.stack)
+    self.stack = {}
     table.insert(self.sceneStack, view)
 end
 function Director:runWithScene(view)
@@ -68,8 +72,9 @@ end
 function Director:popScene()
     CCDirector:sharedDirector():popScene()
     self.curScene = self.sceneStack[#self.sceneStack-1]
+    self.stack = self.allSceneView[#self.allSceneView]
+    table.remove(self.allSceneView, #self.allSceneView)
     table.remove(self.sceneStack, #self.sceneStack)
-    
 end
 
 

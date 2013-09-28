@@ -460,7 +460,17 @@ function setVisible(s, v)
 end
 
 function getStr(key, rep)
-    return key
+    local s = Strings[key]
+    if s == nil then
+        return ""
+    end
+    if type(s) == "table" then
+        s = s[LANGUAGE] 
+    end
+    if type(rep) == "table" then
+        s = replaceStr(s, rep)
+    end
+    return s
 end
 
 --可以参考nozomi MyWorld 网格 笛卡尔坐标 仿射坐标的转化
@@ -715,7 +725,6 @@ function getParam(k)
     return getDefault(GameParam, k, 0)
 end
 
-
 function colorWordsNode(s, si, nc, sc)
     local n = CCNode:create()
     local over = split(s, "%]")
@@ -726,7 +735,7 @@ function colorWordsNode(s, si, nc, sc)
         if string.find(over[i], "%[") ~= nil then
             local p = split(over[i], "%[")
             if #p[1] > 0 then
-                local l = setPos(setColor(CCLabel:create(p[1], "", si), nc), {curX, 0})
+                local l = setPos(setColor(CCLabelTTF:create(p[1], "", si), nc), {curX, 0})
                 n:addChild(l)
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
@@ -734,7 +743,7 @@ function colorWordsNode(s, si, nc, sc)
             end
 
             if #p[2] > 0 then
-                local l = setPos(setColor(CCLabel:create(p[2], "", si), sc), {curX, 0})
+                local l = setPos(setColor(CCLabelTTF:create(p[2], "", si), sc), {curX, 0})
                 n:addChild(l)
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
@@ -742,7 +751,8 @@ function colorWordsNode(s, si, nc, sc)
             end
         else
             if #over[i] > 0 then
-                local l = setPos(setColor(CCLabel:create(over[i], "", si), nc), {curX, 0})
+                local l = setPos(setColor(CCLabelTTF:create(over[i], "", si), nc), {curX, 0})
+                setAnchor(l, {0, 0})
                 n:addChild(l)
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
@@ -753,6 +763,7 @@ function colorWordsNode(s, si, nc, sc)
     n:setContentSize(CCSizeMake(curX, height))
     return n;
 end
+--string size normalColor Special Color
 function getRealHeight(sp)
     local sz = sp:getContentSize()
     local sca = sp:getScale()
@@ -830,4 +841,13 @@ function adjustZord(bg, z)
     par:addChild(bg, z)
     bg:release()
     return bg
+end
+function getVs()
+    return CCDirector:sharedDirector():getVisibleSize()
+end
+function addReq(req, postData, handler, param, delegate)
+    global.httpController:addRequest(req, postData, handler, param, delegate)
+end
+function showDialog(w)
+    global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}), nil, nil)
 end

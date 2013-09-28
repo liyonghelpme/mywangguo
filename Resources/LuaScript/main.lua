@@ -18,14 +18,19 @@ local function main()
 
     ---------------
     require "Global.INCLUDE"
+    require "logic.Logic"
+    require "values.Value"
     require "MyDia.MainDialog"
+    require "MyDia.AllFight"
     require "MyDia.AllHeroes"
     require "MyDia.AllLevel"
     require "MyDia.AllUser"
     require "MyDia.AllFriend"
     require 'MyDia.Formation'
     require "Battle.BattleGround"
+    --require "Mock.MainMap"
     
+    --[[
     local ground = BattleGround.new()
     ground:initTest()
     ground:prepareBattle()
@@ -34,6 +39,10 @@ local function main()
     
     CCDirector:sharedDirector():getScheduler():setTimeScale(2)
     global.director:runWithScene(scene)
+    --]]
+
+    --global.director:runWithScene(ui.createScene(MainMap.new()))
+    global.director:runWithScene(mainScene())
 end
 
 xpcall(main, __G__TRACKBACK__)

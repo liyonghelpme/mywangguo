@@ -88,7 +88,10 @@ function ui.newTTFLabel(params)
 
     return label
 end
-
+--[[
+image 
+callback
+--]]
 function ui.newButton(params)
     local obj = {}
     local lay = CCLayer:create()
@@ -97,8 +100,8 @@ function ui.newButton(params)
     obj.bg = lay
     local sz = sp:getContentSize()
     lay:setContentSize(sz)
-    lay:setAnchorPoint(ccp(0, 0))
-    sp:setAnchorPoint(ccp(0, 0))
+    --lay:setAnchorPoint(ccp(0, 0))
+    --sp:setAnchorPoint(ccp(0, 0))
 
     function obj:touchBegan(x, y)
         --params.touchBegan(params.delegate, x, y)
@@ -120,6 +123,7 @@ function ui.newButton(params)
         lay:setContentSize(CCSizeMake(w, h))
         setSize(sp, {w, h})
     end
+    obj:setAnchor(0.5, 0.5)
     registerTouch(obj)
     return obj
 end
@@ -132,8 +136,14 @@ function ui.newTouchLayer(params)
     lay:setContentSize(CCSizeMake(params.size[1], params.size[2]))
     local sz = lay:getContentSize()
     function obj:touchBegan(x, y)
-        local xy = lay:convertToNodeSpace(ccp(x, y))
-        if checkIn(xy.x, xy.y, sz) then
+        local ret 
+        if params.checkIn ~= nil then
+            ret = params.checkIn(params.delegate, x, y)
+        else
+            local xy = lay:convertToNodeSpace(ccp(x, y))
+            ret = checkIn(xy.x, xy.y, sz)
+        end
+        if ret then
             params.touchBegan(params.delegate, x, y)
             return true
         end
@@ -147,4 +157,18 @@ function ui.newTouchLayer(params)
     end
     registerTouch(obj)
     return obj
+end
+
+
+function ui.adjustMid(sp)
+    local vs = global.director.disSize
+    sp:setPosition(ccp(vs[1]/2, vs[2]/2))
+    sp:setAnchorPoint(ccp(0.5, 0.5))
+    return sp
+end
+
+function ui.createScene(view)
+    local scene = {bg=CCScene:create()}
+    scene.bg:addChild(view.bg)
+    return scene
 end

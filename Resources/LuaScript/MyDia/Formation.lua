@@ -1,5 +1,27 @@
 local simple = require "dkjson"
 Formation = class()
+function Formation:goBack()
+    global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(Logic.formation)}}) )
+    global.director:popView()
+    return true
+end
+function Formation:goFight(num, dataNum)
+    global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(Logic.formation)}}) )
+
+    local ground = BattleGround.new()
+    ground:initTest()
+    ground:prepareBattle()
+    local scene = {bg=CCScene:create()}
+    scene.bg:addChild(ground:initView())
+    
+    CCDirector:sharedDirector():getScheduler():setTimeScale(2)
+    global.director:pushScene(scene)
+    return false 
+end
+function Formation:adjustHero()
+    return false
+end
+
 function Formation:ctor(mainDialog, friendUid, enemyUser)
     self.INIT_X = 0
     self.INIT_Y = 0
@@ -7,7 +29,7 @@ function Formation:ctor(mainDialog, friendUid, enemyUser)
     self.HEIGHT = 70
     self.BACK_HEI = global.director.disSize[2]
     self.INITOFF = self.BACK_HEI-80
-    self.content = {'骑士1转1级', '牧师3转2级', '牧师3转3级', '开始战斗', '返回'}
+    self.content = {{'返回', self.goBack}, {'开始战斗', self.goFight}, {'骑士1转1级', self.adjustHero}}
     self.TabNum = #self.content
     self.data = {}
     self.mainDialog = mainDialog
@@ -19,7 +41,7 @@ function Formation:ctor(mainDialog, friendUid, enemyUser)
 
     self:initTabs()
     
-    self.touch = ui.newTouchLayer({size={self.WIDTH, self.BACK_HEI}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
+    self.touch = ui.newTouchLayer({size={800, self.BACK_HEI}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
 
     self.bg:addChild(self.touch.bg)
     self:updateData()
@@ -29,23 +51,26 @@ function Formation:updateData()
     global.httpController:addRequest('getFormation', dict({{'uid', 1}}), self.getFormation, nil, self)
 end
 function Formation:getFormation(rep, param)
-    self.formation = rep['formation']
-    self.heroes = rep['heroes']
+    Logic.formation = rep['formation']
+    Logic.heroes = rep['heroes']
     self.content = {}
-    for k, v in ipairs(self.formation) do
+    local count = 0
+    table.insert(self.content, {'返回', self.goBack})
+    table.insert(self.content, {'开始战斗', self.goFight})
+    count = #self.content
+    for k, v in ipairs(Logic.formation) do
+        count = count + 1
         local hdata
-        for l, h in ipairs(self.heroes) do
+        for l, h in ipairs(Logic.heroes) do
             if h['hid'] == v then
                 hdata = h
                 break
             end
         end
-        local name = self.mainDialog.allHeroData[hdata['kind']]['name']
-        table.insert(self.content, name..' '..hdata['job']..'转'..' '..hdata['level']..'级')
+        local name = Logic.allHeroData[hdata['kind']]['name']
+        table.insert(self.content, {name..' '..hdata['job']..'转'..' '..hdata['level']..'级', self.adjustHero, count, k})
     end
-    
-    table.insert(self.content, '开始战斗')
-    table.insert(self.content, '返回')
+
     self.TabNum = #self.content
 
     removeSelf(self.flowTab)
@@ -57,6 +82,7 @@ function Formation:touchBegan(x, y)
     self.accMove = 0
     self.lastPoints = {x, y}
 
+    self.selTag = nil
     local child = checkInChild(self.flowTab, self.lastPoints)
     if child ~= nil then
         local sp = self.data[child:getTag()][1]
@@ -79,9 +105,9 @@ function Formation:touchMoved(x, y)
     local oldPos = self.lastPoints
     self.lastPoints = {x, y}
     local dify = self.lastPoints[2]-oldPos[2]
-    if self.selTag == #self.content or self.selTag == #self.content-1 then
-        --self:moveBack(dify)
-    elseif self.selected ~= nil then
+    if self.selTag == nil then
+        self:moveBack(dify)
+    elseif self.selTag ~= nil and self.content[self.selTag][2] == self.adjustHero then
         local curPos = getPos(self.backNode)
         setPos(self.backNode, {curPos[1], curPos[2]+dify})
     end
@@ -89,8 +115,7 @@ end
 
 function Formation:touchEnded(x, y)
     local newPos = {x, y}
-
-    if self.selTag ~= #self.content and self.selTag ~= #self.content-1 then
+    if self.selTag ~= nil and self.content[self.selTag][2] == self.adjustHero then
         if self.selected ~= nil then
             self.backNode:retain()
             removeSelf(self.backNode)
@@ -102,6 +127,7 @@ function Formation:touchEnded(x, y)
             if child ~= nil then
                 ct = child:getTag()
             end
+
             if child ~= nil and ct ~= #self.content and ct ~= #self.content-1 then
                 local cp = getPos(child)
                 setPos(child, self.oldPos)
@@ -109,9 +135,9 @@ function Formation:touchEnded(x, y)
 
                 child:setTag(bt)
                 self.backNode:setTag(ct)
-                local tv = self.formation[ct]
-                self.formation[ct] = self.formation[bt]
-                self.formation[bt] = tv
+                local tv = Logic.formation[ct]
+                Logic.formation[ct] = Logic.formation[bt]
+                Logic.formation[bt] = tv
                 local bd = self.data[bt]
                 local cd = self.data[ct]
 
@@ -127,24 +153,27 @@ function Formation:touchEnded(x, y)
         if child ~= nil then
             local i = child:getTag()
             print(i)
+            local ret = self.content[i][2](self, self.content[i][3], self.content[i][4])
+            if ret then
+                return
+            end
+            --[[
             if i == #self.content-1 then
-                global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(self.formation)}}) )
+                global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(Logic.formation)}}) )
             elseif i == #self.content then
-                global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(self.formation)}}) )
+                global.httpController:addRequest('setFormation', dict({{'uid',1}, {'formation', simple.encode(Logic.formation)}}) )
                 global.director:popView()
                 return
             end
+            --]]
         end
     end
-    --]]
 
-    --[[
     local curPos = getPos(self.flowTab)
     local k = round((curPos[2]-self.INITOFF)/self.HEIGHT)
     local maxK = math.max(0, math.ceil((self.TabNum*self.HEIGHT-self.BACK_HEI)/self.HEIGHT))
     k = math.min(math.max(0, k), maxK)
     setPos(self.flowTab, {curPos[1], self.INITOFF+self.HEIGHT*k})
-    --]]
 
 
     if self.selected ~= nil then
@@ -162,7 +191,7 @@ function Formation:initTabs()
         t:setTag(i)
         self.data[i] = {sp, t}
         local sz = sp:getContentSize()
-        local w = setColor(setPos(addLabel(sp, self.content[i], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
+        local w = setColor(setPos(addLabel(sp, self.content[i][1], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
     end
 end
 

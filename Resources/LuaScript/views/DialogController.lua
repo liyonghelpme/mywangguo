@@ -21,16 +21,16 @@ function DialogController:update(diff)
     end
     --没有全局对话框
     if #global.director.stack == 0 then
-        if #self.cmd > 0 then
-            local curCmd = table.remove(self.cmd, 1)
+        if #self.cmds > 0 then
+            local curCmd = table.remove(self.cmds, 1)
             if curCmd['cmd'] == "login" then
             end
         end
     end
 end
-
+--可能t[1] 已经删除自己了 只是DialogController 还不知道
 function DialogController:addBanner(banner)
-    while #self.bannerStack > getParam("maxBannerNum") do
+    while #self.bannerStack > 5 do
         local t = table.remove(self.bannerStack, 1)
         removeSelf(t[1])
     end
@@ -40,7 +40,7 @@ function DialogController:addBanner(banner)
     local initX = dis[1]/2;
     local initY = dis[2]/2;
     for i = 1, #self.bannerStack, 1 do
-        local ban = bannerStack[i][1]
+        local ban = self.bannerStack[i][1]
         ban:setMoveAni(initX, initY+getParam("bannerOffY")*maxOff)
         maxOff = maxOff-1
     end

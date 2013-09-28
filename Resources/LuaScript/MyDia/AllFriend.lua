@@ -1,4 +1,12 @@
 AllFriend = class()
+function AllFriend:goBack()
+    global.director:popView()
+    return true
+end
+function AllFriend:selHero(num, dataNum)
+    global.director:pushView(Formation.new(nil, Logic.allFriend[dataNum]['uid'], self.enemyUser), 1, 0, 1)
+    return false
+end
 function AllFriend:ctor(mainDialog, enemyUser)
     self.INIT_X = 0
     self.INIT_Y = 0
@@ -6,10 +14,10 @@ function AllFriend:ctor(mainDialog, enemyUser)
     self.HEIGHT = 70
     self.BACK_HEI = global.director.disSize[2]
     self.INITOFF = self.BACK_HEI-80
-    self.content = {'好友英雄 骑士1转1级', '好友英雄 牧师3转2级', '好友英雄 牧师3转2级', '返回'}
+    self.content = {{'返回', self.goBack}, {'好友英雄 骑士1转1级', self.selHero}}
     self.TabNum = #self.content
     self.data = {}
-    self.mainDialog = mainDialog
+    --self.mainDialog = mainDialog
     self.enemyUser = enemyUser
 
     self.bg = CCLayer:create()
@@ -27,9 +35,13 @@ function AllFriend:updateData()
     global.httpController:addRequest('getAllFriend', dict(), self.getAllFriend, nil, self)
 end
 function AllFriend:getAllFriend(rep, param)
-    self.allFriend = rep['friend']
+    Logic.allFriend = rep['friend']
     self.content = {}
-    for k, v in ipairs(self.allFriend) do
+    local count = 0
+    table.insert(self.content, {'返回', self.goBack})
+    count = #self.content
+    for k, v in ipairs(Logic.allFriend) do
+        count = count+1
         local leader = v['formation'][1]
         local heroData = v['heroData']
         local ch
@@ -39,10 +51,10 @@ function AllFriend:getAllFriend(rep, param)
                 break
             end
         end
-        local name = self.mainDialog.allHeroData[ch['kind']]['name']
-        table.insert(self.content, '好友英雄 '..name..' '..ch['job']..'转'..' '..ch['level']..'级')
+        local name = Logic.allHeroData[ch['kind']]['name']
+        table.insert(self.content, {'好友英雄 '..name..' '..ch['job']..'转'..' '..ch['level']..'级', self.selHero, count, k})
     end
-    table.insert(self.content, '返回')
+
     self.TabNum = #self.content
 
     removeSelf(self.flowTab)
@@ -82,11 +94,9 @@ function AllFriend:touchEnded(x, y)
         if child ~= nil then
             local i = child:getTag()
             print(i)
-            if i == #self.content then
-                global.director:popView()
+            local ret = self.content[i][2](self, self.content[i][3], self.content[i][4])
+            if ret then
                 return
-            else
-                global.director:pushView(Formation.new(self.mainDialog, self.allFriend[i]['uid'], self.enemyUser), 1, 0)
             end
         end
     end
@@ -112,7 +122,7 @@ function AllFriend:initTabs()
         t:setTag(i)
         self.data[i] = sp
         local sz = sp:getContentSize()
-        local w = setColor(setPos(addLabel(sp, self.content[i], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
+        local w = setColor(setPos(addLabel(sp, self.content[i][1], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
     end
 end
 

@@ -1,10 +1,10 @@
 COL_MAX=2
 ROW_MAX=3
-MAX_DELAY=1000
-TS_Y = 991
+MAX_DELAY=30
+TS_Y = 947
 TICK = 0.04
-COL_X = {277,120}
-ROW_Y = {336,256,176}
+COL_X = {295,154}
+ROW_Y = {362,292,209}
 
 
 BuffType = {Vertigo=1, NoSkill=2, Poison=3, Fire=4, Unmatched=5, Chaos=6}
@@ -104,8 +104,8 @@ AreaSelectors[DamageArea.Col] = function(targetRole, targets)
     local ret = {}
     local targetCol = targetRole.col
     for j=1, ROW_MAX do
-        if targets[(targetCol-1)*ROW_MAX+i] then
-            table.insert(ret, targets[(targetCol-1)*ROW_MAX+i])
+        if targets[(targetCol-1)*ROW_MAX+j] then
+            table.insert(ret, targets[(targetCol-1)*ROW_MAX+j])
         end
     end
     return ret
@@ -176,18 +176,81 @@ function SkillModel:initSelector()
     end
 end
 
+function createAnimation(name, format, a,b,c,t)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    if not animation then
+        animation = CCAnimation:create()
+        for i=a, b, c do
+            animation:addSpriteFrameWithFileName(string.format(format, i))
+        end
+        animation:setDelayPerUnit(t*c/(b-a+c))
+        animation:setRestoreOriginalFrame(true)
+        CCAnimationCache:sharedAnimationCache():addAnimation(animation, name)
+    end
+    return animation
+end
 
+
+
+BattleRoleView = class()
+
+function BattleRoleView:ctor(roleViewId)
+    self.roleId = roleViewId
+    self.ax = 0.597
+    self.ay = 0.258
+    self.attackDelay = 0.6
+    self.damageDelay = 0.3
+    self.defenseDelay = 0.3
+    self.shadowX = 1
+    self.shadowY = 1
+end
+
+function BattleRoleView:createView()
+    local view = CCSprite:create("kulou_dj_00.png")
+        
+    local animation = CCAnimation:create()
+    self.djAnimation = createAnimation("role" .. self.roleId .. "_dj", "kulou_dj_%02d.png", 0, 27, 3, 0.5)
+    self.gjAnimation = createAnimation("role" .. self.roleId .. "_gj", "kulou_gj_%02d.png", 0, 19, 1, 0.33)
+    self.sjAnimation = createAnimation("role" .. self.roleId .. "_sj", "kulou_sj_%02d.png", 0, 12, 2, 0.25)
+    self.zouAnimation = createAnimation("role" .. self.roleId .. "_zou", "kulou_zou_%02d.png", 0, 27, 3, 0.5)
+
+    self.runDjAnimation = function(node)
+        self:runAction(node, "dj", false)
+	    --node:runAction(CCRepeatForever:create(CCAnimate:create(self.djAnimation)))
+	end
+	return view
+end
+
+function BattleRoleView:runAction(view, actionName, stopOthers)
+    if view then
+        if stopOthers then
+            view:stopAllActions()
+        end
+        local animation = CCAnimationCache:sharedAnimationCache():animationByName("role" .. self.roleId .. "_" .. actionName)
+        view:runAction(CCRepeatForever:create(CCAnimate:create(animation)))
+    end
+end
+
+function BattleRoleView:runActionOnceAndRestore(view, actionName)
+    if view then
+        view:stopAllActions()
+        local animation = CCAnimationCache:sharedAnimationCache():animationByName("role" .. self.roleId .. "_" .. actionName)
+        view:runAction(CCSequence:createWithTwoActions(CCAnimate:create(animation), CCCallFuncN:create(self.runDjAnimation)))
+    end
+end
 
 BattleRole = class()
 
 --当role被初始化时，仅初始化其模型数据
-function BattleRole:ctor(atk, def, adf, hp, delay, isRemote, normal, skill)
+function BattleRole:ctor(atk, def, adf, hp, delay, isRemote, roleViewId, normal, skill)
     self.atk = atk
     self.def = def
     self.adf = adf
     self.hpMax = hp
-    self.delay = delay
-    self.isRemote = isRemote
+    --self.delay = delay
+    self.delay = 1
+    self.isRemote = (isRemote==true) or (isRemote==1)
+    self.viewModel = BattleRoleView.new(roleViewId)
     self.normal = normal
     self.skill = skill
 end
@@ -213,7 +276,7 @@ function BattleRole:getAttackValue()
     return self.atk * atkPercent/100
 end
 
-function BattleRole:executeDamage(damageType, value)
+function BattleRole:executeDamage(damageType, value, damageDelay)
     local ret = 0
     local defPercent = 100
     if self.propertyBuffs[PropertyBuffType.Defense] then
@@ -227,31 +290,56 @@ function BattleRole:executeDamage(damageType, value)
         ret = value - self.adf*defPercent/100
         if ret<0 then ret=0 end
         ret = -ret
+    else
+        ret = value
     end
     ret = math.floor(ret * BattleRand.randomBetween(85, 115)/100)
     if ret<0 and self:checkBuff(BuffType.Unmatched) then
         ret = 0
     end
     self:changeHp(ret)
+    local function damageOver()
+        local bloodText = CCLabelTTF:create("" .. ret, "", 25)
+        if ret<0 then
+            self.view:stopAllActions()
+            self.viewModel:runActionOnceAndRestore(self.view, "sj")
+            bloodText:setColor(ccc3(255,0,0))
+        else
+            bloodText:setColor(ccc3(0,255,0))
+        end
+        self.blood:addChild(bloodText)
+        bloodText:setAnchorPoint(CCPointMake(0.5,0.5))
+        bloodText:setPosition(self.blood:getContentSize().width/2, -50)
+        bloodText:runAction(CCSequence:createWithTwoActions(CCDelayTime:create(1), CCCallFuncN:create(removeSelf)))
+        bloodText:runAction(CCMoveBy:create(1,CCPointMake(0, 100)))
+        self.blood:setTextureRect(CCRectMake(0,0,math.floor(self.bloodSize.width*self.hp/self.hpMax), self.bloodSize.height))
+        if self.dead then
+            self:runDelayDead(self.viewModel.defenseDelay)
+        end
+    end
+    self.blood:runAction(CCSequence:createWithTwoActions(CCDelayTime:create(damageDelay), CCCallFunc:create(damageOver)))
     return ret
+end
+
+function BattleRole:runDelayDead(delay)
+    local function destroySelf()
+        local temp = CCSprite:create("roleDeadTomb.png")
+        temp:setPosition(self.view:getPosition())
+        if self.isLeft then
+            temp:setAnchorPoint(CCPointMake(0.432, 0.158))
+        else
+            temp:setFlipX(true)
+            temp:setAnchorPoint(CCPointMake(0.568, 0.158))
+        end
+        self.view:getParent():addChild(temp, self.row*COL_MAX-self.col)
+        self:destroy()
+        self.view = temp
+    end
+    self.view:runAction(CCSequence:createWithTwoActions(CCDelayTime:create(delay), CCCallFunc:create(destroySelf)))
 end
 
 function BattleRole:changeHp(changeValue)
     self.hp = self.hp+changeValue
-    if changeValue<0 then
-        self.view:stopAllActions()
-        local array = CCArray:create()
-        array:addObject(CCDelayTime:create(0.5))
-        array:addObject(CCAnimate:create(self.sjAnimation))
-        array:addObject(CCCallFuncN:create(self.runDjAnimation))
-        self.view:runAction(CCSequence:create(array))
-    end
-    if changeValue~=0 then
-        local function valueChanged()
-            self.blood:setTextureRect(CCRectMake(0,0,math.floor(self.bloodSize.width*self.hp/self.hpMax), self.bloodSize.height))
-        end
-        self.view:runAction(CCSequence:createWithTwoActions(CCDelayTime:create(0.5),CCCallFunc:create(valueChanged)))
-    end
     if self.hp > self.hpMax then
         self.hp = self.hpMax
     elseif self.hp <= 0 then
@@ -263,10 +351,6 @@ end
 
 function BattleRole:setDead()
     self.dead = true
-    local function destroySelf()
-        self:destroy()
-    end
-    self.view:runAction(CCSequence:createWithTwoActions(CCDelayTime:create(1), CCCallFunc:create(destroySelf)))
 end
 
 function BattleRole:checkBuff(buffType)
@@ -327,7 +411,7 @@ end
 
 function BattleRole:updateDelay(delay)
     self.leftDelay = self.leftDelay-delay
-    self.process:setTextureRect(CCRectMake(0,0,math.floor(self.processSize.width*(self.delay-self.leftDelay)/self.delay), self.processSize.height))
+    --self.process:setTextureRect(CCRectMake(0,0,math.floor(self.processSize.width*(self.delay-self.leftDelay)/self.delay), self.processSize.height))
     if self.leftDelay<=0 then
         return true
     else
@@ -338,6 +422,7 @@ end
 function BattleRole:executeTurn()
     local ret = 0
     if self:isTurnable() then
+        ret = self.viewModel.attackDelay
         local attackAction = self.normal
         if self.skillPoint>=2 and not self:checkBuff(BuffType.NoSkill) then
             self.skillPoint = 0
@@ -363,73 +448,37 @@ function BattleRole:executeTurn()
         end
         local atk = self:getAttackValue()*attackAction.damageValue/100
         for i=1, #targets do
-            targets[i]:executeDamage(attackAction.damageType, atk)
+            targets[i]:executeDamage(attackAction.damageType, atk, self.viewModel.damageDelay)
             if attackAction.buffPercent>0 then
                 if BattleRand.random(100)<=attackAction.buffPercent then
                     targets[i]:setBuff(attackAction.buffType, attackAction.buffTurn, attackAction.buffValue)
                 end
             end
         end
-        self.view:stopAllActions()
-        self.view:runAction(CCSequence:createWithTwoActions(CCAnimate:create(self.gjAnimation), CCCallFuncN:create(self.runDjAnimation)))
-        ret = 1.2
+        self.viewModel:runActionOnceAndRestore(self.view, "gj")
     end
+    local buffDelay = 0
     if self:checkBuff(BuffType.Poison) then
         self:changeHp(math.floor(self.hp/10))
+        buffDelay = 0.2
     end
     if self:checkBuff(BuffType.Fire) then
         self:changeHp(math.floor(self.hp/5))
+        buffDelay = 0.2
+    end
+    if self.dead then
+        self:runDelayDead(0.2)
     end
     self:decBuff()
     self.leftDelay = self.delay
-    return ret
+    return ret+buffDelay
 end
 
-function BattleRole:initView(bg, isLeft)
+function BattleRole:initView(bg, isLeft, noBattle)
     self.isLeft = isLeft
     if not self.view then
-        self.view = CCSprite:create("kulou_dj_00.png")
-        bg:addChild(self.view)
-        
-        local animation = CCAnimation:create()
-        for i = 0, 27, 3 do
-    	    animation:addSpriteFrameWithFileName(string.format("kulou_dj_%02d.png", i))
-    	end
-	    animation:setDelayPerUnit(0.1)
-	    animation:setRestoreOriginalFrame(true)
-	    animation:retain()
-	    self.djAnimation = animation
-	    
-        animation = CCAnimation:create()
-        for i = 0, 19 do
-    	    animation:addSpriteFrameWithFileName(string.format("kulou_gj_%02d.png", i))
-    	end
-	    animation:setDelayPerUnit(0.033)
-	    animation:setRestoreOriginalFrame(true)
-	    animation:retain()
-	    self.gjAnimation = animation
-	    
-        animation = CCAnimation:create()
-        for i = 0, 12, 2 do
-    	    animation:addSpriteFrameWithFileName(string.format("kulou_sj_%02d.png", i))
-    	end
-	    animation:setDelayPerUnit(0.066)
-	    animation:setRestoreOriginalFrame(true)
-	    animation:retain()
-	    self.sjAnimation = animation
-	    
-        animation = CCAnimation:create()
-        for i = 0, 27, 3 do
-    	    animation:addSpriteFrameWithFileName(string.format("kulou_zou_%02d.png", i))
-    	end
-	    animation:setDelayPerUnit(0.1)
-	    animation:setRestoreOriginalFrame(true)
-	    animation:retain()
-	    self.zouAnimation = animation
-	    
-	    self.runDjAnimation = function(node)
-	        node:runAction(CCRepeatForever:create(CCAnimate:create(self.djAnimation)))
-	    end
+        self.view = self.viewModel:createView()
+        bg:addChild(self.view, self.row*COL_MAX-self.col)
     end
     local y = ROW_Y[self.row]
     local x = COL_X[self.col]
@@ -437,67 +486,68 @@ function BattleRole:initView(bg, isLeft)
     self.view:removeAllChildrenWithCleanup(true)
     if self.isLeft then
         self.view:setFlipX(true)
-        self.view:setAnchorPoint(CCPointMake(0.403, 0.258))
+        self.view:setAnchorPoint(CCPointMake(1-self.viewModel.ax,self.viewModel.ay))
         self.view:setPosition(x, y)
     else
-        self.view:setAnchorPoint(CCPointMake(0.597, 0.258))
+        self.view:setAnchorPoint(CCPointMake(self.viewModel.ax, self.viewModel.ay))
         self.view:setPosition(1024-x,y)
     end
-    self.runDjAnimation(self.view)
-    local back = CCSprite:create("loadingProcessBack.png")
-    back:setAnchorPoint(CCPointMake(0.5, 0.5))
+    local otherNode = self.view:getChildByTag(1)
+    if otherNode then
+        otherNode:removeAllChildrenWithCleanup(true)
+    else
+        otherNode = CCNode:create()
+        self.view:addChild(otherNode, 1, 1)
+    end
+    local anchor = self.view:getAnchorPoint()
     local size = self.view:getContentSize()
-    back:setPosition(size.width*self.view:getAnchorPoint().x, 178)
-    back:setScale(0.25)
-    local filler = CCSprite:create("loadingProcessFiller.png")
-    back:addChild(filler)
-    filler:setAnchorPoint(CCPointMake(0,0))
-    filler:setPosition(2,2)
-    local size = filler:getContentSize()
-    self.processSize = {width=size.width, height=size.height}
-    self.process = filler
-    self.view:addChild(back)
-    back = CCSprite:create("loadingProcessBack.png")
-    back:setAnchorPoint(CCPointMake(0.5, 0.5))
-    local size = self.view:getContentSize()
-    back:setPosition(size.width*self.view:getAnchorPoint().x, 170)
-    back:setScaleX(0.25)
-    back:setScaleY(0.4)
-    local filler = CCSprite:create("loadingProcessFiller.png")
-    filler:setColor(ccc3(255,127,0))
-    back:addChild(filler)
-    filler:setAnchorPoint(CCPointMake(0,0))
-    filler:setPosition(2,2)
-    local size = filler:getContentSize()
-    self.bloodSize = {width=size.width, height=size.height}
-    self.blood = filler
-    self.view:addChild(back)
-    self:updateDelay(0)
+    local shadow = CCSprite:create("roleShadow.png")
+    shadow:setScaleX(self.viewModel.shadowX)
+    shadow:setScaleY(self.viewModel.shadowY)
+    shadow:setAnchorPoint(CCPointMake(0.5, 0.5))
+    shadow:setPosition(anchor.x*size.width, anchor.y*size.height)
+    self.view:addChild(shadow, -1)
+    self.viewModel.runDjAnimation(self.view)
+    if not noBattle then
+        local back = CCSprite:create("roleBloodBack.png")
+        back:setAnchorPoint(CCPointMake(0.5, 0.5))
+        back:setPosition(size.width*anchor.x, 170)
+        local filler = CCSprite:create("roleBloodFiller.png")
+        back:addChild(filler)
+        filler:setAnchorPoint(CCPointMake(0,0))
+        filler:setPosition(1,1)
+        local size = filler:getContentSize()
+        self.bloodSize = {width=size.width, height=size.height}
+        self.blood = filler
+        otherNode:addChild(back)
+        self:updateDelay(0)
+    end
 end
 
 function BattleRole:runZou()
     if self.view then
-        self.view:stopAllActions()
-        self.view:removeAllChildrenWithCleanup(true)
-        self.view:runAction(CCRepeatForever:create(CCAnimate:create(self.zouAnimation))) 
-        
+        self.viewModel:runAction(self.view, "zou", true)
         local y = ROW_Y[self.row]
         local x = 1024-COL_X[2]+(y-ROW_Y[3])*(512-COL_X[2])/(TS_Y-ROW_Y[3]) - COL_X[1]
         if not self.isLeft then x=-x end
-        self.view:runAction(CCMoveBy:create(10,CCPointMake(x,0))) 
+        self.view:runAction(CCMoveBy:create(5,CCPointMake(x,0))) 
     end
 end
 
 function BattleRole:destroy()
     self.view:removeFromParentAndCleanup(true)
     self.view = nil
-    self.runDjAnimation = nil
-    self.djAnimation:release()
-    self.djAnimation = nil
-    self.gjAnimation:release()
-    self.gjAnimation = nil
-    self.sjAnimation:release()
-    self.sjAnimation = nil
-    self.zouAnimation:release()
-    self.zouAnimation = nil
+end
+
+function BattleRole:clearBattle()
+    local cd = self.view:getChildByTag(1)
+    if cd then
+        cd:removeFromParentAndCleanup(true)
+    end
+    self.ours = nil
+    self.enemys = nil
+    self.propertyBuffs = nil
+    self.buffs = nil
+    self.hp = self.hpMax
+    self.skillPoint = 0
 end
