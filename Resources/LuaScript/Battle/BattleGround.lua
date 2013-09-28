@@ -10,14 +10,14 @@ function BattleGround:ctor()
 end
 
 function BattleGround:createActionSprite(dir, data)
-    local sprite = CCSprite:create("action/" .. dir .. "/" .. dir .. "_0.png")
-    sprite:runAction(CCRepeatForever:create(CCAnimate:create(createAnimation(dir, "action/" .. dir .. "/" .. dir .. "_%d.png", 0, data.num-1, 1, data.time))))
+    local sprite = CCSprite:create(dir .. "_0.png")
+    sprite:runAction(CCRepeatForever:create(CCAnimate:create(createAnimation(dir, dir .. "_%d.png", 0, data.num-1, 1, data.time))))
     return sprite
 end
 
 function BattleGround:loadScene(data)
     if self.view then
-        self.view:setTexture(CCTextureCache:sharedTextureCache():addImage("background/" .. data.background))
+        self.view:setTexture(CCTextureCache:sharedTextureCache():addImage(data.background))
         local tag=100
         while true do
             local cd = self.view:getChildByTag(tag)
@@ -29,13 +29,13 @@ function BattleGround:loadScene(data)
             end
         end
     else
-        self.view = CCSprite:create("background/" .. data.background)
+        self.view = CCSprite:create(data.background)
     end
     
     for i=1, #data.childs do
         local child = data.childs[i]
         if child.type=="object" then
-            temp = CCSprite:create("object/" .. child.file)
+            temp = CCSprite:create(child.file)
             temp:setUserObject(CCString:create("object:" .. child.file))
         else
             temp = self:createActionSprite(child.dir, actionDatas[child.dir])
@@ -440,8 +440,8 @@ function BattleGround:reviveCallback(param)
         sl.view = nil
         sl:initView(self.roleBg, sl.isLeft, true)
         sl.dead = false
-        local sprite = CCSprite:create("action/revive/00000.png")
-        sprite:runAction(CCSequence:createWithTwoActions(CCAnimate:create(createAnimation("revive", "action/revive/%05d.png", 0,7,1, 0.8)), CCCallFuncN:create(removeSelf)))
+        local sprite = CCSprite:create("00000.png")
+        sprite:runAction(CCSequence:createWithTwoActions(CCAnimate:create(createAnimation("revive", "%05d.png", 0,7,1, 0.8)), CCCallFuncN:create(removeSelf)))
         sl.view:addChild(sprite, 0, 2)
         sprite:setAnchorPoint(CCPointMake(0.5, 0.157))
         local size = sl.view:getContentSize()
