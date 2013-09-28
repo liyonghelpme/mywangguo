@@ -53,5 +53,4 @@ map<string, string> *handleIni(const char *data, long size) {
     }
     CCLog("finish handleIni");
     return nm;
-    
 }

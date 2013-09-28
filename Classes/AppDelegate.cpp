@@ -66,6 +66,10 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
+<<<<<<< HEAD
+=======
+	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");
+>>>>>>> de206cb687da915bcf728cb7c25c2c6497f68895
     
     updateFiles();
 
