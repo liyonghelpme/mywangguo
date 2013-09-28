@@ -30,7 +30,7 @@ function DialogController:update(diff)
 end
 --可能t[1] 已经删除自己了 只是DialogController 还不知道
 function DialogController:addBanner(banner)
-    while #self.bannerStack > getParam("maxBannerNum") do
+    while #self.bannerStack > 5 do
         local t = table.remove(self.bannerStack, 1)
         removeSelf(t[1])
     end
