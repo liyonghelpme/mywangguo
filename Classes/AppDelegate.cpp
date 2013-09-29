@@ -71,6 +71,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     updateFiles();
 
     
+    CCLog("finish update read main.lua");
+    
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
     pEngine->executeScriptFile(path.c_str());
     return true;
