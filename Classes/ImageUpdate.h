@@ -31,6 +31,8 @@ public:
 
     CURL *_curl;
 
+	string tempData;
+
 };
 
 #endif

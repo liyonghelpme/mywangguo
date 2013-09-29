@@ -12,6 +12,8 @@ map<string, string> *handleIni(const char *data, long size) {
     bool finish = false;
     map<string, string> *nm = new map<string, string>();
     long count = 0;
+	for(int i = 0; i < size; i++){
+	}
     CCLog("handleIni %d", size);
     while(!finish && count < size) {
         CCLog("count %d %c", count, data[count]);
