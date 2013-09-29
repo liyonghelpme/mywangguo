@@ -53,14 +53,19 @@ function MainDialog:initLeftTop()
     setColor(temp, {0, 0, 0})
     self.level = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("exp"), "", 18), {0, 0.5}), {0, -30})
+    setColor(temp, {0, 0, 0})
     self.exp = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("name"), "", 18), {0, 0.5}), {0, -60})
+    setColor(temp, {0, 0, 0})
     self.name = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("strength"), "", 18), {0, 0.5}), {0, -90})
+    setColor(temp, {0, 0, 0})
     self.strength = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("crystal"), "", 18), {0, 0.5}), {0, -120})
+    setColor(temp, {0, 0, 0})
     self.crystal = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("gold"), "", 18), {0, 0.5}), {0, -150})
+    setColor(temp, {0, 0, 0})
     self.gold = temp
 end
 function MainDialog:updateValue()

@@ -66,26 +66,37 @@ function HeroInfo:initLeftTop()
     setPos(lt, {vs.width-236, vs.height-33})
     
     local temp = setPos(setAnchor(addLabel(lt, getStr("name"), "", 18), {0, 0.5}), {0, 0})
+    setColor(temp, {0, 0, 0})
     self.name = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("level"), "", 18), {0, 0.5}), {0, -30})
+    setColor(temp, {0, 0, 0})
     self.level = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("job"), "", 18), {0, 0.5}), {0, -60})
+    setColor(temp, {0, 0, 0})
     self.job = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("attack"), "", 18), {0, 0.5}), {0, -90})
+    setColor(temp, {0, 0, 0})
     self.attack = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("health"), "", 18), {0, 0.5}), {0, -120})
+    setColor(temp, {0, 0, 0})
     self.health = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("magicDef"), "", 18), {0, 0.5}), {0, -150})
+    setColor(temp, {0, 0, 0})
     self.magicDef = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("physicDef"), "", 18), {0, 0.5}), {0, -180})
+    setColor(temp, {0, 0, 0})
     self.physicDef = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("attSpeed"), "", 18), {0, 0.5}), {0, -210})
+    setColor(temp, {0, 0, 0})
     self.attSpeed = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("move"), "", 18), {0, 0.5}), {0, -240})
+    setColor(temp, {0, 0, 0})
     self.move = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("skill"), "", 18), {0, 0.5}), {0, -270})
+    setColor(temp, {0, 0, 0})
     self.skill = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("equip"), "", 18), {0, 0.5}), {0, -300})
+    setColor(temp, {0, 0, 0})
     self.equip = temp
 end
 function HeroInfo:initData()
