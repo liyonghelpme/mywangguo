@@ -42,6 +42,7 @@ local function main()
     --]]
 
     --global.director:runWithScene(ui.createScene(MainMap.new()))
+    print("mainScene")
     global.director:runWithScene(mainScene())
 end
 
