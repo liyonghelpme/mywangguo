@@ -50,6 +50,7 @@ function MainDialog:initLeftTop()
     local lt = addNode(self.bg)
     setPos(lt, {vs.width-236, vs.height-33})
     local temp = setPos(setAnchor(addLabel(lt, getStr("level"), "", 18), {0, 0.5}), {0, 0})
+    setColor(temp, {0, 0, 0})
     self.level = temp
     temp = setPos(setAnchor(addLabel(lt, getStr("exp"), "", 18), {0, 0.5}), {0, -30})
     self.exp = temp
