@@ -53,6 +53,27 @@ ui.TEXT_VALIGN_TOP    = kCCVerticalTextAlignmentTop
 ui.TEXT_VALIGN_CENTER = kCCVerticalTextAlignmentCenter
 ui.TEXT_VALIGN_BOTTOM = kCCVerticalTextAlignmentBottom
 
+function ui.newBMFontLabel(params)
+    assert(type(params) == "table",
+           "[framework.client.ui] newBMFontLabel() invalid params")
+
+    local text      = tostring(params.text)
+    local font      = params.font
+    local textAlign = params.align or ui.TEXT_ALIGN_CENTER
+    local color      = params.color or display.COLOR_WHITE
+    local x, y      = params.x, params.y
+    assert(font ~= nil, "ui.newBMFontLabel() - not set font")
+
+    local label = CCLabelBMFont:create(text, font, kCCLabelAutomaticWidth, textAlign)
+    if not label then return end
+    label:setColor(color)
+    if type(x) == "number" and type(y) == "number" then
+        label:setPosition(x, y)
+    end
+
+    return label
+end
+
 function ui.newTTFLabel(params)
     local text       = tostring(params.text)
     local font       = params.font or ui.DEFAULT_TTF_FONT

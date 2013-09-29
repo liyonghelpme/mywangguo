@@ -67,8 +67,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");
-    
-    updateFiles();
+	if(def->getStringForKey("update") != "0")
+		updateFiles();
 
     
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
