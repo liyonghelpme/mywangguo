@@ -14,7 +14,7 @@ function BuildLayer:initBuilding()
     for k, v in pairs(item) do
         local bid = k
         local bdata = v
-        local data = getData(GOODS_KIND.BUILD, bdata["id"]) 
+        local data = getData(GOODS_KIND.BUILD, bdata["kind"]) 
         local build = Building.new(self, data, bdata)
         build:setBid(bid)
 

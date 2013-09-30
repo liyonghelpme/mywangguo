@@ -7,10 +7,10 @@ function Building:ctor(m, d, privateData)
     self.data = d
     self.bid = -1
     self.map = m
-    self.id = self.data["id"]
+    self.kind = self.data["id"]
     self.sx = self.data["sx"]
     self.sy = self.data["sy"]
-    self.kind = d["kind"]
+    --self.kind = d["kind"]
     self.funcs = d["funcs"]
     self.showMenuYet = false
 
@@ -27,10 +27,12 @@ function Building:ctor(m, d, privateData)
 
     if self.funcs == FARM_BUILD then
         self.funcBuild = Farm.new(self)
+    else
+        self.funcBuild = FuncBuild.new(self) 
     end
     --papaya不同之处
     --anchorPoint 就是 坐标 0 0 时候的点 因此 changeDirNode 坐标就是0 0 
-    self.changeDirNode = setAnchor(addSprite(self.bg, "images/build"..self.id..".png"), {0.5, 0})
+    self.changeDirNode = setAnchor(addSprite(self.bg, "images/build"..self.kind..".png"), {0.5, 0})
     if self.data['hasFeature'] and self.buildColor ~= 0 then
         
     end
@@ -42,7 +44,7 @@ function Building:ctor(m, d, privateData)
 
     local sz = self.changeDirNode:getContentSize()
 
-    setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[self.kind+1][1], fixY(MapHeight, ZoneCenter[self.kind+1][2])})
+    setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
 
     setPos(self.changeDirNode, {0, 0})
     self.dir = getDefault(privateData, 'dir', 0)
@@ -56,10 +58,12 @@ function Building:ctor(m, d, privateData)
     self:setColPos()
 
     self.funcBuild:initWorking(privateData)
+    --[[
     if self.data['hasAni'] ~= 0 then
         self.aniNode = BuildAnimate.new(self)
         self.changeDirNode:addChild(self.aniNode.bg)
     end
+    --]]
 
 
     registerEnterOrExit(self)
@@ -220,8 +224,8 @@ function Building:touchesEnded(touches)
             local oldShowMenuYet = self.showMenuYet
             if self.state == getParam("buildFree") and self.accMove < 40 then
                 self:doFree()
-            else
-
+            elseif self.state == getParam("buildWork") then
+                self.funcBuild:whenBusy()
             end
         end
     end

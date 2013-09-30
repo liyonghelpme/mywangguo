@@ -1,5 +1,5 @@
 Plant = class()
-function Plant(b, d, privateData)
+function Plant:ctor(b, d, privateData)
     if privateData ~= nil then
         self.objectTime = privateData['objectTime']
     else
@@ -8,12 +8,12 @@ function Plant(b, d, privateData)
     
     self.building = b
     self.data = d
-    self.id = data["id"]
+    self.id = self.data["id"]
     local sx = self.building.data["sx"]
     local sy = self.building.data["sy"]
     
     local bSize = self.building.bg:getContentSize()
-    self.bg = setPos(setAnchor(CCSprite:create("images/p0.png"), {0.5, 0}), {(sx+sy)/2*SIZEX, (sx+sy)*SIZEY})
+    self.bg = setPos(setAnchor(CCSprite:create("p0.png"), {0.5, 0}), {0, 0})
     self.curState = 0
     self.acced = 0
 
@@ -34,16 +34,18 @@ function Plant:setState()
     local newState = math.floor(self.passTime*3/needTime)
     newState = math.min(MATURE, math.max(SOW, newState))
 
+    --[[
     if newState == MATURE and self.passTime >= 2*needTime and self.acced == 0 then
         newState = ROT 
     end
+    --]]
 
     if newState ~= self.curState then
         self.curState = newState;
-        if self.curState == SOW or self.curState == SEED or  curState == ROT then
-            setTexture(self.bg, "images/".."p"..self.curState+".png")
+        if self.curState == SOW or self.curState == SEED or  self.curState == ROT then
+            setTexture(self.bg, "p"..self.curState..".png")
         else
-            setTexture(self.bg, "images/".."p"..self.data["id"].."_"..self.curState..".png")
+            setTexture(self.bg, "p"..self.data["id"].."_"..self.curState..".png")
         end
         if self.curState == MATURE or self.curState == ROT then
             self.building.funcBuild:setFlowBanner()

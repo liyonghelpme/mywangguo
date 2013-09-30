@@ -260,6 +260,9 @@ function callfunc(delegate, cb, param)
     end
     return CCCallFunc:create(cm)
 end
+function fadeto(d, o)
+    return CCFadeTo:create(d, o)
+end
 
 function itintto(d, r, g, b)
     return CCTintTo:create(d, r, g, b)
@@ -275,7 +278,7 @@ end
 function sinein(act)
     return CCEaseSineIn:create(act)
 end
-function purebezier(t, x1, y1, x2, y2, x3, y3)
+function purebezierby(t, x1, y1, x2, y2, x3, y3)
     local bezier = ccBezierConfig()
     bezier.controlPoint_1 = ccp(x1, y1)
     bezier.controlPoint_2 = ccp(x2, y2)
@@ -283,8 +286,19 @@ function purebezier(t, x1, y1, x2, y2, x3, y3)
     return CCBezierBy:create(t, bezier)
 end
 function bezierby(t, x0, y0, x1, y1, x2, y2, x3, y3)
-    local b = purebezier(t, x1, y1, x2, y2, x3, y3)
-    return sequence(moveto(0, x0, y0), b)
+    local b = purebezierby(t, x1, y1, x2, y2, x3, y3)
+    return sequence({moveto(0, x0, y0), b})
+end
+function purebezierto(t, x1, y1, x2, y2, x3, y3)
+    local bezier = ccBezierConfig()
+    bezier.controlPoint_1 = ccp(x1, y1)
+    bezier.controlPoint_2 = ccp(x2, y2)
+    bezier.endPosition = ccp(x3, y3)
+    return CCBezierTo:create(t, bezier)
+end
+function bezierto(t, x0, y0, x1, y1, x2, y2, x3, y3)
+    local b = purebezierto(t, x1, y1, x2, y2, x3, y3)
+    return sequence({moveto(0, x0, y0), b})
 end
 --数组中放着图片名字
 function arrPicFrames(arr)
@@ -599,9 +613,11 @@ function checkPointIn(x, y, px, py, sx, sy)
     local npx, npy = cartesianToNormal(px, py)
     local apx, apy = normalToAffine(npx, npy)
 
+    --[[
     print("checkPointIn", x, y, px, py, sx, sy)
     print("nx ny ax ay", nx, ny, ax, ay)
     print("point", npx, npy, apx, apy)
+    --]]
     --网格坐标在其内部
     return ax >= apx and ay >= apy and ax < apx+sx and ay < apy+sy
 end
@@ -808,6 +824,9 @@ function setTexture(sp, tex)
     local t = CCTextureCache:sharedTextureCache():addImage(tex)
     --print('setTexture', sp, t)
     sp:setTexture(t)
+    local sz = t:getContentSize()
+    local r = CCRectMake(0, 0, sz.width, sz.height)
+    sp:setTextureRect(r)
     return sp
 end
 function linearInter(va, vb, ta, tb, cut)

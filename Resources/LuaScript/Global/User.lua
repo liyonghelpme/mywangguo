@@ -10,7 +10,7 @@ function User:ctor()
     self.resource = {}
     --id ----> buildingData
     self.buildings = {
-        [1]={id=0, px=1000, py=300, state=1, dir=0, objectId=0},
+        --[1]={id=0, px=1000, py=300, state=1, dir=0, objectId=0},
     }
     self.soldiers = {}
     self.drugs = {}
@@ -28,18 +28,26 @@ function User:ctor()
 end
 function User:initDataOver(data, param)
     if data ~= nil then
-        self.serverTime = 0
+        self.serverTime = data.serverTime
         self.clientTime = Timer.now
 
         self.uid = data.uid
+        self.buildings = {}
+        self.maxBid = 0
+        for k, v in ipairs(data.builds) do
+            self.buildings[v['bid']] = v
+            self.maxBid = math.max(v['bid'], self.maxBid)
+        end
+        self.resource = data.resource
         print("sendMsg")
         self.initYet = true
         Event:sendMsg(EVENT_TYPE.INITDATA)
     end
 end
 function User:initData()
-   --Network.postData("login", self, self.initDataOver, {papayaId=self.papayaId, papayaName=self.papayaName})
-   self:initDataOver({uid=1234})
+    --Network.postData("login", self, self.initDataOver, {papayaId=self.papayaId, papayaName=self.papayaName})
+    global.httpController:addRequest("login", dict({{"account", "liyong"}}), self.initDataOver, nil, self)
+    --self:initDataOver({uid=1234})
 end
 
 function User:getNewBid()
@@ -76,7 +84,7 @@ function User:changeValue(key, add)
         self:setValue("level", level)
 
         if level ~= oldLevel then
-            global.msgCenter:sendMsg(EVENT_TYPE.LEVEL_UP)
+            Event:sendMsg(EVENT_TYPE.LEVEL_UP)
             global.httpController:addRequest("levelUp", dict({{"uid", uid}, {"exp", v}, {"level", level}, {"rew", dict()}}), nil, nil)
             addV = 0
         end
@@ -84,8 +92,9 @@ function User:changeValue(key, add)
 
     self:setValue(key, v)
     if key == "exp" then
-        global.msgCenter:sendMsg(EVENT_TYPE.UPDATE_EXP, addV)
+        Event:sendMsg(EVENT_TYPE.UPDATE_EXP, addV)
     end
+    Event:sendMsg(EVENT_TYPE.UPDATE)
 end
 
 function User:doCost(cost)
