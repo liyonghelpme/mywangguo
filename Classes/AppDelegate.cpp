@@ -67,8 +67,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");
-    
-    updateFiles();
+	if(def->getStringForKey("update") != "0")
+		updateFiles();
 
     
     CCLog("finish update read main.lua");
