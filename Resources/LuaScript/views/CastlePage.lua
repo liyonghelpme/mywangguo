@@ -75,6 +75,9 @@ end
 function CastlePage:touchesBegan(touches)
     if not self.blockMove then
         self.touchDelegate:tBegan(touches)
+        if self.movToAni == nil then
+            self.scene:closeGlobalMenu(self)
+        end
     end
 end
 
@@ -167,3 +170,11 @@ function CastlePage:moveToBuild(build)
     self:moveToPoint(bPos[1], bPos[2])
 end
     
+function CastlePage:closeGlobalMenu()
+    if self.oldScale ~= nil then
+        self.movToAni = sequence({spawn({scaleto(0.5, self.oldScale, self.oldScale), moveto(0.5, self.oldPos[1], self.oldPos[2])}), callfunc(self, self.finishMove)})
+        self.bg:runAction(self.movToAni)
+        self.oldScale = nil
+        self.oldPos = nil
+    end
+end

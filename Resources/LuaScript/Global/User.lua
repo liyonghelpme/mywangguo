@@ -39,6 +39,7 @@ function User:initDataOver(data, param)
             self.maxBid = math.max(v['bid'], self.maxBid)
         end
         self.resource = data.resource
+        self:changeValue("exp", 0)
         print("sendMsg")
         self.initYet = true
         Event:sendMsg(EVENT_TYPE.INITDATA)

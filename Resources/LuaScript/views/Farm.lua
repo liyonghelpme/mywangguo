@@ -4,6 +4,7 @@ require "views.FlyObject"
 Farm = class(FuncBuild)
 function Farm:ctor(b)
     self.baseBuild = b
+    self.inHarvest = false
 end
 function Farm:whenFree()
     --global.director:pushView(PlantChoose.new(self.baseBuild), 0, 0)
@@ -84,14 +85,22 @@ function Farm:doHarvest()
     print("FlyObject new")
     planting = nil
     global.user:updateBuilding(self.baseBuild)
+    self.inHarvest = false
+
+
 end
 function Farm:harvestPlant()
     local gain = getGain(GOODS_KIND.PLANT, self.planting.id)
-    global.httpController:addRequest("harvestPlant", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {'gain', simple.encode(gain)}}), self.doHarvest, nil, self)
+    if not self.inHarvest then
+        self.inHarvest = true
+        global.httpController:addRequest("harvestPlant", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {'gain', simple.encode(gain)}}), self.doHarvest, nil, self)
+    end
 end
 function Farm:harvestOver()
     print("harvestOver")
-
+    
+    local data = {objectTime=client2Server(Timer.now), objectId=0}
+    self:initWorking(data)
 end
 function Farm:getLeftTime()
     if self.baseBuild.state == getParam("buildWork") and self.planting ~= nil then

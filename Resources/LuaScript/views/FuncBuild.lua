@@ -7,7 +7,7 @@ function FuncBuild:whenBusy()
     return 0
 end
 function FuncBuild:getObjectId()
-    return -1
+    return 0
 end
 function FuncBuild:getLeftTime()
     return 0

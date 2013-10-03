@@ -15,7 +15,15 @@ function MoveMap:updateMapGrid()
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "images/red2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
+            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
+            local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
+            sp:addChild(lab)
+        end
+        for k, v in pairs(self.staticObstacle) do
+            local x = math.floor(k/10000)
+            local y = k%10000
+            local p = setBuildMap({1, 1, x, y})
+            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
             local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             sp:addChild(lab)
         end
@@ -42,13 +50,30 @@ function MoveMap:checkFallGoodsCol(rx, ry)
     end
     return false
 end
+function MoveMap:checkInFlow(zone, p)
+    for i = 1, #zone, 1 do
+        local difx = p[1] - zone[i][1]
+        local dify = p[2] - zone[i][2]
+        if difx > 0 and difx < zone[i][3] and dify > 0 and dify < zone[i][4] then
+            return 1
+        end
+    end
+    return 0
+end
 function MoveMap:checkCollision(build)
+    --print("checkCollision", build)
+    local inZ = self:checkInFlow(self.buildZone, getPos(build.bg))
+    if inZ == 0 then
+        return 1
+    end
+
+
     local map = getBuildMap(build)
     local sx = map[1]
     local sy = map[2]
     local initX = map[3]
     local initY = map[4]
-
+    print("map is", sx, sy, initX, initY)
     for i=0, sx-1, 1 do
         local curX = initX+i
         local curY = initY+i
@@ -61,6 +86,10 @@ function MoveMap:checkCollision(build)
                         return n
                     end
                 end
+            end
+            if self.staticObstacle[key] ~= nil then
+                print("col key", key)
+                return 1
             end
             curX = curX-1
             curY = curY+1

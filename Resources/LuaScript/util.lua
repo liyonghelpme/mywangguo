@@ -237,6 +237,9 @@ end
 function expin(act)
     return CCEaseExponentialIn:create(act)
 end
+function fadein(t)
+    return CCFadeIn:create(t)
+end
 function fadeout(t)
     return CCFadeOut:create(t)
 end
@@ -252,6 +255,12 @@ function spawn(sp)
 end
 function scaleto(t, sx, sy)
     return CCScaleTo:create(t, sx, sy)
+end
+function sizeto(t, sx, sy, sp)
+    local sz = sp:getContentSize()
+    local scax = sx/sz.width
+    local scay = sy/sz.height
+    return CCScaleTo:create(t, scax, scay)
 end
 
 function callfunc(delegate, cb, param)
@@ -383,13 +392,9 @@ function altasWord(c, s)
     if not initYet then
         addPlistSprite("yellow.plist")
         addPlistSprite("red.plist")
-        --[[
-        CCSpriteFrameCache:addSpriteFrameWithFile("yellow.plist")
-        CCSpriteFrameCache:addSpriteFrameWithFile("blue.plist")
-        CCSpriteFrameCache:addSpriteFrameWithFile("white.plist")
-        CCSpriteFrameCache:addSpriteFrameWithFile("bold.plist")
-        CCSpriteFrameCache:addSpriteFrameWithFile("red.plist")
-        --]]
+        addPlistSprite("blue.plist")
+        addPlistSprite("white.plist")
+        addPlistSprite("bold.plist")
     end
     local offX = 0
     local hei = 0
@@ -650,13 +655,13 @@ function picNumWord(w, sz, col)
         local begin = split(over[i], '{')
         if #begin[1] > 0 then
             local l = ui.newTTFLabel({text=begin[1], font="", size=sz})
-            setPos(setColor(setAnchor(l, {0, 0.5}), col), {curX, curY})
+            setPos(setColor(setAnchor(l, {0, 0}), col), {curX, curY})
             n:addChild(l)
             local lSize = l:getContentSize()
             curX = curX+lSize.width
             height = math.max(height, lSize.height)
             local shadow = ui.newTTFLabel({text=begin[1], font="", size=sz})
-            setPos(setColor(setAnchor(shadow, {0, 0.5}), {0, 0, 0}), {1, 1})
+            setPos(setColor(setAnchor(shadow, {0, 0}), {0, 0, 0}), {1, -1})
             l:addChild(shadow, -1)
         end
         if #begin > 1 then
@@ -754,6 +759,7 @@ function colorWordsNode(s, si, nc, sc)
             if #p[1] > 0 then
                 local l = setPos(setColor(CCLabelTTF:create(p[1], "", si), nc), {curX, 0})
                 n:addChild(l)
+                setAnchor(l, {0, 0})
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
                 height = lSize.height
@@ -762,6 +768,7 @@ function colorWordsNode(s, si, nc, sc)
             if #p[2] > 0 then
                 local l = setPos(setColor(CCLabelTTF:create(p[2], "", si), sc), {curX, 0})
                 n:addChild(l)
+                setAnchor(l, {0, 0})
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
                 height = lSize.height
@@ -904,4 +911,26 @@ function fixColor(c)
         temp[k] = v*255/100
     end
     return temp
+end
+
+function getNodeSca(n, box)
+    local nSize = n:getContentSize()
+    local sca = math.min(box[1]/nSize.width, box[2]/nSize.height)
+    sca = math.max(math.min(1.5, sca), 0.5)
+    return sca
+end
+function str(v)
+    return ""..v
+end
+function disappear(obj)
+    local function cb()
+        obj:setVisible(false)
+    end
+    return callfunc(nil, cb, nil)
+end
+function sendReq(url, postData, handler, param, delegate)
+    global.httpController:addRequest(url, postData, handler, param, delegate)
+end
+function addFly(bg, gain, cb, delegate)
+    global.director.curScene.bg:addChild(FlyObject.new(bg, gain, cb, delegate).bg)
 end

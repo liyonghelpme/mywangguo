@@ -31,6 +31,7 @@ end
 function CastleScene:receiveMsg(name, msg)
     if name == EVENT_TYPE.INITDATA then
         self.mc:initDataOver()
+        self.ml:initDataOver()
     end
 end
 function CastleScene:beginBuild(id)
@@ -71,6 +72,14 @@ function CastleScene:closeBuild()
     global.director:popView()
 end
 function CastleScene:setBuilding(build)
+    print("setBuilding", build.bid)
+    if self.curBuild ~= nil then
+        print("curBuild", self.curBuild.bid)
+        print("colNow", self.curBuild.colNow)
+    end
+    if self.curBuild == build then
+        return 1
+    end
     if self.curBuild ~= nil and self.curBuild.colNow == 1 then
         return 0
     end
@@ -78,13 +87,14 @@ function CastleScene:setBuilding(build)
         self.curBuild:finishBottom()
     end
     self.curBuild = build
-    self.planView:setBuilding(p)
+    self.planView:setBuilding({PLAN_KIND.PLAN_BUILDING, build})
     return 1
 end
 
 
 function CastleScene:showGlobalMenu(build, callback, delegate)
     --既没有菜单建筑 也没有 建造建筑
+    print("showGlobalMenu", build, callback, delegate)
     if self.curMenuBuild == nil and self.curBuild == nil then
         self.curMenuBuild = build
         self.ml:hideMenu()
@@ -94,4 +104,40 @@ function CastleScene:showGlobalMenu(build, callback, delegate)
 end
 
 
+function CastleScene:closeGlobalMenu(build)
+    if self.curMenuBuild ~= nil then
+        self.curMenuBuild:closeGlobalMenu()
+        global.director:popView()
+        self.curMenuBuild = nil
+        self.ml:showMenu()
+        self.mc:closeGlobalMenu()
+    end
+    self.ml:cancelAllMenu()
+end
+function CastleScene:doPlan()
+    self.ml:hideMenu()
+    self.Planing = 1
+    self.mc.buildLayer:keepPos()
+    self.planView = BuildMenu.new(self, nil)
+    global.director:pushView(self.planView, 0, 0)
+end
+
+function CastleScene:finishPlan()
+    if self.curBuild ~= nil and self.curBuild.colNow == 1 then
+        return
+    end
+    self.mc.buildLayer:finishPlan()
+    self:closePlan()
+end
+function CastleScene:cancelPlan()
+    self.mc.buildLayer:restorePos()
+    self:closePlan()
+end
+function CastleScene:closePlan()
+    self.Planing = 0
+    self.ml:showMenu()
+    global.director:popView()
+    self.planView = nil
+    self.curBuild = nil
+end
 

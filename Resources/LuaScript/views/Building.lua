@@ -1,11 +1,13 @@
 require "views.FuncBuild"
 require "views.Farm"
+require "views.MineFunc"
 require "views.BuildAnimate"
+require "busiViews.BuildWorkMenu"
 
 Building = class()
 function Building:ctor(m, d, privateData)
     self.data = d
-    self.bid = -1
+    self.bid = privateData["bid"] or -1
     self.map = m
     self.kind = self.data["id"]
     self.sx = self.data["sx"]
@@ -23,16 +25,18 @@ function Building:ctor(m, d, privateData)
         self.buildColor = privateData['color']
     end
     self.objectList = privateData['objectList']
-    self.buildLevel = privateData['level']
+    self.buildLevel = privateData['level'] or 0
 
     if self.funcs == FARM_BUILD then
         self.funcBuild = Farm.new(self)
+    elseif self.funcs == MINE_KIND then
+        self.funcBuild = Mine.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
     --papaya不同之处
     --anchorPoint 就是 坐标 0 0 时候的点 因此 changeDirNode 坐标就是0 0 
-    self.changeDirNode = setAnchor(addSprite(self.bg, "images/build"..self.kind..".png"), {0.5, 0})
+    self.changeDirNode = setAnchor(addSprite(self.bg, "build"..self.kind..".png"), {0.5, 0})
     if self.data['hasFeature'] and self.buildColor ~= 0 then
         
     end
@@ -75,6 +79,7 @@ end
 function Building:setColPos()
     self.colNow = 0;
     local other = self.map:checkCollision(self)
+    print("checkCollision result", other)
     if other ~= nil then
         self.colNow = 1
         self:setColor(0)
@@ -88,9 +93,9 @@ function Building:setColor(inZ)
     end
     print('bottom setColor', inZ)
     if inZ == 0 then
-        setTexture(self.bottom, "images/red2.png")
+        setTexture(self.bottom, "red2.png")
     else
-        setTexture(self.bottom, "images/green2.png")
+        setTexture(self.bottom, "green2.png")
     end
 end
 
@@ -143,20 +148,22 @@ function Building:touchesBegan(touches)
     self.doMove = false
     self.inSelf = false
     self.accMove = 0
+
     if self.lastPos.count == 1 then
         local px, py = self.bg:getPosition()
         local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         if checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy) then
             self.inSelf = true
-            if self.Planing == 1 then
-                local setSuc = global.director.curScene:setBuilding(self)
-                if setSuc then
+            local setSuc = false
+            if self.state == getParam("buildMove") or self.Planing == 1 then
+                setSuc = global.director.curScene:setBuilding(self)
+                if setSuc == 1 then
                     if self.bottom == nil then
                         self:setState(self.bottom)
                     end
                 end
             end
-            if self.state == getParam('buildMove') or self.Planing == 1 then
+            if setSuc == 1 then
                 self.dirty = 1
                 self.map.mapGridController:clearMap(self)
 
@@ -179,7 +186,7 @@ function Building:setState(s)
     if self.state == getParam("buildMove") or self.Planing == 1 then
         local bSize = self.bg:getContentSize()
         if self.bottom == nil then
-            self.bottom = setSize(setAnchor(setPos(CCSprite:create("images/green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
+            self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
             self.bg:addChild(self.bottom, -1)
         end
     end
@@ -195,11 +202,15 @@ function Building:touchesMoved(touches)
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-offY))
         local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
         self:setPos(newPos)
+        self:setColPos()
     else
         self.accMove = math.abs(difx)+math.abs(dify)
+        --if not self.showMenuYet then
+        --end
     end
 end
 function Building:showGlobalMenu()
+    print("self showGlobalMenu")
     self.acced = 0
     self.selled = 0
     self.showMenuYet = 1
@@ -217,15 +228,23 @@ function Building:doFree()
 end
 function Building:touchesEnded(touches)
     if self.doMove then
+        if self.colNow == 0 and self.state ~= getParam("buildMove") then
+            self:setZord(nil)
+        end
         self.map.mapGridController:updateMap(self)
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
+        if self.showMenuYet then
+            global.director.curScene:closeGlobalMenu(self)
+        end
     else
         if self.inSelf then
-            local oldShowMenuYet = self.showMenuYet
             if self.state == getParam("buildFree") and self.accMove < 40 then
                 self:doFree()
             elseif self.state == getParam("buildWork") then
-                self.funcBuild:whenBusy()
+                local ret = self.funcBuild:whenBusy()
+                if ret == 0 then
+                    global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)
+                end
             end
         end
     end
@@ -237,15 +256,18 @@ function Building:setPos(p)
 
     local curPos = p
     local zord = MAX_BUILD_ZORD-curPos[2]
+    if self.colNow then
+        zord = MAX_BUILD_ZORD
+    end
     self.bg:setPosition(ccp(curPos[1], curPos[2]))
     local parent = self.bg:getParent()
     if parent == nil then
         return
     end
-    self.bg:retain()
-    self.bg:removeFromParentAndCleanup(true)
-    parent:addChild(self.bg, zord)
-
+    --self.bg:retain()
+    --self.bg:removeFromParentAndCleanup(true)
+    --parent:addChild(self.bg, zord)
+    self.bg:setZOrder(zord)
 
     --[[
     if self.tempNode ~= nil then
@@ -267,9 +289,10 @@ function Building:restorePos()
     self:finishPlan()
 end
 function Building:finishPlan()
+    print("finishPlan")
     self.dirty = 0
     self.Planing = 0
-    if bottom ~= nil then
+    if self.bottom ~= nil then
         self:finishBottom()
         --self:setZord()
     end
@@ -289,10 +312,12 @@ function Building:setZord()
     local zOrd = MAX_BUILD_ZORD-getPos(self.bg)[2]
     local par = self.bg:getParent()
     if par ~= nil then
-        self.bg:retain()
-        removeSelf(self.bg)
-        par:addChild(self.bg, zOrd)
-        self.bg:release()
+        --self.bg:retain()
+        --removeSelf(self.bg)
+        --self.bg:removeFromParentAndCleanup(false)
+        --par:addChild(self.bg, zOrd)
+        --self.bg:release()
+        self.bg:setZOrder(zOrd)
     end
 end
 function Building:finishBottom()
@@ -314,9 +339,16 @@ function Building:getStartTime()
     return self.funcBuild:getStartTime()
 end
 function Building:getName()
+    return self.data["name"]
 end
 
-function beginPlant(cost, id)
+function Building:beginPlant(cost, id)
     global.user:doCost(cost)
     self.funcBuild:beginPlant(id)
+end
+function Building:getLeftTime()
+    return self.funcBuild:getLeftTime()
+end
+function Building:closeGlobalMenu()
+    self.showMenuYet = 0
 end

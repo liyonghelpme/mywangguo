@@ -1,4 +1,4 @@
-#include "ImageUpdate.h"
+﻿#include "ImageUpdate.h"
 #include "iniReader.h"
 #include <string.h>
 

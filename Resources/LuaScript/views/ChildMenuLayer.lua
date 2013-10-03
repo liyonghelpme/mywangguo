@@ -100,4 +100,8 @@ function ChildMenuLayer:onStore()
     self.menu:cancelAllMenu()
     global.director:pushView(Store.new(self.scene), 1, 0)
 end
+function ChildMenuLayer:onPlan()
+    global.director.curScene:closeGlobalMenu(self)
+    global.director.curScene:doPlan()
+end
 

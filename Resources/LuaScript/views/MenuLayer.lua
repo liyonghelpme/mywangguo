@@ -11,11 +11,17 @@ function MenuLayer:ctor(sc)
     self:initView()
     registerEnterOrExit(self)
 end
+function MenuLayer:initDataOver()
+    self:updateText()
+    self:updateExp(0)
+
+end
 function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:registerEvent(EVENT_TYPE.LEVEL_UP, self)
     Event:registerEvent(EVENT_TYPE.UPDATE_EXP, self)
     self:updateText()
+    self:updateExp(0)
 end
 function MenuLayer:exitScene()
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
@@ -24,7 +30,11 @@ function MenuLayer:exitScene()
 end
 function MenuLayer:receiveMsg(name, msg)
     if name == EVENT_TYPE.UPDATE_RESOURCE then
-        
+        self:updateText() 
+    elseif name == EVENT_TYPE.UPDATE_EXP then
+        self:updateExp(1)
+    elseif name == EVENT_TYPE.LEVEL_UP then
+        self:updateExp(1)
     end
 end
 function MenuLayer:initView()
@@ -48,13 +58,6 @@ function MenuLayer:initView()
     local expSize = self.expBack:getContentSize()
     self.levelLabel = setPos(setAnchor(addNode(self.expBack), {0.5, 0.5}), {expSize.width/2, expSize.height/2})
     
-    self.expBanner = setVisible(setPos(setAnchor(CCSprite:create("expBanner.png"), {0, 0}), {123, fixY(nil, 432, 50)}), false)
-    self.banner:addChild(self.expBanner)
-
-    self.expWord = ShadowWords.new(getStr("expToLev", nil), "", 17, nil, {255, 255, 255})
-    setPos(setAnchor(self.expWord.bg, {0.5, 0.5}), {75, 28})
-    self.expBanner:addChild(self.expWord.bg)
-
     self.collectionButton = ui.newButton({image="mainRank.png", delegate=self, callback=self.onRank})
     setPos(self.collectionButton.bg, {229, fixY(nil, 445, 34)})
     self.banner:addChild(self.collectionButton.bg)
@@ -68,15 +71,67 @@ function MenuLayer:initView()
     self.banner:addChild(self.menuButton.bg)
 
     self:initText() 
+
+    self.expBanner = setVisible(setPos(setAnchor(CCSprite:create("expBanner.png"), {0, 0}), {123, fixY(nil, 432, 50)}), false)
+    self.banner:addChild(self.expBanner)
+
+    self.expWord = ui.newBMFontLabel({text=getStr("expToLev", nil), font="bound.fnt", size=17})
+    --self.expWord = ShadowWords.new(, "", 17, nil, {255, 255, 255})
+    setPos(setAnchor(self.expWord, {0.5, 0.5}), {75, 23})
+    self.expBanner:addChild(self.expWord)
+
+end
+
+local EXP_LEN = 108-22
+local BASE_LEN = 22
+function MenuLayer:updateExp(add)
+    local level = global.user:getValue("level")
+    local exp = global.user:getValue("exp")
+    local needExp = getLevelUpNeedExp(level)
+    local nowSize = exp*EXP_LEN/needExp+BASE_LEN
+    if add > 0 then
+        self.expfiller:stopAllActions()
+        self.expfiller:runAction(sizeto(0.5, nowSize, 12, self.expfiller))
+    else
+        setSize(self.expfiller, {nowSize, 12})
+    end
+
+    local leftExp = needExp-exp
+    if add > 0 then
+        self.expWord:setString(getStr("expToLev", {"[EXP]", str(leftExp), "[LEV]", str(level+2)}))
+        self.expBanner:stopAllActions()
+        self.expWord:stopAllActions()
+        self.expBanner:setVisible(true)
+        self.expBanner:runAction(sequence({fadein(0.2), delaytime(2), fadeout(1)}))
+        self.expWord:runAction(sequence({fadein(0.2), delaytime(2), fadeout(1)}))
+    end
+
+    local temp = altasWord("white", ""..(level+1))
+    setPos(setAnchor(temp, {0.5, 0.5}), getPos(self.levelLabel))
+    removeSelf(self.levelLabel)
+    self.expBack:addChild(temp)
+    self.levelLabel = temp
+
+    local lSize = self.levelLabel:getContentSize()
+    local bSize = self.expBack:getContentSize()
+    
+    local sca = getNodeSca(self.levelLabel, {math.min(lSize.width, bSize.width), math.min(lSize.height, 21)})
+    self.levelLabel:setScale(sca)
 end
 function MenuLayer:initText()
-    self.silverText = setColor(setPos(setAnchor(addLabel(self.banner, getStr("1", nil), "", 23), {0, 0.5}), {333, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
-    self.goldText = setColor(setPos(setAnchor(addLabel(self.banner, getStr("2", nil), "", 23), {0, 0.5}), {588, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
+    self.banner:addChild(temp)
+    self.silverText = setColor(setPos(setAnchor(temp, {0, 0.5}), {333, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
+    self.banner:addChild(temp)
+    self.goldText = setColor(setPos(setAnchor(temp, {0, 0.5}), {588, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
     local w = ''..global.user.rankOrder
     if global.user.rankOrder > 999 then
         w = '999+'
     end
-    self.gloryLevText = setColor(setPos(setAnchor(addLabel(self.banner, w, "", 16), {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
+    self.banner:addChild(temp)
+    self.gloryLevText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
 end
 function MenuLayer:updateText()
     local ures = global.user.resource

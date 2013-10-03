@@ -115,6 +115,6 @@ function StandardTouchHandler:tEnded(touches)
 
 end
 function StandardTouchHandler:scaleToMax(sm)
-    self.bg:scale(sm)
+    self.bg:setScale(sm)
 end
 
