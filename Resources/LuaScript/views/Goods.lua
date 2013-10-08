@@ -50,6 +50,23 @@ function Goods:initSameElement(buildData, panel)
     --调整图像的 纹理
     if objKind == GOODS_KIND.BUILD then
     end
+
+    setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5})
+    for k, v in pairs(cost) do
+        local c = {109, 170, 44}
+        local picName = k..".png"
+        local valNum = str(v)
+        local buyable = global.user:checkCost(cost)
+        if buyable.ok == 0 then
+            c = {208, 70, 72}
+        end
+        local cPic = setSize(setAnchor(setPos(addSprite(panel, picName), {31, fixY(sz.height, 170)}), {0.5, 0.5}), {30, 30})
+        local cNum = ui.newBMFontLabel({text=valNum, font="bound.fnt", color=c, size=18})
+        panel:addChild(cNum)
+        setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
+        break
+    end
+
     local sca
     if showGain == 0 then
         setPos(buildPic, {74, fixY(sz.height, 97)})
@@ -175,12 +192,14 @@ function Goods:touchEnded(x, y)
 end
 function Goods:showGreenBut(child)
     self.shadow = addNode(child)
-    setColor(setSize(setPos(setAnchor(addSprite(self.shadow, "images/storeShadow.png"), {0, 0}), {0, 0}), {151, 191}), {255, 255, 255, 125})
-    local but0 = ui.newButton({image="images/greenButton0.png", delegate=self, callback=self.onBuy, param=self.data[child:getTag()]})
+    setColor(setSize(setPos(setAnchor(addSprite(self.shadow, "storeShadow.png"), {0, 0}), {0, 0}), {151, 191}), {255, 255, 255, 125})
+    local but0 = ui.newButton({image="greenButton0.png", delegate=self, callback=self.onBuy, param=self.data[child:getTag()]})
     but0.bg:setPosition(ccp(75, fixY(191, 97)))
     but0:setAnchor(0.5, 0.5)
     but0:setContentSize(128, 39)
     self.shadow:addChild(but0.bg)
+    local sz = but0.bg:getContentSize()
+    local label = setAnchor(setPos(addLabel(but0.bg, getStr("sureToBuy"), "", 20), {0, 0}), {0.5, 0.5})
 end
 function Goods:onBuy(buildData)
     self.curSel = nil

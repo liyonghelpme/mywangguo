@@ -62,6 +62,9 @@ function ui.newBMFontLabel(params)
     local font      = params.font
     local textAlign = params.align or ui.TEXT_ALIGN_CENTER
     local color      = params.color or display.COLOR_WHITE
+    if type(color) == "table" then
+        color = toCol(color)
+    end
     local x, y      = params.x, params.y
     local size      = params.size
     assert(font ~= nil, "ui.newBMFontLabel() - not set font")
@@ -124,6 +127,8 @@ function ui.newButton(params)
     lay:setContentSize(sz)
     lay:setAnchorPoint(ccp(0, 0))
     sp:setAnchorPoint(ccp(0, 0))
+    local text = params.text
+    local size = params.size
 
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
@@ -144,6 +149,10 @@ function ui.newButton(params)
         setSize(sp, {w, h})
     end
     registerTouch(obj)
+
+    if text ~= nil then
+        setAnchor(addLable(obj.bg, text, "", size), {0.5, 0.5})
+    end
     return obj
 end
 

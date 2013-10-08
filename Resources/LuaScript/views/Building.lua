@@ -77,7 +77,7 @@ function Building:setMap(m)
     self.map = m
 end
 function Building:setColPos()
-    self.colNow = 0;
+    self.colNow = 0
     local other = self.map:checkCollision(self)
     print("checkCollision result", other)
     if other ~= nil then
@@ -159,7 +159,7 @@ function Building:touchesBegan(touches)
                 setSuc = global.director.curScene:setBuilding(self)
                 if setSuc == 1 then
                     if self.bottom == nil then
-                        self:setState(self.bottom)
+                        self:setState(self.state)
                     end
                 end
             end
@@ -256,7 +256,7 @@ function Building:setPos(p)
 
     local curPos = p
     local zord = MAX_BUILD_ZORD-curPos[2]
-    if self.colNow then
+    if self.colNow == 1 then
         zord = MAX_BUILD_ZORD
     end
     self.bg:setPosition(ccp(curPos[1], curPos[2]))
@@ -267,6 +267,7 @@ function Building:setPos(p)
     --self.bg:retain()
     --self.bg:removeFromParentAndCleanup(true)
     --parent:addChild(self.bg, zord)
+    print("zord is ", zord)
     self.bg:setZOrder(zord)
 
     --[[
@@ -283,9 +284,11 @@ function Building:keepPos()
     self.Planing = 1
 end
 function Building:restorePos()
-    self.map.mapGridController:clearMap(self)
-    self:setPos(self.oldPos)
-    self.map.mapGridController:updateMap(self)
+    if self.dirty then
+        self.map.mapGridController:clearMap(self)
+        self:setPos(self.oldPos)
+        self.map.mapGridController:updateMap(self)
+    end
     self:finishPlan()
 end
 function Building:finishPlan()

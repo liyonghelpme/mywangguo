@@ -46,11 +46,12 @@ function Farm:initWorking(data)
 
     local id = data["objectId"]
     local plant = getData(GOODS_KIND.PLANT, id)
+    print("initWorking", id)
     
     local startTime = data["objectTime"]
     startTime = server2Client(startTime) 
     
-    local privateData = dict({{"objectTime", startTime}})
+    local privateData = dict({{"objectTime", startTime}, {"objectId", id}})
     self.planting = Plant.new(self.baseBuild, plant, privateData)
     self.baseBuild.bg:addChild(self.planting.bg)
 end
@@ -93,13 +94,13 @@ function Farm:harvestPlant()
     local gain = getGain(GOODS_KIND.PLANT, self.planting.id)
     if not self.inHarvest then
         self.inHarvest = true
-        global.httpController:addRequest("harvestPlant", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {'gain', simple.encode(gain)}}), self.doHarvest, nil, self)
+        self.npid = math.random(20)-1
+        global.httpController:addRequest("harvestPlant", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {'pid', self.npid}, {'gain', simple.encode(gain)}}), self.doHarvest, nil, self)
     end
 end
 function Farm:harvestOver()
     print("harvestOver")
-    
-    local data = {objectTime=client2Server(Timer.now), objectId=0}
+    local data = {objectTime=client2Server(Timer.now), objectId=self.npid}
     self:initWorking(data)
 end
 function Farm:getLeftTime()

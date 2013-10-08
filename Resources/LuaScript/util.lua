@@ -1,3 +1,13 @@
+function dict(arr)
+    local temp = {}
+    if arr ~= nil then
+        for k, v in ipairs(arr) do
+            temp[v[1]] = v[2]
+        end
+    end
+    return temp
+end
+require "data.String"
 local sim = require "SimpleJson"
 function registerMultiTouch(obj)
     --x y id x y id  x y id
@@ -35,6 +45,7 @@ function registerTouch(obj)
     obj.bg:registerScriptTouchHandler(onTouch, false, kCCMenuHandlerPriority, true)
     obj.bg:setTouchEnabled(true)
 end
+--注册更新通常需要注册enter和exitScene 这样在退出场景的时候自动关闭更新
 function registerUpdate(obj, interval)
     if not interval then
         interval = 0
@@ -47,12 +58,16 @@ end
 function registerEnterOrExit(obj)
     local function onEnterOrExit(tag)
         if tag == 'enter' then
-            obj:enterScene()
+            if obj.enterScene ~= nil then
+                obj:enterScene()
+            end
         elseif tag == 'exit' then
             if obj.updateFunc ~= nil then
                 CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(obj.updateFunc)
             end
-            obj:exitScene()
+            if obj.exitScene ~= nil then
+                obj:exitScene()
+            end
         end
     end
     obj.bg:registerScriptHandler(onEnterOrExit)
@@ -483,7 +498,20 @@ function setVisible(s, v)
 end
 
 function getStr(key, rep)
-    return key
+    local s = Strings[key]
+    if s == nil then
+        s = WORDS[key]
+        if s == nil then
+            return key
+        end
+    end
+    --语言
+    s = s[1]
+    if rep == nil then
+        return s
+    end
+    s = replaceStr(s, rep)
+    return s
 end
 
 --可以参考nozomi MyWorld 网格 笛卡尔坐标 仿射坐标的转化
@@ -550,20 +578,15 @@ function getData(kind, id)
         ret = {}
 
         for m, n in ipairs(k) do
-            ret[n] = datas[m]
+            if n == "name" then
+                ret[n] = getStr(datas[m], nil)
+            else
+                ret[n] = datas[m]
+            end
         end
         dataPool[key] = ret
     end
     return ret
-end
-function dict(arr)
-    local temp = {}
-    if arr ~= nil then
-        for k, v in ipairs(arr) do
-            temp[v[1]] = v[2]
-        end
-    end
-    return temp
 end
 --使用右下角 规划格子 所以不用减去y方向的值
 function normalizePos(p, sx, sy)
@@ -677,7 +700,42 @@ function split(str, del)
     return fields
 end
 
+--level == 0
+function getLevelCost(kind, id, level)
+    local build = getData(kind, id)
+    local cost = {}
+    for i = 1, #costKey, 1 do
+        local v = getDefault(build, i, 0)
+        if v > 0 then
+            cost[i] = v
+        end
+    end
+
+    --建筑物 需要根据数量 等级计算开销
+    --普通建筑都是0级别购买 
+    --水晶矿升级 是 另外的 方式
+    print(simple.encode(build))
+    if kind == GOODS_KIND.BUILD then
+        if build["hasNum"] == 1 then
+            local curNum = getCurLevelBuildNum(id, level);
+            --升级建筑物 建筑物的数量不变
+            curNum = math.min(#build.numCost[level+1]-1, curNum)
+            --购买建筑物建筑
+            local c = build.numCost[level+1][curNum+1]
+            for i = 0, #costKey, 1 do 
+                v = getDefault(c, costKey[i], 0)
+                if v > 0 then
+                    cost[costKey[i]] = v
+                end
+            end
+        end
+    end
+    return cost
+end
+
 function getCost(kind, id)
+    return getLevelCost(kind, id, 0)
+    --[[
     local build = getData(kind, id)
     local cost = {}
     for k, i in ipairs(costKey) do
@@ -687,6 +745,7 @@ function getCost(kind, id)
         end
     end
     return cost
+    --]]
 end
 function getGain(kind, id)
     local build = getData(kind, id)
@@ -874,7 +933,7 @@ function getBuildFunc(id)
 end
 
 function getWorkTime(t)
-    local sec = t%60
+    local sec = math.floor(t%60)
     t = math.floor(t/60)
     local min = t%60
     local hour = math.floor(t/60)
@@ -933,4 +992,7 @@ function sendReq(url, postData, handler, param, delegate)
 end
 function addFly(bg, gain, cb, delegate)
     global.director.curScene.bg:addChild(FlyObject.new(bg, gain, cb, delegate).bg)
+end
+function toCol(c)
+    return ccc3(c[1], c[2], c[3])
 end

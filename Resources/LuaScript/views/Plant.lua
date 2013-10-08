@@ -8,7 +8,8 @@ function Plant:ctor(b, d, privateData)
     
     self.building = b
     self.data = d
-    self.id = self.data["id"]
+    self.id = privateData.objectId
+    print("Plant id is", self.id)
     local sx = self.building.data["sx"]
     local sy = self.building.data["sy"]
     
@@ -45,7 +46,7 @@ function Plant:setState()
         if self.curState == SOW or self.curState == SEED or  self.curState == ROT then
             setTexture(self.bg, "p"..self.curState..".png")
         else
-            setTexture(self.bg, "p"..self.data["id"].."_"..self.curState..".png")
+            setTexture(self.bg, "p"..self.id.."_"..self.curState..".png")
         end
         if self.curState == MATURE or self.curState == ROT then
             self.building.funcBuild:setFlowBanner()

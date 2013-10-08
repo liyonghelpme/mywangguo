@@ -30,7 +30,7 @@ function Mine:whenBusy()
     if self.planting.curState == 1 then
         self.baseBuild.state = getParam('buildFree')
         local gain = getProduction(self.baseBuild.buildLevel)
-        sendReq("harvestMine", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.big}, {"gain", simple.encode(gain)}}), nil, nil) 
+        sendReq("harvestMine", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {"gain", simple.encode(gain)}}), nil, nil) 
         removeSelf(self.flowBanner)
         self.flowBanner = nil
         removeSelf(self.planting.bg)
@@ -52,6 +52,7 @@ function Mine:initWorking(data)
     
     local startTime = data["objectTime"]
     startTime = server2Client(startTime) 
+    print("startTime", startTime)
     
     local privateData = dict({{"objectTime", startTime}})
     self.planting = MinePlant.new(self.baseBuild, privateData)
@@ -65,6 +66,7 @@ MinePlant = class()
 function MinePlant:ctor(b, d)
     self.building = b
     self.objectTime = d["objectTime"]
+    print("initial objectTime", self.objectTime)
     self.bg = CCNode:create()
     self.curState = 0
     local mineData = getData(GOODS_KIND.MINE_PRODUCTION, self.building.buildLevel)
@@ -77,6 +79,7 @@ function MinePlant:getLeftTime()
 end
 function MinePlant:enterScene()
     local now = Timer.now
+    print("now objectTime needTime", now, self.objectTime, self.needTime)
     if now - self.objectTime > self.needTime then
         self.passTime = self.needTime
     else
