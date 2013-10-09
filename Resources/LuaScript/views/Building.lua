@@ -18,12 +18,7 @@ function Building:ctor(m, d, privateData)
 
     self.bg = CCLayer:create()
     
-    if privateData == nil then
-        privateData = {}
-        self.buildColor = global.user:getLastColor()
-    else
-        self.buildColor = privateData['color']
-    end
+    self.buildColor = privateData['color'] or global.user:getLastColor()
     self.objectList = privateData['objectList']
     self.buildLevel = privateData['level'] or 0
 
@@ -60,8 +55,10 @@ function Building:ctor(m, d, privateData)
     local nPos = normalizePos(pos, self.sx, self.sy)
     self:setPos(nPos)
     self:setColPos()
-
-    self.funcBuild:initWorking(privateData)
+    --新建造的建筑物不用初始化工作状态
+    if self.bid ~= -1 then
+        self.funcBuild:initWorking(privateData)
+    end
     --[[
     if self.data['hasAni'] ~= 0 then
         self.aniNode = BuildAnimate.new(self)
@@ -309,6 +306,8 @@ function Building:finishBuild()
     self:setState(getParam("buildFree"))
     self:finishBottom()
     self:setZord()
+    local privateData = {objectId=0, objectTime=client2Server(Timer.now)}
+    self.funcBuild:initWorking(privateData)
     global.user:updateBuilding(self)
 end
 function Building:setZord()

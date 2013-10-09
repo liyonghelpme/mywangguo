@@ -58,7 +58,7 @@ function BuildMenu:setBuilding(b)
         setPos(but1.bg, {669, fixY(sz.height, 8, 45)})
         self.buttonNode:addChild(but1.bg)
 
-        local label = ui.newBMFontLabel({text=getStr("dragBuild", nil), font="bound.fnt", size=22})
+        local label = ui.newTTFLabel({text=getStr("dragBuild", nil), font="", size=22})
         setPos(setAnchor(label, {0, 0.5}), {24, 32})
         self.buttonNode:addChild(label)
     end

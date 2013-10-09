@@ -93,7 +93,7 @@ function CastlePage:touchesEnded(touches)
 end
 
 function CastlePage:beginBuild(building)
-    self.curBuild = Building.new(self.buildLayer, building, nil)
+    self.curBuild = Building.new(self.buildLayer, building, {})
     self.curBuild:setBid(global.user:getNewBid())
     self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
     self.oldScale = self.bg:getScale()

@@ -44,7 +44,7 @@ function Goods:initSameElement(buildData, panel)
 
     --panel is a touchButton or background is a touch zone
     local sz = panel:getContentSize()
-    local buildPic = setPos(addSprite(panel, "images/"..buildPicName), {74, fixY(sz.height, 88)})
+    local buildPic = setPos(addSprite(panel, buildPicName), {74, fixY(sz.height, 88)})
     local ret
     --灰色建筑图 生成
     --调整图像的 纹理

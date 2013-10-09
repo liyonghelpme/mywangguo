@@ -61,7 +61,7 @@ function User:updateBuilding(build)
         return
     end
     --trace("updateBuilding", build, build.id, build.bid, build.getPos(), build.state, build.dir, build.getObjectId(), build.getStartTime());
-    self.buildings[build.bid] = dict({{"id", build.id}, {"px", build:getPos()[1]}, {"py", build:getPos()[2]}, {"state", build.state}, {"dir", build.dir}, {"objectId", build:getObjectId()}, {"objectTime", build:getStartTime()}, {"level", build.buildLevel}, {"color", build.buildColor}, {"objectList", build.objectList}})
+    self.buildings[build.bid] = dict({{"kind", build.kind}, {"px", build:getPos()[1]}, {"py", build:getPos()[2]}, {"state", build.state}, {"dir", build.dir}, {"objectId", build:getObjectId()}, {"objectTime", build:getStartTime()}, {"level", build.buildLevel}, {"color", build.buildColor}, {"objectList", build.objectList}})
 end
 function User:getValue(key)
     return getDefault(self.resource, key, 0)
@@ -115,9 +115,9 @@ function User:getLastColor()
 end
 
 function User:buyBuilding(build)
-    local cost = getCost(GOODS_KIND.BUILD, build.id);
+    local cost = getCost(GOODS_KIND.BUILD, build.kind);
     self:doCost(cost)
-    local gain = getGain(GOODS_KIND.BUILD, build.id);
+    local gain = getGain(GOODS_KIND.BUILD, build.kind);
     self:doAdd(gain)
     self:updateBuilding(build)
 end

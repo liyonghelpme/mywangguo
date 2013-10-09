@@ -722,7 +722,7 @@ function getLevelCost(kind, id, level)
             curNum = math.min(#build.numCost[level+1]-1, curNum)
             --购买建筑物建筑
             local c = build.numCost[level+1][curNum+1]
-            for i = 0, #costKey, 1 do 
+            for i = 1, #costKey, 1 do 
                 v = getDefault(c, costKey[i], 0)
                 if v > 0 then
                     cost[costKey[i]] = v
@@ -764,8 +764,8 @@ function replaceStr(s, rep)
     local temp = {}
     for k, v in ipairs(rep) do
         if (k-1)%2 == 0 then
-            v = string.gsub(v, '%[', '%%[')
-            v = string.gsub(v, '%]', '%%]')
+            v = string.gsub(v, '%[', '{')
+            v = string.gsub(v, '%]', '}')
         end
         table.insert(temp, v)
     end
@@ -881,10 +881,10 @@ function strictSca(n, box)
     return sca
 end
 function server2Client(t)
-    return t-global.user.serverTime+global.user.clientTime
+    return math.floor(t-global.user.serverTime+global.user.clientTime)
 end
 function client2Server(t)
-    return t-global.user.clientTime+global.user.serverTime
+    return math.floor(t-global.user.clientTime+global.user.serverTime)
 end
 function setTexture(sp, tex)
     local t = CCTextureCache:sharedTextureCache():addImage(tex)
@@ -995,4 +995,7 @@ function addFly(bg, gain, cb, delegate)
 end
 function toCol(c)
     return ccc3(c[1], c[2], c[3])
+end
+function addBanner(w)
+    global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}, nil, nil))
 end

@@ -68,6 +68,16 @@ function Store:buy(gi)
     local buyable
     local ret
 
+    cost = getCost(kind, id)
+    buyable = global.user:checkCost(cost)
+    if buyable.ok == 0 then
+        buyable.ok = nil
+        for k, v in pairs(buyable) do
+            addBanner(getStr("resLack", {"[NAME]", getStr(k, nil), "[NUM]", str(v)}) )
+        end
+        return
+    end
+
     if kind == GOODS_KIND.BUILD then
         global.director:popView()
         self.scene:beginBuild(id)
