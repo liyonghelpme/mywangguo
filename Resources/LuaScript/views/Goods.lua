@@ -49,6 +49,16 @@ function Goods:initSameElement(buildData, panel)
     --灰色建筑图 生成
     --调整图像的 纹理
     if objKind == GOODS_KIND.BUILD then
+        local ret = checkBuildNum(objId)
+        --已经达到当前等级的该建筑数量的上限
+        if ret[1] == false then
+            
+        end
+        --建筑物存在数量限制
+        if ret[3] == 1 then
+            setColor(setPos(setAnchor(addLabel(panel, str(getCurBuildNum(objId)).."/"..str(getBuildEnableNum(objId)[1]), "", 20), {0.5, 0.5}), {121, fixY(sz.height, 134)}), fixColor({43, 25, 9}))
+            showGain = 0
+        end
     end
 
     setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5})
@@ -110,7 +120,7 @@ function Goods:updateTab(rg)
             posX = posX+self.offX
         end
         local panel = setAnchor(setContentSize(setPos(addNode(self.flowNode), {posX, posY}), {149, 188}), {0, 0})
-        local pb = setAnchor(setSize(addSprite(panel, "images/goodPanel.png"), {149, 188}), {0, 0})
+        local pb = setAnchor(setSize(addSprite(panel, "goodPanel.png"), {149, 188}), {0, 0})
 
         local buildData = self.goodNum[i+1]
         print('buildData', self.selTab, i, buildData)
@@ -134,7 +144,7 @@ end
 function Goods:setTab(g)
     self.selTab = g
     self.curSel = nil
-    local tex = CCTextureCache:sharedTextureCache():addImage("images/"..self.store.titles[g+1])
+    local tex = CCTextureCache:sharedTextureCache():addImage(self.store.titles[g+1])
     self.title:setTexture(tex)
     
     self.goodNum = self.store.allGoods[self.selTab+1]

@@ -999,3 +999,30 @@ end
 function addBanner(w)
     global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}, nil, nil))
 end
+function Sign(v)
+    if v > 0 then
+        return 1
+    elseif v < 0 then
+        return -1
+    else
+        return 0
+    end
+end
+
+--BMFontLabel 数字使用这个动画
+function numAct(sp, curVal, tarVal)
+    local delta = math.max(math.abs(tarVal-curVal)/4, 1)
+    local up = Sign(tarVal-curVal)
+    local function changeV()
+        curVal = curVal+delta
+        if up == 0 and curVal >= tarVal then
+            curVal = tarVal
+            sp:stopAllActions()
+        elseif up == 1 and curVal <= tarVal then
+            curVal = tarVal
+            sp:stopAllActions()
+        end
+        sp:setString(str(curVal))
+    end
+    sp:runAction(repeatForever(sequence({callfunc(nil, changeV), delaytime(0.1)})))
+end

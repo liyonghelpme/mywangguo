@@ -70,6 +70,8 @@ function MenuLayer:initView()
     setPos(setAnchor(self.menuButton.bg, {0, 0}), {685, fixY(nil, 380, 106)})
     self.banner:addChild(self.menuButton.bg)
 
+    self.crystalIcon = setPos(setSize(addSprite(self.banner, "crystal.png"), {30, 30}), {110, fixY(nil, 461, nil, 0.5)})
+
     self:initText() 
 
     self.expBanner = setVisible(setPos(setAnchor(CCSprite:create("expBanner.png"), {0, 0}), {123, fixY(nil, 432, 50)}), false)
@@ -79,6 +81,7 @@ function MenuLayer:initView()
     --self.expWord = ShadowWords.new(, "", 17, nil, {255, 255, 255})
     setPos(setAnchor(self.expWord, {0.5, 0.5}), {75, 23})
     self.expBanner:addChild(self.expWord)
+
 
 end
 
@@ -125,19 +128,35 @@ function MenuLayer:initText()
     local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     self.banner:addChild(temp)
     self.goldText = setColor(setPos(setAnchor(temp, {0, 0.5}), {588, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    --[[
     local w = ''..global.user.rankOrder
     if global.user.rankOrder > 999 then
         w = '999+'
     end
+    --]]
     local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     self.banner:addChild(temp)
-    self.gloryLevText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    --self.gloryLevText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    self.crystalText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    
 end
 function MenuLayer:updateText()
     local ures = global.user.resource
-    self.silverText:setString(ures.silver)
-    self.goldText:setString(ures.gold)
-    self.gloryLevText:setString(ures.level)
+    local oldSilver = tonumber(self.silverText:getString())
+    local oldGold = tonumber(self.silverText:getString())
+    local oldCrystal = tonumber(self.crystalText:getString())
+    if oldSilver ~= ures.silver then
+        self.silverText:stopAllActions()
+        numAct(self.silverText, oldSilver, ures.silver)
+    end
+    if oldGold ~= ures.gold then
+        self.goldText:stopAllActions()
+        numAct(self.goldText, oldGold, ures.gold)
+    end
+    if oldCrystal ~= ures.crystal then
+        self.crystalText:stopAllActions()
+        numAct(self.crystalText)
+    end
 end
 
 function MenuLayer:onTask()
