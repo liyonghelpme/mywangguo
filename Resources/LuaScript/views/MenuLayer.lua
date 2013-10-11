@@ -155,7 +155,7 @@ function MenuLayer:updateText()
     end
     if oldCrystal ~= ures.crystal then
         self.crystalText:stopAllActions()
-        numAct(self.crystalText)
+        numAct(self.crystalText, oldCrystal, ures.crystal)
     end
 end
 

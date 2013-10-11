@@ -2,6 +2,7 @@ require "views.FuncBuild"
 require "views.Farm"
 require "views.MineFunc"
 require "views.BuildAnimate"
+require "views.Camp"
 require "busiViews.BuildWorkMenu"
 
 Building = class()
@@ -26,6 +27,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = Farm.new(self)
     elseif self.funcs == MINE_KIND then
         self.funcBuild = Mine.new(self)
+    elseif self.funcs == CAMP then
+        self.funcBuild = Camp.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end

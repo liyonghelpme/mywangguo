@@ -12,7 +12,9 @@ function User:ctor()
     self.buildings = {
         --[1]={id=0, px=1000, py=300, state=1, dir=0, objectId=0},
     }
-    self.soldiers = {}
+    self.soldiers = {
+        --kind num
+    }
     self.drugs = {}
     self.equips = {}
     self.herbs = {}
@@ -36,7 +38,11 @@ function User:initDataOver(data, param)
         self.maxBid = 0
         for k, v in ipairs(data.builds) do
             self.buildings[v['bid']] = v
+            v.objectList = simple.decode(v.objectList)
             self.maxBid = math.max(v['bid'], self.maxBid)
+        end
+        for k, v in ipairs(data.soldiers) do
+            self.soldiers[v.kind] = v.num
         end
         self.resource = data.resource
         self:changeValue("exp", 0)
@@ -135,4 +141,10 @@ function User:checkCost(cost)
         end
     end
     return buyable
+end
+function User:addSoldier(kind)
+    local n = getDefault(self.soldiers, kind, 0)
+    n = n+1
+    self.soldiers[kind] = n
+    Event:sendMsg(EVENT_TYPE.ADD_SOLDIER, kind)
 end

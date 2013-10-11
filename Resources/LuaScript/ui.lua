@@ -116,6 +116,11 @@ function ui.newTTFLabel(params)
 
     return label
 end
+--text
+--delegate
+--callback
+--size
+--image
 
 function ui.newButton(params)
     local obj = {}

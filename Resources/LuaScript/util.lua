@@ -469,6 +469,9 @@ function setDesignScale(sp)
 end
 
 function setSca(sp, sca)
+    return setScale(sp, sca)
+end
+function setScale(sp, sca)
     sp:setScale(sca)
     return sp
 end
@@ -1011,18 +1014,32 @@ end
 
 --BMFontLabel 数字使用这个动画
 function numAct(sp, curVal, tarVal)
+    print("numAct", curVal, tarVal)
     local delta = math.max(math.abs(tarVal-curVal)/4, 1)
     local up = Sign(tarVal-curVal)
+    delta = delta*up
     local function changeV()
         curVal = curVal+delta
-        if up == 0 and curVal >= tarVal then
+        if up == 1 and curVal >= tarVal then
             curVal = tarVal
             sp:stopAllActions()
-        elseif up == 1 and curVal <= tarVal then
+        elseif up == -1 and curVal <= tarVal then
+            curVal = tarVal
+            sp:stopAllActions()
+        elseif up == 0 then
             curVal = tarVal
             sp:stopAllActions()
         end
         sp:setString(str(curVal))
     end
     sp:runAction(repeatForever(sequence({callfunc(nil, changeV), delaytime(0.1)})))
+end
+
+function getSca(n, box)
+    local nSize = n:getContentSize()
+    local sca = 1
+    if nSize[1] > box[1] or nSize[2] > box[2] then
+        sca = math.min(box[1]/nSize[1], box[2]/nSize[2])
+    end
+    return sca
 end

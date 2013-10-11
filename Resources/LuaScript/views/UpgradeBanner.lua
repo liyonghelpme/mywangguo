@@ -7,7 +7,7 @@ function UpgradeBanner:ctor(w, col, cb, delegate)
         col = {255, 255, 255}
     end
     self.bg = CCNode:create()
-    local sb = setAnchor(setPos(addSprite(self.bg, "images/storeBlack.png"), {global.director.disSize[1]/2, global.director.disSize[2]/2}), {0.5, 0.5})
+    local sb = setAnchor(setPos(addSprite(self.bg, "storeBlack.png"), {global.director.disSize[1]/2, global.director.disSize[2]/2}), {0.5, 0.5})
     
     local word = setAnchor(colorWordsNode(w, 20, col, {89, 72, 18}), {0.5, 0.5})
     self.bg:addChild(word)
@@ -28,9 +28,9 @@ function UpgradeBanner:removeNow()
 end
 function UpgradeBanner:setMoveAni(X, Y)
     if self.moveAni ~= nil then
-        self.bg:stopAction(self.moveAni)
+        self.sb:stopAction(self.moveAni)
     end
-    self.moveAni = expout(moveto(getParam("bannerMoveTime")/1000, X, Y))
-    self.bg:runAction(self.moveAni) 
+    self.moveAni = expout(moveto(0.2, X, Y))
+    self.sb:runAction(self.moveAni) 
 end
 
