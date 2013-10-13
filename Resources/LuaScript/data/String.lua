@@ -755,7 +755,7 @@ WORDS = dict({
 {"trainZone", {"训练场", "Training Ground"}},
 {"curSolSolBound", {"当前士兵数量/士兵数量上限：{NUM1}/{NUM2}", "Current Soldier Number/Max:{NUM1}/{NUM2}"}},
 {"solTip", {"提示：训练场不能摆放建筑，开启浮岛可以容纳更多士兵，点击上方浮岛查看详细信息", "Notice: Training ground can't display any buildings. Unlocking the floating island can accommodate more soldiers. Tap the floating island on the top for details.\n"}},
-{"buildHouse", {"人口不足，购买更多民居?", "You need to buy more houses^_^"}},
+{"buildHouse", {"当前士兵数量{NUM1}超过上限{NUM2}，请提升等级！", "You need to buy more houses^_^"}},
 {"solTooMany", {"士兵超出", ""}},
 {"sorrySol", {"抱歉，奇迹村只能最多容纳138个人口，开启浮岛来容纳更多人口！", "Sorry, village of can only accommodate 138 soldiers. Unlock the floating island for more space!"}},
 {"notOpen", {"尚未开启", "Locked"}},

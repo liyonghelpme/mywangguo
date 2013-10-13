@@ -236,7 +236,7 @@ function repeatForever(act)
     return CCRepeatForever:create(act)
 end
 function rotateby(t, ang)
-    return CCRotateBy:create(t/1000, ang)
+    return CCRotateBy:create(t, ang)
 end
 function moveto(d, x, y)
     local mov = CCMoveTo:create(d, ccp(x, y))
@@ -270,6 +270,10 @@ function spawn(sp)
 end
 function scaleto(t, sx, sy)
     return CCScaleTo:create(t, sx, sy)
+end
+
+function scaleby(t, sx, sy)
+    return CCScaleBy:create(t, sx, sy)
 end
 function sizeto(t, sx, sy, sp)
     local sz = sp:getContentSize()
@@ -530,6 +534,10 @@ end
 function getMapKey(x, y)
     return x*10000+y
 end
+function getXY(k)
+    return math.floor(k/10000), k%10000
+end
+
 function getDefault(t, k, def)
     local v = t[k]
     if v == nil then
@@ -660,7 +668,7 @@ end
 function getSize(s)
     local sz = {}
     local t = s:getContentSize()
-    sz = {t.width, w.height}
+    sz = {t.width, t.height}
     return sz
 end
 function checkIn(x, y, sz)
@@ -707,7 +715,7 @@ end
 function getLevelCost(kind, id, level)
     local build = getData(kind, id)
     local cost = {}
-    for i = 1, #costKey, 1 do
+    for k, i in ipairs(costKey)do
         local v = getDefault(build, i, 0)
         if v > 0 then
             cost[i] = v
@@ -717,7 +725,7 @@ function getLevelCost(kind, id, level)
     --建筑物 需要根据数量 等级计算开销
     --普通建筑都是0级别购买 
     --水晶矿升级 是 另外的 方式
-    print(simple.encode(build))
+    --print(simple.encode(build))
     if kind == GOODS_KIND.BUILD then
         if build["hasNum"] == 1 then
             local curNum = getCurLevelBuildNum(id, level);
@@ -1015,7 +1023,7 @@ end
 --BMFontLabel 数字使用这个动画
 function numAct(sp, curVal, tarVal)
     print("numAct", curVal, tarVal)
-    local delta = math.max(math.abs(tarVal-curVal)/4, 1)
+    local delta = math.max(math.floor(math.abs(tarVal-curVal)/10), 1)
     local up = Sign(tarVal-curVal)
     delta = delta*up
     local function changeV()
@@ -1036,10 +1044,43 @@ function numAct(sp, curVal, tarVal)
 end
 
 function getSca(n, box)
-    local nSize = n:getContentSize()
+    local nSize = getSize(n)
     local sca = 1
     if nSize[1] > box[1] or nSize[2] > box[2] then
         sca = math.min(box[1]/nSize[1], box[2]/nSize[2])
     end
     return sca
+end
+function fixY2(y)
+    return global.director.designSize[2]-y
+end
+
+
+--动画名称
+--动画名字pattern
+--动画开始frame
+--动画结束frame
+--动画frame 之间的 间隔
+--动画总时间
+--是否是 SpriteFrame  还是普通的Image
+function createAnimation(name, format, a,b,c,t, isFrame)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    if not animation then
+        animation = CCAnimation:create()
+        --从SpriteFrameCache 中获取动画Frame
+        if isFrame then
+            local cache = CCSpriteFrameCache:sharedSpriteFrameCache()
+            for i=a, b, c do
+                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, i)))
+            end
+        else
+            for i=a, b, c do
+                animation:addSpriteFrameWithFileName(string.format(format, i))
+            end
+        end
+        animation:setDelayPerUnit(t*c/(b-a+c))
+        animation:setRestoreOriginalFrame(true)
+        CCAnimationCache:sharedAnimationCache():addAnimation(animation, name)
+    end
+    return animation
 end

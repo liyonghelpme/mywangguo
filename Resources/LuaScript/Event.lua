@@ -3,6 +3,8 @@ EVENT_TYPE = {
     PLAN_BUILDING=11, MOVE_TO_FARM=12,
     MOVE_TO_CAMP=13,
     ADD_SOLDIER=14,
+    HARVEST_SOLDIER=15,
+    KILL_SOLDIER=16, --从经营页面杀死某个士兵
 }
 Event = {}
 Event.callbacks = {}

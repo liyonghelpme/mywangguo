@@ -93,8 +93,8 @@ end
 
 function Goods:getShowRange()
     local px, py = self.flowNode:getPosition()
-    local upRow = math.max(0, round(-py/self.offY))
-    local lowRow = round((-py+self.HEIGHT+self.offY)/self.offY)
+    local upRow = math.max(0, round(py/self.offY))
+    local lowRow = round((py+self.offY)/self.offY)
     local rows = (#self.goodNum+self.PAN_PER_ROW-1)/self.PAN_PER_ROW
     return {math.max(0, upRow-1), math.min(lowRow+1, rows)}
 end

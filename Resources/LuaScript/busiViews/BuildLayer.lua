@@ -1,5 +1,7 @@
 require "model.MapGridController"
 require "views.Building"
+require "views.Soldier"
+
 BuildLayer = class(MoveMap)
 function BuildLayer:ctor(scene)
     self.scene = scene
@@ -11,6 +13,24 @@ function BuildLayer:ctor(scene)
     self.mapGridController = MapGridController.new(self)
     self.gridLayer = CCLayer:create()
     self.bg:addChild(self.gridLayer)
+
+    registerEnterOrExit(self)
+end
+
+function BuildLayer:enterScene()
+    Event:registerEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
+end
+function BuildLayer:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
+end
+function BuildLayer:receiveMsg(name, msg)
+    if name == EVENT_TYPE.HARVEST_SOLDIER then
+        local solId = msg[2]
+        local data = getData(GOODS_KIND.SOLDIER, solId)
+        local s = Soldier.new(self, data, nil)
+        self.bg:addChild(s.bg, MAX_BUILD_ZORD)
+        self.mapGridController:addSoldier(s)
+    end
 end
 
 function BuildLayer:initBuilding()
@@ -33,8 +53,19 @@ function BuildLayer:initBuilding()
     temp:setScale(0.2)
     --]]
 end
+function BuildLayer:initSoldier()
+    for k, v in pairs(global.user.soldiers) do
+        local data = getData(GOODS_KIND.SOLDIER, k)
+        for i=1, v, 1 do
+            local s = Soldier.new(self, data, nil)
+            self.bg:addChild(s.bg, MAX_BUILD_ZORD)
+            self.mapGridController:addSoldier(s)
+        end
+    end
+end
 function BuildLayer:initDataOver()
     self:initBuilding()
+    self:initSoldier()
 end
 
 function BuildLayer:keepPos()

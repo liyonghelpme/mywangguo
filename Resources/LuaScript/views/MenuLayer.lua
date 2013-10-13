@@ -99,6 +99,7 @@ function MenuLayer:updateExp(add)
         setSize(self.expfiller, {nowSize, 12})
     end
 
+    --[[
     local leftExp = needExp-exp
     if add > 0 then
         self.expWord:setString(getStr("expToLev", {"[EXP]", str(leftExp), "[LEV]", str(level+2)}))
@@ -108,6 +109,7 @@ function MenuLayer:updateExp(add)
         self.expBanner:runAction(sequence({fadein(0.2), delaytime(2), fadeout(1)}))
         self.expWord:runAction(sequence({fadein(0.2), delaytime(2), fadeout(1)}))
     end
+    --]]
 
     local temp = altasWord("white", ""..(level+1))
     setPos(setAnchor(temp, {0.5, 0.5}), getPos(self.levelLabel))
@@ -143,7 +145,7 @@ end
 function MenuLayer:updateText()
     local ures = global.user.resource
     local oldSilver = tonumber(self.silverText:getString())
-    local oldGold = tonumber(self.silverText:getString())
+    local oldGold = tonumber(self.goldText:getString())
     local oldCrystal = tonumber(self.crystalText:getString())
     if oldSilver ~= ures.silver then
         self.silverText:stopAllActions()

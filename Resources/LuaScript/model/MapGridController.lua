@@ -12,6 +12,8 @@ end
 function MapGridController:clearRxRyMap(rx, ry, obj)
 end
 function MapGridController:addSoldier(sol)
+    self.allSoldiers[sol] = true
+    --士兵当前不占用地面体积 建筑物可以摆放在士兵身上
 end
 function MapGridController:removeSoldier(sol)
 end
@@ -80,5 +82,4 @@ function MapGridController:removeBuilding(build)
     self:clearMap(build)
     self.allBuildings[build] = nil
 end
-
 

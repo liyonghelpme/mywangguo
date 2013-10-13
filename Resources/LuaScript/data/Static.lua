@@ -45,8 +45,9 @@ levelExp = {6, 10, 15, 20, 25, 30, 33, 35, 48, 58, 62, 79, 85, 91, 112, 120, 128
 mineProductionKey = {"exp", "gaincrystal", "time", "color", "id", "silver"}
 mineProductionData = dict( {{0, {4, 4, 600, 0, 0, 10000}}, {1, {12, 14, 1800, -50, 1, 50000}}, {2, {18, 32, 2700, 50, 2, 100000}}, {3, {30, 70, 3600, 100, 3, 0}}} )
 
-
-storeSoldier = {480, 440, 590, 550, 0, 490, 410, 20, 60, 190, 10, 1080, 400, 1010, 80, 1170, 510, 100, 500, 150, 560, 1030, 30, 140, 70, 1120, 420, 1300, 430, 170, 530, 1070, 520, 1090, 570, 1040, 450, 1020, 50, 1110, 470, 120, 540, 1060, 40, 160, 460, 1360, 90, 1140, 580, 1150, 110, 1050, 1220, 1160, 1190, 1310, 1230, 1180, 130, 1280, 1260, 1250, 1270, 1200, 1240, 1320, 1290, 1100, 180, 1340, 1330, 1370, 1350, 1130, 1380, 1210}
+--选择部分士兵
+storeSoldier = {3, 493, 413, 23}
+--storeSoldier = {3, 493, 413, 23, 60, 190, 10, 1080, 400, 1010, 80, 1170, 510, 100, 500, 150, 560, 1030, 30, 140, 70, 1120, 420, 1300, 430, 170, 530, 1070, 520, 1090, 570, 1040, 450, 1020, 50, 1110, 470, 120, 540, 1060, 40, 160, 460, 1360, 90, 1140, 580, 1150, 110, 1050, 1220, 1160, 1190, 1310, 1230, 1180, 130, 1280, 1260, 1250, 1270, 1200, 1240, 1320, 1290, 1100, 180, 1340, 1330, 1370, 1350, 1130, 1380, 1210}
 
 
 soldierKey = {"attSpeed", "solOrMon", "gold", "transferGold", "isHero", "maleOrFemale", "bloodHeight", "defense", "shadowOffY", "shadowOffX", "id", "isBoss", "shadowHeight", "arrpx", "arrpy", "particleId", "offY", "healthBoundary", "attack", "kind", "desId", "transferTime", "time", "solSca", "ability", "missRate", "shadowWidth", "sy", "moveSpeed", "attackType", "silver", "arrSca", "transferCrystal", "sx", "name", "tested", "needArgb", "level", "crystal", "range", "criticalHitRate", "arrFlyOffY", "defenseType", "reliveTime"}

@@ -31,6 +31,7 @@ function Mine:whenBusy()
         self.baseBuild.state = getParam('buildFree')
         local gain = getProduction(self.baseBuild.buildLevel)
         sendReq("harvestMine", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {"gain", simple.encode(gain)}}), nil, nil) 
+        global.user:doAdd(gain)
         removeSelf(self.flowBanner)
         self.flowBanner = nil
         removeSelf(self.planting.bg)

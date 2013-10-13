@@ -10,7 +10,7 @@ function User:ctor()
     self.resource = {}
     --id ----> buildingData
     self.buildings = {
-        --[1]={id=0, px=1000, py=300, state=1, dir=0, objectId=0},
+        --[1]={kind=0, px=1000, py=300, state=1, dir=0, objectId=0},
     }
     self.soldiers = {
         --kind num
@@ -147,4 +147,27 @@ function User:addSoldier(kind)
     n = n+1
     self.soldiers[kind] = n
     Event:sendMsg(EVENT_TYPE.ADD_SOLDIER, kind)
+end
+function User:getSolNum()
+    local c = 0
+    for k, v in pairs(self.soldiers) do
+        c = c + v
+    end
+    return c
+end
+
+function User:getPeopleNum()
+    local level = self:getValue("level")
+    local n = (level+1)*3
+    return n
+end
+function User:getCampProductNum()
+    local countNum = 0
+    for k, v in pairs(self.buildings) do
+        --兵营
+        if v.kind == 224 then
+            countNum = countNum+#v.objectList 
+        end
+    end
+    return countNum
 end

@@ -65,8 +65,11 @@ function ui.newBMFontLabel(params)
     if type(color) == "table" then
         color = toCol(color)
     end
+    if font == nil then
+        font = "bound.fnt"
+    end
     local x, y      = params.x, params.y
-    local size      = params.size
+    local size      = params.size or 20
     assert(font ~= nil, "ui.newBMFontLabel() - not set font")
     local baseSize = 35
     local k = size/baseSize
@@ -135,9 +138,24 @@ function ui.newButton(params)
     local text = params.text
     local size = params.size
 
+    local spSize = {sz.width, sz.height}
+
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
-        return checkIn(p.x, p.y, sz)
+        local ret = checkIn(p.x, p.y, sz)
+
+        if ret then
+            local tempSp = CCSprite:create(params.image)
+            lay:addChild(tempSp)
+            local function removeTemp()
+                removeSelf(tempSp)
+            end
+            local anchor = sp:getAnchorPoint()
+            tempSp:setAnchorPoint(anchor)
+            setSize(tempSp, spSize)
+            tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
+        end
+        return ret
     end
     function obj:touchMoved(x, y)
     end
@@ -150,6 +168,7 @@ function ui.newButton(params)
         return obj
     end
     function obj:setContentSize(w, h)
+        spSize = {w, h}
         lay:setContentSize(CCSizeMake(w, h))
         setSize(sp, {w, h})
     end

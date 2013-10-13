@@ -23,6 +23,7 @@ function CampWorkNode:update(diff)
         --收获该士兵 
         --建筑更新 objectList objectTime
         --用户更新 新的士兵
+        --print("leftTime", leftTime, needTime)
         if leftTime <= 0 then
             solId = objectList[1]
             table.remove(objectList, 1)
@@ -30,6 +31,7 @@ function CampWorkNode:update(diff)
             sendReq("harvestSoldier", dict({{"uid", global.user.uid}, {"bid", self.func.baseBuild.bid}, {"kind", solId}, {"time", client2Server(self.func.objectTime)}}))
             global.user:addSoldier(solId)
             global.user:updateBuilding(self.func.baseBuild)
+            Event:sendMsg(EVENT_TYPE.HARVEST_SOLDIER, {self.func.baseBuild.bid, solId})
         end
     end
 end
@@ -44,13 +46,14 @@ function Camp:ctor(b)
 end
 --弹出兵营对话框
 function Camp:whenFree()
-    global.director:pushView(SoldierStore.new(), 1, 0)
+    global.director:pushView(SoldierStore.new(self.baseBuild), 1, 0)
     return 1
 end
 function Camp:whenBusy()
-    global.director:pushView(SoldierStore.new(), 1, 0)
+    global.director:pushView(SoldierStore.new(self.baseBuild), 1, 0)
     return 1
 end
+--生产新的士兵的时候 更新当前的工作时间
 function Camp:initWorking(data)
     if data == nil then
         return
@@ -58,6 +61,7 @@ function Camp:initWorking(data)
     self.baseBuild:setState(getParam("buildWork"))
     self.objectId = 0
     self.objectTime = server2Client(data.objectTime)
+    print("initWorking", self.objectTime, data.objectTime, global.user.serverTime, global.user.clientTime)
 end
 function Camp:getRealLeftTime()
     if #self.baseBuild.objectList > 0 then
@@ -67,6 +71,8 @@ function Camp:getRealLeftTime()
         local needTime = getData(GOODS_KIND.SOLDIER, sol).time
         local now = Timer.now
         local passTime = now - self.objectTime 
+
+        --print("realLeftTime", self.objectTime, passTime, needTime, now)
         return {math.max(needTime-passTime, 0), needTime}
     end
     return {0, 0}
