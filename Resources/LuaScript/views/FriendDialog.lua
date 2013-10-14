@@ -17,6 +17,7 @@ function FriendDialog:ctor()
     --
     setPos(setAnchor(addSprite(self.bg, "dialogFriendTitle.png"), {0, 1}), {65, fixY(nil, 10)})
     setPos(setAnchor(addSprite(self.bg, "dialogNeibor.png"), {0.5, 0.5}), {398, fixY(nil, 108)})
+
 end
 function FriendDialog:closeDialog()
     global.director:popView()
