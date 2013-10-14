@@ -137,6 +137,7 @@ function ui.newButton(params)
     sp:setAnchorPoint(ccp(0, 0))
     local text = params.text
     local size = params.size
+    local conSize = params.conSize
 
     local spSize = {sz.width, sz.height}
 
@@ -173,9 +174,11 @@ function ui.newButton(params)
         setSize(sp, {w, h})
     end
     registerTouch(obj)
-
+    if conSize ~= nil then
+        obj:setContentSize(conSize[1], conSize[2])
+    end
     if text ~= nil then
-        setAnchor(addLable(obj.bg, text, "", size), {0.5, 0.5})
+        setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
     end
     return obj
 end

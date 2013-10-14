@@ -4,6 +4,7 @@ function MapGridController:ctor(scene)
     self.mapDict = {}
     self.allBuildings = {}
     self.allSoldiers = {}
+    self.solList = {}
 end
 
 --掉落物品占用单个网格
@@ -14,6 +15,7 @@ end
 function MapGridController:addSoldier(sol)
     self.allSoldiers[sol] = true
     --士兵当前不占用地面体积 建筑物可以摆放在士兵身上
+    table.insert(self.solList, sol)
 end
 function MapGridController:removeSoldier(sol)
 end

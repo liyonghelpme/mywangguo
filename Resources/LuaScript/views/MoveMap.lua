@@ -29,6 +29,37 @@ function MoveMap:updateMapGrid()
         end
     end
 end
+--寻路算法的 node
+function MoveMap:updateCells(cells)
+    if DEBUG then
+        removeSelf(self.cellLayer)
+        self.cellLayer = CCSpriteBatchNode:create("green2.png")
+        self.bg:addChild(self.cellLayer)
+        --gScore hScore fScore
+        --openList
+        --closedList
+        --key:      normal coordinate
+        --value:    parent gScore hScore fScore
+        for k, v in pairs(cells) do
+            local x, y = getXY(k)
+            --local cx, cy = normalToCartesian(x, y)
+            local cxy = setBuildMap({1, 1, x, y})
+            local sp = setAnchor(setPos(setSize(addSprite(self.cellLayer, "green2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0})
+        end
+    end
+end
+--normal 坐标
+function MoveMap:updatePath(path)
+    if DEBUG then
+        removeSelf(self.pathLayer)
+        self.pathLayer = CCSpriteBatchNode:create("white2.png")
+        self.bg:addChild(self.pathLayer)
+        for k, v in ipairs(path) do
+            local cxy = setBuildMap({1, 1, v[1], v[2]})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.pathLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {0, 0, 255})
+        end
+    end
+end
 
 function MoveMap:checkPosCollision(mx, my, ps)
     local key = getMapKey(mx, my)

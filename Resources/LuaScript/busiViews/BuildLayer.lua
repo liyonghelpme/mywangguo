@@ -2,6 +2,8 @@ require "model.MapGridController"
 require "views.Building"
 require "views.Soldier"
 
+ClearNode = class
+
 BuildLayer = class(MoveMap)
 function BuildLayer:ctor(scene)
     self.scene = scene
@@ -13,8 +15,35 @@ function BuildLayer:ctor(scene)
     self.mapGridController = MapGridController.new(self)
     self.gridLayer = CCLayer:create()
     self.bg:addChild(self.gridLayer)
+    self.cellLayer = CCLayer:create()
+    self.bg:addChild(self.cellLayer)
+    self.pathLayer = CCNode:create()
+    self.bg:addChild(self.pathLayer)
+
+    --用于士兵到达目的地之后防止冲突
+    self.cells = {}
+    --当前允许寻路的士兵
+    self.curSol = nil
 
     registerEnterOrExit(self)
+end
+--跳到下一个寻路的士兵那里
+function BuildLayer:switchPathSol()
+    local net = nil
+    local find = false
+    for k, v in ipairs(self.mapGridController.solList) do
+        if v == self.curSol then
+            find = true
+        elseif find then
+            net = v
+            break
+        end
+    end
+    if net == nil then
+        net = self.mapGridController.solList[1]
+    end
+    self.curSol = net
+    print("switchPathSol", self.curSol.kind)
 end
 
 function BuildLayer:enterScene()

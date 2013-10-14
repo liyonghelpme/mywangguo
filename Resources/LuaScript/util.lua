@@ -535,7 +535,7 @@ function getMapKey(x, y)
     return x*10000+y
 end
 function getXY(k)
-    return math.floor(k/10000), k%10000
+    return math.floor(k/10000), math.floor(k%10000)
 end
 
 function getDefault(t, k, def)
@@ -553,6 +553,16 @@ function getBuildMap(build)
     local px, py = build.bg:getPosition()
     return getPosMap(sx, sy, px, py)
 end
+--用 normal To Cartesian 来实现的
+--[[
+function normalToCartesian(nx, ny)
+    return nx*SIZEX, ny*SIZEY
+end
+--]]
+--从寻路的normal 转化成 建筑物的normal 坐标
+function cellNormalToMapNormal(x, y)
+end
+--这个替代了从normal 到Cartesian 坐标转化
 function setBuildMap(map)
     local sx = map[1]
     local sy = map[2]
@@ -617,8 +627,19 @@ function normalizePos(p, sx, sy)
     return {x, y}
 end
 
---cartesian  normal  affine
 
+--笛卡尔 正则  仿射坐标转化
+--寻路算法中使用 正则坐标 
+--neibor 
+--x+1 y
+--x-1 y
+--x y+1
+--x y-1
+--x+1 y+1
+--x-1 y+1
+--x-1 y-1
+--x+1 y-1
+--cartesian  normal  affine
 function cartesianToNormal(x, y)
     return round(x/SIZEX), round(y/SIZEY)
 end
@@ -630,6 +651,13 @@ end
 --返回浮点normal 网格坐标
 function cartesianToNormalFloat(x, y)
     return (x/SIZEX), (y/SIZEY)
+end
+--将坐标基数 现有坐标奇数偶数相同 现有的建筑物坐标的要求
+function sameOdd(x, y)
+    if x%2 ~= y%2 then
+        y = y+1
+    end
+    return x, y
 end
 
 
@@ -644,6 +672,7 @@ end
 function affineToNormal(dx, dy)
     return dx-dy, dx+dy
 end
+
 --转化成 affine 坐标进行比较
 function checkPointIn(x, y, px, py, sx, sy)
     local nx, ny = cartesianToNormalFloat(x, y)
@@ -1083,4 +1112,7 @@ function createAnimation(name, format, a,b,c,t, isFrame)
         CCAnimationCache:sharedAnimationCache():addAnimation(animation, name)
     end
     return animation
+end
+function getVS()
+    return CCDirector:sharedDirector():getVisibleSize()
 end

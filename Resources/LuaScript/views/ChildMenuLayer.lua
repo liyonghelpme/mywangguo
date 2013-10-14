@@ -1,3 +1,4 @@
+require "views.FriendDialog"
 ChildMenuLayer = class()
 function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
     self.buts = dict({
@@ -105,3 +106,7 @@ function ChildMenuLayer:onPlan()
     global.director.curScene:doPlan()
 end
 
+function ChildMenuLayer:onFriend()
+    global.director.curScene:closeGlobalMenu(self)
+    global.director:pushView(FriendDialog.new(), 1, 0)
+end
