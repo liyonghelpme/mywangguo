@@ -2,6 +2,7 @@ Dark = class()
 function Dark:ctor(auto)
     self.autoPop = auto
     self.bg = CCLayer:create()
+    --[[
     local sp = CCSprite:create("images/black.png")
     --sp:setColor(ccc3(0, 0, 0))
     --sp:setOpacity(0.5)
@@ -10,6 +11,7 @@ function Dark:ctor(auto)
     setPos(sp, {global.director.disSize[1]/2, global.director.disSize[2]/2})
     setSize(sp, global.director.disSize)
     self.bg:addChild(sp)
+    --]]
     registerEnterOrExit(self)
     registerTouch(self)
 end

@@ -63,7 +63,12 @@ function BuildLayer:receiveMsg(name, msg)
 end
 
 function BuildLayer:initBuilding()
-    local item = global.user.buildings
+    local item
+    if BattleLogic.inBattle then
+        item = BattleLogic.buildings 
+    else
+        item = global.user.buildings
+    end
     for k, v in pairs(item) do
         local bid = k
         local bdata = v
@@ -83,7 +88,13 @@ function BuildLayer:initBuilding()
     --]]
 end
 function BuildLayer:initSoldier()
-    for k, v in pairs(global.user.soldiers) do
+    local item
+    if BattleLogic.inBattle then
+        item = BattleLogic.soldiers
+    else
+        item = global.user.soldiers
+    end
+    for k, v in pairs(item) do
         local data = getData(GOODS_KIND.SOLDIER, k)
         for i=1, v, 1 do
             local s = Soldier.new(self, data, nil)
@@ -95,6 +106,7 @@ end
 function BuildLayer:initDataOver()
     self:initBuilding()
     self:initSoldier()
+    BattleLogic.finishInitBuild = true
 end
 
 function BuildLayer:keepPos()

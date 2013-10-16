@@ -195,6 +195,9 @@ end
 function Building:touchesMoved(touches)
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
+    if oldPos == nil then
+        return
+    end
     local difx = self.lastPos[0][1]-oldPos[0][1]
     local dify = self.lastPos[0][2]-oldPos[0][2]
     if self.doMove then

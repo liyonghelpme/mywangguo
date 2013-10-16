@@ -6,7 +6,7 @@ function MenuLayer:ctor(sc)
     self.showChildMenu = false
     self.MainMenuFunc = {
     [0]={"map", "rank", "plan", "setting"},
-    [1]={"role", "store", "friend", "mail"},
+    [1]={"attack", "store", "friend", "mail"},
     }
     self:initView()
     registerEnterOrExit(self)
@@ -193,8 +193,8 @@ end
 --action 正在进行时 需要等待action结束么?
 function MenuLayer:drawAllMenu()
     self.showChildMenu= true
-    self:drawFunc(0, {"map", "rank", "plan", "setting"})
-    self:drawFunc(1, {"soldier", "store", "friend", "mail"})
+    self:drawFunc(0, self.MainMenuFunc[0])
+    self:drawFunc(1, self.MainMenuFunc[1])
 end
 function MenuLayer:cancelFunc(index)
     self.menus[index]:removeSelf()

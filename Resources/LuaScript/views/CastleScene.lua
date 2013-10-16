@@ -141,4 +141,7 @@ function CastleScene:closePlan()
     self.planView = nil
     self.curBuild = nil
 end
-
+--进入战斗场景
+function CastleScene:beginSwitch()
+    
+end

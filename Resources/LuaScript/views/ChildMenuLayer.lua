@@ -1,3 +1,4 @@
+require "views.Cloud"
 require "views.FriendDialog"
 ChildMenuLayer = class()
 function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
@@ -14,6 +15,7 @@ function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
     {"rank", {"menu_button_rank.png", self.onRank}},
     {"setting", {"menu_button_setting.png", self.onSetting}},
     {"store", {"menu_button_store.png", self.onStore}},
+    {"attack", {"menu_button_attack.png", self.onAttack}},
 
 
     {"acc", {"menu_button_acc.png", self.onAcc}},
@@ -109,4 +111,7 @@ end
 function ChildMenuLayer:onFriend()
     global.director.curScene:closeGlobalMenu(self)
     global.director:pushView(FriendDialog.new(), 1, 0)
+end
+function ChildMenuLayer:onAttack()
+    global.director:pushView(Cloud.new(), 1, 0)
 end

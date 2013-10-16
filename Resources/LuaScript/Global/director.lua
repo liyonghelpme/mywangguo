@@ -49,6 +49,22 @@ function Director:popView()
     table.remove(self.stack, #self.stack)
 end
 
+--不要清理动画
+function Director:transferScene(view)
+    --self.stack 不变
+    for k, v in ipairs(self.stack) do
+        v.bg:retain()
+        v.bg:removeFromParentAndCleanup(false)
+        view.bg:addChild(v.bg)
+        v.bg:release()
+    end
+
+    --压入场景
+    CCDirector:sharedDirector():pushScene(view.bg)
+    self.curScene = view
+    table.insert(self.sceneStack, view)
+end 
+
 function Director:replaceScene(view)
     CCDirector:sharedDirector():replaceScene(view.bg)
     self.curScene = view

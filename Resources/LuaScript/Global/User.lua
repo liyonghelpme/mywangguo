@@ -30,6 +30,7 @@ function User:ctor()
 end
 function User:initDataOver(data, param)
     if data ~= nil then
+        --登陆的时候 服务器时间
         self.serverTime = data.serverTime
         self.clientTime = Timer.now
 
@@ -53,7 +54,7 @@ function User:initDataOver(data, param)
 end
 function User:initData()
     --Network.postData("login", self, self.initDataOver, {papayaId=self.papayaId, papayaName=self.papayaName})
-    global.httpController:addRequest("login", dict({{"account", "liyong"}}), self.initDataOver, nil, self)
+    global.httpController:addRequest("login", dict({{"account", "wangxiaoming"}}), self.initDataOver, nil, self)
     --self:initDataOver({uid=1234})
 end
 
@@ -63,6 +64,10 @@ function User:getNewBid()
 end
 
 function User:updateBuilding(build)
+    --不要更新战斗建筑物的数据 到我方建筑物中
+    if BattleLogic.inBattle then
+        return
+    end
     if build.bid == -1 then
         return
     end
