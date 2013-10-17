@@ -23,9 +23,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
     CCEGLView* pEGLView = CCEGLView::sharedOpenGLView();
 
     pDirector->setOpenGLView(pEGLView);
-
+    CCSize wh = pDirector->getVisibleSize();
     // Set the design resolution
-    pEGLView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, kResolutionNoBorder);
+    //pEGLView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, kResolutionNoBorder);
+    pEGLView->setDesignResolutionSize(wh.width, wh.height, kResolutionNoBorder);
 
 	CCSize frameSize = pEGLView->getFrameSize();
     
@@ -37,6 +38,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // this can make sure that the resource's height could fit for the height of design resolution.
 
     // if the frame's height is larger than the height of medium resource size, select large resource.
+    /*
 	if (frameSize.height > mediumResource.size.height)
 	{
         searchPath.push_back(largeResource.directory);
@@ -57,6 +59,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
         pDirector->setContentScaleFactor(MIN(smallResource.size.height/designResolutionSize.height, smallResource.size.width/designResolutionSize.width));
     }
+    */
     
     // set searching path
     CCFileUtils::sharedFileUtils()->setSearchPaths(searchPath);

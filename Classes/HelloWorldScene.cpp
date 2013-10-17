@@ -1,5 +1,6 @@
 #include "HelloWorldScene.h"
 #include "AppMacros.h"
+#include "CCSprite3D.h"
 USING_NS_CC;
 
 
@@ -71,6 +72,8 @@ bool HelloWorld::init()
     // position the sprite on the center of the screen
     pSprite->setPosition(ccp(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
 
+    //pSprite->setRotationY(50);
+
     // add the sprite as a child to this layer
     this->addChild(pSprite, 0);
     
@@ -90,9 +93,25 @@ bool HelloWorld::init()
     CCTexture2D *tex = rt->getSprite()->getTexture();
     GLuint tid = tex->getName();
     */
+    CCSprite3D *m3 = CCSprite3D::create();
+    this->addChild(m3, 2);
+    m33 = m3;
 
-    
+    //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
+    //m3->setScale(100);
+    //m3->setPosition(ccp(100, 100));
+    //m3->rotateX(100);
+    m3->tranX(400); 
+    m3->tranY(240); 
+    m3->tranZ(-400);
+    m3->scaleX(200);
+    m3->scaleY(200);
+    m3->scaleZ(200);
+    //m3->rotateX(135); 
+    //m3->rotateY(-45); 
 
+    ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
+    CCLog("Direction %d", p);
     frameNum = 0;
     scheduleUpdate();
     return true;
@@ -105,6 +124,7 @@ void HelloWorld::update(float diff) {
     } else if(frameNum == 2) {
     }
     frameNum++; 
+    m33->rotateY(frameNum);
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)

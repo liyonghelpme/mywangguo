@@ -2,6 +2,7 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "CCSprite3D.h"
 using namespace cocos2d;
 
 class HelloWorld : public cocos2d::CCLayer
@@ -21,6 +22,8 @@ public:
     CCSprite *sp;
     virtual void update(float diff);
     int frameNum;
+    
+    CCSprite3D *m33;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
