@@ -78,6 +78,6 @@ typedef struct _md2GLVertex
 
 
 // 读取模型文件 写入 位置 纹理 一frame 静态动画
-void readMD2(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, unsigned char *);
+void readMD2(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, vector<vector<float> > *animations, unsigned char *);
 
 #endif

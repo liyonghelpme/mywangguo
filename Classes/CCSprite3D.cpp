@@ -1,4 +1,5 @@
 #include "CCSprite3D.h"
+#include "MD2.h"
 
 CCSprite3D *CCSprite3D::create() {
     CCSprite3D *pSprite = new CCSprite3D();
@@ -16,6 +17,7 @@ CCSprite3D::~CCSprite3D() {
     CC_SAFE_RELEASE(pTex);
 }
 void CCSprite3D::initModel() {
+    /*
     float p[] = {
         //bottom
        -0.5, -0.5, 0.5,  
@@ -163,9 +165,11 @@ void CCSprite3D::initModel() {
         
     };
     tex.assign(t, t+2*vertNum);
+    */
 
-    CCTexture2D *text = CCTextureCache::sharedTextureCache()->addImage("test.png");
-    setTexture(text);
+    //CCTexture2D *text = CCTextureCache::sharedTextureCache()->addImage("test.png");
+    initProgram();
+    setTexture(NULL);
     setTextureRect();
 }
 //调用父亲类的 init  方法
@@ -285,13 +289,21 @@ void CCSprite3D::draw() {
         // texCoods
         glVertexAttribPointer(kCCVertexAttrib_TexCoords, 2, GL_FLOAT, GL_FALSE, 0, &tex[0]);
     }
-    glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, &col[0]);
-    glDrawElements(GL_TRIANGLES, 3*2*6, GL_UNSIGNED_BYTE, &index[0]);
+    //暂时不要颜色
+    //glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, &col[0]);
+    glDrawElements(GL_TRIANGLES, index.size(), GL_UNSIGNED_INT, &index[0]);
     CCDirector::sharedDirector()->setDepthTest(false);
+}
+void CCSprite3D::loadMd2(const char *fileName) {
+    unsigned long size;
+    unsigned char *fcon = CCFileUtils::sharedFileUtils()->getFileData(fileName, "rb", &size);
+    readMD2(&pos, &tex, &index, &animations, fcon);
+    pos = animations[0]; 
+    delete fcon;
 }
 
 void CCSprite3D::setTexture(CCTexture2D *texture) {
-    initProgram();
+    //initProgram();
     if(pTex != texture) {
         CC_SAFE_RETAIN(texture);
         CC_SAFE_RELEASE(pTex);

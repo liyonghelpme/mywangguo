@@ -81,6 +81,8 @@ public:
     void scaleX(float x);
     void scaleY(float y);
     void scaleZ(float z);
+
+    virtual void loadMd2(const char *fileName);
     
     /** 
      * Makes the Sprite to be updated in the Atlas.
@@ -108,7 +110,9 @@ protected:
     vector<float> tex;
     vector<unsigned char> col;
     vector<unsigned int> index;
-
+    
+    //所有的动画frame数据
+    vector< vector<float> > animations;
     //attribute only for draw in RenderTexture then render sprite in 2d Scene  
 
     GLuint pmat, mvmat, mvpmat;

@@ -96,6 +96,8 @@ bool HelloWorld::init()
     GLuint tid = tex->getName();
     */
     CCSprite3D *m3 = CCSprite3D::create();
+    m3->loadMd2("test.md2");
+    m3->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
     this->addChild(m3, 2);
     m33 = m3;
 
@@ -106,9 +108,11 @@ bool HelloWorld::init()
     m3->tranX(400); 
     m3->tranY(240); 
     m3->tranZ(-400);
+    /*
     m3->scaleX(200);
     m3->scaleY(200);
     m3->scaleZ(200);
+    */
     //m3->rotateX(135); 
     //m3->rotateY(-45); 
 
@@ -119,10 +123,13 @@ bool HelloWorld::init()
 
     //Bone *root;
     //root = Bone::create();
+    /*
     vector<float> pos, tex;
     vector<unsigned int> ind;
     unsigned long size;
     readMD2(&pos, &tex, &ind, CCFileUtils::sharedFileUtils()->getFileData("test.md2", "rb", &size));
+    */
+
     scheduleUpdate();
     return true;
 }

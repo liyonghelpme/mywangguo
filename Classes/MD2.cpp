@@ -6,8 +6,15 @@
 static map<int, int> vItI;
 static int maxIndex;
 
+//新的顶点索引对应的旧的顶点索引
+//用于将 顶点数据 写入到 pos里面
+//0---> maxIndex-1
+static map<int, int> newVI2Old;
+
+
 static unsigned char *fileCon;
 static md2Header header;
+static float stdScale = 10;
 
 static int md2ReadHeader(unsigned char *con, md2Header *header) {
     memcpy(header, con, sizeof(*header));
@@ -57,8 +64,8 @@ void md2LoadTextureCoord() {
 }
 void dumpTriangles() {
     for(int i = 0; i < header.numTriangles; i++) {
-        CCLog("%d %d %d", triData[i].vertexIndices[0], triData[i].vertexIndices[1], triData[i].vertexIndices[2] );
-        CCLog("%d %d %d", triData[i].textureIndices[0], triData[i].textureIndices[1], triData[i].textureIndices[2]);
+        CCLog("vert index %d %d %d", triData[i].vertexIndices[0], triData[i].vertexIndices[1], triData[i].vertexIndices[2] );
+        CCLog("tex index %d %d %d", triData[i].textureIndices[0], triData[i].textureIndices[1], triData[i].textureIndices[2]);
     }
 }
 //vert index
@@ -70,14 +77,16 @@ void md2LoadTriangles() {
     memcpy(&triData[0], buf_t, totalNum*sizeof(md2Triangle));
 }
 
-void dumpFrames() {
+static void dumpFrames() {
     for(int i = 0; i < header.numFrames; i++) {
+        CCLog("frameData %f %f %f", frameData[i].scale[0], frameData[i].scale[1], frameData[i].scale[2]);
+        CCLog("frameData %f %f %f", frameData[i].translate[0], frameData[i].translate[1], frameData[i].translate[2]);
         for(int j = 0; j < header.numVertices; j++) {
             CCLog("%d %d %d", frameData[i].pvertices[j].vertex[0], frameData[i].pvertices[j].vertex[1], frameData[i].pvertices[j].vertex[2]);
         }
     }
 }
-void md2LoadFrames() {
+static void md2LoadFrames() {
     CCLog("loadFrames %d %d", header.offsetFrames, header.numFrames);
     int index = 0;
     byte *buf_t = fileCon+header.offsetFrames;
@@ -94,10 +103,10 @@ void md2LoadFrames() {
         buf_t += frameVertSize;
     }
 }
-void md2LoadGLCommands() {
+static void md2LoadGLCommands() {
 }
 
-void md2LoadData(md2Header *header) {
+static void md2LoadData(md2Header *header) {
     md2LoadSkinNames();
     
     md2LoadTextureCoord();
@@ -112,10 +121,33 @@ void md2LoadData(md2Header *header) {
     md2LoadGLCommands();
 }
 
+static void dumpPosAndTex(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, vector< vector<float> > *animations) {
+    CCLog("Pos %d", pos->size());
+    for(int i = 0; i < pos->size()/3; i++) {
+        CCLog("%f %f %f", (*pos)[i*3+0], (*pos)[i*3+1], (*pos)[i*3+2]);
+    }
+    CCLog("texCoord %d", tex->size());
+    for(int i = 0; i < tex->size()/2; i++) {
+        CCLog("%f %f", (*tex)[i*2+0], (*tex)[i*2+1]);
+    }
+    
+    CCLog("ind %d", ind->size());
+    for(int i = 0; i < ind->size(); i++) {
+        CCLog("%d", (*ind)[i]);
+    }
+    CCLog("animations %d", animations->size());
+    for(int i = 0; i < animations->size(); i++) {
+        for(int j = 0; j < ((*animations)[i]).size()/3; j++) {
+            CCLog("%f %f %f", ((*animations)[i])[j*3+0], ((*animations)[i])[j*3+1], ((*animations)[i])[j*3+2] );
+        }
+    }
+}
 //put 0 frame data into pos with frame scale and translation
 //put texData into tex
 //put triangle data into ind
-void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind) {
+
+//-1000 1000 的范围 显示的话 将 比例缩放一下 未 100 * 100 的比例尺即可
+static void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, vector< vector<float> >*animations ) {
     if(header.numFrames > 0) {
         pos->clear();
         tex->clear();
@@ -130,14 +162,17 @@ void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int>
             if(vItI.count(vti) == 0) {
                 curIndex = maxIndex;
                 vItI[vti] = curIndex;
-
+                
                 int pi = triData[i].vertexIndices[0];
-                float px = frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0];
-                float py = frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1];
-                float pz = frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2];
+                /*
+                float px = (frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0])/stdScale;
+                float py = (frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1])/stdScale;
+                float pz = (frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2])/stdScale;
                 pos->push_back(px);
                 pos->push_back(py);
                 pos->push_back(pz);
+                */
+                newVI2Old[curIndex] = pi;
 
                 int ti = triData[i].textureIndices[0];
                 float ts = texData[ti].s/header.skinWidth;
@@ -158,13 +193,15 @@ void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int>
                 vItI[vti] = curIndex;
 
                 int pi = triData[i].vertexIndices[1];
-                float px = frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0];
-                float py = frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1];
-                float pz = frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2];
+                /*
+                float px = (frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0])/stdScale;
+                float py = (frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1])/stdScale;
+                float pz = (frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2])/stdScale;
                 pos->push_back(px);
                 pos->push_back(py);
                 pos->push_back(pz);
-
+                */
+                newVI2Old[curIndex] = pi;
                 int ti = triData[i].textureIndices[1];
                 float ts = texData[ti].s/header.skinWidth;
                 float tt = texData[ti].t/header.skinHeight;
@@ -183,12 +220,15 @@ void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int>
                 vItI[vti] = curIndex;
 
                 int pi = triData[i].vertexIndices[2];
-                float px = frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0];
-                float py = frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1];
-                float pz = frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2];
+                /*
+                float px = (frameData[0].pvertices[pi].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0])/stdScale;
+                float py = (frameData[0].pvertices[pi].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1])/stdScale;
+                float pz = (frameData[0].pvertices[pi].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2])/stdScale;
                 pos->push_back(px);
                 pos->push_back(py);
                 pos->push_back(pz);
+                */
+                newVI2Old[curIndex] = pi;
 
                 int ti = triData[i].textureIndices[2];
                 float ts = texData[ti].s/header.skinWidth;
@@ -203,22 +243,22 @@ void md2ProcessData(vector<float> *pos, vector<float> *tex, vector<unsigned int>
 
             (*ind)[i*3+2] = curIndex;
         }
-
-        /*
-        int vNum = head.numVertices;
-        //different Frame use different pos data
-        for(int i = 0; i < vNum; i++) {
-            (*pos)[i*3+0] = frameData[0].pvertices[i].vertex[0]*frameData[0].scale[0]+frameData[0].translate[0];
-            (*pos)[i*3+1] = frameData[0].pvertices[i].vertex[1]*frameData[0].scale[1]+frameData[0].translate[1];
-            (*pos)[i*3+2] = frameData[0].pvertices[i].vertex[2]*frameData[0].scale[2]+frameData[0].translate[2];
+        //animations 里面放置所有的 frame的数据 pos 里面不用放置数据了
+        //pos 里面放置显示的数据
+        animations->resize(header.numFrames); 
+        for(int i=0;  i < header.numFrames; i++) {
+            (*animations)[i].resize(maxIndex*3);
+            for(int j = 0; j < maxIndex; j++) {
+                int pi = newVI2Old[j];
+                float px = (frameData[i].pvertices[pi].vertex[0]*frameData[i].scale[0]+frameData[i].translate[0])/stdScale;
+                float py = (frameData[i].pvertices[pi].vertex[1]*frameData[i].scale[1]+frameData[i].translate[1])/stdScale;
+                float pz = (frameData[i].pvertices[pi].vertex[2]*frameData[i].scale[2]+frameData[i].translate[2])/stdScale;
+                
+                (*animations)[i][j*3+0] = px;     
+                (*animations)[i][j*3+1] = py;     
+                (*animations)[i][j*3+2] = pz;     
+            }
         }
-        
-        tex->resize(head.numTexCoords*2);
-        for(int i = 0; i < head.numTexCoords; i++) {
-            (*tex)[i*2+0] = texData[i].s/header.skinWidth;
-            (*tex)[i*2+1] = texData[i].t/header.skinHeight;
-        }
-        */
 
     }
 }
@@ -242,7 +282,7 @@ static void dumpHeader() {
     CCLog("offsetEnd    %d", header.offsetEnd);
 }
 
-void readMD2(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, unsigned char *con) {
+void readMD2(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, vector< vector<float> > *animations,  unsigned char *con) {
     vItI.clear();
     maxIndex = 0;
 
@@ -253,7 +293,8 @@ void readMD2(vector<float> *pos, vector<float> *tex, vector<unsigned int> *ind, 
 
     md2InitData(&header);
     md2LoadData(&header);
-    md2ProcessData(pos, tex, ind);
+    md2ProcessData(pos, tex, ind, animations);
+    dumpPosAndTex(pos, tex, ind, animations);
 
     CCLog("finish load md2");
 }
