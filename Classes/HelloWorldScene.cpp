@@ -1,6 +1,8 @@
 #include "HelloWorldScene.h"
 #include "AppMacros.h"
 #include "CCSprite3D.h"
+//#include "Bone.h"
+#include "MD2.h"
 USING_NS_CC;
 
 
@@ -113,6 +115,14 @@ bool HelloWorld::init()
     ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
     CCLog("Direction %d", p);
     frameNum = 0;
+
+
+    //Bone *root;
+    //root = Bone::create();
+    vector<float> pos, tex;
+    vector<unsigned int> ind;
+    unsigned long size;
+    readMD2(&pos, &tex, &ind, CCFileUtils::sharedFileUtils()->getFileData("test.md2", "rb", &size));
     scheduleUpdate();
     return true;
 }

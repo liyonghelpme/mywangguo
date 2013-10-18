@@ -60,7 +60,7 @@ void CCSprite3D::initModel() {
     vertNum = 24;
     pos.assign(p, p+vertNum*3);
 
-    unsigned char i[] = {
+    unsigned int i[] = {
         //bottom
         1, 0, 3,
         1, 3, 2,

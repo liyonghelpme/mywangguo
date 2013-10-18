@@ -94,6 +94,10 @@ public:
 
     virtual void initModel();
 
+    float xRot, yRot, zRot;
+    float x, y, z;
+    
+    float sx, sy, sz;
 
 protected:
     ccBlendFunc m_sBlendFunc;
@@ -103,13 +107,9 @@ protected:
     vector<float> pos;
     vector<float> tex;
     vector<unsigned char> col;
-    vector<unsigned char> index;
+    vector<unsigned int> index;
 
     //attribute only for draw in RenderTexture then render sprite in 2d Scene  
-    float xRot, yRot, zRot;
-    float x, y, z;
-    
-    float sx, sy, sz;
 
     GLuint pmat, mvmat, mvpmat;
 
