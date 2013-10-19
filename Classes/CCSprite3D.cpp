@@ -261,9 +261,18 @@ void CCSprite3D::stdTransform() {
     kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);
 
     kmMat3 normalMatrix;
-    kmMat4ExtractRotation(&normalMatrix, &matrixMV);
+    /*
+    kmMat4 inv4;
+    kmMat4Inverse(&inv4, &matrixMV);
+    kmMat4Transpose(&inv4, &inv4);
+
+    kmMat4ExtractRotation(&normalMatrix, &inv4);
+    */
+    /*
     float det = kmMat3Determinant(&normalMatrix);
     kmMat3Inverse(&normalMatrix, det, &normalMatrix);
+    kmMat3Transpose(&normalMatrix, &normalMatrix);
+    */
 
     kmVec3 l;
     kmVec3Fill(&l, 1000, 100, 1000);

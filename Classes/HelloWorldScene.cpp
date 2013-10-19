@@ -117,7 +117,7 @@ bool HelloWorld::init()
     m3->scaleX(0.5);
     m3->scaleY(0.5);
     m3->scaleZ(0.5);
-    //m3->rotateX(135); 
+    m3->rotateX(-90); 
     //m3->rotateX(135); 
 
     ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
@@ -145,7 +145,7 @@ void HelloWorld::update(float diff) {
     } else if(frameNum == 2) {
     }
     frameNum++; 
-    m33->rotateY(frameNum);
+    //m33->rotateY(frameNum);
     //m33->rotateZ(frameNum);
 }
 
