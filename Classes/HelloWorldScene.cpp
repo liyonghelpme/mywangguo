@@ -69,6 +69,7 @@ bool HelloWorld::init()
     this->addChild(pLabel, 1);
 
     // add "HelloWorld" splash screen"
+    /*
     CCSprite* pSprite = CCSprite::create("HelloWorld.png");
 
     // position the sprite on the center of the screen
@@ -78,6 +79,7 @@ bool HelloWorld::init()
 
     // add the sprite as a child to this layer
     this->addChild(pSprite, 0);
+    */
     
     /*
     sp = CCSprite::create("HelloWorld.png"); 
@@ -96,7 +98,7 @@ bool HelloWorld::init()
     GLuint tid = tex->getName();
     */
     CCSprite3D *m3 = CCSprite3D::create();
-    m3->loadMd2("test.md2");
+    m3->loadMd2("test2.md2");
     m3->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
     this->addChild(m3, 2);
     m33 = m3;
@@ -107,14 +109,16 @@ bool HelloWorld::init()
     //m3->rotateX(100);
     m3->tranX(400); 
     m3->tranY(240); 
-    m3->tranZ(-400);
-    /*
-    m3->scaleX(200);
-    m3->scaleY(200);
-    m3->scaleZ(200);
-    */
+    m3->tranZ(0);
+    
+    //m3->rotateX(90);
+
+    //m3->rotateZ(-90);
+    m3->scaleX(0.5);
+    m3->scaleY(0.5);
+    m3->scaleZ(0.5);
     //m3->rotateX(135); 
-    //m3->rotateY(-45); 
+    //m3->rotateX(135); 
 
     ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
     CCLog("Direction %d", p);
@@ -142,6 +146,7 @@ void HelloWorld::update(float diff) {
     }
     frameNum++; 
     m33->rotateY(frameNum);
+    //m33->rotateZ(frameNum);
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)

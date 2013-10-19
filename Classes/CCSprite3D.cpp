@@ -230,8 +230,8 @@ void CCSprite3D::stdTransform() {
     kmGLGetMatrix(KM_GL_PROJECTION, &matrixP);
     kmGLGetMatrix(KM_GL_MODELVIEW, &matrixMV);
 
-    kmMat4 rotation;
-    kmMat4RotationPitchYawRoll(&rotation, xRot, yRot, zRot);
+    //kmMat4 rotation;
+    //kmMat4RotationPitchYawRoll(&rotation, xRot, yRot, zRot);
 
     kmMat4 translation;
     kmMat4Translation(&translation, x, y, z);
@@ -252,11 +252,34 @@ void CCSprite3D::stdTransform() {
     kmMat4RotationAxisAngle(&roty, &axis2, yRot*kmPI/180);
     kmMat4Multiply(&matrixMV, &matrixMV, &roty);
 
+    kmMat4 rotz;
+    kmVec3 axis3 = {0, 0, 1};
+    kmMat4RotationAxisAngle(&rotz, &axis3, zRot*kmPI/180);
+    kmMat4Multiply(&matrixMV, &matrixMV, &rotz);
+
+
     kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);
+
+    kmMat3 normalMatrix;
+    kmMat4ExtractRotation(&normalMatrix, &matrixMV);
+    float det = kmMat3Determinant(&normalMatrix);
+    kmMat3Inverse(&normalMatrix, det, &normalMatrix);
+
+    kmVec3 l;
+    kmVec3Fill(&l, 1000, 100, 1000);
+    
 
     prog->setUniformLocationWithMatrix4fv(pmat, matrixP.mat, 1);
     prog->setUniformLocationWithMatrix4fv(mvmat, matrixMV.mat, 1);
     prog->setUniformLocationWithMatrix4fv(mvpmat, matrixMVP.mat, 1);
+    
+    //bool updated = prog->updateUniformLocation(nmat, normalMatrix.mat, sizeof(float)*9*1);
+    //if(updated) {
+        glUniformMatrix3fv(nmat, 1, GL_FALSE, normalMatrix.mat);
+    //}
+
+
+    prog->setUniformLocationWith3f(light, l.x, l.y, l.z);
 }
 
 //模型经常在屏幕上面旋转移动
@@ -270,7 +293,8 @@ void CCSprite3D::draw() {
     stdTransform();
     
     CCDirector::sharedDirector()->setDepthTest(true);
-    ccGLBlendFunc(m_sBlendFunc.src, m_sBlendFunc.dst);
+    //ccGLBlendFunc(m_sBlendFunc.src, m_sBlendFunc.dst);
+    glDisable(GL_BLEND);
 
     if (pTex != NULL)
     {
@@ -282,6 +306,8 @@ void CCSprite3D::draw() {
         ccGLBindTexture2D(0);
         ccGLEnableVertexAttribs( kCCVertexAttribFlag_Position | kCCVertexAttribFlag_Color );
     }
+    //enable normal array
+    glEnableVertexAttribArray(3);
 
     glVertexAttribPointer(kCCVertexAttrib_Position, 3, GL_FLOAT, GL_FALSE, 0, &pos[0]);
     if (pTex != NULL)
@@ -291,13 +317,17 @@ void CCSprite3D::draw() {
     }
     //暂时不要颜色
     //glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, &col[0]);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, &normal[0]);
+
     glDrawElements(GL_TRIANGLES, index.size(), GL_UNSIGNED_INT, &index[0]);
+    
     CCDirector::sharedDirector()->setDepthTest(false);
+    glEnable(GL_BLEND);
 }
 void CCSprite3D::loadMd2(const char *fileName) {
     unsigned long size;
     unsigned char *fcon = CCFileUtils::sharedFileUtils()->getFileData(fileName, "rb", &size);
-    readMD2(&pos, &tex, &index, &animations, fcon);
+    readMD2(&pos, &tex, &index, &animations, &normal, fcon);
     pos = animations[0]; 
     delete fcon;
 }
@@ -338,10 +368,12 @@ void CCSprite3D::initProgram() {
     prog->release();
 
     CHECK_GL_ERROR_DEBUG();
-
+    
+    //0 1 2 3
     getShaderProgram()->addAttribute(kCCAttributeNamePosition, kCCVertexAttrib_Position);
     getShaderProgram()->addAttribute(kCCAttributeNameColor, kCCVertexAttrib_Color);
     getShaderProgram()->addAttribute(kCCAttributeNameTexCoord, kCCVertexAttrib_TexCoords);
+    getShaderProgram()->addAttribute("a_normal", 3);
     CHECK_GL_ERROR_DEBUG();
 
     getShaderProgram()->link();
@@ -355,4 +387,6 @@ void CCSprite3D::initProgram() {
     pmat = glGetUniformLocation( getShaderProgram()->getProgram(), "CC_PMatrix");
     mvmat = glGetUniformLocation( getShaderProgram()->getProgram(), "CC_MVMatrix");
     mvpmat = glGetUniformLocation( getShaderProgram()->getProgram(), "CC_MVPMatrix");
+    nmat = glGetUniformLocation(getShaderProgram()->getProgram(), "u_normalMatrix");
+    light = glGetUniformLocation(getShaderProgram()->getProgram(), "light");
 }

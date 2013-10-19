@@ -110,12 +110,13 @@ protected:
     vector<float> tex;
     vector<unsigned char> col;
     vector<unsigned int> index;
+    vector<float> normal;
     
     //所有的动画frame数据
     vector< vector<float> > animations;
     //attribute only for draw in RenderTexture then render sprite in 2d Scene  
 
-    GLuint pmat, mvmat, mvpmat;
+    GLuint pmat, mvmat, mvpmat, nmat, light;
 
     CCTexture2D *pTex;
 
