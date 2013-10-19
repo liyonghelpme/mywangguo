@@ -9,6 +9,7 @@ end
 --x y id
 function StandardTouchHandler:tBegan(touches)
     --print("tBegan", sim:encode(arg))
+    self.accMove = 0
     self.lastPos = convertMultiToArr(touches)
 end
 
@@ -38,6 +39,10 @@ function StandardTouchHandler:MoveBack(difx, dify)
     if rightTop.y > sz.height and dify < 0 then
         dify = 0
     end
+    if self.accMove == nil then
+        self.accMove = 0
+    end
+    self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
     self.bg:setPosition(ccp(ox+difx, oy+dify))
 end
 function StandardTouchHandler:ScaleBack(sca)
@@ -73,6 +78,9 @@ end
 function StandardTouchHandler:tMoved(touches)
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
+    if oldPos == nil then
+        return
+    end
     --两个点
 
     if self.lastPos.count >= 2 then

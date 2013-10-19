@@ -6,7 +6,8 @@ SOLDIER_STATE = {
     IN_FIND = 2,
     FIND = 3,
     IN_MOVE = 4,
-
+    START_ATTACK = 5,
+    IN_ATTACK = 6,
 }
 function Soldier:ctor(map, data, pd)
     self.map = map
@@ -19,6 +20,12 @@ function Soldier:ctor(map, data, pd)
 
     self.bg = setAnchor(CCNode:create(), {0.5, 0.5})
     createAnimation("soldierm"..self.kind, "ss"..self.kind.."m%d.png", 0, 6, 1, 0.5, true)
+    if BattleLogic.inBattle then
+        --print("init Attack")
+        --Don't forget to load plist first
+        CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldiera"..self.kind..".plist")
+        createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, 1, true) 
+    end
     self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("ss"..self.kind.."m0.png"), {0.5, 0})
     self.bg:addChild(self.changeDirNode)
     self.changeDirNode:setScale(0.7)
@@ -32,6 +39,8 @@ function Soldier:ctor(map, data, pd)
     self.passTime = 0
     self.waitTime = 0
     self.oldPredictTarget = nil
+    self.health = 100
+    self.maxHealth = 100
 
     registerUpdate(self)
     registerEnterOrExit(self)
@@ -44,6 +53,32 @@ end
 function Soldier:update(diff)
     self:findPath(diff)
     self:doMove(diff)
+    self:doAttack(diff)
+end
+function Soldier:doAttack(diff)
+    if self.state == SOLDIER_STATE.START_ATTACK then
+        self.state = SOLDIER_STATE.IN_ATTACK
+        self.changeDirNode:stopAllActions()
+        local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldiera"..self.kind)
+        print("animation", animation)
+        self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
+        self.attackTime = 0
+        self.attackTarget = self.predictTarget
+    end
+    if self.state == SOLDIER_STATE.IN_ATTACK then
+        if self.attackTarget.broken == true then
+            self.state = SOLDIER_STATE.FREE
+            self.changeDirNode:stopAllActions()
+            local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
+            return
+        end
+        self.attackTime = self.attackTime+diff
+        if self.attackTime >= 1 then
+            self.attackTime = self.attackTime - 1
+            self.attackTarget:doHarm(10)
+        end
+    end
 end
 --保证所有计算之前先给cells 赋值
 function Soldier:calcG(x, y)
@@ -183,7 +218,8 @@ end
 --mapDict 里面存的也是建筑物的normal坐标 不过是建筑物 最下面一个菱形块的中心坐标
 function Soldier:findPath(diff)
     if self.state == SOLDIER_STATE.FREE then
-        if self.map.curSol == nil or self.map.curSol == self then
+        --如果 当前抢占的寻路对象没有在寻路 那么 就抢占它
+        if self.map.curSol == nil or self.map.curSol == self or self.map.curSol.state ~= SOLDIER_STATE.IN_FIND then
             self.map.curSol = self
             self.state = SOLDIER_STATE.START_FIND
         end
@@ -206,46 +242,54 @@ function Soldier:findPath(diff)
         self.predictEnd = nil
         
         --攻击的时候 寻找最近的建筑物
-        --[[
-        local allBuild = self.map.mapGridController.allBuildings
-        --3000 * 3000 = 90000
-        local minDis = 99999999
-        for k, v in pairs(allBuild) do
-            if k ~= self.oldPredictTarget then
-                local bp = getPos(k.bg) 
-                local d = distance2(p, bp)
-                if d < minDis then
-                    minDis = d
-                    self.predictTarget = k
+        if BattleLogic.inBattle then
+            local allBuild = self.map.mapGridController.allBuildings
+            local minDis = 99999999
+            for k, v in pairs(allBuild) do
+                --建筑物未被摧毁
+                if k.broken == false then
+                    local bp = getPos(k.bg) 
+                    local d = distance2(p, bp)
+                    if d < minDis then
+                        minDis = d
+                        self.predictTarget = k
+                    end
                 end
             end
+        --经营随便找一个建筑物
+        else
+            local allBuild = self.map.mapGridController.allBuildings
+            local num = getLen(allBuild)
+            local s = math.random(num)
+            local i = 1
+            for k, v in pairs(allBuild) do
+                if i == s then
+                    self.predictTarget = k
+                    break
+                end
+                i = i+1
+            end
         end
+        --[[
+        --3000 * 3000 = 90000
         --]]
 
-        local allBuild = self.map.mapGridController.allBuildings
-        local num = getLen(allBuild)
-        local s = math.random(num)
-        local i = 1
-        for k, v in pairs(allBuild) do
-            if i == s then
-                self.predictTarget = k
-                break
-            end
-            i = i+1
+
+        if self.predictTarget ~= nil then
+            --self.oldPredictTarget = self.predictTarget
+            local bp = getPos(self.predictTarget.bg)
+            local tx, ty = cartesianToNormal(bp[1], bp[2])
+            self.predictEnd = {tx, ty}
+
+            local sk = getMapKey(mx, my)
+            self.cells[sk] = {}
+            self.cells[sk].gScore = 0
+            self:calcH(mx, my)
+            self:calcF(mx, my)
+            self:pushQueue(mx, my)
+        else
+            self.state = SOLDIER_STATE.START_FIND
         end
-
-
-        --self.oldPredictTarget = self.predictTarget
-        local bp = getPos(self.predictTarget.bg)
-        local tx, ty = cartesianToNormal(bp[1], bp[2])
-        self.predictEnd = {tx, ty}
-
-        local sk = getMapKey(mx, my)
-        self.cells[sk] = {}
-        self.cells[sk].gScore = 0
-        self:calcH(mx, my)
-        self:calcF(mx, my)
-        self:pushQueue(mx, my)
     end
     --寻路访问的节点超过n个 则停止
     if self.state == SOLDIER_STATE.IN_FIND then
@@ -270,7 +314,7 @@ function Soldier:findPath(diff)
                 --普通建筑物则是终点
                 --行走的时候 可以绕过建筑物的 如果士兵跑到建筑物里面去了 
                 --不是上次的目标
-                if buildCell[key] ~= nil and buildCell[key][1][1] ~= self.oldPredictTarget then
+                if buildCell[key] ~= nil and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
                     self.endPoint = {x, y} 
                     --找到建筑了
                     break
@@ -333,7 +377,11 @@ function Soldier:doMove(diff)
 
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
-                self.state = SOLDIER_STATE.FREE
+                if BattleLogic.inBattle == false then
+                    self.state = SOLDIER_STATE.FREE
+                else
+                    self.state = SOLDIER_STATE.START_ATTACK
+                end
             else
                 local np = self.path[nextPoint]
                 local cxy = setBuildMap({1, 1, np[1], np[2]})
@@ -354,4 +402,6 @@ function Soldier:doMove(diff)
         end
         --]]
     end
+end
+function Soldier:doHarm(n)
 end

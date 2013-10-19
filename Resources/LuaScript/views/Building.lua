@@ -16,6 +16,12 @@ function Building:ctor(m, d, privateData)
     --self.kind = d["kind"]
     self.funcs = d["funcs"]
     self.showMenuYet = false
+    --是否被摧毁掉
+    self.broken = false
+    --神像有防御效果 WorkNode
+
+    self.health = 100
+    self.maxHealth = 100
 
     self.bg = CCLayer:create()
     
@@ -68,6 +74,15 @@ function Building:ctor(m, d, privateData)
         self.changeDirNode:addChild(self.aniNode.bg)
     end
     --]]
+    if BattleLogic.inBattle then
+        local rh = math.max(sz.height, 150)
+        self.healthBar = setScale(setPos(CCSprite:create("mapSolBloodBar1.png"), {0, 150}), 0.7)
+        
+        self.bg:addChild(self.healthBar)
+        self.innerBar = setAnchor(setPos(addSprite(self.healthBar, "mapSolBloodRed1.png"), {2, 2}), {0, 0})
+    
+        self.healthBar:setVisible(false)
+    end
 
 
     registerEnterOrExit(self)
@@ -144,6 +159,9 @@ end
 --只有一个手指 则移动建筑 并且拒绝移动地图
 --touch的Point 从0开始计数
 function Building:touchesBegan(touches)
+    if BattleLogic.inBattle then
+        return
+    end
     self.lastPos = convertMultiToArr(touches)
     self.doMove = false
     self.inSelf = false
@@ -193,6 +211,9 @@ function Building:setState(s)
 end
 
 function Building:touchesMoved(touches)
+    if BattleLogic.inBattle then
+        return
+    end
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
     if oldPos == nil then
@@ -230,6 +251,9 @@ function Building:doFree()
     end
 end
 function Building:touchesEnded(touches)
+    if BattleLogic.inBattle then
+        return
+    end
     if self.doMove then
         if self.colNow == 0 and self.state ~= getParam("buildMove") then
             self:setZord(nil)
@@ -359,4 +383,51 @@ function Building:getLeftTime()
 end
 function Building:closeGlobalMenu()
     self.showMenuYet = 0
+end
+function Building:doHarm(n)
+    if self.broken then
+        return
+    end
+
+    self.health = self.health-n
+    self.health = math.max(0, self.health)
+    local vs = self.healthBar:isVisible()
+    if not vs then
+        self.healthBar:setVisible(true)
+        self.healthBar:runAction(fadein(0.5))
+        self.innerBar:runAction(fadein(0.5))
+    end
+    local b = self.health/self.maxHealth
+    self.innerBar:runAction(scaleto(0.2, b, 1)) 
+
+    if self.health > 0 then
+        self.bg:runAction(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}))
+        local x = math.random()*6-3
+        local y = math.random()*6-3
+        self.bg:runAction(sequence({moveby(0.2, x, y), moveby(0.2, -x, -y)}))
+    end
+
+    if self.health == 0 and self.broken == false then
+        self.broken = true
+        
+        local function fadeAll(bg)
+            local child = bg:getChildren()
+            local n = bg:getChildrenCount()
+            if n > 0 then
+                for i=0, n-1, 1 do
+                    local c = child:objectAtIndex(i)
+                    print("whos c", c)
+                    if c.runAction ~= nil then
+                        c:runAction(fadeout(0.4))
+                        fadeAll(c)
+                    end
+                end
+            end
+            bg:runAction(sequence({scaleto(0.3, 1.2, 1.2), scaleto(0.1,  1, 1) }))
+            if self.funcBuild.flowBanner ~= nil then
+                self.funcBuild.flowBanner.pl:runAction(fadeout(0.4))
+            end
+        end
+        self.bg:runAction(sequence({repeatN(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}), 4), callfunc(nil, fadeAll, self.bg)}))
+    end
 end

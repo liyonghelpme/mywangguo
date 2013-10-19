@@ -59,8 +59,12 @@ function Director:transferScene(view)
         v.bg:release()
     end
 
-    --压入场景
-    CCDirector:sharedDirector():pushScene(view.bg)
+    --压入场景  如果第一次进入战斗场景 则 push 否则 replace掉旧的
+    if BattleLogic.inBattle == false then
+        CCDirector:sharedDirector():pushScene(view.bg)
+    else
+        CCDirector:sharedDirector():replaceScene(view.bg)
+    end
     self.curScene = view
     table.insert(self.sceneStack, view)
 end 

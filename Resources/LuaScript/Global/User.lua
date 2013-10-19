@@ -54,7 +54,7 @@ function User:initDataOver(data, param)
 end
 function User:initData()
     --Network.postData("login", self, self.initDataOver, {papayaId=self.papayaId, papayaName=self.papayaName})
-    global.httpController:addRequest("login", dict({{"account", "wangxiaoming"}}), self.initDataOver, nil, self)
+    global.httpController:addRequest("login", dict({{"account", "liyong3"}}), self.initDataOver, nil, self)
     --self:initDataOver({uid=1234})
 end
 
@@ -175,4 +175,7 @@ function User:getCampProductNum()
         end
     end
     return countNum
+end
+function User:killSoldier(kind)
+    self.soldiers[kind] = self.soldiers[kind]-1
 end

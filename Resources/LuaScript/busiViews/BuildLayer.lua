@@ -28,6 +28,7 @@ function BuildLayer:ctor(scene)
     registerEnterOrExit(self)
 end
 --跳到下一个寻路的士兵那里
+--如果下一个还是 自己 那么就设置为nil
 function BuildLayer:switchPathSol()
     local net = nil
     local find = false
@@ -42,8 +43,12 @@ function BuildLayer:switchPathSol()
     if net == nil then
         net = self.mapGridController.solList[1]
     end
-    self.curSol = net
-    print("switchPathSol", self.curSol.kind)
+    if net == self.curSol then
+        self.curSol = nil
+    else
+        self.curSol = net
+    end
+    --print("switchPathSol", self.curSol.kind)
 end
 
 function BuildLayer:enterScene()
@@ -60,6 +65,14 @@ function BuildLayer:receiveMsg(name, msg)
         self.bg:addChild(s.bg, MAX_BUILD_ZORD)
         self.mapGridController:addSoldier(s)
     end
+end
+
+function BuildLayer:addSoldier(kind, x, y)
+    local data = getData(GOODS_KIND.SOLDIER, kind)
+    local s = Soldier.new(self, data, nil)
+    self.bg:addChild(s.bg, MAX_BUILD_ZORD)
+    setPos(s.bg, {x, y})
+    self.mapGridController:addSoldier(s)
 end
 
 function BuildLayer:initBuilding()
@@ -91,6 +104,8 @@ function BuildLayer:initSoldier()
     local item
     if BattleLogic.inBattle then
         item = BattleLogic.soldiers
+        --不要初始化对方的士兵
+        return
     else
         item = global.user.soldiers
     end

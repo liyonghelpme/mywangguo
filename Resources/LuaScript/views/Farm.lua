@@ -35,6 +35,7 @@ function Farm:setFlowBanner()
         local sca = strictSca(pl, {52, 38})
         pl:setScale(sca)
         self.flowBanner:runAction(repeatForever(sequence({spawn({moveby(0.5, 0, -20), scaleto(0.5, 0.8, 0.8)}), delaytime(0.1), spawn({moveby(0.5, 0, 20), scaleto(0.5, 1.2, 1.2)})})))
+        self.flowBanner.pl = pl
     end
 end
 function Farm:initWorking(data)

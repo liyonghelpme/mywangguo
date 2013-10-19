@@ -235,6 +235,9 @@ end
 function repeatForever(act)
     return CCRepeatForever:create(act)
 end
+function repeatN(act, n)
+    return CCRepeat:create(act, n)
+end
 function rotateby(t, ang)
     return CCRotateBy:create(t, ang)
 end
@@ -284,7 +287,11 @@ end
 
 function callfunc(delegate, cb, param)
     local function cm()
-        cb(delegate, param)
+        if delegate ~= nil then
+            cb(delegate, param)
+        else
+            cb(param)
+        end
     end
     return CCCallFunc:create(cm)
 end
@@ -1052,6 +1059,9 @@ end
 --BMFontLabel 数字使用这个动画
 function numAct(sp, curVal, tarVal)
     print("numAct", curVal, tarVal)
+    if tarVal == nil then
+        return
+    end
     local delta = math.max(math.floor(math.abs(tarVal-curVal)/10), 1)
     local up = Sign(tarVal-curVal)
     delta = delta*up

@@ -87,6 +87,35 @@ function CastlePage:touchesMoved(touches)
     end
 end
 function CastlePage:touchesEnded(touches)
+    --move距离小于一定的值
+    local acMov = self.touchDelegate.accMove or 0
+    if BattleLogic.inBattle and  acMov < 20 then
+
+        local curChoose = self.scene.ml:getCurSol()
+        if curChoose ~= nil then
+            local n = getDefault(global.user.soldiers, curChoose, 0)
+            if n > 0 then
+                local temp = convertMultiToArr(touches)
+                local temp = self.bg:convertToNodeSpace(ccp(temp[0][1], temp[0][2]))
+                BattleLogic.updateKill(curChoose)
+                self.scene.ml:updateKill(curChoose)
+                print("curChoose", curChoose)
+                self.buildLayer:addSoldier(curChoose, temp.x, temp.y) 
+
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("tx2")
+                local sp = setPos(CCSprite:create(string.format("tx2_%d.png", 0)), {temp.x, temp.y})
+                self.bg:addChild(sp)
+                sp:setScale(0.0)
+                sp:runAction(repeatForever(CCAnimate:create(ani)))
+                sp:runAction(sequence({fadein(0.2), delaytime(0.2), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+                sp:runAction(sequence({scaleto(0.2, 0.2, 0.2)}))
+
+                self.scene.state = BATTLE_STATE.IN_BATTLE
+            end
+
+        end
+    end
+
     if not self.blockMove then
         self.touchDelegate:tEnded(touches)
     end

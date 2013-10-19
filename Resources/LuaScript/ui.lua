@@ -173,6 +173,7 @@ function ui.newButton(params)
         lay:setContentSize(CCSizeMake(w, h))
         setSize(sp, {w, h})
     end
+    obj.sp = sp
     registerTouch(obj)
     if conSize ~= nil then
         obj:setContentSize(conSize[1], conSize[2])
