@@ -1,4 +1,5 @@
 require "views.FuncBuild"
+require "views.GodBuild"
 require "views.Farm"
 require "views.MineFunc"
 require "views.BuildAnimate"
@@ -26,7 +27,7 @@ function Building:ctor(m, d, privateData)
     self.bg = CCLayer:create()
     
     self.buildColor = privateData['color'] or global.user:getLastColor()
-    self.objectList = privateData['objectList']
+    self.objectList = privateData['objectList'] or {}
     self.buildLevel = privateData['level'] or 0
 
     if self.funcs == FARM_BUILD then
@@ -35,6 +36,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = Mine.new(self)
     elseif self.funcs == CAMP then
         self.funcBuild = Camp.new(self)
+    elseif self.funcs == GOD_BUILD then
+        self.funcBuild = GodBuild.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
@@ -91,6 +94,7 @@ end
 function Building:setMap(m)
     self.map = m
 end
+--检测冲突设置 底部的颜色
 function Building:setColPos()
     self.colNow = 0
     local other = self.map:checkCollision(self)
@@ -172,21 +176,26 @@ function Building:touchesBegan(touches)
         local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         if checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy) then
             self.inSelf = true
-            local setSuc = false
+            local setSuc = 0
             if self.state == getParam("buildMove") or self.Planing == 1 then
                 setSuc = global.director.curScene:setBuilding(self)
+                --经营场景不允许该建筑物
                 if setSuc == 1 then
                     if self.bottom == nil then
                         self:setState(self.state)
                     end
                 end
             end
+            print("touchesBegan", setSuc, self.state, self.Planing)
             if setSuc == 1 then
                 self.dirty = 1
                 self.map.mapGridController:clearMap(self)
 
                 self.doMove = true
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
+            --建造的时候 inSelf 但是不要 弹出对话框
+            --else
+                --self.inSelf = false
             end
 
         end
@@ -209,7 +218,7 @@ function Building:setState(s)
         end
     end
 end
-
+--move 的时候降低 checkCollision 的频率
 function Building:touchesMoved(touches)
     if BattleLogic.inBattle then
         return
@@ -225,8 +234,11 @@ function Building:touchesMoved(touches)
         local offY = (self.sx+self.sy)*SIZEY/2
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-offY))
         local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+        --先判定是否冲突 再 设置位置
+        if math.abs(difx)+math.abs(dify) > 20 then
+            self:setColPos()
+        end
         self:setPos(newPos)
-        self:setColPos()
     else
         self.accMove = math.abs(difx)+math.abs(dify)
         --if not self.showMenuYet then
@@ -255,9 +267,14 @@ function Building:touchesEnded(touches)
         return
     end
     if self.doMove then
+        self:setColPos()
+        local p = getPos(self.bg)
+        self:setPos(p)
+        --[[
         if self.colNow == 0 and self.state ~= getParam("buildMove") then
             self:setZord(nil)
         end
+        --]]
         self.map.mapGridController:updateMap(self)
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         if self.showMenuYet then
@@ -265,7 +282,7 @@ function Building:touchesEnded(touches)
         end
     else
         if self.inSelf then
-            if self.state == getParam("buildFree") and self.accMove < 40 then
+            if self.state == getParam("buildFree") and self.accMove < 40 and global.director.curScene.inBuild == false then
                 self:doFree()
             elseif self.state == getParam("buildWork") then
                 local ret = self.funcBuild:whenBusy()
@@ -401,7 +418,13 @@ function Building:doHarm(n)
     self.innerBar:runAction(scaleto(0.2, b, 1)) 
 
     if self.health > 0 then
-        self.bg:runAction(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}))
+        local function clearScale()
+            self.inScale = nil
+        end
+        if self.inScale == nil then
+            self.inScale = true
+            self.bg:runAction(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1), callfunc(nil, clearScale)}))
+        end
         local x = math.random()*6-3
         local y = math.random()*6-3
         self.bg:runAction(sequence({moveby(0.2, x, y), moveby(0.2, -x, -y)}))
@@ -409,21 +432,21 @@ function Building:doHarm(n)
 
     if self.health == 0 and self.broken == false then
         self.broken = true
-        
+        self.healthBar:setVisible(false)  
         local function fadeAll(bg)
             local child = bg:getChildren()
             local n = bg:getChildrenCount()
             if n > 0 then
                 for i=0, n-1, 1 do
                     local c = child:objectAtIndex(i)
-                    print("whos c", c)
+                    --print("whos c", c)
                     if c.runAction ~= nil then
                         c:runAction(fadeout(0.4))
                         fadeAll(c)
                     end
                 end
             end
-            bg:runAction(sequence({scaleto(0.3, 1.2, 1.2), scaleto(0.1,  1, 1) }))
+            bg:runAction(sequence({scaleto(0.3, 1.1, 1.1), scaleto(0.1,  1, 1) }))
             if self.funcBuild.flowBanner ~= nil then
                 self.funcBuild.flowBanner.pl:runAction(fadeout(0.4))
             end

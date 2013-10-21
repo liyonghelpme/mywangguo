@@ -112,6 +112,9 @@ function ChildMenuLayer:onFriend()
     global.director.curScene:closeGlobalMenu(self)
     global.director:pushView(FriendDialog.new(), 1, 0)
 end
+--切换场景之前保证当前场景的 所有dialog都关闭了
 function ChildMenuLayer:onAttack()
+    global.director.curScene:closeGlobalMenu(self)
+    BattleLogic.prepareState()
     global.director:pushView(Cloud.new(), 1, 0)
 end

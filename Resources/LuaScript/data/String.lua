@@ -1345,4 +1345,5 @@ WORDS = dict({
 {"Max", {"最多", "Max"}},
 {"onceTaskFinished", {"该任务已经完成", "This quest has been completed"}},
 {"refresh", {"刷新", "refresh"}},
+{"newName", {"输入你的名字", "input name"}},
 })

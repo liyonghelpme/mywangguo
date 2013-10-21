@@ -43,53 +43,82 @@ function Director:pushView(view, dark, autoPop)
 end
 
 function Director:popView()
-    print('popView', #self.stack)
     local v = self.stack[#self.stack]
+    print('popView', #self.stack, v, v.bg)
     v.bg:removeFromParentAndCleanup(true)
     table.remove(self.stack, #self.stack)
+end
+--上一个场景没有对话框
+function Director:popTransfer()
+    print("popTransfer", #self.sceneStack, self.sceneStack[1])
+    self.curScene = self.sceneStack[#self.sceneStack-1]
+    table.remove(self.sceneStack, #self.sceneStack)
+    --主要是云朵
+    local cd = self.stack[1]
+    cd.bg:retain()
+    cd.bg:removeFromParentAndCleanup(false)
+    --BattleLogic.cloud.bg:retain()
+    --BattleLogic.cloud.bg:removeFromParentAndCleanup(false)
+    print("self.curScene.bg", self.curScene.bg)
+    self.curScene.bg:addChild(cd.bg)
+    cd.bg:release()
+    --BattleLogic.cloud.bg:release()
+
+    CCDirector:sharedDirector():popScene()
+    --self.stack = {self.stack[1]}
 end
 
 --不要清理动画
 function Director:transferScene(view)
     --self.stack 不变
-    for k, v in ipairs(self.stack) do
-        v.bg:retain()
-        v.bg:removeFromParentAndCleanup(false)
-        view.bg:addChild(v.bg)
-        v.bg:release()
-    end
+    local cd = self.stack[1]
+    cd.bg:retain()
+    cd.bg:removeFromParentAndCleanup(false)
+    --BattleLogic.cloud.bg:retain()
+    --BattleLogic.cloud.bg:removeFromParentAndCleanup(false)
+    view.bg:addChild(cd.bg)
+    cd.bg:release()
+    --BattleLogic.cloud.bg:release()
+    --cloud是由背景节点的所以不能直接使用
+    --self.stack = {self.stack[1]}
 
     --压入场景  如果第一次进入战斗场景 则 push 否则 replace掉旧的
+    --BattleScene enterScene inBattle = true
     if BattleLogic.inBattle == false then
         CCDirector:sharedDirector():pushScene(view.bg)
     else
         CCDirector:sharedDirector():replaceScene(view.bg)
+        table.remove(self.sceneStack)
     end
     self.curScene = view
     table.insert(self.sceneStack, view)
+    print("transferScene", #self.sceneStack)
 end 
 
 function Director:replaceScene(view)
     CCDirector:sharedDirector():replaceScene(view.bg)
     self.curScene = view
     self.stack = {}
-    
+    print("replace", #self.sceneStack) 
 end
 function Director:pushScene(view)
     CCDirector:sharedDirector():pushScene(view.bg)
     self.curScene = view
     table.insert(self.sceneStack, view)
+    print("pushScene", #self.sceneStack)
 end
 function Director:runWithScene(view)
     CCDirector:sharedDirector():runWithScene(view.bg)
     self.curScene = view
     table.insert(self.sceneStack, view)
+    print("scene runWithScene", #self.sceneStack)
 end
 function Director:popScene()
     CCDirector:sharedDirector():popScene()
     self.curScene = self.sceneStack[#self.sceneStack-1]
     table.remove(self.sceneStack, #self.sceneStack)
-    
+    print("scene popScene", #self.sceneStack)
+    self.stack = {} 
 end
 
 

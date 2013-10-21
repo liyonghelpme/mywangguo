@@ -1,3 +1,4 @@
+require "views.RoleName"
 require "views.CastlePage"
 require "views.MenuLayer"
 require "views.BuildMenu"
@@ -19,7 +20,11 @@ end
 --User 发出信号的时候 未进入场景
 --因此在进入场景的时候 需要 手动检测是否已经INITDATA 了
 function CastleScene:enterScene()
-    if global.user.initYet then
+    if global.user.initYet and self.initYet == nil then
+        --首先获取 User 初始化 接着 INITDATA
+        --但是popScene 的时候不要再初始化了
+        self.initYet = true
+        print("enterScene receive")
         self:receiveMsg(EVENT_TYPE.INITDATA)
     else
         Event:registerEvent(EVENT_TYPE.INITDATA, self)
@@ -30,6 +35,10 @@ function CastleScene:exitScene()
 end
 function CastleScene:receiveMsg(name, msg)
     if name == EVENT_TYPE.INITDATA then
+        print("receiveMsg initDataOver !!!!!!!!!!!!!!!!!!")
+        if global.user:getValue("name") == "" then
+            self.dialogController:addCmd({cmd="roleName"})
+        end
         self.mc:initDataOver()
         self.ml:initDataOver()
     end
@@ -38,6 +47,7 @@ function CastleScene:beginBuild(id)
     local building = getData(GOODS_KIND.BUILD, id)
     self.ml:hideMenu()
     self.curBuild = self.mc:beginBuild(building)
+    self.inBuild = true
     global.director:pushView(BuildMenu.new(self, {PLAN_KIND.PLAN_BUILDING, self.curBuild}), 0, 0)
 end
 function CastleScene:finishBuild()
@@ -68,11 +78,18 @@ function CastleScene:cancelBuild()
 end
  
 function CastleScene:closeBuild()
+    self.inBuild = false
     self.curBuild = nil
     self.ml:showMenu()
     global.director:popView()
 end
 function CastleScene:setBuilding(build)
+    if self.inBuild == true then
+        if build == self.curBuild  then
+            return 1
+        end
+        return 0
+    end
     print("setBuilding", build.bid)
     if self.curBuild ~= nil then
         print("curBuild", self.curBuild.bid)

@@ -9,6 +9,9 @@ function ui.newEditBox(params)
     local x = params.x
     local y = params.y
     local size = params.size
+    if type(size) == "table" then
+        size = CCSizeMake(size[1], size[2])
+    end
 
     if type(imageNormal) == "string" then
         imageNormal = display.newScale9Sprite(imageNormal)
@@ -24,6 +27,7 @@ function ui.newEditBox(params)
 
     if editbox then
         editbox:registerScriptEditBoxHandler(function(event, object)
+            print("editBox", event)
             if listenerType == "table" or listenerType == "userdata" then
                 if event == "began" then
                     listener:onEditBoxBegan(object)
@@ -40,6 +44,7 @@ function ui.newEditBox(params)
         end)
         if x and y then editbox:setPosition(x, y) end
     end
+    editbox:setTouchPriority(kCCMenuHandlerPriority)
 
     return editbox
 end
@@ -89,6 +94,9 @@ function ui.newTTFLabel(params)
     local font       = params.font or ui.DEFAULT_TTF_FONT
     local size       = params.size or ui.DEFAULT_TTF_FONT_SIZE
     local color      = params.color or display.COLOR_WHITE
+    if type(color) == "table" then
+        color = toCol(color)
+    end
     local textAlign  = params.align or ui.TEXT_ALIGN_LEFT
     local textValign = params.valign or ui.TEXT_VALIGN_CENTER
     local x, y       = params.x, params.y
@@ -124,6 +132,7 @@ end
 --callback
 --size
 --image
+--conSize button size
 
 function ui.newButton(params)
     local obj = {}
@@ -161,7 +170,12 @@ function ui.newButton(params)
     function obj:touchMoved(x, y)
     end
     function obj:touchEnded(x, y)
-        params.callback(params.delegate, params.param)
+        if params.callback ~= nil then
+            params.callback(params.delegate, params.param)
+        end
+    end
+    function obj:setCallback(cb)
+        params.callback = cb
     end
     function obj:setAnchor(x, y)
         lay:setAnchorPoint(ccp(x, y))

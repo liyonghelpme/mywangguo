@@ -15,12 +15,39 @@ function BattleMenu:ctor(s)
     local randomBut = ui.newButton({image="random.png", callback=self.onRandom, delegate=self})
     setPos(randomBut.bg, {731, fixY(nil, 65)})
     self.bg:addChild(randomBut.bg)
+    self.randomBut = randomBut
     
+
+
     self.cl = setPos(addNode(self.bg), {self.INIT_X, self.INIT_Y})
     self.flowNode = addNode(self.cl)
     self.data = {}
     self:updateTab()
     self:choose(1)
+end
+function BattleMenu:initDataOver()
+    if BattleLogic.resource.name == nil then
+        BattleLogic.resource.name = str(1)
+    end
+    local temp = setSize(setPos(addSprite(self.bg, "name.png"), {33, fixY(nil, 36)}), {30, 30})
+    local name = ui.newTTFLabel({text=BattleLogic.resource.name, size=25, color={202, 70, 70}})
+    setAnchor(setPos(name, {55, fixY(nil, 36)}), {0, 0.5})
+    self.bg:addChild(name)
+
+    local temp = setSize(setPos(addSprite(self.bg, "silver.png"), {33, fixY(nil, 88)}), {30, 30})
+    local silver = ui.newBMFontLabel({text=str(BattleLogic.resource.silver), size=25, color={133, 149, 161}})
+    setAnchor(setPos(silver, {55, fixY(nil, 88)}), {0, 0.5})
+    self.bg:addChild(silver)
+
+    local temp = setSize(setPos(addSprite(self.bg, "crystal.png"), {33, fixY(nil, 124)}), {30, 30})
+    local crystal = ui.newBMFontLabel({text=str(BattleLogic.resource.crystal), size=25, color={48, 52, 109}})
+    setAnchor(setPos(crystal, {55, fixY(nil, 124)}), {0, 0.5})
+    self.bg:addChild(crystal)
+
+    local temp = setSize(setPos(addSprite(self.bg, "exp.png"), {33, fixY(nil, 154)}), {30, 30})
+    local exp = ui.newBMFontLabel({text=str(10), size=25, color={109, 170, 44}})
+    setAnchor(setPos(exp, {55, fixY(nil, 154)}), {0, 0.5})
+    self.bg:addChild(exp)
 end
 function BattleMenu:choose(n)
     if self.curChoose ~= nil then
@@ -74,11 +101,33 @@ end
 --bound Num
 --退出战斗
 function BattleMenu:onCancel()
-    BattleLogic.clearBattle()
-    global.director:popScene()
+    --没有显示对话框  
+    if BattleLogic.endDialog == nil then
+        --没有战斗结束
+        if BattleLogic.gameOver == false then
+            --正在战斗过程中 显示 失败对话框
+            if self.scene.state == BATTLE_STATE.IN_BATTLE then
+                global.director:pushView(ChallengeOver.new(self.scene, {suc=false}), 1, 0)
+                --没有开始战斗 直接云朵结束
+                --BattleLogic.clearBattle()
+            else
+                --BattleLogic.clearBattle()
+                BattleLogic.quitBattle = true
+                global.director:pushView(Cloud.new(), 1, 0)
+            end
+        end
+
+    end
 end
 function BattleMenu:onRandom()
     global.director:pushView(Cloud.new(), 1, 0)
+end
+function BattleMenu:startBattle()
+    if self.hideYet == nil then
+        self.hideYet = true
+        self.randomBut.sp:runAction(fadeout(0.3))
+        self.randomBut:setCallback(nil)
+    end
 end
 
 function BattleMenu:onSoldier(data)

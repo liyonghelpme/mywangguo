@@ -46,6 +46,7 @@ function registerTouch(obj)
     obj.bg:setTouchEnabled(true)
 end
 --注册更新通常需要注册enter和exitScene 这样在退出场景的时候自动关闭更新
+--registerEnterOrExit must!!
 function registerUpdate(obj, interval)
     if not interval then
         interval = 0
@@ -1062,24 +1063,25 @@ function numAct(sp, curVal, tarVal)
     if tarVal == nil then
         return
     end
-    local delta = math.max(math.floor(math.abs(tarVal-curVal)/10), 1)
+    local delta = math.max(math.floor(math.abs(tarVal-curVal)/20), 1)
     local up = Sign(tarVal-curVal)
     delta = delta*up
     local function changeV()
         curVal = curVal+delta
         if up == 1 and curVal >= tarVal then
             curVal = tarVal
-            sp:stopAllActions()
+            sp:stopAction(sp.numAction)
         elseif up == -1 and curVal <= tarVal then
             curVal = tarVal
-            sp:stopAllActions()
+            sp:stopAction(sp.numAction)
         elseif up == 0 then
             curVal = tarVal
-            sp:stopAllActions()
+            sp:stopAction(sp.numAction)
         end
         sp:setString(str(curVal))
     end
-    sp:runAction(repeatForever(sequence({callfunc(nil, changeV), delaytime(0.1)})))
+    sp.numAction = repeatForever(sequence({callfunc(nil, changeV), delaytime(0.05)}))
+    sp:runAction(sp.numAction)
 end
 
 function getSca(n, box)
@@ -1125,4 +1127,8 @@ function createAnimation(name, format, a,b,c,t, isFrame)
 end
 function getVS()
     return CCDirector:sharedDirector():getVisibleSize()
+end
+function setRotation(p, ang)
+    p:setRotation(ang)
+    return p
 end

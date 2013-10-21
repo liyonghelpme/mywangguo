@@ -70,6 +70,7 @@ function CastlePage:exitScene()
 end
 
 function CastlePage:initDataOver()
+    print("CastlePage initDataOver!!!!!!!!!!!!!!")
     self.buildLayer:initDataOver()
 end
 function CastlePage:touchesBegan(touches)
@@ -111,6 +112,7 @@ function CastlePage:touchesEnded(touches)
                 sp:runAction(sequence({scaleto(0.2, 0.2, 0.2)}))
 
                 self.scene.state = BATTLE_STATE.IN_BATTLE
+                self.scene.ml:startBattle()
             end
 
         end
@@ -183,7 +185,8 @@ function CastlePage:finishBuild()
     self.curBuild = nil
 end
 function CastlePage:cancelBuild()
-    self.curBuild:cancelBuild()
+    self.buildLayer:removeBuilding(self.curBuild)
+    --self.curBuild:cancelBuild()
     self.curBuild = nil
 end
 

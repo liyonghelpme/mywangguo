@@ -14,16 +14,18 @@ end
 function MenuLayer:initDataOver()
     self:updateText()
     self:updateExp(0)
-
+    self.name:setString(global.user:getValue("name"))
 end
 function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:registerEvent(EVENT_TYPE.LEVEL_UP, self)
     Event:registerEvent(EVENT_TYPE.UPDATE_EXP, self)
+    Event:registerEvent(EVENT_TYPE.CHANGE_NAME, self)
     self:updateText()
     self:updateExp(0)
 end
 function MenuLayer:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.CHANGE_NAME, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:unregisterEvent(EVENT_TYPE.LEVEL_UP, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_EXP, self)
@@ -35,10 +37,19 @@ function MenuLayer:receiveMsg(name, msg)
         self:updateExp(1)
     elseif name == EVENT_TYPE.LEVEL_UP then
         self:updateExp(1)
+    elseif name == EVENT_TYPE.CHANGE_NAME then
+        self.name:setString(global.user:getValue("name"))
     end
 end
 function MenuLayer:initView()
     self.bg = CCLayer:create()
+
+    local temp = setSize(setPos(addSprite(self.bg, "name.png"), {33, fixY(nil, 36)}), {30, 30})
+    local name = ui.newTTFLabel({text=global.user:getValue("name"), size=25, color={202, 70, 70}})
+    setAnchor(setPos(name, {55, fixY(nil, 36)}), {0, 0.5})
+    self.bg:addChild(name)
+    self.name = name
+
     self.banner = setSca(setPos(setAnchor(addSprite(self.bg, "menu_back.png"), {0, 0}), {0, 0}), global.director.disSize[1]/global.director.designSize[1])
 
     local temp = setPos(setAnchor(addSprite(self.banner, "menuFeather.png"), {0, 0}), {107, fixY(global.director.disSize[2], 367, 59)})
@@ -159,6 +170,7 @@ function MenuLayer:updateText()
         self.crystalText:stopAllActions()
         numAct(self.crystalText, oldCrystal, ures.crystal)
     end
+
 end
 
 function MenuLayer:onTask()

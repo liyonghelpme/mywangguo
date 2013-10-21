@@ -10,7 +10,7 @@ BATTLE_STATE = {
 }
 function BattleScene:ctor()
     --退出战斗时候 inBattle = false
-    BattleLogic.startBattle()
+    --BattleLogic.startBattle()
     self.bg = CCScene:create()
     self.ml = BattleMenu.new(self)
     self.mc = CastlePage.new(self)
@@ -20,21 +20,27 @@ function BattleScene:ctor()
     self.bg:addChild(self.dialogController.bg)
     --CastlePage 需要新的结构中初始化数据
     self:initFx()
-    sendReq("getRandomOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
     registerUpdate(self)
     registerEnterOrExit(self)
     self.passTime = 0
     self.state = BATTLE_STATE.PREPARE
     self.show = false
 end
+function BattleScene:enterScene()
+    --设置inBattle状态之后 再 获取游戏数据
+    BattleLogic.startBattle()
+    sendReq("getRandomOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+end
+function BattleScene:exitScene()
+end
 function BattleScene:initFx()
     createAnimation("tx2", "tx2_%d.png", 0, 9, 1, 1, false)
 end
 function BattleScene:checkGameOver()
-    if BattleLogic.gameOver  and not self.show then
+    if BattleLogic.gameOver  and BattleLogic.endDialog == nil then
         self.show = true
         local co = ChallengeOver.new(self, {suc=true})
-        global.director:pushView(co)
+        global.director:pushView(co, 1, 0)
     end
 end
 function BattleScene:update(diff)
@@ -75,6 +81,7 @@ function BattleScene:initData(data, param)
                 BattleLogic.soldiers[v.kind] = v.num
             end
             --Event:sendMsg(EVENT_TYPE.INIT_BATTLE)
+            self.ml:initDataOver()
             self.mc:initDataOver() 
         else
         --搜索失败

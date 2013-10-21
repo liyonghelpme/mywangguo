@@ -18,6 +18,23 @@ function MapGridController:addSoldier(sol)
     table.insert(self.solList, sol)
 end
 function MapGridController:removeSoldier(sol)
+    self.allSoldiers[sol] = false
+    for k, v in ipairs(self.solList) do
+        if v == sol then
+            table.remove(self.solList, k)
+            break
+        end
+    end
+    removeSelf(sol.bg)
+end
+--TODO
+function MapGridController:removeTheseSol(t)
+    local temp = {}
+    for k, v in ipairs(self.allSoldiers) do
+        if t[k.kind] > 0 then
+            t[k.kind] = t[k.kind]-1
+        end
+    end
 end
 function MapGridController:removeAllSoldiers()
 end

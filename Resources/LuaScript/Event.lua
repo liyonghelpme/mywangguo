@@ -7,6 +7,7 @@ EVENT_TYPE = {
     KILL_SOLDIER=16, --从经营页面杀死某个士兵
     INIT_BATTLE=17, 
     FINISH_INIT_BUILD=18,
+    CHANGE_NAME=19,
 }
 Event = {}
 Event.callbacks = {}

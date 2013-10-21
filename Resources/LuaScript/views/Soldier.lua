@@ -1,4 +1,5 @@
 require "heapq"
+require "views.Arrow"
 Soldier = class()
 SOLDIER_STATE = {
     FREE = 0,
@@ -14,6 +15,7 @@ function Soldier:ctor(map, data, pd)
     self.data = data
     self.privateData = pd
     self.kind = data.id 
+    self.dead = false
     --在mapGridController 中的编号
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldierm"..self.kind..".plist")
@@ -41,19 +43,36 @@ function Soldier:ctor(map, data, pd)
     self.oldPredictTarget = nil
     self.health = 100
     self.maxHealth = 100
+    
+    if BattleLogic.inBattle then
+        local sz = self.changeDirNode:getContentSize()
+        local rh = math.max(sz.height, 50)
+        self.healthBar = setScale(setPos(CCSprite:create("mapSolBloodBar1.png"), {0, rh}), 0.4)
+        
+        self.bg:addChild(self.healthBar)
+        self.innerBar = setAnchor(setPos(addSprite(self.healthBar, "mapSolBloodRed1.png"), {2, 2}), {0, 0})
+    
+        self.healthBar:setVisible(false)
+    end
 
-    registerUpdate(self)
     registerEnterOrExit(self)
 
+end
+function Soldier:enterScene()
+    registerUpdate(self)
+end
+function Soldier:exitScene()
 end
 function Soldier:setPos(p)
 end
 --寻到到目的建筑物的路径之后
 --开始移动
 function Soldier:update(diff)
-    self:findPath(diff)
-    self:doMove(diff)
-    self:doAttack(diff)
+    if not self.dead and not BattleLogic.paused then
+        self:findPath(diff)
+        self:doMove(diff)
+        self:doAttack(diff)
+    end
 end
 function Soldier:doAttack(diff)
     if self.state == SOLDIER_STATE.START_ATTACK then
@@ -68,6 +87,7 @@ function Soldier:doAttack(diff)
     if self.state == SOLDIER_STATE.IN_ATTACK then
         if self.attackTarget.broken == true then
             self.state = SOLDIER_STATE.FREE
+            self.map:clearCell(self.endPoint)
             self.changeDirNode:stopAllActions()
             local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
             self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
@@ -76,7 +96,17 @@ function Soldier:doAttack(diff)
         self.attackTime = self.attackTime+diff
         if self.attackTime >= 1 then
             self.attackTime = self.attackTime - 1
-            self.attackTarget:doHarm(10)
+            --弓箭手 发射弓箭
+            if self.kind == 23 then
+                local start = getPos(self.bg)
+                start[2] = start[2]+15
+                local over = getPos(self.attackTarget.bg)
+                over[1] = over[1]+math.random(20)-10
+                over[2] = over[2]+math.random(20)+20
+                self.map.bg:addChild(Arrow.new(self, self.attackTarget, start, over).bg, MAX_BUILD_ZORD)
+            else
+                self.attackTarget:doHarm(10)
+            end
         end
     end
 end
@@ -101,6 +131,9 @@ function Soldier:calcG(x, y)
     local buildCell = self.map.mapGridController.mapDict
     if buildCell[key] ~= nil then
         dist = 30
+    end
+    if self.map.cells[key] == true then
+        dist = 200
     end
 
     data.gScore = self.cells[parent].gScore+dist
@@ -155,9 +188,9 @@ function Soldier:checkNeibor(x, y)
         --小于左边界 则 只能+x
         if cx <= 100 and nv[1] < x then
 
-        elseif cx > 2500 and nv[1] > x then
+        elseif cx > 3000 and nv[1] > x then
         elseif cy < 100 and nv[2] < y then
-        elseif cy > 500 and nv[2] > y then
+        elseif cy > 700 and nv[2] > y then
         
         else
             local inOpen = false
@@ -197,6 +230,11 @@ function Soldier:getPath()
         --不包括最后一个点
         for i =#path, 2, -1 do
             table.insert(self.path, {path[i][1], path[i][2]})
+        end
+        --设置全局Cell 中此处的权重+10
+        if #self.path > 0 then
+            self.endPoint = self.path[#self.path]
+            self.map:setCell(self.endPoint)
         end
     end
 end
@@ -304,7 +342,9 @@ function Soldier:findPath(diff)
             local possible = self.pqDict[fScore]
             if #possible > 0 then
                 --print("possible", simple.encode(possible))
-                local point = table.remove(possible)
+                local n = math.random(#possible)
+                local point = table.remove(possible, n)
+                --local point = table.remove(possible)
                 --print("point", point)
                 local x, y = getXY(point)
                 --print("x, y", x, y)
@@ -326,7 +366,7 @@ function Soldier:findPath(diff)
             end
             n = n+1
         end
-        self.map:updateCells(self.cells)
+        self.map:updateCells(self.cells, self.map.cells)
         --找到路径
         if #self.openList == 0 or self.endPoint ~= nil then
             self.state = SOLDIER_STATE.FIND
@@ -349,7 +389,7 @@ function Soldier:setDir(cx, cy)
     local p = getPos(self.bg)
     if p[1]-cx < 0 then
         self.changeDirNode:setScaleX(-0.7)
-    else
+    elseif p[1]-cx > 0 then
         self.changeDirNode:setScaleX(0.7)
     end
 end
@@ -364,7 +404,7 @@ function Soldier:doMove(diff)
         self.curPoint = 1
         self.passTime = 1
 
-        print("myPath", simple.encode(self.path))
+        --print("myPath", simple.encode(self.path))
         self.map:updatePath(self.path)
         
         self.map:switchPathSol()
@@ -374,14 +414,29 @@ function Soldier:doMove(diff)
         self.passTime = self.passTime+diff
         if self.passTime > 1 then
             self.passTime = 0
+            if BattleLogic.inBattle then
+                local curPos = getPos(self.bg)
+                local endPos = setBuildMap({1, 1, self.endPoint[1], self.endPoint[2]})
+                local attR = (self.data.range)*(self.data.range)*32*32 
+                if distance2(curPos, endPos) < attR then
+                    self.state = SOLDIER_STATE.START_ATTACK 
+                    self.map:clearCell(self.endPoint)
+                    self:setZord()
+                    return 
+                end
+            end
 
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
                 if BattleLogic.inBattle == false then
                     self.state = SOLDIER_STATE.FREE
                 else
+                    --开始攻击则清理cell 数据
                     self.state = SOLDIER_STATE.START_ATTACK
+                    self.map:clearCell(self.endPoint)
                 end
+                --移动到目的地调整zord
+                self:setZord()
             else
                 local np = self.path[nextPoint]
                 local cxy = setBuildMap({1, 1, np[1], np[2]})
@@ -404,4 +459,42 @@ function Soldier:doMove(diff)
     end
 end
 function Soldier:doHarm(n)
+    if self.dead then
+        return
+    end
+    self.health = self.health - n
+    self.health = math.max(self.health, 0)
+    if self.health <= 0 then
+        self.dead = true
+    end
+
+    local vs = self.healthBar:isVisible()
+    if not vs then
+        self.healthBar:setVisible(true)
+        self.healthBar:runAction(fadein(0.5))
+        self.innerBar:runAction(fadein(0.5))
+    end
+    local b = self.health/self.maxHealth
+    self.innerBar:runAction(scaleto(0.2, b, 1)) 
+    if self.dead then
+        self.healthBar:setVisible(false)
+        local function fadeAll(bg)
+            local child = bg:getChildren()
+            local n = bg:getChildrenCount()
+            if n > 0 then
+                for i=0, n-1, 1 do
+                    local c = child:objectAtIndex(i)
+                    --print("whos c", c)
+                    if c.runAction ~= nil then
+                        c:runAction(fadeout(0.4))
+                        fadeAll(c)
+                    end
+                end
+            end
+        end
+        BattleLogic.killKind(self.kind)
+        global.user:killSoldier(self.kind)
+        self.bg:runAction(callfunc(nil, fadeAll, self.bg))
+    end
 end
+

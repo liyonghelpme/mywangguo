@@ -29,6 +29,7 @@ function Farm:whenBusy()
 end
 function Farm:setFlowBanner()
     if self.flowBanner == nil then
+        print("showFlowBanner", self.flowBanner)
         local sz = self.baseBuild.bg:getContentSize() 
         self.flowBanner = setAnchor(setPos(addSprite(self.baseBuild.bg, "flowBanner.png"), {0, sz.height+11}), {0.5, 0})
         local pl = setPos(setAnchor(addSprite(self.flowBanner, 'Wplant'..self.planting.id..'.png'), {0.5, 0.5}), {34, 30})

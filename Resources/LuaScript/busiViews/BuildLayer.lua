@@ -27,6 +27,16 @@ function BuildLayer:ctor(scene)
 
     registerEnterOrExit(self)
 end
+function BuildLayer:setCell(p)
+    if p ~= nil then
+        self.cells[getMapKey(p[1], p[2])] = true
+    end
+end
+function BuildLayer:clearCell(p)
+    if p ~= nil then
+        self.cells[getMapKey(p[1], p[2])] = nil
+    end
+end
 --跳到下一个寻路的士兵那里
 --如果下一个还是 自己 那么就设置为nil
 function BuildLayer:switchPathSol()
@@ -53,6 +63,19 @@ end
 
 function BuildLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
+    for k, v in pairs(BattleLogic.killedSoldier) do
+        local allSol = self.mapGridController.allSoldiers 
+        for i=1, v, 1 do
+            for sk, sv in pairs(allSol) do
+                if sk.kind == k then
+                    self.mapGridController:removeSoldier(sk)
+                    break
+                end
+            end
+        end
+    end
+    --self.mapGridController:removeTheseSol(BattleLogic.killedSoldier)
+    BattleLogic.killedSoldier = {}
 end
 function BuildLayer:exitScene()
     Event:unregisterEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
@@ -76,6 +99,7 @@ function BuildLayer:addSoldier(kind, x, y)
 end
 
 function BuildLayer:initBuilding()
+    print("initBuilding now!!!!!!!!!!!!!!!!!!!!!")
     local item
     if BattleLogic.inBattle then
         item = BattleLogic.buildings 
@@ -119,6 +143,7 @@ function BuildLayer:initSoldier()
     end
 end
 function BuildLayer:initDataOver()
+    print("initDataOver !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     self:initBuilding()
     self:initSoldier()
     BattleLogic.finishInitBuild = true

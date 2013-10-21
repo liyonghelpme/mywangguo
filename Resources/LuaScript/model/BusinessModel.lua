@@ -49,3 +49,10 @@ function checkBuildNum(id)
     --是否存在上限限制
     return {enableNum[1]>curNum, enableNum[2], enableNum[3]}
 end
+function getNextBuildNum(id)
+    local bData = getData(GOODS_KIND.BUILD, id)
+    local bLevel = bData.numLevel
+    local level = global.user:getValue("level")
+    local need = math.floor((level+bLevel)/bLevel)
+    return need+bLevel
+end

@@ -24,6 +24,8 @@ function DialogController:update(diff)
         if #self.cmds > 0 then
             local curCmd = table.remove(self.cmds, 1)
             if curCmd['cmd'] == "login" then
+            elseif curCmd['cmd'] == "roleName" then
+                global.director:pushView(RoleName.new(), 1, 0)
             end
         end
     end

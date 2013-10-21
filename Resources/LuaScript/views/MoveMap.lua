@@ -30,10 +30,10 @@ function MoveMap:updateMapGrid()
     end
 end
 --寻路算法的 node
-function MoveMap:updateCells(cells)
+function MoveMap:updateCells(cells, bcells)
     if DEBUG then
         removeSelf(self.cellLayer)
-        self.cellLayer = CCSpriteBatchNode:create("green2.png")
+        self.cellLayer = CCSpriteBatchNode:create("white2.png")
         self.bg:addChild(self.cellLayer)
         --gScore hScore fScore
         --openList
@@ -44,7 +44,14 @@ function MoveMap:updateCells(cells)
             local x, y = getXY(k)
             --local cx, cy = normalToCartesian(x, y)
             local cxy = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.cellLayer, "green2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {0, 255, 0})
+        end
+
+        for k, v in pairs(bcells) do
+            local x, y = getXY(k)
+            --local cx, cy = normalToCartesian(x, y)
+            local cxy = setBuildMap({1, 1, x, y})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {255, 0, 0})
         end
     end
 end
@@ -134,7 +141,7 @@ function MoveMap:addBuilding(chd, z)
     self.mapGridController:addBuilding(chd)
 end
 function MoveMap:removeBuilding(chd)
-    self.bg:removeChild(chd.bg)
+    self.bg:removeChild(chd.bg, true)
     self.mapGridController:removeBuilding(chd)
 end
 

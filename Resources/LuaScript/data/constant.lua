@@ -2,7 +2,7 @@ MapWidth=3000
 MapHeight=1120
 SIZEX=32
 SIZEY=16
-DEBUG=true
+DEBUG=false
 MAX_BUILD_ZORD=10000
 
 Keys = {

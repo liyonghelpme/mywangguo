@@ -60,7 +60,7 @@ function Mine:initWorking(data)
     self.planting = MinePlant.new(self.baseBuild, privateData)
     self.baseBuild.bg:addChild(self.planting.bg)
     self.workLight = addSprite(self.baseBuild.bg, "build300_l.png")
-    self.workLight:setPosition(ccp(-40, 64))
+    self.workLight:setPosition(ccp(-40, 44))
     self.workLight:runAction(repeatForever(sequence({fadein(0.3), fadeout(0.3)})))
 end
 

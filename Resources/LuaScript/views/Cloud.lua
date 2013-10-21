@@ -39,7 +39,16 @@ function Cloud:finishShow()
     self.finishShow = true
     --global.director.curScene:beginSwitch()
     BattleLogic.cloud = self
-    global.director:transferScene(BattleScene.new())
+    --进入战斗场景
+    --多个战斗场景之间切换
+    if BattleLogic.quitBattle == false then
+        --BattleLogic.clearBattle()
+        global.director:transferScene(BattleScene.new())
+    --退出战斗场景
+    else
+        BattleLogic.clearBattle()
+        global.director:popTransfer()
+    end
 end
 function Cloud:finishCloud()
     for k, v in ipairs(self.clouds) do
