@@ -195,6 +195,7 @@ function ui.newButton(params)
     if text ~= nil then
         setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
     end
+    obj:setAnchor(0.5, 0.5)
     return obj
 end
 

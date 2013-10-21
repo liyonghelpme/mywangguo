@@ -532,9 +532,11 @@ end
 --可以参考nozomi MyWorld 网格 笛卡尔坐标 仿射坐标的转化
 --从 笛卡尔坐标 到 左下角的normal 坐标
 --转化成 normal 坐标
+--Cartesian to normal
+--return round(x/SIZEX), round(y/SIZEY)
+--normal left 
 function getPosMap(sx, sy, px, py)
     px = px - (sx+sy)*SIZEX/2
-    --py = py - (sx+sy)*SIZEY
     px = round(px/SIZEX)
     py = round(py/SIZEY)
     return {sx, sy, px+sx, py+1}
@@ -555,6 +557,7 @@ function getDefault(t, k, def)
     return v
 end
 
+--Cartesian to normal
 function getBuildMap(build)
     local sx = build.sx
     local sy = build.sy
@@ -571,6 +574,7 @@ end
 function cellNormalToMapNormal(x, y)
 end
 --这个替代了从normal 到Cartesian 坐标转化
+--px py 是0.5 0 网格的normal位置
 function setBuildMap(map)
     local sx = map[1]
     local sy = map[2]
@@ -582,7 +586,6 @@ function setBuildMap(map)
     px = px*SIZEX
     py = py*SIZEY
     px = px+(sx+sy)*SIZEX/2
-    --py = py+(sx+sy)*SIZEY
     return {px, py}
 end
 
@@ -618,11 +621,11 @@ function getData(kind, id)
     return ret
 end
 --使用右下角 规划格子 所以不用减去y方向的值
+--Cartesian to Cartesian 
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]
     x = x - (sx+sy)*SIZEX/2
-    --y = y - (sx+sy)*SIZEY
     
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
@@ -681,19 +684,33 @@ function affineToNormal(dx, dy)
     return dx-dy, dx+dy
 end
 
---转化成 affine 坐标进行比较
-function checkPointIn(x, y, px, py, sx, sy)
+function checkMiaoPoint(x, y, px, py, sx, sy)
     local nx, ny = cartesianToNormalFloat(x, y)
     local ax, ay = normalToAffineFloat(nx, ny)
 
-    local npx, npy = cartesianToNormal(px, py)
-    local apx, apy = normalToAffine(npx, npy)
+    local npx, npy = cartesianToNormalFloat(px, py)
+    local apx, apy = normalToAffineFloat(npx, npy)
 
-    --[[
     print("checkPointIn", x, y, px, py, sx, sy)
     print("nx ny ax ay", nx, ny, ax, ay)
     print("point", npx, npy, apx, apy)
-    --]]
+
+    return ax >= apx-sx/2 and ay >= apy-sy/2 and ax < apx+sx/2 and ay < apy+sy/2
+end
+
+--转化成 affine 坐标进行比较
+function checkPointIn(x, y, px, py, sx, sy)
+    --点击对应的网格点
+    local nxy = getPosMap(1, 1, x, y)
+    local ax, ay = normalToAffine(nxy[3], nxy[4]) 
+
+    --建筑物 对应的affine 网格 中心点
+    local npxy = getPosMap(1, 1, px, py) 
+    local apx, apy = normalToAffine(npxy[3], npxy[4])
+
+    print("checkPointIn", x, y, px, py, sx, sy)
+    print("nx ny ax ay", simple.encode(nxy), ax, ay)
+    print("point", simple.encode(npxy), apx, apy)
     --网格坐标在其内部
     return ax >= apx and ay >= apy and ax < apx+sx and ay < apy+sy
 end

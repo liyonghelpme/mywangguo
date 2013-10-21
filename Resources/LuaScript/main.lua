@@ -18,11 +18,9 @@ local function main()
 
     ---------------
     require "Global.INCLUDE"
-    
-    global.director:runWithScene(CastleScene.new())
-    global.director:pushView(Loading.new())
-    --等待加入场景之后 再初始化
-    global.user:initData()
+    require "Miao.MiaoScene"
+
+    global.director:runWithScene(MiaoScene.new())
 end
 
 xpcall(main, __G__TRACKBACK__)
