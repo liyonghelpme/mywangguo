@@ -18,7 +18,9 @@ local function main()
 
     ---------------
     require "Global.INCLUDE"
+    require "Miao.Logic"
     require "Miao.MiaoScene"
+
 
     global.director:runWithScene(MiaoScene.new())
 end

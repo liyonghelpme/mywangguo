@@ -15,7 +15,7 @@ function MoveMap:updateMapGrid()
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*4, SIZEY*4}), p), {0.5, 0})
+            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0})
             print("show MapDict", x, y)
 
             --local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
@@ -25,7 +25,7 @@ function MoveMap:updateMapGrid()
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*4, SIZEY*4}), p), {0.5, 0})
+            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0})
 
             --local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             --sp:addChild(lab)

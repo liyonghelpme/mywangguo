@@ -7,11 +7,23 @@ function MiaoScene:ctor()
     self.bg:addChild(self.page.bg)
     self.menu = MiaoMenu.new(self)
     self.bg:addChild(self.menu.bg)
+    sendReq('login', dict(), self.initData, nil, self)
 end
-function MiaoScene:beginBuild()
-    self.curBuild = self.page:beginBuild()
+function MiaoScene:initData(rep, param)
+    Logic.buildings = {}
+    for k, v in ipairs(rep.build) do
+        Logic.buildings[v.id] = v 
+    end
+    Logic.buildList = rep.build
+
+    self.menu:initDataOver()
+    self.page.buildLayer:initDataOver()
+end
+function MiaoScene:beginBuild(kind, id)
+    self.curBuild = self.page:beginBuild(kind, id)
 end
 function MiaoScene:setBuilding(b)
+    print("setBuilding", self.curBuild, b)
     if b == self.curBuild then
         return 1
     end

@@ -4,6 +4,7 @@ function MapGridController:ctor(scene)
     self.mapDict = {}
     self.allBuildings = {}
     self.allSoldiers = {}
+    self.allEnvTile = {}
     self.solList = {}
 end
 
@@ -92,13 +93,17 @@ function MapGridController:updatePosMap(sizePos)
     return {initX, initY}
 end
 
-
 function MapGridController:addBuilding(chd)
-    self.allBuildings[chd] = true
+    if chd.picName == 'build' then
+        self.allBuildings[chd] = true
+    else
+        self.allEnvTile[chd] = true
+    end
     self:updateMap(chd)
 end
 function MapGridController:removeBuilding(build)
     self:clearMap(build)
     self.allBuildings[build] = nil
+    self.allEnvTile[chd] = nil
 end
 

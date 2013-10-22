@@ -1,25 +1,34 @@
 MiaoBuild = class()
-function MiaoBuild:ctor(m)
+function MiaoBuild:ctor(m, data)
     self.map = m
     self.sx = 1
     self.sy = 1
     self.colNow = 0
     --道路的状态
     self.value = 0
+    self.picName = data.picName
+    self.id = data.id
 
     self.bg = CCLayer:create()
-    self.changeDirNode = setAnchor(CCSprite:create("t0.png"), {0.5, 0})
+    if self.picName == 'build' then
+        self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+        local bd = Logic.buildings[self.id]
+        local sz = self.changeDirNode:getContentSize()
+        setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
+    else
+        self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
+    end
     self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     --看一下 CCNode 0 0 位置 和 一半位置
     --
-    local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
+    --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
+    self:setState(getParam("buildFree"))
 
-    self.state = getParam("buildMove")
-    self:setState()
     registerEnterOrExit(self)
-    registerMultiTouch(self)
+    --page 首先处理 建筑物的touch 再处理自身的touch事件
+    --registerMultiTouch(self)
 end
 function MiaoBuild:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
@@ -30,24 +39,17 @@ function MiaoBuild:touchesBegan(touches)
     if self.lastPos.count == 1 then
         --建筑物 getBuildMap 0.5 0 位置
         --手指是 0.5 0 位置 转化成0.5 0.5 位置
-        local px, py = self.bg:getPosition()
+        --local px, py = self.bg:getPosition()
         --手指坐标 向下移动SIZEY 用于在getBuildMap 里面计算手指所在的网格坐标
-        local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
-        local ret = checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy)
-        print("checkPointIn", ret)
+        --local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
+        --local ret = checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy)
+        local ret = true
+        --print("checkPointIn", ret)
         if ret then
             self.inSelf = true
             local setSuc = 0
             if self.state == getParam("buildMove") or self.Planing == 1 then
                 setSuc = global.director.curScene:setBuilding(self)
-                --经营场景不允许该建筑物
-                --[[
-                if setSuc == 1 then
-                    if self.bottom == nil then
-                        self:setState(self.state)
-                    end
-                end
-                --]]
             end
             print("touchesBegan", setSuc, self.state, self.Planing)
             if setSuc == 1 then
@@ -55,7 +57,6 @@ function MiaoBuild:touchesBegan(touches)
                 self.map.mapGridController:clearMap(self)
 
                 self.doMove = true
-                --self:setState()
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
             end
 
@@ -123,9 +124,7 @@ function MiaoBuild:setPos(p)
     end
     self.bg:setZOrder(zord)
 end
---根据当前cell类型决定 图片类型
---只有拆除路径 铺设路径 
-function MiaoBuild:finishBuild()
+function MiaoBuild:adjustRoad()
     print("MiaoBuild")
     local bm = getBuildMap(self) 
     print("self map", bm[1], bm[2], bm[3], bm[4])
@@ -148,7 +147,7 @@ function MiaoBuild:finishBuild()
     for k, v in ipairs(nei) do
         local key = getMapKey(v[1], v[2])
         print("check Key", key, allCell[key])
-        if allCell[key] ~= nil then
+        if allCell[key] ~= nil and allCell[key][1][1].picName == self.picName then
             table.insert(neiState, true)
             table.insert(neiborNode, allCell[key][1][1])
         else
@@ -168,7 +167,7 @@ function MiaoBuild:finishBuild()
     end
     print("check Value", val, wei)
     --adjust neibor state
-    local tex = CCTextureCache:sharedTextureCache():addImage("t"..val..".png") 
+    local tex = CCTextureCache:sharedTextureCache():addImage(self.picName..val..".png") 
     --if wei == 0 then
     self.changeDirNode:setTexture(tex)
     --end
@@ -189,18 +188,31 @@ function MiaoBuild:finishBuild()
             end
         end
     end
-
+end
+--根据当前cell类型决定 图片类型
+--只有拆除路径 铺设路径 
+function MiaoBuild:finishBuild()
+    if self.picName ~= 'build' then
+        self:adjustRoad()
+    end
     self:finishBottom()
 end
+
 function MiaoBuild:adjustValue()
-    local tex = CCTextureCache:sharedTextureCache():addImage("t"..self.value..".png") 
+    local tex = CCTextureCache:sharedTextureCache():addImage(self.picName..self.value..".png") 
     self.changeDirNode:setTexture(tex)
 end
-function MiaoBuild:setState()
-    self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
-    self.bg:addChild(self.bottom, 1)
+function MiaoBuild:setState(s)
+    self.state = s
+    print("MiaoBuild setState", s, self.state)
+    if self.state == getParam("buildMove") and self.bottom == nil then
+        self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
+        self.bg:addChild(self.bottom, 1)
+    end
 end
 function MiaoBuild:finishBottom()
-    self.bottom:removeFromParentAndCleanup(true)
-    self.bottom = nil
+    if self.bottom ~= nil then
+        self.bottom:removeFromParentAndCleanup(true)
+        self.bottom = nil
+    end
 end

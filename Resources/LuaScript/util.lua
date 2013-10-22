@@ -541,6 +541,16 @@ function getPosMap(sx, sy, px, py)
     py = round(py/SIZEY)
     return {sx, sy, px+sx, py+1}
 end
+
+function getPosMapFloat(sx, sy, px, py)
+    local np = normalizePos({px,py},sx, sy)
+    px = np[1]
+    py = np[2]
+    px = px - (sx+sy)*SIZEX/2
+    px = round(px/SIZEX)+sx
+    py = round(py/SIZEY)+1
+    return {sx, sy, px, py}
+end
 function getMapKey(x, y)
     return x*10000+y
 end
@@ -622,6 +632,7 @@ function getData(kind, id)
 end
 --使用右下角 规划格子 所以不用减去y方向的值
 --Cartesian to Cartesian 
+--getBuildMap ----> setBuildMap
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]
@@ -701,11 +712,11 @@ end
 --转化成 affine 坐标进行比较
 function checkPointIn(x, y, px, py, sx, sy)
     --点击对应的网格点
-    local nxy = getPosMap(1, 1, x, y)
+    local nxy = getPosMapFloat(1, 1, x, y)
     local ax, ay = normalToAffine(nxy[3], nxy[4]) 
 
     --建筑物 对应的affine 网格 中心点
-    local npxy = getPosMap(1, 1, px, py) 
+    local npxy = getPosMapFloat(1, 1, px, py) 
     local apx, apy = normalToAffine(npxy[3], npxy[4])
 
     print("checkPointIn", x, y, px, py, sx, sy)
