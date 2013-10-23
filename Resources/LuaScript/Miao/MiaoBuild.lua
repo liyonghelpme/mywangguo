@@ -1,4 +1,8 @@
 MiaoBuild = class()
+BUILD_STATE = {
+    FREE = 0,
+    MOVE = 1,
+}
 function MiaoBuild:ctor(m, data)
     self.map = m
     self.sx = 1
@@ -8,6 +12,8 @@ function MiaoBuild:ctor(m, data)
     self.value = 0
     self.picName = data.picName
     self.id = data.id
+    self.owner = nil
+    self.workNum = 0
 
     self.bg = CCLayer:create()
     if self.picName == 'build' then
@@ -15,16 +21,23 @@ function MiaoBuild:ctor(m, data)
         local bd = Logic.buildings[self.id]
         local sz = self.changeDirNode:getContentSize()
         setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
+
+        local temp = setPos(setSize(addSprite(self.changeDirNode, "green2.png"), {10, 10}), {Logic.buildings[self.id].doorx, (sz.height-Logic.buildings[self.id].doory)})
+        self.doorPoint = temp
     else
         self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
     end
     self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
+    self.nameLabel = ui.newBMFontLabel({text="", size=21})
+    setPos(self.nameLabel, {0, 100})
+    self.bg:addChild(self.nameLabel)
+
     --看一下 CCNode 0 0 位置 和 一半位置
     --
     --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
-    self:setState(getParam("buildFree"))
+    self:setState(BUILD_STATE.FREE)
 
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
@@ -48,13 +61,14 @@ function MiaoBuild:touchesBegan(touches)
         if ret then
             self.inSelf = true
             local setSuc = 0
-            if self.state == getParam("buildMove") or self.Planing == 1 then
+            if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
                 setSuc = global.director.curScene:setBuilding(self)
             end
-            print("touchesBegan", setSuc, self.state, self.Planing)
+            --print("touchesBegan", setSuc, self.state, self.Planing)
             if setSuc == 1 then
                 self.dirty = 1
                 self.map.mapGridController:clearMap(self)
+                self:showBottom()
 
                 self.doMove = true
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
@@ -113,6 +127,7 @@ function MiaoBuild:enterScene()
 end
 function MiaoBuild:exitScene()
 end
+--道路显示的图层Layer 在 建筑物 和 人物的下面
 function MiaoBuild:setPos(p)
     local curPos = p
     local zord = MAX_BUILD_ZORD-curPos[2]
@@ -195,6 +210,7 @@ function MiaoBuild:finishBuild()
     if self.picName ~= 'build' then
         self:adjustRoad()
     end
+    self:setState(BUILD_STATE.FREE)
     self:finishBottom()
 end
 
@@ -205,7 +221,7 @@ end
 function MiaoBuild:setState(s)
     self.state = s
     print("MiaoBuild setState", s, self.state)
-    if self.state == getParam("buildMove") and self.bottom == nil then
+    if self.state == BUILD_STATE.MOVE and self.bottom == nil then
         self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
         self.bg:addChild(self.bottom, 1)
     end
@@ -215,4 +231,28 @@ function MiaoBuild:finishBottom()
         self.bottom:removeFromParentAndCleanup(true)
         self.bottom = nil
     end
+end
+
+function MiaoBuild:showBottom()
+    if self.bottom == nil then
+        self.bottom = setColor(setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10}),  {0, 255, 0})
+        self.bg:addChild(self.bottom, -1)
+    end
+end
+function MiaoBuild:finishBottom()
+    if self.bottom ~= nil then
+        self.bottom:removeFromParentAndCleanup(true)
+        self.bottom = nil
+    end
+end
+function MiaoBuild:setOwner(s)
+    self.owner = s
+    if s == nil then
+        self.nameLabel:setString("")
+    else
+        self.nameLabel:setString(s.name)    
+    end
+end
+function MiaoBuild:changeWorkNum(n)
+    self.workNum = self.workNum+n
 end

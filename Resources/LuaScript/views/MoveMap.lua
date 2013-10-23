@@ -6,16 +6,17 @@ function MoveMap:enterScene()
 end
 function MoveMap:exitScene()
 end
+--显示建筑物网格
 function MoveMap:updateMapGrid()
     if DEBUG then
         removeSelf(self.gridLayer)
-        self.gridLayer = CCLayer:create()
+        self.gridLayer = CCSpriteBatchNode:create("white2.png")
         self.bg:addChild(self.gridLayer)
         for k, v in pairs(self.mapGridController.mapDict) do
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.gridLayer, "white2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0}), {255, 0, 0})
             print("show MapDict", x, y)
 
             --local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
@@ -25,7 +26,7 @@ function MoveMap:updateMapGrid()
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.gridLayer, "white2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0}), {255, 0, 0})
 
             --local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             --sp:addChild(lab)
@@ -47,14 +48,14 @@ function MoveMap:updateCells(cells, bcells)
             local x, y = getXY(k)
             --local cx, cy = normalToCartesian(x, y)
             local cxy = setBuildMap({1, 1, x, y})
-            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {0, 255, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {0, 128, 0})
         end
-
+        --路径网格
         for k, v in pairs(bcells) do
             local x, y = getXY(k)
             --local cx, cy = normalToCartesian(x, y)
             local cxy = setBuildMap({1, 1, x, y})
-            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {255, 0, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {128, 0, 0})
         end
     end
 end
@@ -140,7 +141,11 @@ function MoveMap:checkCollision(build)
 end
 function MoveMap:addBuilding(chd, z)
     print('MoveMap addBuilding', chd, z)
-    self.bg:addChild(chd.bg, z)
+    if chd.picName == 'build' then
+        self.buildingLayer:addChild(chd.bg, z)
+    else
+        self.roadLayer:addChild(chd.bg, z)
+    end
     self.mapGridController:addBuilding(chd)
 end
 function MoveMap:removeBuilding(chd)

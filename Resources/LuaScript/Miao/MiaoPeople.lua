@@ -8,12 +8,27 @@ PEOPLE_STATE = {
     IN_MOVE = 4,
     START_WORK = 5,
     IN_WORK = 6,
+    IN_HOME = 7,
 }
 function MiaoPeople:ctor(m)
     self.map = m
-    self.bg = CCNode:create()
-    self.changeDirNode = addSprite(self.bg, "people1_lb_0.png")
     self.state = PEOPLE_STATE.FREE
+    self.health = 0
+    self.maxHealth = 5
+    self.tired = false
+    self.myHouse = nil
+    self.name = str(math.random(99999))
+
+    self.bg = CCNode:create()
+    --不同人物动画的角度也有可能不同
+    self.changeDirNode = addSprite(self.bg, "people1_lb_0.png")
+    local sz = self.changeDirNode:getContentSize()
+    --人物图像向上偏移一半高度 到达块中心位置
+    setAnchor(self.changeDirNode, {Logic.people[1].ax/sz.width, (sz.height-Logic.people[1].ay-SIZEY)/sz.height})
+    self.stateLabel = ui.newBMFontLabel({text=str(self.state), size=30})
+    setPos(self.stateLabel, {0, 100})
+    self.bg:addChild(self.stateLabel)
+    
     createAnimation("people1_lb", "people1_lb_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("people1_lt", "people1_lt_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("people1_rb", "people1_rb_%d.png", 0, 4, 1, 0.5, false)
@@ -30,13 +45,55 @@ function MiaoPeople:enterScene()
 end
 function MiaoPeople:exitScene()
 end
+
+function MiaoPeople:checkHealth()
+    if self.state == PEOPLE_STATE.FREE and self.health <= 0 then
+        self.tired = true
+    end
+end
+--寻找我的住宅
+
+--在家也是工作的一种形式
+--dump PeopleState
+--dump HouseState
+--dump RoadState
+--dump SeaState
+--dump BuildingState
+--只寻找 已经建造好的建筑物作为目标
+function MiaoPeople:findHouse()
+    if self.myHouse == nil then
+        local allBuild = self.map.mapGridController.allBuildings
+        for k, v in pairs(allBuild) do
+            if k.owner == nil and k.state == BUILD_STATE.FREE then
+                self.myHouse = k
+                k:setOwner(self)
+                break
+            end
+        end
+    end
+end
+function MiaoPeople:findWorkBuilding()
+    local allBuild = self.map.mapGridController.allBuildings
+    local num = getLen(allBuild)
+    for k, v in pairs(allBuild) do
+        --休息结束
+        if k.picName == 'build' and k.owner == nil and k.id == 2 and k.state == BUILD_STATE.FREE then
+            k:setOwner(self)
+            self.predictTarget = k
+            break
+        end
+    end
+end
+
 function MiaoPeople:update(diff)
+    self:checkHealth()
     self:findPath(diff)
     self:initFind(diff) 
     self:doFind(diff)
     self:initMove(diff)
     self:doMove(diff)
     self:doWork(diff)
+    self.stateLabel:setString(str(self.state))
 end
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
@@ -50,8 +107,10 @@ function MiaoPeople:initFind(diff)
     if self.state == PEOPLE_STATE.START_FIND then
         self.state = PEOPLE_STATE.IN_FIND
         local p = getPos(self.bg)
-        local mx, my = cartesianToNormal(p[1], p[2])
-        mx, my = sameOdd(mx, my)
+        --local mx, my = cartesianToNormal(p[1], p[2])
+        --mx, my = sameOdd(mx, my)
+        local mxy = getPosMapFloat(1, 1, p[1], p[2])
+        local mx, my = mxy[3], mxy[4]
         
         self.startPoint = {mx, my} 
         self.endPoint = nil
@@ -63,6 +122,7 @@ function MiaoPeople:initFind(diff)
 
         self.predictTarget = nil
         self.predictEnd = nil
+        self.realTarget = nil
         
         --寻找最近的建筑物 去工作 使用简单的洪水查找法 不要使用最近建筑物查找法 人物多思考一会即可
         --只在有路的块上面行走 picName == 't'
@@ -81,22 +141,36 @@ function MiaoPeople:initFind(diff)
             end
         end
         --]]
-        --只找经营建筑物
-        local allBuild = self.map.mapGridController.allBuildings
-        local num = getLen(allBuild)
-        local s = math.random(num)
-        local i = 1
-        for k, v in pairs(allBuild) do
-            if i == s then
-                self.predictTarget = k
-                break
+        --寻找住宅
+        if self.tired then
+            self:findHouse()
+            if self.myHouse ~= nil then
+                self.predictTarget = self.myHouse
             end
-            i = i+1
+        else
+            self:findWorkBuilding()
+            --[[
+            --只找经营建筑物
+            local allBuild = self.map.mapGridController.allBuildings
+            local num = getLen(allBuild)
+            local s = math.random(num)
+            local i = 1
+            for k, v in pairs(allBuild) do
+                if i == s then
+                    self.predictTarget = k
+                    break
+                end
+                i = i+1
+                end
+            --]]
         end
 
+        --所有cartesianToNormal 全部转化成getBuildMap 来计算
         if self.predictTarget ~= nil then
             local bp = getPos(self.predictTarget.bg)
-            local tx, ty = cartesianToNormal(bp[1], bp[2])
+            --local tx, ty = cartesianToNormal(bp[1], bp[2])
+            local txy = getPosMapFloat(1, 1, bp[1], bp[2])
+            local tx, ty = txy[3], txy[4]
             self.predictEnd = {tx, ty}
 
             local sk = getMapKey(mx, my)
@@ -113,7 +187,7 @@ end
 function MiaoPeople:doFind(diff)
     --寻路访问的节点超过n个 则停止
     if self.state == PEOPLE_STATE.IN_FIND then
-        local n = 0
+        local n = 1
         --所有建筑物  水面 道路
         local buildCell = self.map.mapGridController.mapDict
         local staticObstacle = self.map.staticObstacle 
@@ -138,9 +212,12 @@ function MiaoPeople:doFind(diff)
                 --行走的时候 可以绕过建筑物的 如果士兵跑到建筑物里面去了 
                 --不是上次的目标
                 --走到一个建筑物附近了
-                if buildCell[key] ~= nil and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][#buildCell[key]][1].picName == 'build' then
+                --道路 和 建筑物 都在cell 里面
+                if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
+                --if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] ~= self.oldPredictTarget and buildCell[key][#buildCell[key]][1].picName == 'build' then
                     self.endPoint = {x, y} 
-                    --找到建筑了
+                    self.realTarget = buildCell[key][#buildCell[key]][1]
+                    print("findTarget", self.predictTarget.picName, self.realTarget.picName)
                     break
                 end
 
@@ -177,6 +254,30 @@ function MiaoPeople:initMove(diff)
     end
 end
 function MiaoPeople:setDir(x, y)
+    local p = getPos(self.bg)
+    local dx = x-p[1]
+    local dy = y-p[2]
+    if dx > 0 then
+        if dy > 0 then
+            self.changeDirNode:stopAllActions()
+            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people1_rt")
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+        elseif dy < 0 then
+            self.changeDirNode:stopAllActions()
+            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people1_rb")
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+        end
+    elseif dx < 0 then
+        if dy > 0 then
+            self.changeDirNode:stopAllActions()
+            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people1_lt")
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+        elseif dy < 0 then
+            self.changeDirNode:stopAllActions()
+            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people1_lb")
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+        end
+    end
 end
 function MiaoPeople:doMove(diff)
     if self.state == PEOPLE_STATE.IN_MOVE then
@@ -185,7 +286,16 @@ function MiaoPeople:doMove(diff)
             self.passTime = 0
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
-                self.state = PEOPLE_STATE.FREE
+                --去休息
+                if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
+                    self.state = PEOPLE_STATE.IN_HOME
+                    self.restTime = 0
+                    self.bg:setVisible(false)
+                else
+                    --self.state = PEOPLE_STATE.FREE
+                    self.state = PEOPLE_STATE.IN_WORK
+                    self.workTime = 0
+                end
                 self:setZord()
             else
                 local np = self.path[nextPoint]
@@ -198,7 +308,39 @@ function MiaoPeople:doMove(diff)
         end
     end
 end
+--农田的 3个状态 
+--没有农作物
+--农作物 阶段1
+--农作物 阶段2
+--人物播放劳作动画
 function MiaoPeople:doWork(diff)
+    if self.state == PEOPLE_STATE.IN_WORK then
+        self.workTime = self.workTime+diff
+        if self.workTime > 1 then
+            self.workTime = 0
+            self.health = self.health-1
+            self.realTarget:changeWorkNum(1)
+            --种地的时候 tired 直接 回去即可
+            if self.health <= 0 then
+                self.state = PEOPLE_STATE.FREE 
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+            end
+        end
+    elseif self.state == PEOPLE_STATE.IN_HOME then
+        self.restTime = self.restTime+diff
+        if self.restTime > 1 then
+            self.restTime = 0
+            self.health = self.health +1
+        end
+        --下一步开始寻路 去工作
+        self.health = math.min(self.health, self.maxHealth)
+        if self.health >= self.maxHealth then
+            self.tired = false
+            self.state = PEOPLE_STATE.FREE
+            self.bg:setVisible(true)
+        end
+    end
 end
 
 
@@ -261,11 +403,12 @@ end
 --先检测近的邻居 再检测远的邻居
 function MiaoPeople:checkNeibor(x, y)
     --近的邻居先访问
+    --只允许 正边
     local neibors = {
-        {x, y-2},
-        {x+2, y},
-        {x, y+2},
-        {x-2, y},
+        --{x, y-2},
+        --{x+2, y},
+        --{x, y+2},
+        --{x-2, y},
         {x-1, y-1},
         {x+1, y-1},
         {x+1, y+1},
@@ -301,7 +444,22 @@ function MiaoPeople:checkNeibor(x, y)
             end
             --TODO 只有是ROAD 才能走过
             local hasRoad = false
-            if self.cells[key] == nil and staticObstacle[key] == nil and not hasRiver then
+            if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1].picName == 't' then
+                hasRoad = true
+                print("buildCell Kind Road")
+            else
+                print("not Road")
+            end
+            --未遍历过 这个邻居 
+            --没有 硬性阻碍
+            --没有河流
+            --有道路
+            --如果有建筑物 也可以移动 进去
+            local hasBuild = false
+            if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1].picName == 'build' then
+                hasBuild = true
+            end
+            if self.cells[key] == nil and staticObstacle[key] == nil and not hasRiver and (hasRoad or hasBuild) then
                 self.cells[key] = {}
                 self.cells[key].parent = curKey
                 self:calcG(nv[1], nv[2])
@@ -333,10 +491,20 @@ function MiaoPeople:getPath()
         for i =#path, 2, -1 do
             table.insert(self.path, {path[i][1], path[i][2]})
         end
+        print("getPath", simple.encode(self.endPoint), simple.encode(path))
+        
+        --走到房间边缘消失掉
+        if self.predictTarget.id == 1 then
+            local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
+            table.insert(self.path, {mx, my})
+        elseif self.predictTarget.id == 2 then
+            --进入农田中心去工作
+            table.insert(self.path, path[1])
+        end
         --设置全局Cell 中此处的权重+10
         if #self.path > 0 then
             self.endPoint = self.path[#self.path]
-            self.map:setCell(self.endPoint)
+            --self.map:setCell(self.endPoint)
         end
     end
 end

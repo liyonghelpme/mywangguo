@@ -2,6 +2,7 @@ MiaoMenu = class()
 function MiaoMenu:ctor(s)
     self.scene = s
     self.bg = CCNode:create()
+    setPos(self.bg, {100, 0})
     local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onBuild, delegate=self, text="道路", size=20})
     setPos(but.bg, {50, 50})
     but:setAnchor(0.5, 0.5)

@@ -10,6 +10,10 @@ function MiaoBuildLayer:ctor(s)
     
     self.bg = CCLayer:create()
     self.mapGridController = MapGridController.new(self)
+    self.roadLayer = CCLayer:create()
+    self.bg:addChild(self.roadLayer)
+    self.buildingLayer = CCLayer:create()
+    self.bg:addChild(self.buildingLayer)
 
     self.gridLayer = CCLayer:create()
     self.bg:addChild(self.gridLayer)
@@ -56,14 +60,32 @@ function MiaoBuildLayer:initBuild()
     self:addBuilding(b, MAX_BUILD_ZORD)
     b:setPos(p)
     b:finishBuild()
+
+
+    local b = MiaoBuild.new(self, {picName='build', id=1})
+    local p = normalizePos({500, 500}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+    --每个农田只能有一个人去工作
+    local b = MiaoBuild.new(self, {picName='build', id=2})
+    local p = normalizePos({300, 500}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
 end
 
 function MiaoBuildLayer:initSea()
     local initX = -128
-    local initY = -94
+    local initY = 500
     local offX = 64
     local offY = 47
-    local col = 21
+    local col = 13
     for i = 0, col-1, 1 do
         local b = MiaoBuild.new(self, {picName='s'})
         local p = {initX+i*offX, initY+i*offY} 
@@ -122,7 +144,68 @@ function MiaoBuildLayer:initTest()
 
     end
 end
+function MiaoBuildLayer:initRoad()
+    local initX = 60
+    local initY = 60
+    local offX = 64
+    local offY = 47
+    local row = 5
+    local col = 8
+    for i=0, col, 1 do
+        local b = MiaoBuild.new(self, {picName='t'})
+        local p = {initX+i*offX, initY+i*offY} 
+        p = normalizePos(p, b.sx, b.sy)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+        local rd = math.random(2)
+        if rd == 1 then
+            local b = MiaoBuild.new(self, {picName='t'})
+            local p = {initX+(i+1)*offX, initY+(i-1)*offY} 
+            p = normalizePos(p, b.sx, b.sy)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+        end
+    end
+
+    --id = nil picName 决定地形块类型
+    local b = MiaoBuild.new(self, {picName='t'})
+    local p = {300+offX, 500-offY} 
+    p = normalizePos(p, b.sx, b.sy)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+    local b = MiaoBuild.new(self, {picName='t'})
+    local p = {300+offX+offX, 500-offY-offY} 
+    p = normalizePos(p, b.sx, b.sy)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+    local b = MiaoBuild.new(self, {picName='t'})
+    local p = {300+offX+offX+offX, 500-offY} 
+    p = normalizePos(p, b.sx, b.sy)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+end
+--道路始终 放在 建筑物 下面的
 function MiaoBuildLayer:initDataOver()
+    self:initSea()
+    self:initRoad()
     self:initBuild()
 end
 function MiaoBuildLayer:initData()
@@ -209,8 +292,8 @@ function MiaoBuildLayer:initData()
 end
 function MiaoBuildLayer:addPeople()
     local p = MiaoPeople.new(self)
-    self.bg:addChild(p.bg, MAX_BUILD_ZORD)
-    setPos(p.bg, {300, 200})
+    self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+    setPos(p.bg, {600, 400})
     p:setZord()
     self.mapGridController:addSoldier(p)
 end

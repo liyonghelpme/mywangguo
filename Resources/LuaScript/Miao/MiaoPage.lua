@@ -89,9 +89,10 @@ function MiaoPage:beginBuild(kind, id)
         --先确定位置 再加入到 buildLayer里面
         self.curBuild = MiaoBuild.new(self.buildLayer, {picName=kind, id=id}) 
         local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-        self.curBuild:setPos({p.x, p.y})
+        p = normalizePos({p.x, p.y}, 1, 1)
+        self.curBuild:setPos(p)
         self.curBuild:setColPos()
-        self.curBuild:setState(getParam("buildMove"))
+        self.curBuild:setState(BUILD_STATE.MOVE)
 
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
     end

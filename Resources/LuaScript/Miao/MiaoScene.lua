@@ -15,6 +15,10 @@ function MiaoScene:initData(rep, param)
         Logic.buildings[v.id] = v 
     end
     Logic.buildList = rep.build
+    Logic.people = {}
+    for k, v in ipairs(rep.people) do
+        Logic.people[v.id] = v
+    end
 
     self.menu:initDataOver()
     self.page.buildLayer:initDataOver()
