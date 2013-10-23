@@ -100,7 +100,14 @@ function MiaoBuild:touchesMoved(touches)
     end
 end
 
-function MiaoBuild:setColor()
+function MiaoBuild:setColor(c)
+    if self.bottom ~= nil then
+        if c == 0 then
+            setColor(self.bottom, {255, 0, 0})
+        else
+            setColor(self.bottom, {0, 255, 0})
+        end
+    end
 end
 function MiaoBuild:setColPos()
     self.colNow = 0
