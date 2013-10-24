@@ -12,6 +12,8 @@ function MiaoBuildLayer:ctor(s)
     self.mapGridController = MapGridController.new(self)
     self.roadLayer = CCLayer:create()
     self.bg:addChild(self.roadLayer)
+    self.farmLayer = CCLayer:create()
+    self.bg:addChild(self.farmLayer)
     self.buildingLayer = CCLayer:create()
     self.bg:addChild(self.buildingLayer)
 
@@ -21,6 +23,9 @@ function MiaoBuildLayer:ctor(s)
     self.bg:addChild(self.cellLayer)
     self.pathLayer = CCNode:create()
     self.bg:addChild(self.pathLayer)
+
+    self.removeLayer = CCNode:create()
+    self.bg:addChild(self.removeLayer)
 
     --self:initData()
     --self:initTest()
@@ -78,6 +83,16 @@ function MiaoBuildLayer:initBuild()
     self:addBuilding(b, MAX_BUILD_ZORD)
     b:setPos(p)
     b:finishBuild()
+
+
+    local b = MiaoBuild.new(self, {picName='backPoint'})
+    local p = normalizePos({900, 400}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+    self.backPoint = b
 end
 
 function MiaoBuildLayer:initSea()
@@ -144,6 +159,36 @@ function MiaoBuildLayer:initTest()
 
     end
 end
+--初始化商人的路径
+function MiaoBuildLayer:initMerchantRoad()
+    local initX = 200
+    local initY = 0
+    local offX = 64
+    local offY = 47
+    local row = 5
+    local col = 10
+
+    for i=0, col, 1 do
+        local b = MiaoBuild.new(self, {picName='t'})
+        local p = {initX+i*offX, initY+i*offY} 
+        p = normalizePos(p, b.sx, b.sy)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+        if i == 10 or i == 9 then
+            local b = MiaoBuild.new(self, {picName='t'})
+            local p = {initX+(i+1)*offX, initY+(i-1)*offY} 
+            p = normalizePos(p, b.sx, b.sy)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+        end
+    end
+end
 function MiaoBuildLayer:initRoad()
     local initX = 60
     local initY = 60
@@ -201,11 +246,31 @@ function MiaoBuildLayer:initRoad()
     self:addBuilding(b, MAX_BUILD_ZORD)
     b:setPos(p)
     b:finishBuild()
+
+
+    local b = MiaoBuild.new(self, {picName='t'})
+    local p = normalizePos({300-offX, 500+offY}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+    --连接到河流
+    local b = MiaoBuild.new(self, {picName='t'})
+    local p = normalizePos({300-offX, 500+offY}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
 end
---道路始终 放在 建筑物 下面的
+--道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     self:initSea()
     self:initRoad()
+    self:initMerchantRoad()
     self:initBuild()
 end
 function MiaoBuildLayer:initData()
@@ -290,10 +355,17 @@ function MiaoBuildLayer:initData()
         end
     end
 end
-function MiaoBuildLayer:addPeople()
-    local p = MiaoPeople.new(self)
+function MiaoBuildLayer:addPeople(param)
+    local p = MiaoPeople.new(self, {id=param})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
-    setPos(p.bg, {600, 400})
+    local pos
+    if param == 1 then
+        pos = normalizePos({600, 400}, 1, 1)
+    --商人
+    else
+        pos = normalizePos({200, 20}, 1, 1)
+    end
+    setPos(p.bg, pos)
     p:setZord()
     self.mapGridController:addSoldier(p)
 end
@@ -308,3 +380,5 @@ function MiaoBuildLayer:clearCell(p)
         self.cells[getMapKey(p[1], p[2])] = nil
     end
 end
+
+--加入一个特殊的remove建筑物

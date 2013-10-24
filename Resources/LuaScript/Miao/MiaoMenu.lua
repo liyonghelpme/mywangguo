@@ -2,7 +2,7 @@ MiaoMenu = class()
 function MiaoMenu:ctor(s)
     self.scene = s
     self.bg = CCNode:create()
-    setPos(self.bg, {100, 0})
+    setPos(self.bg, {0, 0})
     local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onBuild, delegate=self, text="道路", size=20})
     setPos(but.bg, {50, 50})
     but:setAnchor(0.5, 0.5)
@@ -13,11 +13,22 @@ function MiaoMenu:ctor(s)
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
 
-    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onPeople, delegate=self, text="人物", size=20})
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onPeople, delegate=self, text="人物", size=20, param=1})
     setPos(but.bg, {250, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
     
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onPeople, delegate=self, text="商人", size=20, param=2})
+    setPos(but.bg, {350, 50})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
+
+
+    --拆除道路和 建筑物
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onRemove, delegate=self, text="拆除", size=20, param=2})
+    setPos(but.bg, {450, 50})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
 end
 function MiaoMenu:initDataOver()
     local initX = 50
@@ -39,14 +50,17 @@ function MiaoMenu:initDataOver()
     
 end
 function MiaoMenu:onBuild()
-    self.scene:beginBuild('t', 0)
+    self.scene.page:beginBuild('t', 0)
 end
 function MiaoMenu:onOk()
-    self.scene:finishBuild()
+    self.scene.page:finishBuild()
 end
 function MiaoMenu:onHouse(param)
-    self.scene:beginBuild('build', param)
+    self.scene.page:beginBuild('build', param)
 end
-function MiaoMenu:onPeople()
-    self.scene.page:addPeople()
+function MiaoMenu:onPeople(param)
+    self.scene.page:addPeople(param)
+end
+function MiaoMenu:onRemove()
+    self.scene.page:onRemove()
 end

@@ -18,3 +18,4 @@ require "views.ShadowWords"
 
 require "views.MoveMap"
 require "views.StandardTouchHandler"
+require "views.DialogController"

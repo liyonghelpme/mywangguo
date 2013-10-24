@@ -93,16 +93,56 @@ function MiaoPage:beginBuild(kind, id)
         self.curBuild:setPos(p)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
-
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        --调整bottom 冲突状态
+        self.curBuild:setColPos()
     end
     return self.curBuild
 end
-function MiaoPage:addPeople()
-    self.buildLayer:addPeople()
+function MiaoPage:addPeople(param)
+    self.buildLayer:addPeople(param)
 end
+
 function MiaoPage:finishBuild()
-    print("finishBuild")
-    self.curBuild:finishBuild()
-    self.curBuild = nil 
+    print("finishBuild", self.curBuild.picName, self.curBuild.id)
+    if self.curBuild ~= nil then
+        if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
+            --桥梁没有冲突
+            if self.curBuild.colNow == 0 then
+                self.curBuild:finishBuild()
+                self.curBuild = nil
+            else
+                if type(self.curBuild.otherBuild) == 'table' then
+                    --地形河流
+                    if self.curBuild.otherBuild.picName == 's' then
+                        self.curBuild:finishBuild()
+                        self.curBuild = nil
+                    else
+                        addBanner("和其它建筑物冲突啦！")
+                    end
+                end
+            end
+        elseif self.curBuild.picName == 'remove' then
+            self.curBuild:removeSelf()
+            self.curBuild = nil
+        elseif self.curBuild.colNow == 0  then
+            self.curBuild:finishBuild()
+            self.curBuild = nil
+        else
+            addBanner("和其它建筑物冲突啦！")
+        end
+    end
+end
+
+function MiaoPage:onRemove()
+    if self.curBuild == nil then
+        local vs = getVS()
+        --先确定位置 再加入到 buildLayer里面
+        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='remove'}) 
+        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+        p = normalizePos({p.x, p.y}, 1, 1)
+        self.curBuild:setPos(p)
+        self.curBuild:setState(BUILD_STATE.MOVE)
+        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+    end
 end

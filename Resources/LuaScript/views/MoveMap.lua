@@ -17,7 +17,7 @@ function MoveMap:updateMapGrid()
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
             local sp = setColor(setAnchor(setPos(setSize(addSprite(self.gridLayer, "white2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0}), {255, 0, 0})
-            print("show MapDict", x, y)
+            --print("show MapDict", x, y)
 
             --local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             --sp:addChild(lab)
@@ -102,6 +102,8 @@ function MoveMap:checkInFlow(zone, p)
     end
     return 0
 end
+--先拆除道路 再铺设道路
+--返回冲突的建筑物
 function MoveMap:checkCollision(build)
     --print("checkCollision", build)
     local inZ = self:checkInFlow(self.buildZone, getPos(build.bg))
@@ -125,7 +127,7 @@ function MoveMap:checkCollision(build)
             if v ~= nil then
                 for m, n in ipairs(v) do
                     if n[1] ~= build then
-                        return n
+                        return n[1]
                     end
                 end
             end
@@ -142,14 +144,22 @@ end
 function MoveMap:addBuilding(chd, z)
     print('MoveMap addBuilding', chd, z)
     if chd.picName == 'build' then
-        self.buildingLayer:addChild(chd.bg, z)
+        if chd.id == 2 then
+            self.farmLayer:addChild(chd.bg, z)
+        else
+            self.buildingLayer:addChild(chd.bg, z)
+        end
+    elseif chd.picName == 'remove' then
+        self.removeLayer:addChild(chd.bg, z)
     else
         self.roadLayer:addChild(chd.bg, z)
     end
     self.mapGridController:addBuilding(chd)
 end
 function MoveMap:removeBuilding(chd)
-    self.bg:removeChild(chd.bg, true)
+    --self.bg:removeChild(chd.bg, true)
+    --先清除 map 数据 再移除 建筑物view 因为需要view 来获取位置
     self.mapGridController:removeBuilding(chd)
+    removeSelf(chd.bg)
 end
 

@@ -14,6 +14,7 @@ end
 function MapGridController:clearRxRyMap(rx, ry, obj)
 end
 function MapGridController:addSoldier(sol)
+    --暂时不用管理所有soldier信息
     self.allSoldiers[sol] = true
     --士兵当前不占用地面体积 建筑物可以摆放在士兵身上
     table.insert(self.solList, sol)
@@ -26,7 +27,8 @@ function MapGridController:removeSoldier(sol)
             break
         end
     end
-    removeSelf(sol.bg)
+    --不用删除node soldier自己删除自己的node
+    --removeSelf(sol.bg)
 end
 --TODO
 function MapGridController:removeTheseSol(t)
@@ -68,6 +70,7 @@ function MapGridController:clearMap(build)
             curY = curY+1
         end
     end
+    self.scene:updateMapGrid()
 end
 
 function MapGridController:updatePosMap(sizePos)
@@ -104,6 +107,6 @@ end
 function MapGridController:removeBuilding(build)
     self:clearMap(build)
     self.allBuildings[build] = nil
-    self.allEnvTile[chd] = nil
+    self.allEnvTile[build] = nil
 end
 
