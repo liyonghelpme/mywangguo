@@ -50,6 +50,11 @@ map<string, string> *handleIni(const char *data, long size) {
         value[j] = '\0';
         (*nm)[(char*)key] = (char*)value; 
         CCLog("key value %s %s", key, value);
+
+        while(start[0] == '\r' or start[0] == '\n') {
+            start = start++;
+            count++;
+        }
     }
     CCLog("finish handleIni");
     return nm;
