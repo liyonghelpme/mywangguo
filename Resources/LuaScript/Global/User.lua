@@ -54,6 +54,7 @@ function User:initDataOver(data, param)
 end
 function User:initData()
     --Network.postData("login", self, self.initDataOver, {papayaId=self.papayaId, papayaName=self.papayaName})
+    print(CCUserDefault:sharedUserDefault():getStringForKey("username"))
     global.httpController:addRequest("login", dict({{"account", "liyong3"}}), self.initDataOver, nil, self)
     --self:initDataOver({uid=1234})
 end

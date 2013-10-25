@@ -129,7 +129,8 @@ function Soldier:calcG(x, y)
 
     --此块有建筑物 要绕过
     local buildCell = self.map.mapGridController.mapDict
-    if buildCell[key] ~= nil then
+    --建筑物 阻挡移动的块 和 阻挡放置的块不同
+    if buildCell[key] ~= nil and buildCell[key][1][2] == 1 then
         dist = 30
     end
     if self.map.cells[key] == true then
@@ -354,7 +355,8 @@ function Soldier:findPath(diff)
                 --普通建筑物则是终点
                 --行走的时候 可以绕过建筑物的 如果士兵跑到建筑物里面去了 
                 --不是上次的目标
-                if buildCell[key] ~= nil and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
+                --该格子是一个建筑物
+                if buildCell[key] ~= nil and buildCell[key][1][2] == 1 and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
                     self.endPoint = {x, y} 
                     --找到建筑了
                     break

@@ -15,9 +15,15 @@ map<string, string> *handleIni(const char *data, long size) {
     CCLog("handleIni %d", size);
     while(!finish && count < size) {
         CCLog("count %d %c", count, data[count]);
-        int i;
+        int i = 0;
+        while(start[0] == '\r' or start[0] == '\n') {
+            start = start++;
+            count++;
+        }
+
         for(i=0; count < size; i++, count++) {
-            if(start[i] == '\n') {
+            //request neturl not matter \n \r 
+            if(start[i] == '\n' or start[i] == '\r') {
                 break;
             }
             line[i] = start[i];

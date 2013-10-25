@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include "cocos2d.h"
 #include "platform/android/jni/JniHelper.h"
+#include "PluginJniHelper.h"
 #include <jni.h>
 #include <android/log.h>
 
@@ -15,7 +16,7 @@ extern "C"
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JniHelper::setJavaVM(vm);
-
+    PluginJniHelper::setJavaVM(vm);
     return JNI_VERSION_1_4;
 }
 
@@ -36,7 +37,7 @@ void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeInit(JNIEnv*  env, jobject thi
 
         CCShaderCache::sharedShaderCache()->reloadDefaultShaders();
         CCTextureCache::reloadAllTextures();
-        CCNotificationCenter::sharedNotificationCenter()->postNotification(EVNET_COME_TO_FOREGROUND, NULL);
+        //CCNotificationCenter::sharedNotificationCenter()->postNotification(EVNET_COME_TO_FOREGROUND, NULL);
         CCDirector::sharedDirector()->setGLDefaultValues(); 
     }
 }

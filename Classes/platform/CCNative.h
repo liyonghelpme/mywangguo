@@ -4,6 +4,15 @@
 
 #include "cocos2d_ext_const.h"
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#include "platform/android/jni/JniHelper.h"
+extern "C"
+{
+    void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jstring url);
+}
+#endif
+
+
 NS_CC_EXT_BEGIN
 
 class CCNative
@@ -18,6 +27,8 @@ public:
 	static void postNotification(int duration, const char* content);
 
 	static void clearLocalNotification();
+
+
     
 private:
     CCNative(void) {}

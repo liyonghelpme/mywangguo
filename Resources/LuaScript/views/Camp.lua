@@ -9,6 +9,10 @@ function CampWorkNode:ctor(f)
     registerEnterOrExit(self)
 end
 function CampWorkNode:update(diff)
+    --对方建筑物正在生产士兵
+    if BattleLogic.inBattle then
+        return
+    end
     local solId 
     local sid
     local newName

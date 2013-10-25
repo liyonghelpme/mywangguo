@@ -14,24 +14,30 @@ function CastleScene:ctor()
     self.bg:addChild(self.ml.bg)
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
-
+    self.initScene = false
+    print("init CastleScene", self.initScene)
     registerEnterOrExit(self)
 end
 --User 发出信号的时候 未进入场景
 --因此在进入场景的时候 需要 手动检测是否已经INITDATA 了
 function CastleScene:enterScene()
-    if global.user.initYet and self.initYet == nil then
+    if global.user.initYet and self.initScene == false then
         --首先获取 User 初始化 接着 INITDATA
         --但是popScene 的时候不要再初始化了
-        self.initYet = true
-        print("enterScene receive")
+        print("enterScene receive", self.initScene)
+        self.initScene = true
         self:receiveMsg(EVENT_TYPE.INITDATA)
     else
         Event:registerEvent(EVENT_TYPE.INITDATA, self)
     end
+    print("sendCmd showAds")
+    MyPlugins:getInstance():sendCmd("showAds", "");
 end
 function CastleScene:exitScene()
+    self.initScene = true
     Event:unregisterEvent(EVENT_TYPE.INITDATA, self)
+    print("sendCmd hideAds")
+    MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 function CastleScene:receiveMsg(name, msg)
     if name == EVENT_TYPE.INITDATA then

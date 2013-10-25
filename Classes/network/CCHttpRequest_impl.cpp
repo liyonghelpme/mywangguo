@@ -25,6 +25,7 @@ CCHttpRequest_impl::CCHttpRequest_impl(const char* url, CCHttpRequestMethod meth
     {
         curl_easy_setopt(m_curl, CURLOPT_POST, 1L);
     }
+    CCLog("post request is %s", url);
 }
 
 CCHttpRequest_impl::~CCHttpRequest_impl(void)

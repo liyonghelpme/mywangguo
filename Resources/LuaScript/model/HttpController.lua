@@ -40,6 +40,7 @@ function HttpController:doRequest()
             self:doRequest()
         end
         request = CCHttpRequest:create(httpCallback, self.baseUrl..url, false)
+        print("httpRequest", self.baseUrl, url, simple.encode(data))
         
         for k, v in pairs(data) do
             if type(v) == 'string' then

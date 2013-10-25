@@ -384,9 +384,13 @@ function animate(t, arr)
     return ani
 end
 
+function addPlistSprite(name)
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile(name)
+end
 --修正主picture 在images 文件夹
 --修正key --->xxx.plist/x.png
 --降低资源包
+--[[
 function addPlistSprite(name)
     --print("addPlistSprite", name)
     local dict = CCDictionary:createWithContentsOfFile('images/'..name)
@@ -411,6 +415,7 @@ function addPlistSprite(name)
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithDictionary(dict, texture)
 end
+--]]
 
 local initYet = false
 function altasWord(c, s)
@@ -538,6 +543,17 @@ function getPosMap(sx, sy, px, py)
     px = round(px/SIZEX)
     py = round(py/SIZEY)
     return {sx, sy, px+sx, py+1}
+end
+--修正点击的位置 最近的正常的Affine坐标
+--需要先得到normal 位置再计算 map
+function getPosMapFloat(sx, sy, px, py)
+    local np = normalizePos({px,py},sx, sy)
+    px = np[1]
+    py = np[2]
+    px = px - (sx+sy)*SIZEX/2
+    px = round(px/SIZEX)+sx
+    py = round(py/SIZEY)+1
+    return {sx, sy, px, py}
 end
 function getMapKey(x, y)
     return x*10000+y
@@ -683,11 +699,12 @@ end
 
 --转化成 affine 坐标进行比较
 function checkPointIn(x, y, px, py, sx, sy)
-    local nx, ny = cartesianToNormalFloat(x, y)
-    local ax, ay = normalToAffineFloat(nx, ny)
+    local nxy = getPosMapFloat(1, 1, x, y)
+    local ax, ay = normalToAffine(nxy[3], nxy[4]) 
 
-    local npx, npy = cartesianToNormal(px, py)
-    local apx, apy = normalToAffine(npx, npy)
+    --建筑物 对应的affine 网格 中心点
+    local npxy = getPosMapFloat(1, 1, px, py) 
+    local apx, apy = normalToAffine(npxy[3], npxy[4])
 
     --[[
     print("checkPointIn", x, y, px, py, sx, sy)
@@ -1131,4 +1148,11 @@ end
 function setRotation(p, ang)
     p:setRotation(ang)
     return p
+end
+
+function multiScalar(arr, s)
+    for k, v in pairs(arr) do
+        v = v*s
+        arr[k] = v
+    end
 end

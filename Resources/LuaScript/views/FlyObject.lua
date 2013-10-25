@@ -36,7 +36,18 @@ function FlyObject:ctor(obj, c, cb, delegate)
                 local dis = distance(coor2, tar)
                 --addSprite(self.bg, "dialogRankShadow.png") 
                 setPos(flyObj, coor2)
-                print("flyObjPos", simple.encode(coor2), waitTime, simple.encode(tar))
+                print("flyObjPos", simple.encode(coor2), waitTime, simple.encode(tar), showVal)
+                local difx1 = math.random(getParam("fallX"))+getParam("baseX") 
+                local dify1 = math.random(getParam("fallY"))+getParam("baseY") 
+                local difx2 = math.random(getParam("fallX1"))+getParam("baseX1") 
+                local dify2 = math.random(getParam("fallY1"))+getParam("baseY1") 
+                local dir = math.random(2)
+                if dir == 1 then
+                    difx1 = -difx1
+                    difx2 = -difx2
+                end
+
+
                 flyObj:runAction(sequence(
                     {   
                         fadeto(0, 0), 
@@ -45,15 +56,18 @@ function FlyObject:ctor(obj, c, cb, delegate)
                     sinein(bezierto(
                         1.5+dis/100*0.25,
                         coor2[1], coor2[2], 
-                        coor2[1]+150, coor2[2]+300, 
-                        coor2[1]+100, coor2[2]-100, 
+                        coor2[1]+difx1, coor2[2]+dify1, 
+                        coor2[1]+difx2, coor2[2]-dify2, 
                         tar[1], tar[2])), 
                         callfunc(self, self.pickMe, flyObj)
                     }))
                 if j == cut-1 then
-                    showVal = v - showVal*cut
+                    showVal = v - showVal*(cut-1)
                 end
-                local words = setColor(setAnchor(setPos(addLabel(flyObj, ''..showVal, "", 23), {self.FLY_WIDTH, self.FLY_HEIGHT / 2}), {0, 0.5}), {6, 26*2.5, 46*2.5})
+                local words = ui.newBMFontLabel({text=str(showVal), size=23, color={210, 125, 44}})
+                setPos(words, {self.FLY_WIDTH+20, self.FLY_HEIGHT/2})
+                flyObj:addChild(words)
+                --local words = setColor(setAnchor(setPos(addLabel(flyObj, str(showVal), "", 23), {self.FLY_WIDTH, self.FLY_HEIGHT / 2}), {0, 0.5}), {210, 125, 44})
                 waitTime = waitTime+0.2
             end
         end

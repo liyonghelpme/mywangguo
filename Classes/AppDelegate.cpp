@@ -6,6 +6,7 @@
 #include "cocos2d_ext_tolua.h"
 #include "iniReader.h"
 #include "ImageUpdate.h"
+#include "MyPlugins.h"
 
 
 
@@ -69,6 +70,11 @@ bool AppDelegate::applicationDidFinishLaunching()
 	//updateFiles();
 
     //搜索文件路径
+    CCDictionary *dict = CCDictionary::create();
+    CCDictionary *ads = CCDictionary::create();
+    ads->setObject(CCString::create("AdsAdMob"), "name");
+    dict->setObject(ads, "ads");
+    MyPlugins::getInstance()->loadPlugins(dict);
     
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
     pEngine->executeScriptFile(path.c_str());

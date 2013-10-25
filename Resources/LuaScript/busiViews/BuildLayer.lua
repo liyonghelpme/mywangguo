@@ -19,6 +19,9 @@ function BuildLayer:ctor(scene)
     self.bg:addChild(self.cellLayer)
     self.pathLayer = CCNode:create()
     self.bg:addChild(self.pathLayer)
+    
+    self.showBuildLayer = nil
+    self.showGrids = {}
 
     --用于士兵到达目的地之后防止冲突
     self.cells = {}
@@ -26,6 +29,42 @@ function BuildLayer:ctor(scene)
     self.curSol = nil
 
     registerEnterOrExit(self)
+end
+function BuildLayer:showMapGrid()
+    if self.showYet ~= true then
+        self.showYet = true
+        --第一次显示 初始化一个
+        if self.showBuildLayer == nil then
+            --removeSelf(self.showBuildLayer)
+            self.showBuildLayer = CCSpriteBatchNode:create("white2.png")
+            self.bg:addChild(self.showBuildLayer)
+            for k, v in pairs(self.mapGridController.mapDict) do
+                local x = math.floor(k/10000)
+                local y = k%10000
+                local p = setBuildMap({1, 1, x, y})
+                local sp = setColor(setAnchor(setPos(setSize(addSprite(self.showBuildLayer, "white2.png"), {SIZEX, SIZEY}), p), {0.5, 0}), {102, 0, 0})
+                sp:runAction(sequence({fadein(0.5), delaytime(3), fadeout(0.5)}))
+                table.insert(self.showGrids, sp)
+            end
+
+            for k, v in pairs(self.staticObstacle) do
+                local x = math.floor(k/10000)
+                local y = k%10000
+                local p = setBuildMap({1, 1, x, y})
+                local sp = setColor(setAnchor(setPos(setSize(addSprite(self.showBuildLayer, "white2.png"), {SIZEX, SIZEY}), p), {0.5, 0}), {102, 0, 0})
+                sp:runAction(sequence({fadein(0.5), delaytime(3), fadeout(0.5)}))
+                table.insert(self.showGrids, sp)
+            end
+        else
+            for k, v in ipairs(self.showGrids) do
+                v:runAction(sequence({fadein(0.5), delaytime(3), fadeout(0.5)}))
+            end
+        end
+        local function clearShowYet()
+            self.showYet = false
+        end
+        self.showBuildLayer:runAction(sequence({delaytime(4), callfunc(nil, clearShowYet)}))
+    end
 end
 function BuildLayer:setCell(p)
     if p ~= nil then
@@ -63,11 +102,13 @@ end
 
 function BuildLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
+    print("removeKilled Soldiers")
     for k, v in pairs(BattleLogic.killedSoldier) do
         local allSol = self.mapGridController.allSoldiers 
         for i=1, v, 1 do
             for sk, sv in pairs(allSol) do
                 if sk.kind == k then
+                    print("kind ", k)
                     self.mapGridController:removeSoldier(sk)
                     break
                 end

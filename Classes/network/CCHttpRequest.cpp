@@ -32,6 +32,7 @@ CCHttpRequest* CCHttpRequest::createWithUrlLua(int nHandler, const char* url, bo
     request->autorelease();
     request->retain();
     //CCLog("request count is? %d", request->retainCount());
+    CCLog("createWithUrlLua %d %s %d", nHandler, url, isGet);
     return request;
 }
 
@@ -56,6 +57,7 @@ void CCHttpRequest::addRequestHeader(const char* key, const char* value)
 
 void CCHttpRequest::addPostValue(const char* key, const char* value)
 {
+    CCLog("addPostValue %s %s", key, value);
     if (key && value)
     {
         ((CCHttpRequest_impl*)m_request)->addPostValue(key, value);

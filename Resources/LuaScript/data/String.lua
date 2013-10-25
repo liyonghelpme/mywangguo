@@ -1346,4 +1346,5 @@ WORDS = dict({
 {"onceTaskFinished", {"该任务已经完成", "This quest has been completed"}},
 {"refresh", {"刷新", "refresh"}},
 {"newName", {"输入你的名字", "input name"}},
+{"NoHere", {"不能在此处放置士兵!", "Don't put here!"}},
 })

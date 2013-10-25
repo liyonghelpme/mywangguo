@@ -16,3 +16,4 @@
 #include "platform/VideoCamera.h"
 #include "platform/CCNative.h"
 #include "platform/CCWebView.h"
+#include "MyPlugins.h"
