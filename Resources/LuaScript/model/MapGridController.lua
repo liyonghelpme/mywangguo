@@ -18,13 +18,14 @@ function MapGridController:addSoldier(sol)
     table.insert(self.solList, sol)
 end
 function MapGridController:removeSoldier(sol)
-    self.allSoldiers[sol] = false
+    self.allSoldiers[sol] = nil
     for k, v in ipairs(self.solList) do
         if v == sol then
             table.remove(self.solList, k)
             break
         end
     end
+    print("remove sol", sol, sol.kind)
     removeSelf(sol.bg)
 end
 --TODO
@@ -52,6 +53,13 @@ function MapGridController:clearMap(build)
     local sy = map[2]
     local initX = map[3]
     local initY = map[4]
+    if BattleLogic.inBattle then
+        initX = map[3]
+        initY = map[4]-2
+        sx = map[1]+2
+        sy = map[2]+2
+    end
+
     for i=0, sx-1, 1 do
         local curX = initX+i
         local curY = initY+i
@@ -68,13 +76,19 @@ function MapGridController:clearMap(build)
         end
     end
 end
-
+--战斗中绘制影响范围grid
 function MapGridController:updatePosMap(sizePos)
     local map = getPosMap(sizePos[1], sizePos[2], sizePos[3], sizePos[4])
     local sx = map[1]
     local sy = map[2]
     local initX = map[3]
     local initY = map[4]
+    if BattleLogic.inBattle then
+        initX = map[3]
+        initY = map[4]-2
+        sx = map[1]+2
+        sy = map[2]+2
+    end
 
     for i=0, sx-1, 1 do
         local curX = initX+i
@@ -82,7 +96,17 @@ function MapGridController:updatePosMap(sizePos)
         for j=0, sy-1, 1 do
             local key = getMapKey(curX, curY)
             local v = getDefault(self.mapDict, key, {})
-            table.insert(v, {sizePos[5], 1, 1})
+            if BattleLogic.inBattle then
+                --建筑体内不能移动
+                if curX >= map[3] and curX < map[3]+map[1] and curY >= map[4] and curY < map[4]+map[2] then
+                    table.insert(v, {sizePos[5], 1, 1})
+                --建筑物边缘 可以移动
+                else
+                    table.insert(v, {sizePos[5], 0, 0})
+                end
+            else
+                table.insert(v, {sizePos[5], 1, 1})
+            end
             --self.mapDict[key] = v
             curX = curX-1
             curY = curY+1

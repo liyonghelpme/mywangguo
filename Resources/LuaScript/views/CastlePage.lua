@@ -72,8 +72,34 @@ end
 function CastlePage:initDataOver()
     print("CastlePage initDataOver!!!!!!!!!!!!!!")
     self.buildLayer:initDataOver()
+    if BattleLogic.inBattle then
+        self.buildLayer:showMapGrid()
+    end
 end
 function CastlePage:touchesBegan(touches)
+    self.touchBuild = nil
+    self.touchRiver = false
+    self.lastPos = convertMultiToArr(touches)
+    if self.lastPos.count == 1 then
+        local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
+        local allCell = self.buildLayer.mapGridController.mapDict
+        local map = getPosMapFloat(1, 1, tp.x, tp.y)
+        local key = getMapKey(map[3], map[4])
+        local allRiver = self.buildLayer.staticObstacle 
+        print("touch  Cell", map[3], map[4])
+        --点击到某个建筑物
+        if allCell[key] ~= nil then
+            self.touchBuild = allCell[key][1][1]
+            self.touchBuild:touchesBegan(touches)
+        elseif allRiver[key] ~= nil then
+            self.touchRiver = true
+        end
+    end
+    --在建筑物 影响范围上面 上面放置 则更新gridLayer update一下
+    if BattleLogic.inBattle and (self.touchBuild ~= nil or self.touchRiver)then
+        self.buildLayer:showMapGrid()
+    end
+
     if not self.blockMove then
         self.touchDelegate:tBegan(touches)
         if self.movToAni == nil then
@@ -83,38 +109,48 @@ function CastlePage:touchesBegan(touches)
 end
 
 function CastlePage:touchesMoved(touches)
+    if self.touchBuild ~= nil then
+        self.touchBuild:touchesMoved(touches)
+    end
     if not self.blockMove then
         self.touchDelegate:tMoved(touches)
     end
 end
 function CastlePage:touchesEnded(touches)
+    if self.touchBuild ~= nil then
+        self.touchBuild:touchesEnded()
+    end
     --move距离小于一定的值
     local acMov = self.touchDelegate.accMove or 0
     if BattleLogic.inBattle and  acMov < 20 then
+        if self.touchBuild ~= nil then
+            addBanner(getStr("NoHere"))
+        else
+            local curChoose = self.scene.ml:getCurSol()
+            if curChoose ~= nil then
+                local n = getDefault(global.user.soldiers, curChoose, 0)
+                print("leftSoldiers", curChoose, n)
+                if n > 0 then
+                    local temp = convertMultiToArr(touches)
+                    local temp = self.bg:convertToNodeSpace(ccp(temp[0][1], temp[0][2]))
+                    BattleLogic.updateKill(curChoose)
+                    self.scene.ml:updateKill(curChoose)
+                    print("curChoose", curChoose)
+                    self.buildLayer:addSoldier(curChoose, temp.x, temp.y) 
 
-        local curChoose = self.scene.ml:getCurSol()
-        if curChoose ~= nil then
-            local n = getDefault(global.user.soldiers, curChoose, 0)
-            if n > 0 then
-                local temp = convertMultiToArr(touches)
-                local temp = self.bg:convertToNodeSpace(ccp(temp[0][1], temp[0][2]))
-                BattleLogic.updateKill(curChoose)
-                self.scene.ml:updateKill(curChoose)
-                print("curChoose", curChoose)
-                self.buildLayer:addSoldier(curChoose, temp.x, temp.y) 
+                    local ani = CCAnimationCache:sharedAnimationCache():animationByName("tx2")
+                    local sp = setPos(CCSprite:create(string.format("tx2_%d.png", 0)), {temp.x, temp.y})
+                    self.bg:addChild(sp)
+                    sp:setScale(0.0)
+                    sp:runAction(repeatForever(CCAnimate:create(ani)))
+                    sp:runAction(sequence({fadein(0.2), delaytime(0.2), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+                    sp:runAction(sequence({scaleto(0.2, 0.2, 0.2)}))
 
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("tx2")
-                local sp = setPos(CCSprite:create(string.format("tx2_%d.png", 0)), {temp.x, temp.y})
-                self.bg:addChild(sp)
-                sp:setScale(0.0)
-                sp:runAction(repeatForever(CCAnimate:create(ani)))
-                sp:runAction(sequence({fadein(0.2), delaytime(0.2), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                sp:runAction(sequence({scaleto(0.2, 0.2, 0.2)}))
+                    self.scene.state = BATTLE_STATE.IN_BATTLE
+                    self.scene.ml:startBattle()
+                end
 
-                self.scene.state = BATTLE_STATE.IN_BATTLE
-                self.scene.ml:startBattle()
             end
-
         end
     end
 

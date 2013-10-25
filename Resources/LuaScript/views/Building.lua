@@ -89,7 +89,7 @@ function Building:ctor(m, d, privateData)
 
 
     registerEnterOrExit(self)
-    registerMultiTouch(self)
+    --registerMultiTouch(self)
 end
 function Building:setMap(m)
     self.map = m
@@ -172,9 +172,11 @@ function Building:touchesBegan(touches)
     self.accMove = 0
 
     if self.lastPos.count == 1 then
-        local px, py = self.bg:getPosition()
-        local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
-        if checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy) then
+        --local px, py = self.bg:getPosition()
+        --local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
+        --checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy) 
+        local ret = true   
+        if ret then
             self.inSelf = true
             local setSuc = 0
             if self.state == getParam("buildMove") or self.Planing == 1 then

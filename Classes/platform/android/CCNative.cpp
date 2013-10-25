@@ -1,7 +1,13 @@
 #include "platform/CCNative.h"
 #include "platform/android/jni/JniHelper.h"
-
+#include "support/user_default/CCUserDefault.h"
 #include "CCLuaEngine.h"
+
+void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jstring url){
+    const char* s=env->GetStringUTFChars(url, NULL);
+    cocos2d::CCUserDefault::sharedUserDefault()->setStringForKey("username", s);
+}
+
 NS_CC_EXT_BEGIN
 
 void CCNative::openURL(const char* pszUrl)
