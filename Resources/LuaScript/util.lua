@@ -229,6 +229,11 @@ function fixY(hei, y, sy, ay)
         return hei-(y)
     end
 end
+function designToRealY(y)
+    local dy = global.director.designSize[2]-y
+    return global.director.disSize[2]-dy
+end
+
 function addAction(bg, act)
     bg:runAction(act)
     return bg
@@ -1155,4 +1160,10 @@ function multiScalar(arr, s)
         v = v*s
         arr[k] = v
     end
+end
+
+--right 对齐的坐标
+function fixX(x)
+    local dx = global.director.designSize[1]-x
+    return global.director.disSize[1]-dx
 end

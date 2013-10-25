@@ -8,7 +8,6 @@ void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jst
     cocos2d::CCUserDefault::sharedUserDefault()->setStringForKey("username", s);
 }
 
-
 NS_CC_EXT_BEGIN
 
 void CCNative::openURL(const char* pszUrl)

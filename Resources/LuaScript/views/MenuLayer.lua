@@ -50,42 +50,42 @@ function MenuLayer:initView()
     self.bg:addChild(name)
     self.name = name
 
+    --scaleX
     self.banner = setSca(setPos(setAnchor(addSprite(self.bg, "menu_back.png"), {0, 0}), {0, 0}), global.director.disSize[1]/global.director.designSize[1])
 
-    local temp = setPos(setAnchor(addSprite(self.banner, "menuFeather.png"), {0, 0}), {107, fixY(global.director.disSize[2], 367, 59)})
+    local temp = setPos(setAnchor(addSprite(self.banner, "menuFeather.png"), {0, 0}), {107, fixY(global.director.disSize[2], designToRealY(367), 59)})
     
     self.taskButton = ui.newButton({image="task.png", delegate=self, callback=self.onTask}) 
-    setPos(self.taskButton.bg, {12, fixY(nil, 395, 82)})
+    setPos(self.taskButton.bg, {12, fixY(nil, designToRealY(395), 82)})
     self.banner:addChild(self.taskButton.bg)
     
-    self.taskFin = setPos(setAnchor(addSprite(self.banner, "taskFin0.png"), {0, 0}), {83, fixY(nil, 402, 27)})
-    self.finNum = setColor(setPos(setAnchor(addLabel(self.banner, getStr("99+", nil), "", 18), {0.5, 0.5}), {96, fixY(nil, 416, 0, 0.5)}), {255, 255, 255})
+    self.taskFin = setPos(setAnchor(addSprite(self.banner, "taskFin0.png"), {0, 0}), {83, fixY(nil, designToRealY(402), 27)})
+    self.finNum = setColor(setPos(setAnchor(addLabel(self.banner, getStr("99+", nil), "", 18), {0.5, 0.5}), {96, fixY(nil, designToRealY(416), 0, 0.5)}), {255, 255, 255})
     
     self.expfiller = setAnchor(addSprite(self.banner, "exp_filler.png"), {0, 0})
-    setPos(self.expfiller, {133, fixY(nil, 419, getHeight(self.expfiller))})
+    setPos(self.expfiller, {133, fixY(nil, designToRealY(419), getHeight(self.expfiller))})
 
-    self.expBack = setPos(setAnchor(addSprite(self.banner, "level0.png"), {0, 0}), {120, fixY(nil, 406, 36)})
+    self.expBack = setPos(setAnchor(addSprite(self.banner, "level0.png"), {0, 0}), {120, fixY(nil, designToRealY(406), 36)})
     
     local expSize = self.expBack:getContentSize()
     self.levelLabel = setPos(setAnchor(addNode(self.expBack), {0.5, 0.5}), {expSize.width/2, expSize.height/2})
     
     self.collectionButton = ui.newButton({image="mainRank.png", delegate=self, callback=self.onRank})
-    setPos(self.collectionButton.bg, {229, fixY(nil, 445, 34)})
+    setPos(self.collectionButton.bg, {229, fixY(nil, designToRealY(445), 34)})
     self.banner:addChild(self.collectionButton.bg)
 
     self.chargeButton = ui.newButton({image="recharge.png", delegate=self, callback=self.openCharge})
-    setAnchor(setPos(self.chargeButton.bg, {439, fixY(nil, 444, 35)}), {0, 0})
+    setAnchor(setPos(self.chargeButton.bg, {439, fixY(nil, designToRealY(444), 35)}), {0, 0})
     self.banner:addChild(self.chargeButton.bg)
 
     self.menuButton = ui.newButton({image="menu_button.png", delegate=self, callback=self.onClicked, param=0})
-    setPos(setAnchor(self.menuButton.bg, {0, 0}), {685, fixY(nil, 380, 106)})
+    setPos(setAnchor(self.menuButton.bg, {0, 0}), {685, fixY(nil, designToRealY(380), 106)})
     self.banner:addChild(self.menuButton.bg)
 
-    self.crystalIcon = setPos(setSize(addSprite(self.banner, "crystal.png"), {30, 30}), {110, fixY(nil, 461, nil, 0.5)})
-
+    self.crystalIcon = setPos(setSize(addSprite(self.banner, "crystal.png"), {30, 30}), {110, fixY(nil, designToRealY(461), nil, 0.5)})
     self:initText() 
 
-    self.expBanner = setVisible(setPos(setAnchor(CCSprite:create("expBanner.png"), {0, 0}), {123, fixY(nil, 432, 50)}), false)
+    self.expBanner = setVisible(setPos(setAnchor(CCSprite:create("expBanner.png"), {0, 0}), {123, fixY(nil, designToRealY(432), 50)}), false)
     self.banner:addChild(self.expBanner)
 
     self.expWord = ui.newBMFontLabel({text=getStr("expToLev", nil), font="bound.fnt", size=17})
@@ -137,21 +137,13 @@ end
 function MenuLayer:initText()
     local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     self.banner:addChild(temp)
-    self.silverText = setColor(setPos(setAnchor(temp, {0, 0.5}), {333, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
+    self.silverText = setColor(setPos(setAnchor(temp, {0, 0.5}), {333, fixY(nil, designToRealY(461), nil, 0.5)}), {255, 255, 255})
     local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     self.banner:addChild(temp)
-    self.goldText = setColor(setPos(setAnchor(temp, {0, 0.5}), {588, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
-    --[[
-    local w = ''..global.user.rankOrder
-    if global.user.rankOrder > 999 then
-        w = '999+'
-    end
-    --]]
+    self.goldText = setColor(setPos(setAnchor(temp, {0, 0.5}), {588, fixY(nil, designToRealY(461), nil, 0.5)}), {255, 255, 255})
     local temp = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     self.banner:addChild(temp)
-    --self.gloryLevText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
-    self.crystalText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, 461, nil, 0.5)}), {255, 255, 255})
-    
+    self.crystalText = setColor(setPos(setAnchor(temp, {0.5, 0.5}), {169, fixY(nil, designToRealY(461), nil, 0.5)}), {255, 255, 255})
 end
 function MenuLayer:updateText()
     local ures = global.user.resource
