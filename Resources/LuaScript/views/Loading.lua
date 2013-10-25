@@ -1,13 +1,14 @@
 Loading = class()
 function Loading:ctor()
-    self.bg = CCLayer:create()
-    setDesignScale(self.bg)
+    self.bg = CCNode:create()
+    --self.bg = CCLayer:create()
+    --setDesignScale(self.bg)
 
     registerTouch(self)
     registerUpdate(self)
     registerEnterOrExit(self)
 
-    local temp = setColor(setSize(setPos(setAnchor(addSprite(self.bg, "loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255})
+    local temp = setDesignScale(setColor(setSize(setPos(setAnchor(addSprite(self.bg, "loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255}))
 
 
     setSize(setPos(setAnchor(addSprite(self.bg, "wangguoLogo.png"), {0, 0}), {19,  fixY(480, 4, 116)}), {184, 116})
