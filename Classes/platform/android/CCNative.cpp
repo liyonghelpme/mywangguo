@@ -25,12 +25,10 @@ void CCNative::openURL(const char* pszUrl)
 
 void CCNative::postNotification(int duration, const char* content)
 {
-	CCLog(content);
+	//CCLog(content);
 }
 
 void CCNative::clearLocalNotification()
 {
-	//"do not support");
 }
-
 NS_CC_EXT_END

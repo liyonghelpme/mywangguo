@@ -389,9 +389,13 @@ function animate(t, arr)
     return ani
 end
 
+function addPlistSprite(name)
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile(name)
+end
 --修正主picture 在images 文件夹
 --修正key --->xxx.plist/x.png
 --降低资源包
+--[[
 function addPlistSprite(name)
     --print("addPlistSprite", name)
     local dict = CCDictionary:createWithContentsOfFile('images/'..name)
@@ -416,6 +420,7 @@ function addPlistSprite(name)
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithDictionary(dict, texture)
 end
+--]]
 
 local initYet = false
 function altasWord(c, s)

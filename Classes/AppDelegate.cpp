@@ -72,7 +72,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     //搜索文件路径
     CCDictionary *dict = CCDictionary::create();
     CCDictionary *ads = CCDictionary::create();
-    ads->setObject(CCString::create("AdsAdMob"), "name");
+    ads->setObject(CCString::create("AdsAdmob"), "name");
     dict->setObject(ads, "ads");
     MyPlugins::getInstance()->loadPlugins(dict);
     
