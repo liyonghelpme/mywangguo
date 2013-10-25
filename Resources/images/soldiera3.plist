@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>ss3a0.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a1.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{142,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a2.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{284,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a3.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{426,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a4.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{568,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a5.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{710,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a6.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{852,0},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+		<key>ss3a7.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,75},{142,75}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {142,75}}</string>
+			<key>sourceSize</key>
+			<string>{142,75}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>2</integer>
+		<key>realTextureFileName</key>
+		<string>soldiera3.png</string>
+		<key>size</key>
+		<string>{1024,256}</string>
+		<key>textureFileName</key>
+		<string>soldiera3.png</string>
+	</dict>
+</dict>
+</plist>

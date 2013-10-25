@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>bold.plist/0.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{82, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/1.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{123, 0},{19, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {19, 41}}</string>
+			<key>sourceSize</key>
+			<string>{19,41}</string>
+		</dict>
+		<key>bold.plist/2.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/3.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{41, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/4.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{224, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/5.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{265, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/6.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{142, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/7.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{183, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/8.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{306, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+		<key>bold.plist/9.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{347, 0},{41, 41}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {41, 41}}</string>
+			<key>sourceSize</key>
+			<string>{41,41}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>2</integer>
+		<key>realTextureFileName</key>
+		<string>bold.png</string>
+		<key>size</key>
+		<string>{512,64}</string>
+		<key>textureFileName</key>
+		<string>bold.png</string>
+	</dict>
+</dict>
+</plist>
