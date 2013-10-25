@@ -17,6 +17,7 @@ function MiaoBuild:ctor(m, data)
     self.lastColBuild = nil
     self.dir = 0
     self.deleted = false
+    self.moveTarget = nil
 
     self.bg = CCLayer:create()
     if self.picName == 'build' then
@@ -25,15 +26,42 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0.5})
             setPos(self.changeDirNode, {0, SIZEY})
             setRotation(self.changeDirNode, 45)
+        --樱花树
+        elseif self.id == 4 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            local bd = Logic.buildings[self.id]
+            local sz = self.changeDirNode:getContentSize()
+            setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
+            
+            local temp = CCSpriteBatchNode:create("white2.png")
+            self.bg:addChild(temp)
+            self.gridNode = temp
+            local initX = 0
+            local initY = -SIZEY*2*2
+            local offX = SIZEX
+            local offY = SIZEY
+            for i =0, 4, 1 do
+                local curX = initX-SIZEX*i
+                local curY = initY+SIZEY*i
+                for j = 0, 4, 1 do
+                    local no = CCSprite:create("white2.png")
+                    temp:addChild(no)
+                    setAnchor(setSize(setPos(no, {curX, curY}), {SIZEX*2, SIZEY*2}), {0.5, 0})
+                    curX = curX+SIZEX
+                    curY = curY+SIZEY
+                end
+            end
         else
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             local bd = Logic.buildings[self.id]
             local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
 
-            local temp = setPos(setSize(addSprite(self.changeDirNode, "green2.png"), {10, 10}), {Logic.buildings[self.id].doorx, (sz.height-Logic.buildings[self.id].doory)})
-            self.doorPoint = temp
+            --local temp = setPos(setSize(addSprite(self.changeDirNode, "green2.png"), {10, 10}), {Logic.buildings[self.id].doorx, (sz.height-Logic.buildings[self.id].doory)})
+            --self.doorPoint = temp
         end
+    elseif self.picName == 'move' then
+        self.changeDirNode = setPos(setRotation(CCSprite:create("move.png"), 45), {0, SIZEY})
     elseif self.picName == 'backPoint' then
         self.changeDirNode = setColor(setSize(setAnchor(CCSprite:create("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
     elseif self.picName == 'remove' then
@@ -81,6 +109,7 @@ function MiaoBuild:touchesBegan(touches)
             --print("touchesBegan", setSuc, self.state, self.Planing)
             if setSuc == 1 then
                 self.dirty = 1
+                self.accMove = 0
                 self.map.mapGridController:clearMap(self)
                 self:showBottom()
 
@@ -109,8 +138,7 @@ function MiaoBuild:touchesMoved(touches)
             self:setColPos()
         end
         self:setPos(newPos)
-    else
-        self.accMove = math.abs(difx)+math.abs(dify)
+        self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
     end
 end
 
@@ -143,8 +171,31 @@ function MiaoBuild:touchesEnded(touches)
         self.map.mapGridController:updateMap(self)
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         if self.colNow == 1 then
+            if self.picName == 'move' then
+                if self.moveTarget == nil then
+                    --print("move collide ", self.otherBuild.picName, self.lastColBuild.picName, self.moveTarget)
+                    print("move Collide")
+                    --确认移动建筑物了
+                    if self.lastColBuild == self.otherBuild and self.otherBuild.picName == 'build' then
+                        local tex = self.otherBuild.changeDirNode:getTexture()
+                        --确认当前移动的建筑物
+                        self.changeDirNode:setTexture(tex)
+                        self.moveTarget = self.otherBuild
+                    else
+                        self.lastColBuild = self.otherBuild
+                    end
+                --如果上次点击位置 和这次位置一样 则 确认移动  要移动的目的地和原来的目的地相同则不变
+                --之后需要加上朝向direction
+                else
+                    print("moveBuilding now", self.accMove)
+                    if self.accMove < 20 and self.otherBuild == self.moveTarget then
+                        local p = getPos(self.bg)
+                        self.moveTarget:moveToPos(p)
+                        self:clearMoveState()
+                    end
+                end
             --和一个建筑物 冲突 
-            if self.picName == 'remove' then
+            elseif self.picName == 'remove' then
                 if type(self.otherBuild) == 'table' then
                     print("removeBuilding", self.otherBuild, type(self.otherBuild))
                     if self.lastColBuild == self.otherBuild then
@@ -165,7 +216,18 @@ function MiaoBuild:touchesEnded(touches)
 
                 end
             end
-
+        else
+            --没有冲突 顺利移动建筑物
+            if self.picName == 'move' then
+                if self.moveTarget ~= nil then
+                    print("sure to move", self.accMove)
+                    if self.accMove < 20 then
+                        local p = getPos(self.bg)
+                        self.moveTarget:moveToPos(p)
+                        self:clearMoveState()
+                    end
+                end
+            end
         end
     end
 end
@@ -254,8 +316,12 @@ end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
 function MiaoBuild:finishBuild()
-    if self.picName ~= 'build' then
+    --白名单 方法
+    if self.picName == 't' or self.picName == 's' then
         self:adjustRoad()
+    elseif self.picName == 'build' and self.id == 4 then
+        removeSelf(self.gridNode)
+        self.gridNode = nil
     end
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
@@ -376,4 +442,44 @@ function MiaoBuild:removeSelf()
     end
     self.deleted = true
     self.map:removeBuilding(self)
+end
+--用于Move 建筑
+--再次点击 确认
+function MiaoBuild:runMoveAction(px, py)
+    local np = normalizePos({px, py}, 1, 1)
+    local function finishMove()
+        self.moveAct = nil
+        self:setColPos()
+        self.lastColBuild = self.otherBuild
+        self.map.mapGridController:updateMap(self)
+    end
+    if self.moveAct ~= nil then
+        self.bg:stopAction(self.moveAct)
+        self.moveAct = nil
+    end
+    self.map.mapGridController:clearMap(self)
+    self.moveAct = sequence({moveto(0.3, np[1], np[2]), callfunc(nil, finishMove)})
+    self.bg:runAction(self.moveAct)
+end
+function MiaoBuild:clearMoveState()
+    print("clearMoveState")
+    self.lastColBuild = nil
+    self.otherBuild = nil
+    self.moveTarget = nil
+    local tex = CCTextureCache:sharedTextureCache():addImage("move.png")
+    self.changeDirNode:setTexture(tex)
+end
+function MiaoBuild:moveToPos(p)
+    print("moveToPos", simple.encode(p))
+    self.map.mapGridController:clearMap(self)
+    setPos(self.bg, p)
+    self.map.mapGridController:updateMap(self)
+    if self.owner ~= nil then
+        if self.id == 1 then
+            self.owner:clearHouse()
+        elseif self.id == 2 then
+            self.owner:clearWork()
+        end
+        self.owner = nil
+    end
 end

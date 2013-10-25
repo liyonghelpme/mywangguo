@@ -29,6 +29,11 @@ function MiaoMenu:ctor(s)
     setPos(but.bg, {450, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
+
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onMove, delegate=self, text="移动", size=20, param=2})
+    setPos(but.bg, {550, 50})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
 end
 function MiaoMenu:initDataOver()
     local initX = 50
@@ -63,4 +68,7 @@ function MiaoMenu:onPeople(param)
 end
 function MiaoMenu:onRemove()
     self.scene.page:onRemove()
+end
+function MiaoMenu:onMove()
+    self.scene.page:onMove()
 end

@@ -10,6 +10,7 @@ PEOPLE_STATE = {
     IN_WORK = 6,
     IN_HOME = 7,
     GO_AWAY = 8,
+    PAUSED = 9,
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
@@ -22,6 +23,10 @@ function MiaoPeople:ctor(m, data)
     self.lastState = nil
     self.id = data.id
     self.name = str(math.random(99999))
+    --附近影响的建筑物列表 
+    self.affectBuild = {}
+    --1.1 1.3 1.5
+    self.rate = 1
 
     self.bg = CCNode:create()
     --不同人物动画的角度也有可能不同
@@ -46,8 +51,14 @@ function MiaoPeople:setZord()
 end
 function MiaoPeople:enterScene()
     registerUpdate(self)
+    Event:registerEvent(EVENT_TYPE.ROAD_CHANGED, self)
+end
+function MiaoPeople:receiveMsg(name, msg)
+    if name == EVENT_TYPE.ROAD_CHANGED then
+    end
 end
 function MiaoPeople:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.ROAD_CHANGED, self)
 end
 
 function MiaoPeople:checkHealth()
@@ -115,6 +126,7 @@ function MiaoPeople:update(diff)
     self:initMove(diff)
     self:doMove(diff)
     self:doWork(diff)
+    self:doPaused(diff)
     self.stateLabel:setString(str(self.state))
 end
 function MiaoPeople:findPath(diff)
@@ -157,8 +169,8 @@ function MiaoPeople:initFind(diff)
             --寻找要去收割的建筑物
             self:findWorkBuilding()
             if self.predictTarget == nil then
-                --普通村民
-                if self.id == 1 then
+                --普通村民 没有呆在房间内 则回到房间内
+                if self.id == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
                     self:findHouse()
                 --商人往回走
                 elseif self.id == 2 then
@@ -184,7 +196,13 @@ function MiaoPeople:initFind(diff)
 
         else
             --没找到可以工作的目标 则回去休息
-            self.state = PEOPLE_STATE.START_FIND
+            --暂停寻路 再去寻找回去的路 id == 1  
+            if self.tired then
+                self.state = PEOPLE_STATE.PAUSED 
+                self.pausedTime = 0
+            else
+                self.state = PEOPLE_STATE.START_FIND
+            end
         end
     end
 end
@@ -244,8 +262,13 @@ function MiaoPeople:doFind(diff)
             self.pqDict = nil
             self.cells = nil
         elseif #self.openList == 0 then
-        --无路可走了
-            self.state = PEOPLE_STATE.FREE
+        --回家无路可走了 休息 
+            if self.tired then
+                self.state = PEOPLE_STATE.PAUSED 
+                self.pausedTime = 0
+            else
+                self.state = PEOPLE_STATE.FREE
+            end
 
             self.openList = nil
             self.closedList = nil
@@ -258,10 +281,9 @@ function MiaoPeople:doFind(diff)
 end
 function MiaoPeople:initMove(diff)
     if self.state == PEOPLE_STATE.FIND then
-
         --开始从房间里面出来了 调整一下初始的位置 people 所在网格靠近附近邻居的位置 中点
         if self.lastState == PEOPLE_STATE.IN_HOME then
-            print("init Home Pos", simple.encode(self.path[2]), simple.encode(self.lastEndPoint))
+            print("init Home Pos", #self.path, simple.encode(self.path[2]), simple.encode(self.lastEndPoint))
             local mx = (self.path[2][1]+self.lastEndPoint[1])/2
             local my = (self.path[2][2]+self.lastEndPoint[2])/2
             local np = setBuildMap({1, 1, mx, my})
@@ -584,5 +606,15 @@ end
 function MiaoPeople:clearWork()
     if self.state == PEOPLE_STATE.IN_WORK then
         self.state = PEOPLE_STATE.FREE
+    end
+end
+
+function MiaoPeople:doPaused(diff)
+    if self.state == PEOPLE_STATE.PAUSED then
+        self.pausedTime = self.pausedTime+diff
+        if self.pausedTime > 5 then
+            self.pausedTime = 0
+            self.state = PEOPLE_STATE.FREE
+        end
     end
 end

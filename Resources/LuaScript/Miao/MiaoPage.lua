@@ -48,18 +48,29 @@ function MiaoPage:receiveMsg(name, msg)
     end
 end
 
+--移动move 
+--点击某个建筑物 进入移动状态 
+--原地还有这个建筑物 不过 新的 替换成了这个建筑物 的 图像 可以移动 桥梁 普通建筑物   道路不能移动
 function MiaoPage:touchesBegan(touches)
     self.touchBuild = nil
     self.lastPos = convertMultiToArr(touches)
     if self.lastPos.count == 1 then
-        local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
+        local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
+        tp.y = tp.y-SIZEY
         local allCell = self.buildLayer.mapGridController.mapDict
         local map = getPosMap(1, 1, tp.x, tp.y)
         local key = getMapKey(map[3], map[4])
         --点击到某个建筑物
         if allCell[key] ~= nil then
+            --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
+            --移动地图 和 单纯的点击 地图
+            --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
+            --    self.touchBuild = self.curBuild
+            --    self.touchBuild:touchesBegan(touches)
+            --else
             self.touchBuild = allCell[key][#allCell[key]][1]
             self.touchBuild:touchesBegan(touches)
+            --end
         end
     end
 
@@ -75,12 +86,61 @@ function MiaoPage:touchesMoved(touches)
         self.touchDelegate:tMoved(touches)
     end
 end
+function MiaoPage:moveToPoint(x, y)
+    local wp = self.bg:convertToWorldSpace(ccp(x, y))
+    local vs = getVS()
+    local dx, dy = vs.width/2-wp.x, vs.height/2-wp.y
+    local cp = getPos(self.bg)
+    cp[1] = cp[1]+dx
+    cp[2] = cp[2]+dy
+
+    local sz = self.bg:getContentSize()
+    local mx = math.min(0, cp[1])
+    local my = math.min(0, cp[2])
+    local sca = self.bg:getScale()
+    mx = math.max(mx, vs.width-sz.width*sca)
+    my = math.max(my, vs.height-sz.height*sca)
+    local function finishMov()
+        self.moveAct = nil
+    end
+    if self.moveAct ~= nil then
+        self.bg:stopAction(self.moveAct)
+        self.moveAct = nil
+    end
+    self.moveAct = sequence({moveto(0.2, mx, my), callfunc(nil, finishMov)})
+    self.bg:runAction(self.moveAct)
+end
 function MiaoPage:touchesEnded(touches)
+    if not self.blockMove then
+        --快速点击 curBuild 移动到 这个点击位置  屏幕移动到中心位置 
+        if self.touchDelegate.accMove == nil then
+
+        elseif self.touchDelegate.accMove < 20 then
+            --点击移动建筑物 
+            if self.curBuild ~= nil and self.curBuild.picName == 'move' then
+                self.lastPos = convertMultiToArr(touches)
+                --场景没有被缩放的情况下 使用 SIZEY 偏移世界坐标
+                --场景缩放了之后 不能使用SIZEY 偏移世界坐标
+                local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
+                tp.y = tp.y-SIZEY
+                local np = normalizePos({tp.x, tp.y}, 1, 1)
+                self.curBuild:runMoveAction(np[1], np[2])
+                self:moveToPoint(np[1], np[2]+SIZEY)
+            end
+        else
+            if self.curBuild ~= nil and self.curBuild.picName == 'move' then
+                local vs = getVS()
+                local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+                p = normalizePos({p.x, p.y-SIZEY}, 1, 1)
+                self.curBuild:runMoveAction(p[1], p[2])
+            end
+        end
+
+        self.touchDelegate:tEnded(touches)
+    end
+    --处理完 blockMove 之后 再清理 blockMove
     if self.touchBuild then
         self.touchBuild:touchesEnded(touches)
-    end
-    if not self.blockMove then
-        self.touchDelegate:tEnded(touches)
     end
 end
 function MiaoPage:beginBuild(kind, id)
@@ -106,7 +166,36 @@ end
 function MiaoPage:finishBuild()
     print("finishBuild", self.curBuild.picName, self.curBuild.id)
     if self.curBuild ~= nil then
-        if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
+        if self.curBuild.picName == 'move' then
+            --[[
+            --有拖动的建筑物 没有冲突  或者没有移动 建筑物尺寸一样大  对于伐木场的移动 和旋转需要另外考虑 要求 新旧位置完全一样才行 
+            if self.curBuild.moveTarget ~= nil  then
+                local ret = false
+                if  self.curBuild.colNow == 0 then
+                    ret = true
+                else
+                    --额外考虑所有的块
+                    --TODO
+                    if self.curBuild.otherBuild == self.curBuild.moveTarget then
+                        ret = true
+                    end
+                end
+                if ret then
+                    local p = getPos(self.curBuild.bg)
+                    self.curBuild.moveTarget:moveToPos(p)
+                    self.curBuild:clearMoveState()
+                end
+            end
+            --]]
+            if self.curBuild.moveTarget == nil then
+                self.curBuild:removeSelf()
+                self.curBuild = nil
+            --取消移动
+            else
+                self.curBuild:removeSelf()
+                self.curBuild = nil
+            end
+        elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
             if self.curBuild.colNow == 0 then
                 self.curBuild:finishBuild()
@@ -139,6 +228,20 @@ function MiaoPage:onRemove()
         local vs = getVS()
         --先确定位置 再加入到 buildLayer里面
         self.curBuild = MiaoBuild.new(self.buildLayer, {picName='remove'}) 
+        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+        p = normalizePos({p.x, p.y}, 1, 1)
+        self.curBuild:setPos(p)
+        self.curBuild:setState(BUILD_STATE.MOVE)
+        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+    end
+end
+--拖动某个建筑物 还是  
+--选择某个建筑物 拖动 确定  取消 移动 setCurBuild = '??' 作为最上层一旦和这个建筑物 合体 就一起了 
+--点击某个位置 这个建筑物 就被选中了 
+function MiaoPage:onMove()
+    if self.curBuild == nil then
+        local vs = getVS()
+        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='move'})
         local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         p = normalizePos({p.x, p.y}, 1, 1)
         self.curBuild:setPos(p)

@@ -125,11 +125,16 @@ function MoveMap:checkCollision(build)
             local key = getMapKey(curX, curY)
             local v = self.mapGridController.mapDict[key]
             if v ~= nil then
+                if v[#v][1] ~= build then
+                    return v[#v][1]
+                end
+                --[[
                 for m, n in ipairs(v) do
                     if n[1] ~= build then
                         return n[1]
                     end
                 end
+                --]]
             end
             if self.staticObstacle[key] ~= nil then
                 print("col key", key)
@@ -150,6 +155,8 @@ function MoveMap:addBuilding(chd, z)
             self.buildingLayer:addChild(chd.bg, z)
         end
     elseif chd.picName == 'remove' then
+        self.removeLayer:addChild(chd.bg, z)
+    elseif chd.picName == 'move' then
         self.removeLayer:addChild(chd.bg, z)
     else
         self.roadLayer:addChild(chd.bg, z)
