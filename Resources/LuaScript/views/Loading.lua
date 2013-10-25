@@ -1,24 +1,24 @@
 Loading = class()
 function Loading:ctor()
     self.bg = CCLayer:create()
-    setDesignScale(self.bg)
+    --setDesignScale(self.bg)
 
     registerTouch(self)
     registerUpdate(self)
     registerEnterOrExit(self)
 
-    local temp = setColor(setSize(setPos(setAnchor(addSprite(self.bg, "loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255})
+    local temp = setDesignScale(setColor(setSize(setPos(setAnchor(addSprite(self.bg, "loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255}))
 
 
-    setSize(setPos(setAnchor(addSprite(self.bg, "wangguoLogo.png"), {0, 0}), {19,  fixY(480, 4, 116)}), {184, 116})
-    addAction(setSize(setPos(setAnchor(addSprite(self.bg, "loadingCircle.png"), {0.5, 0.5}), {763, fixY(480, 37, 0)}), {50, 57}), repeatForever(rotateby(2000, 360)))
-    setSize(setPos(setAnchor(addSprite(self.bg, "loadingWord.png"), {0, 0}), {607, fixY(480, 23, 29)}), {129, 29}) 
-    addAction(setAnchor(setPos(addSprite(self.bg, nil), {0, 0}), {0, 0}), repeatForever(animate(1500, frames("lighting%d.png", 0, 6))))
+    setSize(setPos(setAnchor(addSprite(self.bg, "wangguoLogo.png"), {0, 0}), {19,  fixY(nil, 4, 116)}), {184, 116})
+    addAction(setSize(setPos(setAnchor(addSprite(self.bg, "loadingCircle.png"), {0.5, 0.5}), {fixX(763), fixY(nil, 37, 0)}), {50, 57}), repeatForever(rotateby(2000, 360)))
+    setSize(setPos(setAnchor(addSprite(self.bg, "loadingWord.png"), {0, 0}), {fixX(607), fixY(nil, 23, 29)}), {129, 29}) 
+    addAction(setAnchor(setPos(addSprite(self.bg, nil), {0.5, 0}), {getVS().width/2, 0}), repeatForever(animate(1500, frames("lighting%d.png", 0, 6))))
     
     self.processNum = altasWord('red', '0%')
     self.bg:addChild(self.processNum)
     local sz = self.processNum:getContentSize()
-    setPos(setAnchor(self.processNum, {0.5, 0.5}), {400, fixY(480, 394, sz.height)})
+    setPos(setAnchor(self.processNum, {0.5, 0.5}), {getVS().width/2, fixY(480, 394, sz.height)})
 
     self.passTime = 0
     self.curProcess = 0
