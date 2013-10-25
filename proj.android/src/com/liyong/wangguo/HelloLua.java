@@ -88,7 +88,6 @@ public class HelloLua extends Cocos2dxActivity{
 			} else {
 				id = uuid;
 			}
-			//从手机上面获取 UUID
 			p.edit().putString("id", id).commit();
 		}
 		setDeviceId(id);
