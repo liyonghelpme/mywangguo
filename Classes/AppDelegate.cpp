@@ -68,6 +68,9 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 	//updateFiles();
+	if(def->getStringForKey("update") != "0")
+		updateFiles();
+
 
     //搜索文件路径
     CCDictionary *dict = CCDictionary::create();
