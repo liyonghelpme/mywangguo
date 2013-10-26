@@ -1,7 +1,7 @@
 BattleMenu = class()
 function BattleMenu:ctor(s)
     self.INIT_X = 50
-    self.INIT_Y = fixY(nil, 432)
+    self.INIT_Y = fixY(global.director.designSize[2], 432)
     self.OFFX = 80
 
     print("initBattleMenu ##############")
@@ -9,11 +9,11 @@ function BattleMenu:ctor(s)
     self.bg = CCNode:create()
     --100 倍率图片产生奇怪的效果
     local cancelBut = ui.newButton({image="mapMenuCancel.png", callback=self.onCancel, delegate=self})
-    setPos(cancelBut.bg, {654, fixY(nil, 65)})
+    setPos(cancelBut.bg, {fixX(654), fixY(nil, 65)})
     self.bg:addChild(cancelBut.bg)
     
     local randomBut = ui.newButton({image="random.png", callback=self.onRandom, delegate=self})
-    setPos(randomBut.bg, {731, fixY(nil, 65)})
+    setPos(randomBut.bg, {fixX(731), fixY(nil, 65)})
     self.bg:addChild(randomBut.bg)
     self.randomBut = randomBut
     

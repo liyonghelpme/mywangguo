@@ -16,14 +16,14 @@ map<string, string> *handleIni(const char *data, long size) {
     while(!finish && count < size) {
         CCLog("count %d %c", count, data[count]);
         int i = 0;
-        while(start[0] == '\r' or start[0] == '\n') {
+        while(start[0] == '\r' || start[0] == '\n') {
             start = start++;
             count++;
         }
 
         for(i=0; count < size; i++, count++) {
             //request neturl not matter \n \r 
-            if(start[i] == '\n' or start[i] == '\r') {
+            if(start[i] == '\n' || start[i] == '\r') {
                 break;
             }
             line[i] = start[i];
@@ -51,7 +51,7 @@ map<string, string> *handleIni(const char *data, long size) {
         (*nm)[(char*)key] = (char*)value; 
         CCLog("key value %s %s", key, value);
 
-        while(start[0] == '\r' or start[0] == '\n') {
+        while(start[0] == '\r' || start[0] == '\n') {
             start = start++;
             count++;
         }

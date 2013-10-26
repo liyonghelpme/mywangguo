@@ -34,6 +34,7 @@ import com.google.ads.AdRequest.ErrorCode;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 
 public class AdsAdmob implements InterfaceAds {
@@ -142,11 +143,15 @@ public class AdsAdmob implements InterfaceAds {
 			public void run() {
 				// destory the ad view before
 				if (null != adView) {
+					/*
 					if (null != mWm) {
 						mWm.removeView(adView);
 					}
 					adView.destroy();
 					adView = null;
+					*/
+					adView.setVisibility(View.VISIBLE);
+					return;
 				}
 
 				AdSize size = AdSize.BANNER;
@@ -187,7 +192,7 @@ public class AdsAdmob implements InterfaceAds {
 				if (null == mWm) {
 					mWm = (WindowManager) mContext.getSystemService("window");
 				}
-				AdsWrapper.addAdView(mWm, adView, curPos);
+				AdsWrapper.addAdView(mWm, adView, AdsWrapper.POS_TOP_CENTER);
 			}
 		});
 	}
@@ -197,11 +202,14 @@ public class AdsAdmob implements InterfaceAds {
 			@Override
 			public void run() {
 				if (null != adView) {
+					adView.setVisibility(View.INVISIBLE);
+					/*
 					if (null != mWm) {
 						mWm.removeView(adView);
 					}
 					adView.destroy();
 					adView = null;
+					*/
 				}
 			}
 		});

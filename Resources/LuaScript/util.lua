@@ -229,6 +229,7 @@ function fixY(hei, y, sy, ay)
         return hei-(y)
     end
 end
+
 function designToRealY(y)
     local dy = global.director.designSize[2]-y
     return global.director.disSize[2]-dy
@@ -1166,4 +1167,32 @@ end
 function fixX(x)
     local dx = global.director.designSize[1]-x
     return global.director.disSize[1]-dx
+end
+function setDesignY(sp)
+    local sca = sp:getScaleY()
+    sp:setScaleY(sca*global.director.disSize[2]/global.director.designSize[2])
+    return sp
+end
+function setDesignXY(sp)
+    local dx = global.director.disSize[1]/global.director.designSize[1]
+    local dy = global.director.disSize[2]/global.director.designSize[2]
+    local sca = math.min(dx, dy)
+    sp:setScale(sca)
+end
+function getDesignSca()
+    local dx = global.director.disSize[1]/global.director.designSize[1]
+    local dy = global.director.disSize[2]/global.director.designSize[2]
+    local sca = math.min(dx, dy)
+    return sca
+end
+--调整Scale 之后 bg 居中对齐的方法
+function setMidPos(sp)
+    local sca = sp:getScale()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local rx = ds[1]*sca
+    local ry = ds[2]*sca
+    local offX = (vs.width-rx)/2
+    local offY = (vs.height-ry)/2
+    return setPos(sp, {offX, offY})
 end

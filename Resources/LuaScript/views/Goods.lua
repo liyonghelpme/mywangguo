@@ -10,13 +10,15 @@ function Goods:ctor(s)
     self.cachePos = {}
     
     self.bg = CCNode:create()
-    
+    --setDesignXY(self.bg)
+
     self.cl = Scissor:create()
     self.bg:addChild(self.cl)
-    self.cl:setPosition(ccp(271, fixY(nil, 145, self.HEIGHT)))
-    self.cl:setContentSize(CCSizeMake(500, self.HEIGHT))
+    self.cl:setPosition(ccp(271, fixY(global.director.designSize[2], 145, self.HEIGHT)))
+    local sca = getDesignSca()
+    self.cl:setContentSize(CCSizeMake(500*sca, self.HEIGHT*sca))
 
-    self.title = setPos(setAnchor(addSprite(self.bg, "images/buyDrug.png"), {0.5, 0.5}), {515, fixY(nil, 112)})
+    self.title = setPos(setAnchor(addSprite(self.bg, "images/buyDrug.png"), {0.5, 0.5}), {515, fixY(global.director.designSize[2], 112)})
 
     self.goodNum = {}
     self.flowNode = addNode(self.cl)
@@ -28,7 +30,7 @@ function Goods:ctor(s)
 
     self.touch = ui.newTouchLayer({size={500, self.HEIGHT}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     self.bg:addChild(self.touch.bg)
-    setPos(self.touch.bg, {271, fixY(nil, 145, self.HEIGHT)})
+    setPos(self.touch.bg, {271, fixY(global.director.designSize[2], 145, self.HEIGHT)})
 end
 function Goods:initSameElement(buildData, panel)
     local objKind = buildData[1]

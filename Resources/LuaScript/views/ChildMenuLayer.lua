@@ -101,6 +101,7 @@ end
 
 function ChildMenuLayer:onStore()
     self.menu:cancelAllMenu()
+    MyPlugins:getInstance():sendCmd("hideAds", "");
     global.director:pushView(Store.new(self.scene), 1, 0)
 end
 function ChildMenuLayer:onPlan()
@@ -110,8 +111,28 @@ end
 
 function ChildMenuLayer:onFriend()
     global.director.curScene:closeGlobalMenu(self)
-    global.director:pushView(FriendDialog.new(), 1, 0)
+    --global.director:pushView(FriendDialog.new(), 1, 0)
+    addBanner(getStr("noFunc"))
 end
+function ChildMenuLayer:onSetting()
+    global.director.curScene:closeGlobalMenu(self)
+    addBanner(getStr("noFunc"))
+end
+function ChildMenuLayer:onMap()
+    global.director.curScene:closeGlobalMenu(self)
+    addBanner(getStr("noFunc"))
+end
+function ChildMenuLayer:onRank()
+    global.director.curScene:closeGlobalMenu(self)
+    addBanner(getStr("noFunc"))
+end
+
+function ChildMenuLayer:onMail()
+    global.director.curScene:closeGlobalMenu(self)
+    addBanner(getStr("noFunc"))
+end
+
+
 --切换场景之前保证当前场景的 所有dialog都关闭了
 function ChildMenuLayer:onAttack()
     global.director.curScene:closeGlobalMenu(self)

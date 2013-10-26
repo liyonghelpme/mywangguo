@@ -1347,4 +1347,5 @@ WORDS = dict({
 {"refresh", {"刷新", "refresh"}},
 {"newName", {"输入你的名字", "input name"}},
 {"NoHere", {"不能在此处放置士兵!", "Don't put here!"}},
+{"noFunc", {"该功能未开启", "nofunc"}},
 })

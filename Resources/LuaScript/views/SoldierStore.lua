@@ -10,7 +10,9 @@ end
 
 --复用商店上半部分
 function SoldierStore:initView()
-    self.bg = CCLayer:create()
+    self.bg = CCNode:create()
+    setDesignXY(self.bg)
+    setMidPos(self.bg)
     local temp
     local but0
     local sz = {800, 480}

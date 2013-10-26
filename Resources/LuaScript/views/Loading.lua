@@ -43,7 +43,7 @@ function Loading:update(diff)
             self.processNum = altasWord("red", ''..self.curProcess..'%')
             self.bg:addChild(self.processNum)
             local sz = self.processNum:getContentSize()
-            setPos(setAnchor(self.processNum, {0.5, 0.5}), {400, fixY(480, 394, sz.height)})
+            setPos(setAnchor(self.processNum, {0.5, 0.5}), {getVS().width/2, fixY(480, 394, sz.height)})
         elseif self.hopeProcess == 100 then
             --可能在loading的过程中出现新的对话框么 不能出现必须loading结束
             --sendMsg 检测场景

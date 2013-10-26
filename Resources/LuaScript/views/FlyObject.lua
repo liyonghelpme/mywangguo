@@ -9,8 +9,8 @@ function FlyObject:ctor(obj, c, cb, delegate)
 
     self.bg = CCNode:create()
     --ui 元素在屏幕上的位置 convertToWorldSpace 进行转化
-    local TarPos = dict({{"silver", {297, fixY(nil, 460)}}, {"crystal", {253, fixY(nil, 460)}}, {"gold", {550, fixY(nil, 460)}}, {"exp", {196, fixY(nil, 427)}}})
-    local defaultPos = {297, fixY(nil, 460)}
+    local TarPos = dict({{"silver", {297, fixY(global.director.designSize[2], 460)}}, {"crystal", {253, fixY(global.director.designSize[2], 460)}}, {"gold", {550, fixY(global.director.designSize[2], 460)}}, {"exp", {196, fixY(global.director.designSize[2], 427)}}})
+    local defaultPos = {297, fixY(global.director.designSize[2], 460)}
 
     local bsize = obj:getContentSize()
     local coor2 = obj:convertToWorldSpace(ccp(0, bsize.height+10))

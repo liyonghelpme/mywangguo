@@ -1,4 +1,5 @@
 Choice = class()
+--左侧只增长高度右边 宽度高度都增长
 function Choice:ctor(s)
     self.store = s
     self.INIT_X = 33
@@ -10,8 +11,10 @@ function Choice:ctor(s)
     self.INITOFF = self.BACK_HEI/2
     self.EXTRA = 5
 
+
     self.TabNum = #self.store.allGoods
-    self.bg = setContentSize(setPos(CCNode:create(), {self.INIT_X, fixY(nil, self.INIT_Y, self.BACK_HEI)}), {self.WIDTH, self.BACK_HEI})
+    self.bg = setContentSize(setPos(CCNode:create(), {self.INIT_X, fixY(global.director.designSize[2], self.INIT_Y, self.BACK_HEI)}), {self.WIDTH, self.BACK_HEI})
+    --setDesignXY(self.bg)
     self.sci = Scissor:create()
     self.sci:setContentSize(CCSizeMake(self.WIDTH, self.BACK_HEI))
     self.bg:addChild(self.sci)

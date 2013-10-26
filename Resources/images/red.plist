@@ -4,7 +4,7 @@
 <dict>
 	<key>frames</key>
 	<dict>
-		<key>0.png</key>
+		<key>red.plist/0.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{123, 0},{35, 32}}</string>
@@ -17,7 +17,7 @@
 			<key>sourceSize</key>
 			<string>{35,32}</string>
 		</dict>
-		<key>1.png</key>
+		<key>red.plist/1.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{158, 0},{15, 32}}</string>
@@ -30,7 +30,7 @@
 			<key>sourceSize</key>
 			<string>{15,32}</string>
 		</dict>
-		<key>2.png</key>
+		<key>red.plist/2.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{56, 0},{33, 32}}</string>
@@ -43,7 +43,7 @@
 			<key>sourceSize</key>
 			<string>{33,32}</string>
 		</dict>
-		<key>3.png</key>
+		<key>red.plist/3.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{89, 0},{34, 32}}</string>
@@ -56,7 +56,7 @@
 			<key>sourceSize</key>
 			<string>{34,32}</string>
 		</dict>
-		<key>4.png</key>
+		<key>red.plist/4.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{242, 0},{35, 32}}</string>
@@ -69,7 +69,7 @@
 			<key>sourceSize</key>
 			<string>{35,32}</string>
 		</dict>
-		<key>5.png</key>
+		<key>red.plist/5.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{277, 0},{34, 32}}</string>
@@ -82,7 +82,7 @@
 			<key>sourceSize</key>
 			<string>{34,32}</string>
 		</dict>
-		<key>6.png</key>
+		<key>red.plist/6.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{173, 0},{34, 32}}</string>
@@ -95,7 +95,7 @@
 			<key>sourceSize</key>
 			<string>{34,32}</string>
 		</dict>
-		<key>7.png</key>
+		<key>red.plist/7.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{207, 0},{35, 32}}</string>
@@ -108,7 +108,7 @@
 			<key>sourceSize</key>
 			<string>{35,32}</string>
 		</dict>
-		<key>8.png</key>
+		<key>red.plist/8.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{311, 0},{34, 32}}</string>
@@ -121,7 +121,7 @@
 			<key>sourceSize</key>
 			<string>{34,32}</string>
 		</dict>
-		<key>9.png</key>
+		<key>red.plist/9.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{345, 0},{36, 32}}</string>
@@ -134,7 +134,7 @@
 			<key>sourceSize</key>
 			<string>{36,32}</string>
 		</dict>
-		<key>minus.png</key>
+		<key>red.plist/minus.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{0, 0},{16, 32}}</string>
@@ -147,7 +147,7 @@
 			<key>sourceSize</key>
 			<string>{16,32}</string>
 		</dict>
-		<key>percent.png</key>
+		<key>red.plist/percent.png</key>
 		<dict>
 			<key>frame</key>
 			<string>{{16, 0},{40, 32}}</string>

@@ -14,19 +14,23 @@ function Store:ctor(s)
     "buyBuild.png"
     }
     self.bg = CCNode:create()
-    setSize(setPos(setAnchor(addSprite(self.bg, "back.png"), {0, 0}), {0, 0}), global.director.disSize)
-    setPos(setAnchor(addSprite(self.bg, "diaBack.png"), {0.5, 1}), {global.director.disSize[1]/2, global.director.disSize[2]-10})
+    setDesignXY(self.bg)
+    setMidPos(self.bg)
 
-    setPos(setAnchor(addSprite(self.bg, "rightBack.png"), {0, 0}), {254, fixY(nil, 79, 387)})
-    setPos(setAnchor(addSprite(self.bg, "storeLeft.png"), {0, 0}), {34, fixY(nil, 79, 387)})
+    local ds = global.director.designSize
+    setPos(setAnchor(addSprite(self.bg, "back.png"), {0, 0}), {0, 0})
+    setPos(setAnchor(addSprite(self.bg, "diaBack.png"), {0.5, 1}), {ds[1]/2, ds[2]-10})
 
-    local choose = setPos(setAnchor(CCSprite:create("instructArrow.png"), {0, 0}), {22, fixY(nil, 211, 117)})
+    setPos(setAnchor(addSprite(self.bg, "rightBack.png"), {0, 0}), {254, fixY(global.director.designSize[2], 79, 387)})
+    setPos(setAnchor(addSprite(self.bg, "storeLeft.png"), {0, 0}), {34, fixY(global.director.designSize[2], 79, 387)})
+
+    local choose = setPos(setAnchor(CCSprite:create("instructArrow.png"), {0, 0}), {22, fixY(global.director.designSize[2], 211, 117)})
     self.bg:addChild(choose, 1)
 
-    setPos(setAnchor(addSprite(self.bg, "moneyBack.png"), {0, 0}), {274, fixY(nil, 28, 33)})
-    setSize(setPos(setAnchor(addSprite(self.bg, "crystal.png"), {0, 0}), {586, fixY(nil, 30, 29)}), {31, 29})
-    setSize(setPos(setAnchor(addSprite(self.bg, "gold.png"), {0, 0}), {439, fixY(nil, 30, 29)}), {31, 29})
-    setSize(setPos(setAnchor(addSprite(self.bg, "silver.png"), {0, 0}), {280, fixY(nil, 30, 29)}), {31, 29})
+    setPos(setAnchor(addSprite(self.bg, "moneyBack.png"), {0, 0}), {274, fixY(global.director.designSize[2], 28, 33)})
+    setSize(setPos(setAnchor(addSprite(self.bg, "crystal.png"), {0, 0}), {586, fixY(global.director.designSize[2], 30, 29)}), {31, 29})
+    setSize(setPos(setAnchor(addSprite(self.bg, "gold.png"), {0, 0}), {439, fixY(global.director.designSize[2], 30, 29)}), {31, 29})
+    setSize(setPos(setAnchor(addSprite(self.bg, "silver.png"), {0, 0}), {280, fixY(global.director.designSize[2], 30, 29)}), {31, 29})
 
     self.silverText = ui.newBMFontLabel({text="1", font="bound.fnt", size=23})
     setPos(setAnchor(self.silverText, {0, 0.5}), {318, fixY(sz[2], 43)})
@@ -41,7 +45,7 @@ function Store:ctor(s)
     self.bg:addChild(self.crystalText)
 
 
-    setPos(setAnchor(addSprite(self.bg, "storeTit.png"), {0, 0}), {76, fixY(nil, 7, 63)})
+    setPos(setAnchor(addSprite(self.bg, "storeTit.png"), {0, 0}), {76, fixY(global.director.designSize[2], 7, 63)})
 
     self.goods = Goods.new(self)
     self.bg:addChild(self.goods.bg)
@@ -49,9 +53,9 @@ function Store:ctor(s)
     self.tabs = Choice.new(self)
     self.bg:addChild(self.tabs.bg)
 
-    setPos(setAnchor(addSprite(self.bg, "leftBoard.png"), {0, 0}), {29, fixY(nil, 74, 396)})
+    setPos(setAnchor(addSprite(self.bg, "leftBoard.png"), {0, 0}), {29, fixY(global.director.designSize[2], 74, 396)})
     local but0 = ui.newButton({image="closeBut.png", delegate=self, callback=self.closeDialog}):setAnchor(0.5, 0.5)
-    setPos(but0.bg, {772, fixY(nil, 27, nil, 0.5)})
+    setPos(but0.bg, {772, fixY(global.director.designSize[2], 27, nil, 0.5)})
     self.bg:addChild(but0.bg)
 
     self:initData()
@@ -93,6 +97,7 @@ function Store:exitScene()
 end
 
 function Store:closeDialog()
+    MyPlugins:getInstance():sendCmd("showAds", "");
     global.director:popView()
 end
 function Store:initData()

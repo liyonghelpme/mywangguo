@@ -39,7 +39,9 @@ import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -116,7 +118,27 @@ class LuaGLSurfaceView extends Cocos2dxGLSurfaceView{
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
     	// exit program when key back is entered
     	if (keyCode == KeyEvent.KEYCODE_BACK) {
-    		android.os.Process.killProcess(android.os.Process.myPid());
+    		AlertDialog.Builder b = new AlertDialog.Builder(this.getContext(), AlertDialog.THEME_HOLO_LIGHT);
+    		b.setTitle("关闭游戏")
+    		.setMessage("要关闭游戏么?")
+    		.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					android.os.Process.killProcess(android.os.Process.myPid());
+				}
+			})
+			.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.cancel();
+				}
+			});
+    		AlertDialog ad = b.create();
+    		ad.show();
     	}
         return super.onKeyDown(keyCode, event);
     }

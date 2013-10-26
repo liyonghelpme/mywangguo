@@ -1,5 +1,6 @@
 SoldierGoods = class()
 function SoldierGoods:ctor(s)
+    local sca = getDesignSca()
     self.HEIGHT = 323
     self.OFFY = 215 
     self.OFFX = 160 
@@ -12,8 +13,8 @@ function SoldierGoods:ctor(s)
     self.cl = Scissor:create()
     self.bg:addChild(self.cl)
     
-    self.cl:setPosition(ccp(271, fixY(nil, 145, self.HEIGHT)))
-    self.cl:setContentSize(CCSizeMake(500, self.HEIGHT))
+    self.cl:setPosition(ccp(271, fixY(global.director.designSize[2], 145, self.HEIGHT)))
+    self.cl:setContentSize(CCSizeMake(500*sca, self.HEIGHT*sca))
     
     self.flowNode = addNode(self.cl)
     setPos(self.flowNode, {0, self.HEIGHT})
@@ -22,7 +23,7 @@ function SoldierGoods:ctor(s)
     
     self.touch = ui.newTouchLayer({size={500, self.HEIGHT}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     self.bg:addChild(self.touch.bg)
-    setPos(self.touch.bg, {271, fixY(nil, 145, self.HEIGHT)})
+    setPos(self.touch.bg, {271, fixY(global.director.designSize[2], 145, self.HEIGHT)})
     self.goodNum = storeSoldier
     self:updateTab()
 
