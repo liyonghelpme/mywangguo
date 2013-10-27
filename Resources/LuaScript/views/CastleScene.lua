@@ -1,3 +1,5 @@
+require "views.Hint"
+require "views.NewDialog"
 require "views.RoleName"
 require "views.CastlePage"
 require "views.MenuLayer"
@@ -42,6 +44,9 @@ end
 function CastleScene:receiveMsg(name, msg)
     if name == EVENT_TYPE.INITDATA then
         print("receiveMsg initDataOver !!!!!!!!!!!!!!!!!!")
+        if not CCUserDefault:sharedUserDefault():getBoolForKey("firstGame") then
+            self.dialogController:addCmd({cmd="firstGame"})
+        end
         if global.user:getValue("name") == "" then
             self.dialogController:addCmd({cmd="roleName"})
         end

@@ -26,6 +26,8 @@ function DialogController:update(diff)
             if curCmd['cmd'] == "login" then
             elseif curCmd['cmd'] == "roleName" then
                 global.director:pushView(RoleName.new(), 1, 0)
+            elseif curCmd['cmd'] == 'firstGame' then
+                global.director:pushView(NewDialog.new(getStr("firstGame")), 1, 0)
             end
         end
     end

@@ -18,7 +18,7 @@ function Goods:ctor(s)
     local sca = getDesignSca()
     self.cl:setContentSize(CCSizeMake(500*sca, self.HEIGHT*sca))
 
-    self.title = setPos(setAnchor(addSprite(self.bg, "images/buyDrug.png"), {0.5, 0.5}), {515, fixY(global.director.designSize[2], 112)})
+    self.title = setPos(setAnchor(addSprite(self.bg, "buyDrug.png"), {0.5, 0.5}), {515, fixY(global.director.designSize[2], 112)})
 
     self.goodNum = {}
     self.flowNode = addNode(self.cl)
@@ -63,7 +63,7 @@ function Goods:initSameElement(buildData, panel)
         end
     end
 
-    setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5})
+    setColor(setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5}), {0, 0, 0})
     for k, v in pairs(cost) do
         local c = {109, 170, 44}
         local picName = k..".png"

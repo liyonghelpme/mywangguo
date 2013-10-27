@@ -5,6 +5,7 @@ function SoldierStore:ctor(s)
     self:initView()
 end
 function SoldierStore:onClose()
+    MyPlugins:getInstance():sendCmd("showAds", "");
     global.director:popView()
 end
 
@@ -63,7 +64,6 @@ function SoldierStore:initView()
     self:initLeftPanel()
 
     self.passTime = 0
-    registerUpdate(self)
     registerEnterOrExit(self)
 end
 
@@ -71,6 +71,7 @@ function SoldierStore:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:registerEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
     self:updateText()
+    registerUpdate(self)
 end
 function SoldierStore:exitScene()
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)

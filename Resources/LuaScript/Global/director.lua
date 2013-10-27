@@ -40,6 +40,7 @@ function Director:pushView(view, dark, autoPop)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
+    --MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 
 function Director:popView()
@@ -47,6 +48,7 @@ function Director:popView()
     print('popView', #self.stack, v, v.bg)
     v.bg:removeFromParentAndCleanup(true)
     table.remove(self.stack, #self.stack)
+    --MyPlugins:getInstance():sendCmd("showAds", "");
 end
 --上一个场景没有对话框
 function Director:popTransfer()

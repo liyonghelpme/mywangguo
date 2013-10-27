@@ -86,7 +86,8 @@ bool AppDelegate::applicationDidFinishLaunching()
 //更新脚本
 //更新图片
 static AssetsManager *pAssetsManager = NULL;
-static ImageUpdate *pImageUpdate = NULL;
+static AssetsManager *pImageManager = NULL;
+//static ImageUpdate *pImageUpdate = NULL;
 void AppDelegate::updateFiles() {
     pathToSave = CCFileUtils::sharedFileUtils()->getWritablePath();
     CCLog("pathToSave %s", pathToSave.c_str());
@@ -103,8 +104,22 @@ void AppDelegate::updateFiles() {
             CCLog("update Script Fail");
         }
     }
-    
-    
+
+    if(pImageManager == NULL) {
+		CCUserDefault *def = CCUserDefault::sharedUserDefault(); 
+		pImageManager = new AssetsManager((def->getStringForKey("imageUrl")+def->getStringForKey("imageZip")).c_str(), (def->getStringForKey("imageUrl")+def->getStringForKey("imageVersion")).c_str());
+	}
+	suc = false;
+	if(pImageManager->checkUpdate()) {
+        if(pImageManager->update()) {
+            suc = true;
+            CCLog("update Image successfully");
+        } else {
+            CCLog("update Image Fail");
+        }
+    }
+
+    /*
     if(pImageUpdate == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();
 		pImageUpdate = new ImageUpdate(def->getStringForKey("baseUrl").c_str(), (def->getStringForKey("imageVer")).c_str(), def->getStringForKey("localVer").c_str());
@@ -118,6 +133,7 @@ void AppDelegate::updateFiles() {
             CCLog("update Image fail");
 		}
     }
+	*/
 }
 
 

@@ -1196,3 +1196,13 @@ function setMidPos(sp)
     local offY = (vs.height-ry)/2
     return setPos(sp, {offX, offY})
 end
+function getWinMid()
+    local vs = getVS()
+    return {vs.width/2, vs.height/2}
+end
+function getBool(k)
+    return CCUserDefault:sharedUserDefault():getBoolForKey(k)
+end
+function setBool(k, v)
+    CCUserDefault:sharedUserDefault():setBoolForKey(k, v)
+end

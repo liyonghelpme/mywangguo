@@ -1,3 +1,4 @@
+require "views.Hint"
 require "views.Goods"
 require "views.Choice"
 Store = class()
@@ -62,6 +63,8 @@ function Store:ctor(s)
     self.curSel = -1
     self:changeTab(0)
     registerEnterOrExit(self)
+
+    --self.bg:addChild(Hint.new().bg)
 end
 function Store:receiveMsg(name, msg)
     if name == EVENT_TYPE.UPDATE_RESOURCE then

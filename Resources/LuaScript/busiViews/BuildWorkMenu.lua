@@ -6,8 +6,10 @@ function BuildWorkMenu:ctor(b, func1, func2)
     self.banner = setAnchor(setPos(addSprite(self.bg, "buildMenu1.png"), {0, 0}), {0, 0})
     self:updateView()
     self.passTime = 0
-    registerUpdate(self)
     registerEnterOrExit(self)
+end
+function BuildWorkMenu:enterScene()
+    registerUpdate(self)
 end
 function BuildWorkMenu:updateView()
     if self.cw ~= nil then

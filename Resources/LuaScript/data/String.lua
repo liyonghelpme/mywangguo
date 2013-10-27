@@ -1348,4 +1348,5 @@ WORDS = dict({
 {"newName", {"输入你的名字", "input name"}},
 {"NoHere", {"不能在此处放置士兵!", "Don't put here!"}},
 {"noFunc", {"该功能未开启", "nofunc"}},
+{"firstGame", {"欢迎来到你的王国，王，让我为您介绍王国的情况吧！", ""}},
 })

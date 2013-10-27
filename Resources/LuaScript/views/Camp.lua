@@ -5,8 +5,10 @@ function CampWorkNode:ctor(f)
     self.func = f
     self.bg = CCNode:create()
     self.passTime = 0
-    registerUpdate(self)
     registerEnterOrExit(self)
+end
+function CampWorkNode:enterScene()
+    registerUpdate(self)
 end
 function CampWorkNode:update(diff)
     --对方建筑物正在生产士兵
@@ -50,10 +52,12 @@ function Camp:ctor(b)
 end
 --弹出兵营对话框
 function Camp:whenFree()
+    MyPlugins:getInstance():sendCmd("hideAds", "");
     global.director:pushView(SoldierStore.new(self.baseBuild), 1, 0)
     return 1
 end
 function Camp:whenBusy()
+    MyPlugins:getInstance():sendCmd("hideAds", "");
     global.director:pushView(SoldierStore.new(self.baseBuild), 1, 0)
     return 1
 end

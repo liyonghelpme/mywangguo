@@ -37,6 +37,7 @@ import org.json.JSONException;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -92,7 +93,9 @@ public class HelloLua extends Cocos2dxActivity{
 			}
 			p.edit().putString("id", id).commit();
 		}
+		Log.e("deviceId", id);
 		setDeviceId(id);
+		//MobclickAgent.setDebugMode(true);
 	}
 	
 	public void onDestroy() {
@@ -103,10 +106,20 @@ public class HelloLua extends Cocos2dxActivity{
 	public Cocos2dxGLSurfaceView onCreateView() {
 		return new LuaGLSurfaceView(this);
 	}
-	
+	@Override
+	public void onResume() {
+		super.onResume();
+		MobclickAgent.onResume(this);
+	}
+	@Override
+	public void onPause() {
+		super.onPause();
+		MobclickAgent.onPause(this);
+	}
 	static {
         System.loadLibrary("hellolua");
    }
+	
 }
 
 class LuaGLSurfaceView extends Cocos2dxGLSurfaceView{
