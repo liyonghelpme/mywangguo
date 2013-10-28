@@ -59,7 +59,8 @@ function Cloud:finishCloud()
     self.bg:runAction(sequence({delaytime(2), callfunc(self, self.removeSelf)}))
 end
 function Cloud:removeSelf()
-    global.director:popView()
+    --global.director:popView()
+    global.director:removeFirstView()
 end
 --监控场景初始化结束
 function Cloud:update(diff)

@@ -148,4 +148,14 @@ function BattleMenu:updateKill(kind)
             break
         end
     end
+    local has = false
+    for k, v in ipairs(self.data) do
+        if v.total > 0 then
+            has = true
+            break
+        end
+    end
+    if not has then
+        global.director:pushView(ChallengeOver.new(self.scene, {suc=false}), 1, 0)
+    end
 end

@@ -9,6 +9,15 @@ function CampWorkNode:ctor(f)
 end
 function CampWorkNode:enterScene()
     registerUpdate(self)
+    Event:registerEvent(EVENT_TYPE.CLOSE_STORE, self)
+end
+function CampWorkNode:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
+end
+function CampWorkNode:receiveMsg(name, msg)
+    if name == EVENT_TYPE.CLOSE_STORE then
+        self.passTime = 9999
+    end
 end
 function CampWorkNode:update(diff)
     --对方建筑物正在生产士兵

@@ -242,10 +242,11 @@ function Building:touchesMoved(touches)
         end
         self:setPos(newPos)
     else
-        self.accMove = math.abs(difx)+math.abs(dify)
         --if not self.showMenuYet then
         --end
     end
+    --print("accMove", self.accMove)
+    self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
 end
 function Building:showGlobalMenu()
     print("self showGlobalMenu")
@@ -284,9 +285,10 @@ function Building:touchesEnded(touches)
         end
     else
         if self.inSelf then
+            --print("accMove", self.accMove)
             if self.state == getParam("buildFree") and self.accMove < 40 and global.director.curScene.inBuild == false then
                 self:doFree()
-            elseif self.state == getParam("buildWork") then
+            elseif self.state == getParam("buildWork") and self.accMove < 40 then
                 local ret = self.funcBuild:whenBusy()
                 if ret == 0 then
                     global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)

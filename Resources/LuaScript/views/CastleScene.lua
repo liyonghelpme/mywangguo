@@ -82,6 +82,8 @@ function CastleScene:finishBuild()
     self.mc:finishBuild()
     global.user:buyBuilding(self.curBuild)
     self:closeBuild()
+
+    NewLogic.triggerEvent(NEW_STEP.HARVEST)
 end
 function CastleScene:cancelBuild()
     self.mc:cancelBuild()
@@ -123,7 +125,7 @@ end
 
 function CastleScene:showGlobalMenu(build, callback, delegate)
     --既没有菜单建筑 也没有 建造建筑
-    print("showGlobalMenu", build, callback, delegate)
+    print("showGlobalMenu", build, callback, delegate, self.curMenuBuild)
     if self.curMenuBuild == nil and self.curBuild == nil then
         self.curMenuBuild = build
         self.ml:hideMenu()
@@ -134,6 +136,7 @@ end
 
 
 function CastleScene:closeGlobalMenu(build)
+    print("closeGlobalMenu", build)
     if self.curMenuBuild ~= nil then
         self.curMenuBuild:closeGlobalMenu()
         global.director:popView()

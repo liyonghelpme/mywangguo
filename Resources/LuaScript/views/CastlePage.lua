@@ -58,13 +58,26 @@ function CastlePage:receiveMsg(name, msg)
         self.blockMove = true
     elseif name == EVENT_TYPE.FINISH_MOVE then
         self.blockMove = false
+    elseif name == EVENT_TYPE.CALL_SOL then
+        for k, v in pairs(self.buildLayer.mapGridController.allBuildings) do
+            if k.funcs == CAMP then
+                self:moveToBuild(k)
+                local hint = Hint.new()
+                k.bg:addChild(hint.bg)
+                setPos(hint.bg, {0, 50})
+                NewLogic.setHint(hint)
+                break
+            end
+        end
     end
 end
 function CastlePage:enterScene()
     Event:registerEvent(EVENT_TYPE.DO_MOVE, self)
     Event:registerEvent(EVENT_TYPE.FINISH_MOVE, self)
+    Event:registerEvent(EVENT_TYPE.CALL_SOL, self)
 end
 function CastlePage:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.CALL_SOL, self)
     Event:unregisterEvent(EVENT_TYPE.DO_MOVE, self)
     Event:unregisterEvent(EVENT_TYPE.FINISH_MOVE, self)
 end
@@ -102,7 +115,7 @@ function CastlePage:touchesBegan(touches)
 
     if not self.blockMove then
         self.touchDelegate:tBegan(touches)
-        if self.movToAni == nil then
+        if self.movToAni == nil and self.touchBuild == nil then
             self.scene:closeGlobalMenu(self)
         end
     end

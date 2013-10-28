@@ -24,6 +24,12 @@ function Plant:enterScene()
     registerUpdate(self)
     local now = Timer.now
     self.passTime = now-self.objectTime
+    Event:registerEvent(EVENT_TYPE.MATURE_FARM, self)
+end
+function Plant:receiveMsg(name, msg)
+    if name == EVENT_TYPE.MATURE_FARM then
+        self.passTime = self.data['time']
+    end
 end
 
 function Plant:update(diff)
@@ -55,6 +61,7 @@ function Plant:setState()
 end
 
 function Plant:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.MATURE_FARM, self)
 end
 function Plant:getLeftTime()
     return self.data['time']-self.passTime

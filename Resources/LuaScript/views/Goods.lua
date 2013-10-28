@@ -128,7 +128,7 @@ function Goods:updateTab(rg)
         print('buildData', self.selTab, i, buildData)
         local canBuy = self:initSameElement(buildData, panel)
         panel:setTag(i)
-        self.data[i] = {self.selTab, i, canBuy}
+        self.data[i] = {self.selTab, i, canBuy, panel}
 
         print('panelData', panel.data)
         
@@ -142,6 +142,16 @@ function Goods:updateTab(rg)
     local fHeight = rows*self.offY
     --maxPos 更合适
     self.minPos = math.max(0, fHeight-self.HEIGHT)
+    self:showHint(self.hint)
+end
+function Goods:showHint(h)
+    self.hint = h
+    if h ~= nil then
+        local hint = Hint.new()
+        self.data[h][4]:addChild(hint.bg)
+        NewLogic.setHint(hint)
+        setPos(hint.bg, {75, 95})
+    end
 end
 function Goods:setTab(g)
     self.selTab = g

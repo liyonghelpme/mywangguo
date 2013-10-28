@@ -110,15 +110,25 @@ function SoldierGoods:updateTab()
 
             panel:setTag(curNum)
             --当前选择的tab  当前士兵在goodNum数组中的位置 是否等级足够可以购买
-            self.data[curNum] = {self.selTab, curNum+1, canBuy}
+            self.data[curNum] = {self.selTab, curNum+1, canBuy, panel}
 
             if self.curSel ~= nil and self.curSel[2] == curNum+1 then
                 self:showGreenBut(panel)
             end
         end
     end
-
+    print("soldierGoods", NewLogic.step)
+    if NewLogic.step == 5 then
+        self:showHint()
+    end
     self.selTab = -1
+end
+function SoldierGoods:showHint()
+    
+    local hint = Hint.new()
+    self.data[0][4]:addChild(hint.bg)
+    setPos(hint.bg, {74, 94})
+    NewLogic.setHint(hint)
 end
 function SoldierGoods:onBuy(buildData)
     self.store:setSoldier(buildData)

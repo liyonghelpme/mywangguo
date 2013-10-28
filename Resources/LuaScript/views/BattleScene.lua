@@ -30,6 +30,7 @@ function BattleScene:enterScene()
     --设置inBattle状态之后 再 获取游戏数据
     BattleLogic.startBattle()
     sendReq("getRandomOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+    NewLogic.triggerEvent(NEW_STEP.BATTLE_NOW)
 end
 function BattleScene:exitScene()
 end

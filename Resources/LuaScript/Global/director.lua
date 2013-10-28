@@ -43,6 +43,12 @@ function Director:pushView(view, dark, autoPop)
     --MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 
+function Director:removeFirstView()
+    local v = self.stack[1]
+    v.bg:removeFromParentAndCleanup(true)
+    table.remove(self.stack, 1)
+end
+
 function Director:popView()
     local v = self.stack[#self.stack]
     print('popView', #self.stack, v, v.bg)

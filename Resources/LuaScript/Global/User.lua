@@ -99,7 +99,7 @@ function User:changeValue(key, add)
 
         if level ~= oldLevel then
             Event:sendMsg(EVENT_TYPE.LEVEL_UP)
-            global.httpController:addRequest("levelUp", dict({{"uid", uid}, {"exp", v}, {"level", level}, {"rew", dict()}}), nil, nil)
+            global.httpController:addRequest("levelUp", dict({{"uid", self.uid}, {"exp", v}, {"level", level}, {"rew", dict()}}), nil, nil)
             addV = 0
         end
     end

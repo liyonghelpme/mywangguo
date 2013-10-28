@@ -21,10 +21,14 @@ function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.LEVEL_UP, self)
     Event:registerEvent(EVENT_TYPE.UPDATE_EXP, self)
     Event:registerEvent(EVENT_TYPE.CHANGE_NAME, self)
+    Event:registerEvent(EVENT_TYPE.TAP_MENU, self)
+    Event:registerEvent(EVENT_TYPE.CLOSE_STORE, self)
     self:updateText()
     self:updateExp(0)
 end
 function MenuLayer:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
+    Event:unregisterEvent(EVENT_TYPE.TAP_MENU, self)
     Event:unregisterEvent(EVENT_TYPE.CHANGE_NAME, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:unregisterEvent(EVENT_TYPE.LEVEL_UP, self)
@@ -39,6 +43,11 @@ function MenuLayer:receiveMsg(name, msg)
         self:updateExp(1)
     elseif name == EVENT_TYPE.CHANGE_NAME then
         self.name:setString(global.user:getValue("name"))
+    elseif name == EVENT_TYPE.TAP_MENU or name == EVENT_TYPE.CLOSE_STORE then
+        local hint = Hint.new()
+        self.menuButton.bg:addChild(hint.bg)
+        setPos(hint.bg, {50, 50})
+        NewLogic.setHint(hint)
     end
 end
 function MenuLayer:initView()
@@ -177,6 +186,8 @@ end
 function MenuLayer:onClicked()
     if not self.showChildMenu then
         self:drawAllMenu()
+        NewLogic.triggerEvent(2)
+        NewLogic.triggerEvent(NEW_STEP.GO_BATTLE)
     else
         self:cancelAllMenu()
     end

@@ -23,6 +23,7 @@ function Farm:whenBusy()
         self:harvestPlant()
         self.flowBanner:removeFromParentAndCleanup(true)
         self.flowBanner = nil
+        NewLogic.triggerEvent(NEW_STEP.TRAIN_SOL)
         return 1
     end
     return 0

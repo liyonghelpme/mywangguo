@@ -1,3 +1,4 @@
+require "model.NewLogic"
 NewDialog = class()
 --可以上下拖动的新手对话框 
 --在手机上面测试哪些图片没有
@@ -19,6 +20,8 @@ function NewDialog:ctor(w)
     setAnchor(setPos(self.content, {122, fixY(sz.height, 142)}), {0, 0.5})
     self.pic:addChild(self.content)
 end
+--每次点击一下 进入下一个步骤
 function NewDialog:onOk()
     global.director:popView()
+    NewLogic.nextStep()
 end

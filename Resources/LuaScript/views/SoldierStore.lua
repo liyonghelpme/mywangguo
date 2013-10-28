@@ -70,10 +70,12 @@ end
 function SoldierStore:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:registerEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
+    Event:registerEvent(EVENT_TYPE.CLOSE_STORE, self)
     self:updateText()
     registerUpdate(self)
 end
 function SoldierStore:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
     Event:unregisterEvent(EVENT_TYPE.HARVEST_SOLDIER, self)
 end
@@ -82,6 +84,8 @@ function SoldierStore:receiveMsg(name, msg)
         self:updateText()
     elseif name == EVENT_TYPE.HARVEST_SOLDIER then
         self:updateLeftPanel()
+    elseif name == EVENT_TYPE.CLOSE_STORE then
+        global.director:popView()
     end
 end
 function SoldierStore:updateText()
@@ -151,6 +155,8 @@ function SoldierStore:sureToCall()
 
     sendReq("campAddSol", dict({{"uid", global.user.uid}, {"bid", self.scene.bid}, {"solId", solId}, {'cost', cost}, {'objectTime', objectTime}}))
     self:updateLeftPanel()
+
+    NewLogic.triggerEvent(NEW_STEP.TRAIN_OVER)
 end
 
 function SoldierStore:initLeftPanel()

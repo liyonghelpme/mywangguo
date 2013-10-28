@@ -67,8 +67,11 @@ function Store:ctor(s)
     --self.bg:addChild(Hint.new().bg)
 end
 function Store:receiveMsg(name, msg)
+    print("receiveMsg", name)
     if name == EVENT_TYPE.UPDATE_RESOURCE then
         self:updateText()
+    elseif name == EVENT_TYPE.TAP_FARM then
+        self.goods:showHint(0)
     end
 end
 function Store:updateText()
@@ -93,9 +96,11 @@ end
 
 function Store:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
+    Event:registerEvent(EVENT_TYPE.TAP_FARM, self)
     self:updateText()
 end
 function Store:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.TAP_FARM, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
 end
 
@@ -127,6 +132,7 @@ function Store:buy(gi)
     local data = getData(GOODS_KIND.BUILD, id)
 
     local ret = checkBuildNum(id)
+    print("checkBuildNum", simple.encode(ret))
     if ret[1] == false then
         if ret[2] == 0 then
             addBanner(getStr("buildTooCon", {"[LEV]", str(getNextBuildNum(id)+1), "[NAME]", data.name}))

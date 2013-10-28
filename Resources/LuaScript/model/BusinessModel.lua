@@ -54,5 +54,5 @@ function getNextBuildNum(id)
     local bLevel = bData.numLevel
     local level = global.user:getValue("level")
     local need = math.floor((level+bLevel)/bLevel)
-    return need+bLevel
+    return need*bLevel
 end
