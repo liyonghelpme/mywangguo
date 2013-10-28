@@ -137,7 +137,11 @@ end
 function BattleMenu:getCurSol()
     return self.data[self.curChoose].id
 end
+function BattleMenu:getNum()
+    return self.data[self.curChoose].total
+end
 function BattleMenu:updateKill(kind)
+    print("updateKill", kind)
     for k, v in ipairs(self.data) do
         if v.id == kind then
             v.total = v.total-1
@@ -148,8 +152,11 @@ function BattleMenu:updateKill(kind)
             break
         end
     end
+    --所有死光游戏才结束
+    --[[
     local has = false
     for k, v in ipairs(self.data) do
+        print("k, v,", k, v.total)
         if v.total > 0 then
             has = true
             break
@@ -158,4 +165,5 @@ function BattleMenu:updateKill(kind)
     if not has then
         global.director:pushView(ChallengeOver.new(self.scene, {suc=false}), 1, 0)
     end
+    --]]
 end

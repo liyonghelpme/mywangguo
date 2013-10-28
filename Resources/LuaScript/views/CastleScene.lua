@@ -69,11 +69,12 @@ function CastleScene:finishBuild()
 
     local p = getPos(self.curBuild.bg)
     local now = client2Server(Timer.now)
-    global.httpController:addRequest("finishBuild", dict({{"uid", global.user.uid}, {"bid", self.curBuild.bid}, {"kind", self.curBuild.kind}, {"px", p[1]}, {"py", p[2]}, {"dir", self.curBuild.dir}, {"color", self.curBuild.buildColor}, {'objectTime', math.floor(client2Server(Timer.now))}}), nil, nil, self)
-        
-    --建筑物使用 kind 代替原来的 id 
     local id = self.curBuild.kind
     local cost = getCost(GOODS_KIND.BUILD, id)
+
+    global.httpController:addRequest("finishBuild", dict({{"uid", global.user.uid}, {"bid", self.curBuild.bid}, {"kind", self.curBuild.kind}, {"px", p[1]}, {"py", p[2]}, {"dir", self.curBuild.dir}, {"color", self.curBuild.buildColor}, {'objectTime', math.floor(client2Server(Timer.now))}, {'cost', simple.encode(cost)}}), nil, nil, self)
+        
+    --建筑物使用 kind 代替原来的 id 
     local gain = getGain(GOODS_KIND.BUILD, id)
     local showData = cost2Minus(cost)
     updateTable(showData, gain)

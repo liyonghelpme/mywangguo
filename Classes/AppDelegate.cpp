@@ -7,11 +7,13 @@
 #include "iniReader.h"
 #include "ImageUpdate.h"
 #include "MyPlugins.h"
-
+#include <algorithm>
+#include "UpdateScene.h"
 
 
 USING_NS_CC;
 using namespace CocosDenshion;
+using namespace std;
 
 AppDelegate::AppDelegate()
 {
@@ -68,11 +70,16 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 	//updateFiles();
-	if(def->getStringForKey("update") != "0")
-		updateFiles();
+
+    UpdateScene *scene = UpdateScene::create(this);
+    pDirector->runWithScene(scene);
+
+	//if(def->getStringForKey("update") != "0")
+	//	updateFiles();
 
 
     //搜索文件路径
+    /*
     CCDictionary *dict = CCDictionary::create();
     CCDictionary *ads = CCDictionary::create();
     ads->setObject(CCString::create("AdsAdmob"), "name");
@@ -81,6 +88,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
     pEngine->executeScriptFile(path.c_str());
+    */
     return true;
 }
 //更新脚本
@@ -96,29 +104,34 @@ void AppDelegate::updateFiles() {
 		pAssetsManager = new AssetsManager((def->getStringForKey("codeUrl")+def->getStringForKey("zipFile")).c_str(), (def->getStringForKey("codeUrl")+def->getStringForKey("versionFile")).c_str());
     }
     bool suc = false;
-    if(pAssetsManager->checkUpdate()) {
+    CCLog("start update code");
+    //if(pAssetsManager->checkUpdate()) {
         if(pAssetsManager->update()) {
             suc = true;
             CCLog("update Script successfully");
         } else {
             CCLog("update Script Fail");
         }
-    }
+    //}
+    CCLog("update code finish", suc);
 
+	/*
     if(pImageManager == NULL) {
 		CCUserDefault *def = CCUserDefault::sharedUserDefault(); 
 		pImageManager = new AssetsManager((def->getStringForKey("imageUrl")+def->getStringForKey("imageZip")).c_str(), (def->getStringForKey("imageUrl")+def->getStringForKey("imageVersion")).c_str());
 	}
+    CCLog("startUpdate image");
 	suc = false;
-	if(pImageManager->checkUpdate()) {
+	//if(pImageManager->checkUpdate()) {
         if(pImageManager->update()) {
             suc = true;
             CCLog("update Image successfully");
         } else {
             CCLog("update Image Fail");
         }
-    }
-
+    //}
+    CCLog("update image finish", suc);
+	*/
     /*
     if(pImageUpdate == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();

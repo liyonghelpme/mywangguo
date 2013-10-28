@@ -107,6 +107,8 @@ function Director:replaceScene(view)
     CCDirector:sharedDirector():replaceScene(view.bg)
     self.curScene = view
     self.stack = {}
+    table.remove(self.sceneStack)
+    table.insert(self.sceneStack, view)
     print("replace", #self.sceneStack) 
 end
 function Director:pushScene(view)
@@ -115,12 +117,20 @@ function Director:pushScene(view)
     table.insert(self.sceneStack, view)
     print("pushScene", #self.sceneStack)
 end
+
+function Director:onlyRun(view)
+    self.curScene = view
+    table.insert(self.sceneStack, view)
+    print("scene runWithScene", #self.sceneStack)
+end
+
 function Director:runWithScene(view)
     CCDirector:sharedDirector():runWithScene(view.bg)
     self.curScene = view
     table.insert(self.sceneStack, view)
     print("scene runWithScene", #self.sceneStack)
 end
+
 function Director:popScene()
     CCDirector:sharedDirector():popScene()
     self.curScene = self.sceneStack[#self.sceneStack-1]

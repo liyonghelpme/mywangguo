@@ -121,6 +121,7 @@ bool AssetsManager::checkUpdate()
     // Clear _version before assign new value.
     _version.clear();
     
+    CCLog("start version url Update", _versionFileUrl.c_str());
     CURLcode res;
     curl_easy_setopt(_curl, CURLOPT_URL, _versionFileUrl.c_str());
     curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -387,6 +388,7 @@ static int progressFunc(void *ptr, double totalToDownload, double nowDownloaded,
 
 bool AssetsManager::downLoad()
 {
+    CCLog("download package file", _packageUrl.c_str());
     // Create a file to save package.
     string outFileName = _storagePath + TEMP_PACKAGE_FILE_NAME;
     FILE *fp = fopen(outFileName.c_str(), "wb");

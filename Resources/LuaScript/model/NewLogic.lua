@@ -6,6 +6,7 @@ NEW_STEP = {
     TRAIN_OVER=6,
     GO_BATTLE=7,
     BATTLE_NOW=8,
+    FINISH_NEW=9,
 }
 NewLogic = {}
 NewLogic.step = 0
@@ -44,6 +45,9 @@ function NewLogic.triggerEvent(e)
         Event:sendMsg(EVENT_TYPE.BATTLE)
     elseif e == NEW_STEP.BATTLE_NOW and NewLogic.step == 6 then
         global.director:pushView(NewDialog.new(getStr("step6")), 1, 0)
+    elseif e == NEW_STEP.FINISH_NEW and NewLogic.step == 7 then
+        setBool("firstGame", true)
+        NewLogic.setHint(nil)
     end
 end
 

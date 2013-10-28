@@ -57,9 +57,9 @@ function Building:ctor(m, d, privateData)
 
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
 
-    setPos(self.changeDirNode, {0, 0})
+    setPos(self.changeDirNode, {0, self.data['offY']})
     self.dir = getDefault(privateData, 'dir', 0)
-    self:setState(getDefault(privateData, 'state', getParam('buildMove')))
+    self:setState(getParam("buildFree"))
     self:setDir(self.dir)
 
 
@@ -273,11 +273,6 @@ function Building:touchesEnded(touches)
         self:setColPos()
         local p = getPos(self.bg)
         self:setPos(p)
-        --[[
-        if self.colNow == 0 and self.state ~= getParam("buildMove") then
-            self:setZord(nil)
-        end
-        --]]
         self.map.mapGridController:updateMap(self)
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         if self.showMenuYet then

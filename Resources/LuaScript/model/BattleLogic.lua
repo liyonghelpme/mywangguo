@@ -49,6 +49,7 @@ function BattleLogic.clearBattle()
     --BattleLogic.gameOver = true
     --BattleLogic.killedSoldier = {}
 end
+--只有士兵死亡了才算挂掉
 function BattleLogic.updateKill(kind)
     local n = getDefault(BattleLogic.killedSoldier, kind, 0)
     n = n+1

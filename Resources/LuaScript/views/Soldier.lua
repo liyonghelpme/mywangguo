@@ -497,6 +497,16 @@ function Soldier:doHarm(n)
         BattleLogic.killKind(self.kind)
         global.user:killSoldier(self.kind)
         self.bg:runAction(callfunc(nil, fadeAll, self.bg))
+        local has = false
+        for k, v in pairs(global.user.soldiers) do
+            if v > 0 then
+                has = true
+                break
+            end
+        end
+        if not has then
+            global.director:pushView(ChallengeOver.new(global.director.curScene, {suc=false}), 1, 0)
+        end
     end
 end
 

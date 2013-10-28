@@ -15,8 +15,9 @@ function CampWorkNode:exitScene()
     Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
 end
 function CampWorkNode:receiveMsg(name, msg)
+    print("CampWorkNode", name)
     if name == EVENT_TYPE.CLOSE_STORE then
-        self.passTime = 9999
+        self.func.objectTime = self.func.objectTime-9999
     end
 end
 function CampWorkNode:update(diff)

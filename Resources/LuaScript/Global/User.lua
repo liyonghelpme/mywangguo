@@ -179,5 +179,6 @@ function User:getCampProductNum()
     return countNum
 end
 function User:killSoldier(kind)
+    print("kill Soldier", kind)
     self.soldiers[kind] = self.soldiers[kind]-1
 end

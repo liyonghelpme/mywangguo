@@ -102,7 +102,8 @@ function CastlePage:touchesBegan(touches)
         print("touch  Cell", map[3], map[4])
         --点击到某个建筑物
         if allCell[key] ~= nil then
-            self.touchBuild = allCell[key][1][1]
+            --点击最上面的建筑物
+            self.touchBuild = allCell[key][#allCell[key]][1]
             self.touchBuild:touchesBegan(touches)
         elseif allRiver[key] ~= nil then
             self.touchRiver = true
@@ -141,12 +142,13 @@ function CastlePage:touchesEnded(touches)
         else
             local curChoose = self.scene.ml:getCurSol()
             if curChoose ~= nil then
-                local n = getDefault(global.user.soldiers, curChoose, 0)
+                local n = self.scene.ml:getNum()
                 print("leftSoldiers", curChoose, n)
                 if n > 0 then
                     local temp = convertMultiToArr(touches)
                     local temp = self.bg:convertToNodeSpace(ccp(temp[0][1], temp[0][2]))
-                    BattleLogic.updateKill(curChoose)
+                    --只有士兵死亡了才算真的死掉了
+                    --BattleLogic.updateKill(curChoose)
                     self.scene.ml:updateKill(curChoose)
                     print("curChoose", curChoose)
                     self.buildLayer:addSoldier(curChoose, temp.x, temp.y) 
@@ -176,6 +178,8 @@ function CastlePage:beginBuild(building)
     self.curBuild = Building.new(self.buildLayer, building, {})
     self.curBuild:setBid(global.user:getNewBid())
     self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+    self.curBuild:setState(getParam("buildMove"))
+
     self.oldScale = self.bg:getScale()
     self.oldPos = getPos(self.bg)
 
