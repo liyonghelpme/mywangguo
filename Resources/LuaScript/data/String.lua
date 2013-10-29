@@ -57,6 +57,7 @@ Strings = dict({
 {"building176", {"稻草人", "Scarecrow"}},
 {"building178", {"奶牛", "Cow"}},
 {"building168", {"指示牌", "Sign Post"}},
+{"building301", {"城墙", "Sign Post"}},
 {"crystal0", {"10000 水晶", "10000 Crystal"}},
 {"crystal1", {"100000 水晶", "100000 Crystal"}},
 {"crystal2", {"1000000 水晶", "1000000 Crystal"}},

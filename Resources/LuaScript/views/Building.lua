@@ -1,4 +1,5 @@
 require "views.FuncBuild"
+require "views.Wall"
 require "views.GodBuild"
 require "views.Farm"
 require "views.MineFunc"
@@ -38,12 +39,21 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = Camp.new(self)
     elseif self.funcs == GOD_BUILD then
         self.funcBuild = GodBuild.new(self)
+    elseif self.funcs == WALL then
+        self.funcBuild = Wall.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
     --papaya不同之处
     --anchorPoint 就是 坐标 0 0 时候的点 因此 changeDirNode 坐标就是0 0 
-    self.changeDirNode = setAnchor(addSprite(self.bg, "build"..self.kind..".png"), {0.5, 0})
+    if self.funcs == WALL then
+        self.changeDirNode = setAnchor(addSprite(self.bg, "wall0.png"), {0.5, 0})
+        local sz = self.changeDirNode:getContentSize()
+        local axy = WALL_OFFXY[0]
+        setAnchor(self.changeDirNode, {axy[1]/sz.width, (sz.height-axy[2])/sz.height})
+    else
+        self.changeDirNode = setAnchor(addSprite(self.bg, "build"..self.kind..".png"), {0.5, 0})
+    end
     if self.data['hasFeature'] and self.buildColor ~= 0 then
         
     end
@@ -194,7 +204,9 @@ function Building:touchesBegan(touches)
                 self.map.mapGridController:clearMap(self)
 
                 self.doMove = true
-                Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
+                Event:sendMsg(EVENT_TYPE.DO_MOVE, self)    
+                --规划的时候移动
+                self.funcBuild:removeBuild()
             --建造的时候 inSelf 但是不要 弹出对话框
             --else
                 --self.inSelf = false
@@ -274,6 +286,7 @@ function Building:touchesEnded(touches)
         local p = getPos(self.bg)
         self:setPos(p)
         self.map.mapGridController:updateMap(self)
+        self.funcBuild:finishBuild()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         if self.showMenuYet then
             global.director.curScene:closeGlobalMenu(self)

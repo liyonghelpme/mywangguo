@@ -9,24 +9,28 @@ end
 function MoveMap:updateMapGrid()
     if DEBUG then
         removeSelf(self.gridLayer)
-        self.gridLayer = CCLayer:create()
+        self.gridLayer = CCSpriteBatchNode:create("white2.png")
         self.bg:addChild(self.gridLayer)
         for k, v in pairs(self.mapGridController.mapDict) do
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.gridLayer, "white2.png"), {SIZEX*2, SIZEY*2}), p), {0.5, 0}), {255, 0, 0})
+            --[[
             local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             sp:addChild(lab)
+            --]]
         end
+        --[[
         for k, v in pairs(self.staticObstacle) do
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})
-            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "red2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
+            local sp = setAnchor(setPos(setSize(addSprite(self.gridLayer, "white2.png"), {SIZEX, SIZEY}), p), {0.5, 0})
             local lab = ui.newTTFLabel({text=""..p[1].." "..p[2], size=100})
             sp:addChild(lab)
         end
+        --]]
     end
 end
 --寻路算法的 node

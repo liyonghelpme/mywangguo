@@ -27,3 +27,6 @@ end
 
 function FuncBuild:finishBuild()
 end
+
+function FuncBuild:removeBuild()
+end

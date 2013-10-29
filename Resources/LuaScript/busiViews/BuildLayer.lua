@@ -139,6 +139,14 @@ function BuildLayer:addSoldier(kind, x, y)
     self.mapGridController:addSoldier(s)
 end
 
+function BuildLayer:initWall()
+    local allB = self.mapGridController.allBuildings
+    for k, v in pairs(allB) do
+        if k.funcs == WALL then
+            k.funcBuild:calValue()
+        end
+    end
+end
 function BuildLayer:initBuilding()
     print("initBuilding now!!!!!!!!!!!!!!!!!!!!!")
     local item
@@ -150,6 +158,7 @@ function BuildLayer:initBuilding()
     for k, v in pairs(item) do
         local bid = k
         local bdata = v
+        print("getBuildingData", bid, bdata.kind)
         local data = getData(GOODS_KIND.BUILD, bdata["kind"]) 
         local build = Building.new(self, data, bdata)
         build:setBid(bid)
@@ -164,6 +173,7 @@ function BuildLayer:initBuilding()
     self.bg:addChild(temp)
     temp:setScale(0.2)
     --]]
+    self:initWall()
 end
 function BuildLayer:initSoldier()
     local item

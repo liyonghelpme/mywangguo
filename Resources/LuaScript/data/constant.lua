@@ -181,6 +181,7 @@ MINE_KIND = 9
 LOVE_TREE = 10
 RING_FIGHTING = 11
 CAMP = 12
+WALL = 13
 
 buildFunc = dict({
 {FARM_BUILD, {{"photo"}, {"acc", "sell"}}},
@@ -211,3 +212,9 @@ obstacleBlock = dict(
 TrainZone = {{100, 100, 2400, 400}}
 FullZone = {{987, 100, 1914, 438}}
 
+WALL_OFFXY = {
+[0]={54, 59},
+[1]={53, 57},
+[2]={42, 58},
+[3]={48, 58},
+}
