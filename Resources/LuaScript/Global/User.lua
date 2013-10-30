@@ -112,6 +112,7 @@ function User:changeValue(key, add)
 end
 
 function User:doCost(cost)
+    print("doCost!!!!!!", simple.encode(cost))
     for k, v in pairs(cost) do
         self:changeValue(k, -v)
     end
@@ -128,6 +129,7 @@ function User:getLastColor()
 end
 
 function User:buyBuilding(build)
+    print("buyBuilding", build.kind)
     local cost = getCost(GOODS_KIND.BUILD, build.kind);
     self:doCost(cost)
     local gain = getGain(GOODS_KIND.BUILD, build.kind);

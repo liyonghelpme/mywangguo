@@ -80,8 +80,9 @@ function CastleScene:finishBuild()
     updateTable(showData, gain)
     showMultiPopBanner(showData)
 
-    self.mc:finishBuild()
+    --应该在buyBuilding 消耗资源之后再finishBuild
     global.user:buyBuilding(self.curBuild)
+    self.mc:finishBuild()
     self:closeBuild()
 
     NewLogic.triggerEvent(NEW_STEP.HARVEST)
