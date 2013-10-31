@@ -40,6 +40,8 @@ function Director:pushView(view, dark, autoPop)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
+    setScale(view.bg, 0.1)
+    view.bg:runAction(sinein(sequence({scaleto(0.2, 1, 1)})))
     --MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 
@@ -52,8 +54,12 @@ end
 function Director:popView()
     local v = self.stack[#self.stack]
     print('popView', #self.stack, v, v.bg)
+    v.bg:retain()
     v.bg:removeFromParentAndCleanup(true)
     table.remove(self.stack, #self.stack)
+    v.bg:runAction(sineout(sequence({scaleto(0.2, 0.1, 0.1), callfunc(nil, removeSelf, v.bg)})))
+    self.curScene.bg:addChild(v.bg)
+    v.bg:release()
     --MyPlugins:getInstance():sendCmd("showAds", "");
 end
 --上一个场景没有对话框

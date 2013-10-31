@@ -1,6 +1,7 @@
 require "model.MapGridController"
 require "views.Building"
 require "views.Soldier"
+require "views.Monster"
 
 ClearNode = class
 
@@ -8,7 +9,7 @@ BuildLayer = class(MoveMap)
 function BuildLayer:ctor(scene)
     self.scene = scene
     self.moveZone = TrainZone
-    self.buildZone = FullZone
+    self.buildZone = BUILD_ZONE
     --显示所有的obstacle块的位置
     self.staticObstacle = obstacleBlock
     self.bg = CCLayer:create()
@@ -29,6 +30,9 @@ function BuildLayer:ctor(scene)
     self.curSol = nil
 
     registerEnterOrExit(self)
+    registerUpdate(self)
+    self.passTime = 30
+    self.monsters = {}
 end
 function BuildLayer:showMapGrid()
     if self.showYet ~= true then
@@ -166,6 +170,7 @@ function BuildLayer:initBuilding()
         self.bg:addChild(build.bg, MAX_BUILD_ZORD)
         build:setPos(normalizePos({bdata["px"], bdata["py"]}, data["sx"], data["sy"]))
         self.mapGridController:addBuilding(build)
+        build:setZord()
     end
     --[[
     local temp = CCSprite:create("images/loadingCircle.png")
@@ -242,5 +247,24 @@ function BuildLayer:finishPlan()
         global.httpController:addRequest("finishPlan", dict({{"uid", global.user.uid}, {"builds", simple.encode(changedBuilding)}}), nil, nil)
     end
     self:clearPlanState()
+end
+function BuildLayer:update(diff)
+    self.passTime = self.passTime+diff
+    if self.passTime > 30 then
+        self.passTime = 0
+        self:genMonster()
+    end
+end
+--当前怪兽堆数小于一定的值的时候 产生怪兽 怪兽移动的范围不超过边界 
+--怪兽和士兵之间有战斗
+--最多同时4个怪兽
+--杀死怪兽的时候 清理怪兽
+function BuildLayer:genMonster()
+    if #self.monsters < 4 then
+        local m = Monster.new(self)
+        self.bg:addChild(m.bg, MAX_BUILD_ZORD)
+        self.mapGridController:addSoldier(m)
+        table.insert(self.monsters, m)
+    end
 end
 

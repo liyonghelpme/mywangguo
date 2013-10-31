@@ -209,8 +209,10 @@ obstacleBlock = dict(
 )
 
 
-TrainZone = {{100, 100, 2400, 400}}
+TrainZone = {{100, 100, 2800, 400}}
 FullZone = {{987, 100, 1914, 438}}
+BUILD_ZONE = {{100, 100, 2000, 438}}
+MONSTER_ZONE = {{2000, 100, 2800, 438}}
 
 WALL_OFFXY = {
 [0]={54, 59},

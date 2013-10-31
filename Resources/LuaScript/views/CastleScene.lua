@@ -44,11 +44,15 @@ end
 function CastleScene:receiveMsg(name, msg)
     if name == EVENT_TYPE.INITDATA then
         print("receiveMsg initDataOver !!!!!!!!!!!!!!!!!!")
+
+        local tempName = global.user:getValue("name")
+        print("global user name ", tempName)
+        if tempName == "" or tempName == 0 then
+            self.dialogController:addCmd({cmd="roleName"})
+        end
+
         if not CCUserDefault:sharedUserDefault():getBoolForKey("firstGame") then
             self.dialogController:addCmd({cmd="firstGame"})
-        end
-        if global.user:getValue("name") == "" then
-            self.dialogController:addCmd({cmd="roleName"})
         end
         self.mc:initDataOver()
         self.ml:initDataOver()

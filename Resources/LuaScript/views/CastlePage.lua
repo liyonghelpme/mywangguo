@@ -177,6 +177,11 @@ end
 function CastlePage:beginBuild(building)
     self.curBuild = Building.new(self.buildLayer, building, {})
     self.curBuild:setBid(global.user:getNewBid())
+    local vs = getVS()
+    local vcen = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+    local v2 = normalizePos({vcen.x, vcen.y-SIZEY}, self.curBuild.sx, self.curBuild.sy)
+    self.curBuild:setPos(v2)
+
     self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
     self.curBuild:setState(getParam("buildMove"))
 

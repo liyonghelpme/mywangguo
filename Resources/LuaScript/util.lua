@@ -317,6 +317,9 @@ function sequence(seq)
     return CCSequence:create(arr)
 end
 
+function sineout(act)
+    return CCEaseSineOut:create(act)
+end
 function sinein(act)
     return CCEaseSineIn:create(act)
 end
@@ -1205,4 +1208,10 @@ function getBool(k)
 end
 function setBool(k, v)
     CCUserDefault:sharedUserDefault():setBoolForKey(k, v)
+end
+function jumpBy(t, x, y, hei, n)
+    return CCJumpBy:create(t, ccp(x, y), hei, n)
+end
+function addCmd(c)
+    global.director.curScene.dialogController:addCmd(c)
 end

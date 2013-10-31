@@ -34,7 +34,7 @@ function MoveMap:updateMapGrid()
     end
 end
 --寻路算法的 node
-function MoveMap:updateCells(cells, bcells)
+function MoveMap:updateCells(cells, bcells, predict)
     if DEBUG then
         removeSelf(self.cellLayer)
         self.cellLayer = CCSpriteBatchNode:create("white2.png")
@@ -56,6 +56,10 @@ function MoveMap:updateCells(cells, bcells)
             --local cx, cy = normalToCartesian(x, y)
             local cxy = setBuildMap({1, 1, x, y})
             local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {255, 0, 0})
+        end
+        if predict ~= nil then
+            local cxy = setBuildMap({1, 1, predict[1], predict[2]})
+            local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {255, 255, 0})
         end
     end
 end
@@ -108,7 +112,6 @@ function MoveMap:checkCollision(build)
     if inZ == 0 then
         return 1
     end
-
 
     local map = getBuildMap(build)
     local sx = map[1]

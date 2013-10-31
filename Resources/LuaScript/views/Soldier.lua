@@ -17,17 +17,19 @@ function Soldier:ctor(map, data, pd)
     self.kind = data.id 
     self.dead = false
     --在mapGridController 中的编号
+    self.tryAttackTarget = nil
+    --士兵空闲状态下 就会以这个tryAttackTarget 为目标移动的
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldierm"..self.kind..".plist")
 
     self.bg = setAnchor(CCNode:create(), {0.5, 0.5})
     createAnimation("soldierm"..self.kind, "ss"..self.kind.."m%d.png", 0, 6, 1, 0.5, true)
-    if BattleLogic.inBattle then
+    --if BattleLogic.inBattle then
         --print("init Attack")
         --Don't forget to load plist first
         CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldiera"..self.kind..".plist")
         createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, 1, true) 
-    end
+    --end
     self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("ss"..self.kind.."m0.png"), {0.5, 0})
     self.bg:addChild(self.changeDirNode)
     self.changeDirNode:setScale(0.7)
@@ -35,8 +37,11 @@ function Soldier:ctor(map, data, pd)
 
     local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
     self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
+    local shadow = addSprite(self.bg, "roleShadow.png")
 
-    self.bg:setPosition(ccp(100, 200))
+    local dx = math.random(100)+100
+    local dy = math.random(100)+100
+    self.bg:setPosition(ccp(2200+dx, 100+dy))
     self.state = SOLDIER_STATE.FREE 
     self.passTime = 0
     self.waitTime = 0
@@ -44,7 +49,7 @@ function Soldier:ctor(map, data, pd)
     self.health = 100
     self.maxHealth = 100
     
-    if BattleLogic.inBattle then
+    --if BattleLogic.inBattle then
         local sz = self.changeDirNode:getContentSize()
         local rh = math.max(sz.height, 50)
         self.healthBar = setScale(setPos(CCSprite:create("mapSolBloodBar1.png"), {0, rh}), 0.4)
@@ -53,15 +58,25 @@ function Soldier:ctor(map, data, pd)
         self.innerBar = setAnchor(setPos(addSprite(self.healthBar, "mapSolBloodRed1.png"), {2, 2}), {0, 0})
     
         self.healthBar:setVisible(false)
-    end
+    --end
 
     registerEnterOrExit(self)
+    self.stateStr = ui.newBMFontLabel({text="0", size=20})
+    self.bg:addChild(self.stateStr)
 
 end
 function Soldier:enterScene()
     registerUpdate(self)
+    Event:registerEvent(EVENT_TYPE.ATTACK_ME, self)
 end
+function Soldier:receiveMsg(name, msg)
+    if name == EVENT_TYPE.ATTACK_ME then
+        self.tryAttackTarget = msg
+    end
+end
+
 function Soldier:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.ATTACK_ME, self)
 end
 function Soldier:setPos(p)
 end
@@ -72,6 +87,7 @@ function Soldier:update(diff)
         self:findPath(diff)
         self:doMove(diff)
         self:doAttack(diff)
+        self.stateStr:setString(str(self.state))
     end
 end
 function Soldier:doAttack(diff)
@@ -82,10 +98,27 @@ function Soldier:doAttack(diff)
         print("animation", animation)
         self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
         self.attackTime = 0
-        self.attackTarget = self.predictTarget
+        --setDir 
+        if self.predictMon ~= nil then
+            self.attackTarget = self.predictMon
+            self.predictMon:addAttacker(self)
+            if not self.predictMon.dead then
+                local p = getPos(self.predictMon.bg)
+                self:setDir(p[1], p[2])
+            end
+        else
+            self.attackTarget = self.predictTarget
+        end
     end
     if self.state == SOLDIER_STATE.IN_ATTACK then
-        if self.attackTarget.broken == true then
+        if self.attackTarget.dead == true then
+            self.state = SOLDIER_STATE.FREE
+            self.map:clearCell(self.endPoint)
+            self.changeDirNode:stopAllActions()
+            local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
+            return
+        elseif self.attackTarget.broken == true then
             self.state = SOLDIER_STATE.FREE
             self.map:clearCell(self.endPoint)
             self.changeDirNode:stopAllActions()
@@ -96,8 +129,10 @@ function Soldier:doAttack(diff)
         self.attackTime = self.attackTime+diff
         if self.attackTime >= 1 then
             self.attackTime = self.attackTime - 1
+            if self.predictMon ~= nil then
+                self.attackTarget:doHarm(10)
             --弓箭手 发射弓箭
-            if self.kind == 23 then
+            elseif self.kind == 23 then
                 local start = getPos(self.bg)
                 start[2] = start[2]+15
                 local over = getPos(self.attackTarget.bg)
@@ -264,6 +299,7 @@ function Soldier:findPath(diff)
         end
     end
     if self.state == SOLDIER_STATE.START_FIND then
+        print("startFind")
         self.state = SOLDIER_STATE.IN_FIND
         local p = getPos(self.bg)
         local mx, my = cartesianToNormal(p[1], p[2])
@@ -277,8 +313,11 @@ function Soldier:findPath(diff)
         self.path = {}
         self.cells = {}
 
+        self.predictMon = nil
         self.predictTarget = nil
         self.predictEnd = nil
+        self.minPoint = nil
+        self.totalFind = 0
         
         --攻击的时候 寻找最近的建筑物
         if BattleLogic.inBattle then
@@ -295,8 +334,13 @@ function Soldier:findPath(diff)
                     end
                 end
             end
+        --攻击骷髅 当骷髅处于静止状态的时候 向骷髅移动
+        elseif self.tryAttackTarget ~= nil and not self.tryAttackTarget.dead and self.tryAttackTarget.state == SOLDIER_STATE.FREE then
+            self.predictMon = self.tryAttackTarget
+            print("findMonster")
         --经营随便找一个建筑物
         else
+            self.tryAttackTarget = nil
             local allBuild = self.map.mapGridController.allBuildings
             local num = getLen(allBuild)
             local s = math.random(num)
@@ -313,8 +357,22 @@ function Soldier:findPath(diff)
         --3000 * 3000 = 90000
         --]]
 
+        if self.predictMon ~= nil and not self.predictMon.dead then
+            local mp = getPos(self.predictMon.bg) 
+            local map = getPosMapFloat(1, 1, mp[1], mp[2])
+            self.predictEnd = {map[3], map[4]}
+            --当前点
+            self.minPoint = {mx, my}
 
-        if self.predictTarget ~= nil then
+            local sk = getMapKey(mx, my)
+            self.cells[sk] = {}
+            self.cells[sk].gScore = 0
+            self:calcH(mx, my)
+            self:calcF(mx, my)
+            self:pushQueue(mx, my)
+            self.minHScore = self.cells[sk].hScore
+
+        elseif self.predictTarget ~= nil then
             --self.oldPredictTarget = self.predictTarget
             local bp = getPos(self.predictTarget.bg)
             local tx, ty = cartesianToNormal(bp[1], bp[2])
@@ -356,10 +414,23 @@ function Soldier:findPath(diff)
                 --行走的时候 可以绕过建筑物的 如果士兵跑到建筑物里面去了 
                 --不是上次的目标
                 --该格子是一个建筑物
-                if buildCell[key] ~= nil and buildCell[key][1][2] == 1 and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
-                    self.endPoint = {x, y} 
-                    --找到建筑了
-                    break
+
+                if self.predictMon ~= nil then
+                    local hScore = self.cells[key].hScore
+                    if hScore <= self.minHScore then
+                        self.minHScore = hScore
+                        self.minPoint = {x, y}
+                    end
+                    if (x == self.predictEnd[1] and y == self.predictEnd[2]) or self.totalFind >= 100 then
+                        self.endPoint = self.minPoint
+                        break
+                    end
+                else
+                    if buildCell[key] ~= nil and buildCell[key][1][2] == 1 and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
+                        self.endPoint = {x, y} 
+                        --找到建筑了
+                        break
+                    end
                 end
 
                 if self.endPoint == nil then
@@ -368,7 +439,8 @@ function Soldier:findPath(diff)
             end
             n = n+1
         end
-        self.map:updateCells(self.cells, self.map.cells)
+        self.totalFind = self.totalFind+n
+        self.map:updateCells(self.cells, self.map.cells, self.predictEnd)
         --找到路径
         if #self.openList == 0 or self.endPoint ~= nil then
             self.state = SOLDIER_STATE.FIND
@@ -400,6 +472,7 @@ function Soldier:setZord()
     local zOrd = MAX_BUILD_ZORD-p[2]
     self.bg:setZOrder(zOrd)
 end
+--如果和怪兽足够靠近的话 攻击怪兽
 function Soldier:doMove(diff)
     if self.state == SOLDIER_STATE.FIND then
         self.state = SOLDIER_STATE.IN_MOVE
@@ -428,15 +501,38 @@ function Soldier:doMove(diff)
                 end
             end
 
+            if self.tryAttackTarget ~= nil and self.predictMon == nil and not self.tryAttackTarget.dead then
+                self.state = SOLDIER_STATE.FREE
+                self.map:clearCell(self.endPoint)
+                self:setZord()
+                return
+            end
+
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
-                if BattleLogic.inBattle == false then
+                if self.predictMon ~= nil then
+                    if not self.predictMon.dead then
+                        --骷髅静止了 所以可以攻击了
+                        local p = getPos(self.bg)
+                        local map = getPosMapFloat(1, 1, p[1], p[2])
+                        local op = getPos(self.predictMon.bg)
+                        local oMap = getPosMapFloat(1, 1, op[1], op[2])
+                        local dx, dy = math.abs(map[3]-oMap[3]), math.abs(map[4]-oMap[4])
+                        if dx+dy <= 3 then
+                            self.state = SOLDIER_STATE.START_ATTACK
+                        else
+                            self.state = SOLDIER_STATE.FREE
+                        end
+                    else
+                        self.state = SOLDIER_STATE.FREE
+                    end
+                elseif BattleLogic.inBattle == false then
                     self.state = SOLDIER_STATE.FREE
                 else
                     --开始攻击则清理cell 数据
                     self.state = SOLDIER_STATE.START_ATTACK
-                    self.map:clearCell(self.endPoint)
                 end
+                self.map:clearCell(self.endPoint)
                 --移动到目的地调整zord
                 self:setZord()
             else
@@ -494,18 +590,29 @@ function Soldier:doHarm(n)
                 end
             end
         end
-        BattleLogic.killKind(self.kind)
-        global.user:killSoldier(self.kind)
-        self.bg:runAction(callfunc(nil, fadeAll, self.bg))
-        local has = false
-        for k, v in pairs(global.user.soldiers) do
-            if v > 0 then
-                has = true
-                break
+        --干不过怪兽怎么办？ 自杀？
+        --干过怪兽获得 银币 水晶 和 经验 100 水晶
+        if BattleLogic.inBattle then  
+            BattleLogic.killKind(self.kind)
+            global.user:killSoldier(self.kind)
+
+            local has = false
+            for k, v in pairs(global.user.soldiers) do
+                if v > 0 then
+                    has = true
+                    break
+                end
+            end
+            if not has then
+                global.director:pushView(ChallengeOver.new(global.director.curScene, {suc=false}), 1, 0)
             end
         end
-        if not has then
-            global.director:pushView(ChallengeOver.new(global.director.curScene, {suc=false}), 1, 0)
+        self.bg:runAction(sequence({callfunc(nil, fadeAll, self.bg), delaytime(1), callfunc(self.map.mapGridController, self.map.mapGridController.removeSoldier, self)}))
+        --经营场景
+        if not BattleLogic.inBattle then
+            --table.insert(MonsterLogic.killSol, self.kind)
+            global.user:killSoldier(self.kind)
+            sendReq("soldierDead", dict({{"uid", global.user.uid}, {"kind", self.kind}}))
         end
     end
 end

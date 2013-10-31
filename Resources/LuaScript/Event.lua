@@ -17,6 +17,8 @@ EVENT_TYPE = {
     CALL_SOL=24,
     CLOSE_STORE=25,
     BATTLE=26,
+
+    ATTACK_ME=27,
 }
 Event = {}
 Event.callbacks = {}
