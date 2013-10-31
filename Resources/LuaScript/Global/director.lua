@@ -40,8 +40,9 @@ function Director:pushView(view, dark, autoPop)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
+    local sca = view.bg:getScale()
     setScale(view.bg, 0.1)
-    view.bg:runAction(sinein(sequence({scaleto(0.2, 1, 1)})))
+    view.bg:runAction(sinein(sequence({scaleto(0.2, sca, sca)})))
     --MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 

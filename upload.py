@@ -24,5 +24,7 @@ def genAndMove():
 
 genAndMove()
 
+#manual move zip and version
 os.system('scp upload/test.zip root@112.124.41.186:/var/www/code/test1.zip')
 os.system('scp upload/version root@112.124.41.186:/var/www/code/version1')
+
