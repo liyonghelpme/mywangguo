@@ -2,11 +2,17 @@
 #include "platform/android/jni/JniHelper.h"
 #include "support/user_default/CCUserDefault.h"
 #include "CCLuaEngine.h"
-
+#include "support/CCNotificationCenter.h"
+using namespace cocos2d;
 void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jstring url){
     const char* s=env->GetStringUTFChars(url, NULL);
     cocos2d::CCUserDefault::sharedUserDefault()->setStringForKey("username", s);
 }
+void Java_com_liyong_wangguo_HelloLua_setPoints(JNIEnv *env, jobject thiz, jint v) {
+    CCLog("setPoints %d", (int)v);
+    cocos2d::CCUserDefault::sharedUserDefault()->setIntegerForKey("gold", v);
+    cocos2d::CCNotificationCenter::sharedNotificationCenter()->postNotification("EVENT_SETPOINT");
+}
 
 NS_CC_EXT_BEGIN
 

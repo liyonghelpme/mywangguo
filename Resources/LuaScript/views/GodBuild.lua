@@ -43,6 +43,13 @@ function GodBuild:initWorking(data)
         self.baseBuild.bg:addChild(self.bg)
         registerUpdate(self)
         registerEnterOrExit(self)
+    --经营页面只是显示一个闪光的ball
+    elseif self.par == nil then
+        local par = CCParticleSystemQuad:create("god1.plist")
+        self.par = par
+        par:setPositionType(1)
+        setPos(par, {37, 161})
+        self.baseBuild.bg:addChild(par)
     end
 end
 function GodBuild:update(diff)

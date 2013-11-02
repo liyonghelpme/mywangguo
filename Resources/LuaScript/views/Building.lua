@@ -62,10 +62,27 @@ function Building:ctor(m, d, privateData)
         offY = (self.sx+self.sy)*SIZEY/2
     end
 
-
     local sz = self.changeDirNode:getContentSize()
-
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
+    local sp = CCSprite:create("grass3.png")
+    sp:setOpacity(128)
+    self.bg:addChild(sp, -1)
+    setSize(setAnchor(sp, {0.5, 0}), {SIZEX*(self.sx+self.sy), SIZEY*(self.sx+self.sy)})
+    
+    --[[
+    for i = 0, self.sx-1, 1 do
+        local curX = -i*SIZEX
+        local curY = i*SIZEY
+        for j =0, self.sy-1, 1 do
+            local sp = CCSprite:create("grass2.png")
+            self.bg:addChild(sp, -1)
+            setSize(setAnchor(setPos(sp, {curX+j*SIZEX, curY+j*SIZEY}), {0.5, 0}), {SIZEX*2, SIZEY*2})
+            local temp = CCSprite:createWithSpriteFrameName("grass6")
+            setAnchor(temp, {0, 0})
+            sp:addChild(temp)
+        end
+    end
+    --]]
 
     setPos(self.changeDirNode, {0, self.data['offY']})
     self.dir = getDefault(privateData, 'dir', 0)
@@ -368,6 +385,10 @@ function Building:finishBuild()
     local privateData = {objectId=0, objectTime=client2Server(Timer.now)}
     self.funcBuild:initWorking(privateData)
     global.user:updateBuilding(self)
+
+    local dust = CCParticleSystemQuad:create("dust.plist")
+    self.bg:addChild(dust, -1)
+
 end
 function Building:setZord()
     local zOrd = MAX_BUILD_ZORD-getPos(self.bg)[2]

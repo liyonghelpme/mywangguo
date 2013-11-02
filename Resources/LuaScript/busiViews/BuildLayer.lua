@@ -28,11 +28,29 @@ function BuildLayer:ctor(scene)
     self.cells = {}
     --当前允许寻路的士兵
     self.curSol = nil
+    self.birdTime = 30
+    self.birds = {}
 
     registerEnterOrExit(self)
     registerUpdate(self)
     self.passTime = 30
+    self.treeTime = 0
     self.monsters = {}
+    self:initGrassSprite()
+end
+function BuildLayer:initGrassSprite()
+    local tex = CCTextureCache:sharedTextureCache():addImage("tileset.png")
+    local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
+    for i=0, 7, 1 do
+        local r = CCRectMake(4, i*53+9, 56, 43)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        ca:addSpriteFrame(sp, "grass"..i)
+    end
+
+    local tex = CCTextureCache:sharedTextureCache():addImage("realGrass.png")
+    local r = CCRectMake(0, 22, 64, 38)
+    local sp = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(sp, "realGrass")
 end
 function BuildLayer:showMapGrid()
     if self.showYet ~= true then
@@ -254,6 +272,8 @@ function BuildLayer:update(diff)
         self.passTime = 0
         self:genMonster()
     end
+    self:genBird(diff)
+    self:genTree(diff)
 end
 --当前怪兽堆数小于一定的值的时候 产生怪兽 怪兽移动的范围不超过边界 
 --怪兽和士兵之间有战斗
@@ -268,3 +288,47 @@ function BuildLayer:genMonster()
     end
 end
 
+function BuildLayer:genBird(diff)
+    self.birdTime = self.birdTime+diff
+    if self.birdTime > 15 and #self.birds < 6 then
+        self.birdTime = 0
+
+        CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("bird.plist")
+        createAnimation("bird", "bird%d.png", 0, 9, 1, 1, true)
+        local animation = CCAnimationCache:sharedAnimationCache():animationByName("bird")
+
+        local n = math.random(3)+1
+        local dy = math.random(200)
+        for k=1, n, 1 do
+            local bird = CCNode:create()
+            local temp = CCSprite:createWithSpriteFrameName("bird0.png")
+            setScale(temp, 0.5)
+            local shadow = setPos(addSprite(bird, "roleShadow.png"), {0, -100})
+            local sz = temp:getContentSize()
+            setAnchor(temp, {60/sz.width, (sz.height-83)/sz.height})
+            bird:addChild(temp)
+            self.bg:addChild(bird, MAX_BUILD_ZORD+1)
+            setPos(bird, {-50+k*30, 150+dy-k*30})
+            temp:runAction(repeatForever(CCAnimate:create(animation)))
+            local dy = math.random(300)
+            bird:runAction(moveto(40, MapWidth, 100+dy))
+            local function removeBird()
+                for k, v in ipairs(self.birds) do
+                    if v == bird then
+                        table.remove(self.birds, k)
+                        break
+                    end
+                end
+                removeSelf(bird)
+            end
+            bird:runAction(sequence({delaytime(40), callfunc(nil, removeBird)}))
+            table.insert(self.birds, bird)
+        end
+    end
+end
+--士兵来砍伐树木获得银币 
+function BuildLayer:genTree(diff)
+    self.treeTime = self.treeTime+diff
+    if self.treeTime >= 10 then
+    end
+end

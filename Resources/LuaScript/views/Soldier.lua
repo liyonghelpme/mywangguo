@@ -61,8 +61,10 @@ function Soldier:ctor(map, data, pd)
     --end
 
     registerEnterOrExit(self)
-    self.stateStr = ui.newBMFontLabel({text="0", size=20})
-    self.bg:addChild(self.stateStr)
+    if DEBUG then
+        self.stateStr = ui.newBMFontLabel({text="0", size=20})
+        self.bg:addChild(self.stateStr)
+    end
 
 end
 function Soldier:enterScene()
@@ -87,7 +89,9 @@ function Soldier:update(diff)
         self:findPath(diff)
         self:doMove(diff)
         self:doAttack(diff)
-        self.stateStr:setString(str(self.state))
+        if DEBUG then
+            self.stateStr:setString(str(self.state))
+        end
     end
 end
 function Soldier:doAttack(diff)

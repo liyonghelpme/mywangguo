@@ -665,7 +665,7 @@ WORDS = dict({
 {"makeDrugPage", {"炼金页面", ""}},
 {"finTask", {"{DO}/{NEED}", ""}},
 {"needExp", {"{EXP}xp", "{EXP}xp"}},
-{"free0", {"免费金币", ""}},
+{"free0", {"免费获得金币", ""}},
 {"share", {"分 享", "Share"}},
 {"pageNO", {"-{NUM}-", "-{NUM}-"}},
 {"free", {"免费", "Free"}},

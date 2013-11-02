@@ -1,0 +1,2 @@
+MonsterLogic = {}
+MonsterLogic.killSol = {}

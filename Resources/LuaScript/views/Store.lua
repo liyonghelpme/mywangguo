@@ -9,10 +9,12 @@ function Store:ctor(s)
     self.pics = {
      --"goodTreasure.png", "goodBuild.png", "goodDecor.png",  "goodWeapon.png", "goodMagic.png",
      "goodBuild.png",
+     "goodGold.png",
     }
     self.titles = {
     --"buyTreasure.png", "buyBuild.png", "buyDecor.png", "buyWeapon.png", "buyMagic.png",
-    "buyBuild.png"
+    "buyBuild.png",
+    "buyGold.png",
     }
     self.bg = CCNode:create()
     setDesignXY(self.bg)
@@ -129,6 +131,11 @@ function Store:buy(gi)
     local cost
     local buyable
     local ret
+    if kind == GOODS_KIND.GOLD then
+        MyPlugin:getInstance():sendCmd("showOffers", "")
+        return
+    end
+
     local data = getData(GOODS_KIND.BUILD, id)
 
     local ret = checkBuildNum(id)

@@ -147,8 +147,9 @@ function MoveMap:addBuilding(chd, z)
     self.bg:addChild(chd.bg, z)
     self.mapGridController:addBuilding(chd)
 end
+--先清理map 再remove
 function MoveMap:removeBuilding(chd)
-    self.bg:removeChild(chd.bg, true)
     self.mapGridController:removeBuilding(chd)
+    self.bg:removeChild(chd.bg, true)
 end
 

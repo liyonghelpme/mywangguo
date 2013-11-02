@@ -64,6 +64,7 @@ function Goods:initSameElement(buildData, panel)
     end
 
     setColor(setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5}), {0, 0, 0})
+    local cn = 0
     for k, v in pairs(cost) do
         local c = {109, 170, 44}
         local picName = k..".png"
@@ -76,7 +77,14 @@ function Goods:initSameElement(buildData, panel)
         local cNum = ui.newBMFontLabel({text=valNum, font="bound.fnt", color=c, size=18})
         panel:addChild(cNum)
         setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
+        cn = 1
         break
+    end
+    --免费获得金币
+    if cn == 0 then
+        local cNum = ui.newTTFLabel({text=getStr("free0"), size=20, color={255, 215, 0}})
+        panel:addChild(cNum)
+        setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
     end
 
     local sca
@@ -113,6 +121,7 @@ function Goods:updateTab(rg)
 
     print("updateTab", rg[1], rg[2], #self.goodNum, self.PAN_PER_ROW)
     local i = math.max(0, rg[1]*self.PAN_PER_ROW)
+    --显示金币的购买回调函数 和 store的不同
     while i < #self.goodNum and i < rg[2]*self.PAN_PER_ROW do
         --print(i, rg[1], rg[2], #self.goodNum)
         if i % 3 == 0 then

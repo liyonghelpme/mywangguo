@@ -171,6 +171,16 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
             TAdsDeveloperInfo info;
             info["uid"] = args;
             m_pAds->configDeveloperInfo(info);
+        //初始化setPoints
+        //获得奖励setpoints
+        //消费掉奖励的时候 setPoints
+        //通知lua改变金币数量
+        //通知java 改变金币数量
+        } else if(c == "spendGold") {
+            TAdsDeveloperInfo info;
+            info["cmd"] = "spendGold";
+            info["gold"] = args;
+            m_pAds->configDeveloperInfo(info);
         }
 	}  
 }

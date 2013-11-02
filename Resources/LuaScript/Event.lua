@@ -20,6 +20,13 @@ EVENT_TYPE = {
 
     ATTACK_ME=27,
 }
+
+--一个比较大的数字作为区分
+CPP_EVENT = {
+    EVENT_SETPOINTS = 1000,
+}
+
+
 Event = {}
 Event.callbacks = {}
 function Event:registerEvent(name, obj)
@@ -42,3 +49,18 @@ function Event:sendMsg(name, msg)
         end
     end
 end
+
+local function receiveCpp(event, eventParam)
+    print("receiveCpp", event)
+    local name = CPP_EVENT[event]
+    if Event.callbacks[name] ~= nil then
+        for k, v in ipairs(Event.callbacks[name]) do
+            k:receiveMsg(name)
+        end
+    end
+end
+
+function Event:init()
+    CCNotificationCenter:sharedNotificationCenter():registerScriptObserver(CCNotificationCenter:sharedNotificationCenter(), receiveCpp, "EVENT_SETPOINTS")
+end
+Event:init()

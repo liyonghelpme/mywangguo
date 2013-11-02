@@ -27,6 +27,14 @@ function User:ctor()
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
     }
+    Event:registerEvent(CPP_EVENT.EVENT_SETPOINTS, self)
+end
+function User:receiveMsg(name, msg)
+    if name == CPP_EVENT.EVENT_SETPOINTS then
+        local gold = CCUserDefault:sharedUserDefault():getIntegerForKey("gold", 0)
+        print("User setValue Gold", gold)
+        self:setValue('gold', gold)
+    end
 end
 function User:initDataOver(data, param)
     if data ~= nil then

@@ -29,6 +29,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import net.youmi.android.AdManager;
+import net.youmi.android.offers.OffersManager;
+import net.youmi.android.offers.PointsChangeNotify;
+import net.youmi.android.offers.PointsManager;
+
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.plugin.PluginWrapper;
@@ -59,12 +64,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.provider.Settings.Secure;
 
-public class HelloLua extends Cocos2dxActivity{
+public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	LinearLayout layout;
 	AdView view;
 	AdRequest request;
 	
 	private static native void setDeviceId(String deviceId);
+	private static native void setPoints(int v);
 	
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -96,10 +102,18 @@ public class HelloLua extends Cocos2dxActivity{
 		Log.e("deviceId", id);
 		setDeviceId(id);
 		//MobclickAgent.setDebugMode(true);
+		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
+		OffersManager.getInstance(this).onAppLaunch();
+		
+		int myPoints = PointsManager.getInstance(this).queryPoints();
+		setPoints(myPoints);
+		PointsManager.getInstance(this).registerNotify(this);
 	}
 	
 	public void onDestroy() {
+		OffersManager.getInstance(this).onAppExit();
 		super.onDestroy();
+		PointsManager.getInstance(this).unRegisterNotify(this);
 	}
 	
 	@Override
@@ -119,6 +133,20 @@ public class HelloLua extends Cocos2dxActivity{
 	static {
         System.loadLibrary("hellolua");
    }
+	@Override
+	public void onPointBalanceChange(final int arg0) {
+		// TODO Auto-generated method stub
+		Log.v("YouMi", "onPointBalanceChange "+arg0);
+		PluginWrapper.runOnGLThread(new Runnable(){
+			//c++ 通知客户端 加上这些points 用于抵消其它花费 金币
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				setPoints(arg0);
+			}
+			
+		});
+	}
 	
 }
 

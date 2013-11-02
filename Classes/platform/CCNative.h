@@ -9,6 +9,7 @@
 extern "C"
 {
     void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jstring url);
+    void Java_com_liyong_wangguo_HelloLua_setPoints(JNIEnv *env, jobject thiz, jint v);
 }
 #endif
 

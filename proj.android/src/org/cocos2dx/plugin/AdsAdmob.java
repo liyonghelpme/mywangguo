@@ -28,6 +28,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.youmi.android.offers.OffersManager;
+import net.youmi.android.offers.PointsManager;
+
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
 
@@ -36,6 +39,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+
 
 public class AdsAdmob implements InterfaceAds {
 
@@ -48,7 +52,8 @@ public class AdsAdmob implements InterfaceAds {
 	private String mPublishID = "";
 	private Set<String> mTestDevices = null;
 	private WindowManager mWm = null;
-
+	private String muid = "";
+	
 	private static final int ADMOB_SIZE_BANNER = 0;
 	private static final int ADMOB_SIZE_IABMRect = 1;
 	private static final int ADMOB_SIZE_IABBanner = 2;
@@ -84,11 +89,38 @@ public class AdsAdmob implements InterfaceAds {
 	@Override
 	public void configDeveloperInfo(Hashtable<String, String> devInfo) {
 		Log.e("AdsMob", "config Ads "+devInfo);
-		try {
-			mPublishID = devInfo.get("AdmobID");
-			LogD("init AppInfo : " + mPublishID);
-		} catch (Exception e) {
-			LogE("initAppInfo, The format of appInfo is wrong", e);
+		String cmd = devInfo.get("cmd");
+		if(cmd != null) {
+			if(cmd == "spendGold") {
+				final String gold = devInfo.get("gold");
+				PluginWrapper.runOnMainThread(new Runnable(){
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						PointsManager.getInstance(mContext).spendPoints(Integer.valueOf(gold));
+					}
+					
+				});
+			}
+		} else {
+			try {
+				mPublishID = devInfo.get("AdmobID");
+				LogD("init AppInfo : " + mPublishID);
+			} catch (Exception e) {
+				LogE("initAppInfo, The format of appInfo is wrong", e);
+			}
+			try{
+				muid = devInfo.get("uid");
+				PluginWrapper.runOnMainThread(new Runnable() {
+					@Override
+					public void run() {
+						OffersManager.getInstance(mContext).setCustomUserId(muid);
+					}
+				});
+				LogD("user id" + muid);
+			} catch(Exception e) {
+				LogE("not init user id", e);
+			}
 		}
 	}
 
@@ -110,9 +142,23 @@ public class AdsAdmob implements InterfaceAds {
 		*/
 	}
 
+	//显示有米的积分墙广告
 	@Override
 	public void spendPoints(int points) {
 		// do nothing, Admob don't have this function
+		if(points == 2) {
+			PluginWrapper.runOnMainThread(new Runnable(){
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					OffersManager.getInstance(mContext).showOffersWallDialog(mContext);
+				}
+				
+			});
+		} else if(points == 3) {
+			
+		}
 	}
 
 	@Override
