@@ -23,13 +23,17 @@ EVENT_TYPE = {
 
 --一个比较大的数字作为区分
 CPP_EVENT = {
-    EVENT_SETPOINTS = 1000,
+    EVENT_SETPOINT = 1000,
 }
 
 
 Event = {}
 Event.callbacks = {}
 function Event:registerEvent(name, obj)
+    if name == CPP_EVENT.EVENT_SETPOINT then
+        print("User register Event", name)
+    end
+
     if Event.callbacks[name] == nil then
         Event.callbacks[name] = {}
     end
@@ -53,14 +57,23 @@ end
 local function receiveCpp(event, eventParam)
     print("receiveCpp", event)
     local name = CPP_EVENT[event]
+    print("eventName", name, Event.callbacks[name])
+
+    if name == CPP_EVENT.EVENT_SETPOINT then
+        local gold = CCUserDefault:sharedUserDefault():getIntegerForKey("gold")
+        global.user:setValue('gold', gold)
+    end
+
+    --[[
     if Event.callbacks[name] ~= nil then
         for k, v in ipairs(Event.callbacks[name]) do
             k:receiveMsg(name)
         end
     end
+    --]]
 end
 
 function Event:init()
-    CCNotificationCenter:sharedNotificationCenter():registerScriptObserver(CCNotificationCenter:sharedNotificationCenter(), receiveCpp, "EVENT_SETPOINTS")
+    CCNotificationCenter:sharedNotificationCenter():registerScriptObserver(CCNotificationCenter:sharedNotificationCenter(), receiveCpp, "EVENT_SETPOINT")
 end
 Event:init()

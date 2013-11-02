@@ -5,6 +5,8 @@ require "views.CastlePage"
 require "views.MenuLayer"
 require "views.BuildMenu"
 require "views.DialogController"
+require "views.UseGold"
+require "views.SynGold"
 
 CastleScene = class()
 --CastleScene 和loading 页面
@@ -65,16 +67,34 @@ function CastleScene:beginBuild(id)
     self.inBuild = true
     global.director:pushView(BuildMenu.new(self, {PLAN_KIND.PLAN_BUILDING, self.curBuild}), 0, 0)
 end
-function CastleScene:finishBuild()
-    local other = self.mc.buildLayer:checkCollision(self.curBuild)
-    if other ~= nil then
-        return
-    end
-
+--是否使用金币购买
+function CastleScene:realFinishBuild(gold)
     local p = getPos(self.curBuild.bg)
     local now = client2Server(Timer.now)
     local id = self.curBuild.kind
     local cost = getCost(GOODS_KIND.BUILD, id)
+    if gold then
+        cost = calGold(cost)
+        local buyable = global.user:checkCost(cost)
+        if buyable.ok == 0 then
+            --金币不足 不用购买了
+            print("first cancel")
+            self:cancelBuild()
+            
+            print("then push")
+            addBanner(getStr("goldNot"))
+            --金币数量为0 打开同步一下数据
+            local gold = global.user:getValue('gold')
+            if gold == 0 then
+                global.director:pushView(SynGold.new(), 1, 0)
+            end
+            return
+        else
+            MyPlugins:getInstance():sendCmd("setUid", str(global.user.uid))
+            MyPlugins:getInstance():sendCmd("spendGold", str(cost.gold))
+        end
+        print("use gold num", temp.gold)
+    end
 
     global.httpController:addRequest("finishBuild", dict({{"uid", global.user.uid}, {"bid", self.curBuild.bid}, {"kind", self.curBuild.kind}, {"px", p[1]}, {"py", p[2]}, {"dir", self.curBuild.dir}, {"color", self.curBuild.buildColor}, {'objectTime', math.floor(client2Server(Timer.now))}, {'cost', simple.encode(cost)}}), nil, nil, self)
         
@@ -85,12 +105,39 @@ function CastleScene:finishBuild()
     showMultiPopBanner(showData)
 
     --应该在buyBuilding 消耗资源之后再finishBuild
-    global.user:buyBuilding(self.curBuild)
+    --可能消耗的是金币因此由这里计算花费
+    global.user:buyBuilding(self.curBuild, cost)
     self.mc:finishBuild()
     self:closeBuild()
 
     NewLogic.triggerEvent(NEW_STEP.HARVEST)
 end
+
+function CastleScene:finishBuild()
+    local other = self.mc.buildLayer:checkCollision(self.curBuild)
+    if other ~= nil then
+        return
+    end
+    local function useGoldFin(p)
+        if p then
+            self:realFinishBuild(true)
+        else
+            self:cancelBuild()
+        end
+    end
+    local p = getPos(self.curBuild.bg)
+    local now = client2Server(Timer.now)
+    local id = self.curBuild.kind
+    local cost = getCost(GOODS_KIND.BUILD, id)
+    local buyable = global.user:checkCost(cost)
+    if buyable.ok == 0 then
+        local gold = calGold(cost)
+        global.director:pushView(UseGold.new(useGoldFin, gold), 1, 0)
+        return
+    end
+    self:realFinishBuild(false)
+end
+
 function CastleScene:cancelBuild()
     self.mc:cancelBuild()
     self:closeBuild()
@@ -135,8 +182,11 @@ function CastleScene:showGlobalMenu(build, callback, delegate)
     if self.curMenuBuild == nil and self.curBuild == nil then
         self.curMenuBuild = build
         self.ml:hideMenu()
-        self.mc:moveToBuild(build)
+        --显示菜单不要缩放
+        --self.mc:moveToBuild(build)
         callback(delegate)
+    else
+        self:closeGlobalMenu(self) 
     end
 end
 

@@ -56,3 +56,10 @@ function getNextBuildNum(id)
     local need = math.floor((level+bLevel)/bLevel)
     return need*bLevel
 end
+function calGold(cost)
+    local temp = {gold=0}
+    for k, v in pairs(cost) do
+        temp.gold = temp.gold + v
+    end
+    return temp
+end

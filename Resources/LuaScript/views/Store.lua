@@ -132,11 +132,11 @@ function Store:buy(gi)
     local buyable
     local ret
     if kind == GOODS_KIND.GOLD then
-        MyPlugin:getInstance():sendCmd("showOffers", "")
+        MyPlugins:getInstance():sendCmd("showOffers", "")
         return
     end
 
-    local data = getData(GOODS_KIND.BUILD, id)
+    local data = getData(kind, id)
 
     local ret = checkBuildNum(id)
     print("checkBuildNum", simple.encode(ret))
@@ -148,9 +148,11 @@ function Store:buy(gi)
         end
         return
     end
-
+    --资源不足使用金币购买
+    --[[
     cost = getCost(kind, id)
     buyable = global.user:checkCost(cost)
+    --用户先摆好建筑物 点击确定的时候 提示资源不够 cancel 建造 或者 使用金币建造
     if buyable.ok == 0 then
         buyable.ok = nil
         for k, v in pairs(buyable) do
@@ -158,6 +160,7 @@ function Store:buy(gi)
         end
         return
     end
+    --]]
 
     if kind == GOODS_KIND.BUILD then
         global.director:popView()

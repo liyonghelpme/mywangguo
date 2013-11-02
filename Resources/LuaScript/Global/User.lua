@@ -1,3 +1,4 @@
+require "Event"
 User = class()
 function User:ctor()
     self.papayaName = "liyong"
@@ -27,11 +28,12 @@ function User:ctor()
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
     }
-    Event:registerEvent(CPP_EVENT.EVENT_SETPOINTS, self)
+    Event:registerEvent(CPP_EVENT.EVENT_SETPOINT, self)
 end
 function User:receiveMsg(name, msg)
-    if name == CPP_EVENT.EVENT_SETPOINTS then
-        local gold = CCUserDefault:sharedUserDefault():getIntegerForKey("gold", 0)
+    print("receive User msg", name, msg)
+    if name == CPP_EVENT.EVENT_SETPOINT then
+        local gold = CCUserDefault:sharedUserDefault():getIntegerForKey("gold")
         print("User setValue Gold", gold)
         self:setValue('gold', gold)
     end
@@ -53,7 +55,14 @@ function User:initDataOver(data, param)
         for k, v in ipairs(data.soldiers) do
             self.soldiers[v.kind] = v.num
         end
+        --保留从有米服务器获得的金币数量
+        local youmigold = self.resource.gold or 0
         self.resource = data.resource
+        print("youmi gold my gold", youmigold, self.resource.gold)
+        --test gold
+        self.resource.gold = youmigold
+        --youmigold
+
         self:changeValue("exp", 0)
         print("sendMsg")
         self.initYet = true
@@ -136,9 +145,9 @@ function User:getLastColor()
     return self.lastColor
 end
 
-function User:buyBuilding(build)
+function User:buyBuilding(build, cost)
     print("buyBuilding", build.kind)
-    local cost = getCost(GOODS_KIND.BUILD, build.kind);
+    --local cost = getCost(GOODS_KIND.BUILD, build.kind);
     self:doCost(cost)
     local gain = getGain(GOODS_KIND.BUILD, build.kind);
     self:doAdd(gain)

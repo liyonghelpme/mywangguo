@@ -1,4 +1,4 @@
-#include "cocos2d.h"
+﻿#include "cocos2d.h"
 #include "AppDelegate.h"
 #include "SimpleAudioEngine.h"
 #include "script_support/CCScriptSupport.h"
@@ -9,7 +9,7 @@
 #include "MyPlugins.h"
 #include <algorithm>
 #include "UpdateScene.h"
-
+#include "AssetsManager.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -27,6 +27,8 @@ AppDelegate::~AppDelegate()
     SimpleAudioEngine::sharedEngine()->end();
     //CCScriptEngineManager::purgeSharedManager();
 }
+
+static UpdateScene *scene = NULL;
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
@@ -72,7 +74,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 	//updateFiles();
 
-    UpdateScene *scene = UpdateScene::create(this);
+    scene = UpdateScene::create();
+    scene->ap = this;
     pDirector->runWithScene(scene);
 
 	//if(def->getStringForKey("update") != "0")
@@ -103,6 +106,7 @@ void AppDelegate::updateFiles() {
     if(pAssetsManager == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();
 		pAssetsManager = new AssetsManager((def->getStringForKey("codeUrl")+def->getStringForKey("zipFile")).c_str(), (def->getStringForKey("codeUrl")+def->getStringForKey("versionFile")).c_str());
+        
     }
     bool suc = false;
     CCLog("start update code");
@@ -111,6 +115,8 @@ void AppDelegate::updateFiles() {
             suc = true;
             CCLog("update Script successfully");
         } else {
+			//下载失败了 
+			progress = 200;
             CCLog("update Script Fail");
         }
     //}

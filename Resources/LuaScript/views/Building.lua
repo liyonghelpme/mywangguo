@@ -387,7 +387,8 @@ function Building:finishBuild()
     global.user:updateBuilding(self)
 
     local dust = CCParticleSystemQuad:create("dust.plist")
-    self.bg:addChild(dust, -1)
+    dust:setPositionType(2)
+    self.bg:addChild(dust, 1)
 
 end
 function Building:setZord()

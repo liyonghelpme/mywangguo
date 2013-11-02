@@ -69,11 +69,13 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	AdView view;
 	AdRequest request;
 	
+	private HelloLua act;
 	private static native void setDeviceId(String deviceId);
-	private static native void setPoints(int v);
+	public static native void setPoints(int v);
 	
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		act = this;
 		PluginWrapper.init(this); // for plugins
 		PluginWrapper.setGLSurfaceView(Cocos2dxGLSurfaceView.getInstance());
 		final String prefFile = "deviceId.xml";
@@ -101,13 +103,32 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		}
 		Log.e("deviceId", id);
 		setDeviceId(id);
-		//MobclickAgent.setDebugMode(true);
-		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
-		OffersManager.getInstance(this).onAppLaunch();
 		
-		int myPoints = PointsManager.getInstance(this).queryPoints();
-		setPoints(myPoints);
-		PointsManager.getInstance(this).registerNotify(this);
+		
+		//MobclickAgent.setDebugMode(true);
+		Log.v("Youmi", "initial You mi");
+		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", true);
+		
+		
+		try{
+			Log.v("Youmi", "before get points");
+			OffersManager.getInstance(this).onAppLaunch();
+			PointsManager.getInstance(this).registerNotify(this);
+			final int myPoints = PointsManager.getInstance(act).queryPoints();
+			Log.v("Youmi", "initial Points "+myPoints);
+			PluginWrapper.runOnGLThread(new Runnable(){
+				//c++ 通知客户端 加上这些points 用于抵消其它花费 金币
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					setPoints(myPoints);
+				}
+				
+			});
+	
+		} catch(Exception e){
+			Log.e("Youmi", "initial points error", e);
+		}
 	}
 	
 	public void onDestroy() {
@@ -124,6 +145,19 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	public void onResume() {
 		super.onResume();
 		MobclickAgent.onResume(this);
+		try {
+			final int myPoints = PointsManager.getInstance(act).queryPoints();
+			PluginWrapper.runOnGLThread(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					Log.v("Youmi", "initial myPoints "+myPoints);
+					setPoints(myPoints);
+				}
+			});
+		}catch(Exception e){
+			Log.e("Youmi", "resume points error ", e);
+		}
 	}
 	@Override
 	public void onPause() {

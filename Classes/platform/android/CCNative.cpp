@@ -11,6 +11,7 @@ void Java_com_liyong_wangguo_HelloLua_setDeviceId(JNIEnv *env, jobject thiz, jst
 void Java_com_liyong_wangguo_HelloLua_setPoints(JNIEnv *env, jobject thiz, jint v) {
     CCLog("setPoints %d", (int)v);
     cocos2d::CCUserDefault::sharedUserDefault()->setIntegerForKey("gold", v);
+    CCUserDefault::sharedUserDefault()->flush();
     cocos2d::CCNotificationCenter::sharedNotificationCenter()->postNotification("EVENT_SETPOINT");
 }
 

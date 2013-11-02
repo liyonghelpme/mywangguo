@@ -111,32 +111,27 @@ end
 function SoldierStore:setSoldier(idCan)
     self.curSelSol = idCan
 end
-function SoldierStore:sureToCall()
+function SoldierStore:realBuySol(gold)
     local solId = self.goods.goodNum[self.curSelSol[2]]
     local cost = getCost(GOODS_KIND.SOLDIER, solId)
-    local buyable = global.user:checkCost(cost)
-    if buyable.ok == 0 then
-        buyable.ok = nil
-        for k, v in pairs(buyable) do
-            addBanner(getStr("resLack", {"[NAME]", getStr(k, nil), "[NUM]", str(v)}) )
+
+    if gold then
+        cost = calGold(cost)
+        local buyable = global.user:checkCost(cost)
+        if buyable.ok == 0 then
+            print("then push")
+            addBanner(getStr("goldNot"))
+            --金币数量为0 打开同步一下数据
+            local gold = global.user:getValue('gold')
+            if gold == 0 then
+                global.director:pushView(SynGold.new(), 1, 0)
+            end
+            return
+        else
+            MyPlugins:getInstance():sendCmd("setUid", str(global.user.uid))
+            MyPlugins:getInstance():sendCmd("spendGold", str(cost.gold))
         end
-        return
     end
-
-    if #self.scene.objectList >= 3 then
-        addBanner(getStr("campQueueEx", {"[NUM]", str(3)}))
-        return 
-    end
-    
-    local curSolNum = global.user:getSolNum()
-    local campNum = global.user:getCampProductNum()
-    curSolNum = curSolNum+campNum
-    local peopleNum = global.user:getPeopleNum()
-    if curSolNum > peopleNum then
-        addBanner(getStr("buildHouse", {"[NUM1]", str(curSolNum), "[NUM2]", str(peopleNum)}))
-        return 
-    end
-
 
     local objectList = self.scene.objectList
     global.user:doCost(cost)
@@ -157,6 +152,39 @@ function SoldierStore:sureToCall()
     self:updateLeftPanel()
 
     NewLogic.triggerEvent(NEW_STEP.TRAIN_OVER)
+end
+function SoldierStore:sureToCall()
+    local solId = self.goods.goodNum[self.curSelSol[2]]
+    if #self.scene.objectList >= 3 then
+        addBanner(getStr("campQueueEx", {"[NUM]", str(3)}))
+        return 
+    end
+    
+    local curSolNum = global.user:getSolNum()
+    local campNum = global.user:getCampProductNum()
+    curSolNum = curSolNum+campNum
+    local peopleNum = global.user:getPeopleNum()
+    if curSolNum > peopleNum then
+        addBanner(getStr("buildHouse", {"[NUM1]", str(curSolNum), "[NUM2]", str(peopleNum)}))
+        return 
+    end
+
+    local function useGoldFin(p)
+        if p then
+            self:realBuySol(true)
+        else
+            return
+        end
+    end
+
+    local cost = getCost(GOODS_KIND.SOLDIER, solId)
+    local buyable = global.user:checkCost(cost)
+    if buyable.ok == 0 then
+        local gold = calGold(cost)
+        global.director:pushView(UseGold.new(useGoldFin, gold), 1, 0)
+        return
+    end
+    self:realBuySol(false)
 end
 
 function SoldierStore:initLeftPanel()

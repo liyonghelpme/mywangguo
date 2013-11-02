@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
  Copyright (c) 2013 cocos2d-x.org
  
  http://www.cocos2d-x.org
@@ -112,14 +112,13 @@ public:
      */
     void setStoragePath(const char* storagePath);
     
-protected:
+
     bool downLoad();
     void checkStoragePath();
     bool uncompress();
     bool createDirectory(const char *path);
     void setSearchPath();
-    
-private:
+
     //! The path to store downloaded resources.
     std::string _storagePath;
     
@@ -130,8 +129,13 @@ private:
     std::string _versionFileUrl;
     
     CURL *_curl;
-};
 
+    
+};
+extern int progress;
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
+extern pthread_mutex_t _message;
+#endif
 //NS_CC_EXT_END;
 
 #endif /* defined(__AssetsManager__) */

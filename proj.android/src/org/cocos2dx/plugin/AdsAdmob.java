@@ -33,6 +33,7 @@ import net.youmi.android.offers.PointsManager;
 
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
+import com.liyong.wangguo.HelloLua;
 
 import android.app.Activity;
 import android.content.Context;
@@ -101,26 +102,27 @@ public class AdsAdmob implements InterfaceAds {
 					}
 					
 				});
+			} else if(cmd == "initGold") {
+				
 			}
 		} else {
-			try {
-				mPublishID = devInfo.get("AdmobID");
-				LogD("init AppInfo : " + mPublishID);
-			} catch (Exception e) {
-				LogE("initAppInfo, The format of appInfo is wrong", e);
-			}
-			try{
+				String temp = devInfo.get("AdmobID");
+				if(temp != null) {
+					mPublishID = temp; 
+					LogD("init AppInfo : " + mPublishID);
+				}
+			
+			
 				muid = devInfo.get("uid");
-				PluginWrapper.runOnMainThread(new Runnable() {
-					@Override
-					public void run() {
-						OffersManager.getInstance(mContext).setCustomUserId(muid);
-					}
-				});
-				LogD("user id" + muid);
-			} catch(Exception e) {
-				LogE("not init user id", e);
-			}
+				if(muid != null) {
+					PluginWrapper.runOnMainThread(new Runnable() {
+						@Override
+						public void run() {
+							OffersManager.getInstance(mContext).setCustomUserId(muid);
+						}
+					});
+				}
+			LogD("youmi uid is "+muid);
 		}
 	}
 
@@ -147,12 +149,26 @@ public class AdsAdmob implements InterfaceAds {
 	public void spendPoints(int points) {
 		// do nothing, Admob don't have this function
 		if(points == 2) {
+			
 			PluginWrapper.runOnMainThread(new Runnable(){
 
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					OffersManager.getInstance(mContext).showOffersWallDialog(mContext);
+					OffersManager.getInstance(mContext).showOffersWall();
+					try{
+						final int myPoints = PointsManager.getInstance(mContext).queryPoints();
+						PluginWrapper.runOnGLThread(new Runnable(){
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								Log.v("Youmi", "set myPoints "+myPoints);
+								HelloLua.setPoints(myPoints);
+							}
+						});
+					}catch(Exception e) {
+						Log.e("Youmi", "showoffer get points ", e);
+					}
 				}
 				
 			});
@@ -270,15 +286,18 @@ public class AdsAdmob implements InterfaceAds {
 	}
 
 	private class AdmobAdsListener implements AdListener {
-
+		
 		@Override
 		public void onDismissScreen(Ad arg0) {
 			LogD("onDismissScreen invoked");
-			AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewDismissed, "Full screen ads view dismissed!");
+			return;
+			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewDismissed, "Full screen ads view dismissed!");
 		}
 
 		@Override
 		public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+			return;
+			/*
 			int errorNo = AdsWrapper.RESULT_CODE_UnknownError;
 			String errorMsg = "Unknow error";
 			switch (arg1) {
@@ -298,6 +317,7 @@ public class AdsAdmob implements InterfaceAds {
 			}
 			LogD("failed to receive ad : " + errorNo + " , " + errorMsg);
 			AdsWrapper.onAdsResult(mAdapter, errorNo, errorMsg);
+			*/
 		}
 
 		@Override
@@ -308,13 +328,13 @@ public class AdsAdmob implements InterfaceAds {
 		@Override
 		public void onPresentScreen(Ad arg0) {
 			LogD("onPresentScreen invoked");
-			AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewShown, "Full screen ads view shown!");
+			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewShown, "Full screen ads view shown!");
 		}
 
 		@Override
 		public void onReceiveAd(Ad arg0) {
 			LogD("onReceiveAd invoked");
-			AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_AdsReceived, "Ads request received success!");
+			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_AdsReceived, "Ads request received success!");
 		}
 	}
 

@@ -44,7 +44,9 @@
 #endif
 
 #include "support/zip_support/unzip.h"
-
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
+#include "pthread.h"
+#endif
 using namespace cocos2d;
 using namespace std;
 
@@ -55,6 +57,8 @@ using namespace std;
 #define TEMP_PACKAGE_FILE_NAME    "cocos2dx-update-temp-package.zip"
 #define BUFFER_SIZE    8192
 #define MAX_FILENAME   512
+
+int progress = 0;
 
 AssetsManager::AssetsManager()
 : _packageUrl("")
@@ -149,7 +153,48 @@ bool AssetsManager::checkUpdate()
     
     return true;
 }
-
+//当progress == 200 的时候 下载结束
+static void* assetsManagerDownloadAndUncompress(void *data) {
+	AssetsManager* self = (AssetsManager*)data;
+	string downloadedVersion = CCUserDefault::sharedUserDefault()->getStringForKey(KEY_OF_DOWNLOADED_VERSION);
+    if (downloadedVersion != self->_version)
+    {
+        if (! self->downLoad()) {
+			progress = 200;
+			return false;
+		}
+        // Record downloaded version.
+        CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, self->_version.c_str());
+        CCUserDefault::sharedUserDefault()->flush();
+    }
+    
+    // Uncompress zip file.
+    if (! self->uncompress()) {
+		progress = 200;
+		return false;
+	}
+    // Record new version code.
+    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_VERSION, self->_version.c_str());
+    
+    // Unrecord downloaded version code.
+    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, "");
+    
+    CCUserDefault::sharedUserDefault()->flush();
+    
+    // Set resource search path.
+    self->setSearchPath();
+    
+    // Delete unloaded zip file.
+    string zipfileName = self->_storagePath + TEMP_PACKAGE_FILE_NAME;
+    if (remove(zipfileName.c_str()) != 0)
+    {
+        CCLOG("can not remove downloaded zip file");
+    }
+	progress = 200;
+}
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
+static pthread_t *_tid; 
+#endif
 bool AssetsManager::update()
 {
     // 1. Urls of package and version should be valid;
@@ -159,43 +204,23 @@ bool AssetsManager::update()
         std::string::npos == _packageUrl.find(".zip"))
     {
         CCLOG("no version file url, or no package url, or the package is not a zip file");
+		progress = 200;
         return false;
     }
     
     // Check if there is a new version.
-    if (! checkUpdate()) return false;
-    
-    // Is package already downloaded?
-    string downloadedVersion = CCUserDefault::sharedUserDefault()->getStringForKey(KEY_OF_DOWNLOADED_VERSION);
-    if (downloadedVersion != _version)
-    {
-        if (! downLoad()) return false;
-        
-        // Record downloaded version.
-        CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, _version.c_str());
-        CCUserDefault::sharedUserDefault()->flush();
-    }
-    
-    // Uncompress zip file.
-    if (! uncompress()) return false;
-    
-    // Record new version code.
-    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_VERSION, _version.c_str());
-    
-    // Unrecord downloaded version code.
-    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, "");
-    
-    CCUserDefault::sharedUserDefault()->flush();
-    
-    // Set resource search path.
-    setSearchPath();
-    
-    // Delete unloaded zip file.
-    string zipfileName = _storagePath + TEMP_PACKAGE_FILE_NAME;
-    if (remove(zipfileName.c_str()) != 0)
-    {
-        CCLOG("can not remove downloaded zip file");
-    }
+    if (! checkUpdate()) {
+		progress = 200;
+		return false;
+	}
+	#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
+	pthread_mutex_init(&_message, NULL);
+	_tid = new pthread_t();
+	pthread_create(&(*_tid), NULL, assetsManagerDownloadAndUncompress, this);
+	//下载结束线程通知
+	#else
+	assetsManagerDownloadAndUncompress(this);
+	#endif
     return true;
 }
 
@@ -378,16 +403,20 @@ static size_t downLoadPackage(void *ptr, size_t size, size_t nmemb, void *userda
     size_t written = fwrite(ptr, size, nmemb, fp);
     return written;
 }
-
+static AssetsManager *am;
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
+pthread_mutex_t _message;
+#endif
 static int progressFunc(void *ptr, double totalToDownload, double nowDownloaded, double totalToUpLoad, double nowUpLoaded)
 {
     CCLOG("downloading... %d%%", (int)(nowDownloaded/totalToDownload*100));
-    
-    return 0;
+	progress = (int)(nowDownloaded/totalToDownload*100);
+	return 0;
 }
 
 bool AssetsManager::downLoad()
 {
+	am = this;
     CCLog("download package file", _packageUrl.c_str());
     // Create a file to save package.
     string outFileName = _storagePath + TEMP_PACKAGE_FILE_NAME;

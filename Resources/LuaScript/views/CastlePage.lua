@@ -1,28 +1,28 @@
 function Sky()
     local bg = CCNode:create()
-    setAnchor(setPos(addSprite(bg, "images/sky0.png"), {0, 1120}), {0, 1})
+    setAnchor(setPos(addSprite(bg, "sky0.png"), {0, 1120}), {0, 1})
 
-    setAnchor(setPos(addSprite(bg, "images/sky1.png"), {1000, 1120}), {0, 1})
-    setAnchor(setPos(addSprite(bg, "images/sky2.png"), {2000, 1120}), {0, 1})
+    setAnchor(setPos(addSprite(bg, "sky1.png"), {1000, 1120}), {0, 1})
+    setAnchor(setPos(addSprite(bg, "sky2.png"), {2000, 1120}), {0, 1})
     return bg
 end
 
 function TrainLand()
-    local bg = CCSprite:create("images/land0.png")
+    local bg = CCSprite:create("land0.png")
     setAnchor(setPos(bg, {0, 0}), {0, 0})
-    setAnchor(setPos(addSprite(bg, "images/land3.png"), {0, 722}), {0, 0})
+    setAnchor(setPos(addSprite(bg, "land3.png"), {0, 722}), {0, 0})
     return bg
 end
 function BuildLand()
-    local bg = CCSprite:create("images/land1.png")
+    local bg = CCSprite:create("land1.png")
     setAnchor(setPos(bg, {1000, 0}), {0, 0})
-    setAnchor(setPos(addSprite(bg, "images/land4.png"), {0, 722}), {0, 0})
+    setAnchor(setPos(addSprite(bg, "land4.png"), {0, 722}), {0, 0})
     return bg
 end
 function FarmLand()
-    local bg = CCSprite:create("images/land2.png")
+    local bg = CCSprite:create("land2.png")
     setAnchor(setPos(bg, {2000, 0}), {0, 0})
-    setAnchor(setPos(addSprite(bg, "images/land5.png"), {0, 722}), {0, 0})
+    setAnchor(setPos(addSprite(bg, "land5.png"), {0, 722}), {0, 0})
     return bg
 end
 

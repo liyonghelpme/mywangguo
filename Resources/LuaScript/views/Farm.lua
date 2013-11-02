@@ -19,7 +19,8 @@ function Farm:getObjectId()
 end
 function Farm:whenBusy()
     print("whenBusy")
-    if self.planting:getState() >= MATURE then
+    --没有被收获
+    if self.planting:getState() >= MATURE and self.flowBanner ~= nil then
         self:harvestPlant()
         self.flowBanner:removeFromParentAndCleanup(true)
         self.flowBanner = nil
