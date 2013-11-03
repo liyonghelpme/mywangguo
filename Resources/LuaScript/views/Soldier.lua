@@ -1,5 +1,10 @@
 require "heapq"
 require "views.Arrow"
+require "views.SoldierFunc"
+require "views.Archer"
+require "views.Warrior"
+require "views.Magic"
+
 Soldier = class()
 SOLDIER_STATE = {
     FREE = 0,
@@ -28,7 +33,7 @@ function Soldier:ctor(map, data, pd)
         --print("init Attack")
         --Don't forget to load plist first
         CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldiera"..self.kind..".plist")
-        createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, 1, true) 
+        createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, self.data.attSpeed, true) 
     --end
     self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("ss"..self.kind.."m0.png"), {0.5, 0})
     self.bg:addChild(self.changeDirNode)
@@ -46,8 +51,8 @@ function Soldier:ctor(map, data, pd)
     self.passTime = 0
     self.waitTime = 0
     self.oldPredictTarget = nil
-    self.health = 100
-    self.maxHealth = 100
+    self.health = self.data.healthBoundary
+    self.maxHealth = self.data.healthBoundary
     
     --if BattleLogic.inBattle then
         local sz = self.changeDirNode:getContentSize()
@@ -59,7 +64,15 @@ function Soldier:ctor(map, data, pd)
     
         self.healthBar:setVisible(false)
     --end
-
+    if self.kind == 23 then
+        self.funcSoldier = Archer.new(self)
+    elseif self.kind == 3 then
+        self.funcSoldier = Warrior.new(self)
+    elseif self.kind == 493 then
+        self.funcSoldier = Magic.new(self)
+    else
+        self.funcSoldier = SoldierFunc.new(self)
+    end
     registerEnterOrExit(self)
     if DEBUG then
         self.stateStr = ui.newBMFontLabel({text="0", size=20})
@@ -90,7 +103,7 @@ function Soldier:update(diff)
         self:doMove(diff)
         self:doAttack(diff)
         if DEBUG then
-            self.stateStr:setString(str(self.state))
+            self.stateStr:setString(str(self.state).." "..STR(BattleLogic.inBattle).." time "..self.passTime)
         end
     end
 end
@@ -131,20 +144,13 @@ function Soldier:doAttack(diff)
             return
         end
         self.attackTime = self.attackTime+diff
-        if self.attackTime >= 1 then
-            self.attackTime = self.attackTime - 1
+        if self.attackTime >= self.data.attSpeed then
+            self.attackTime = self.attackTime - self.data.attSpeed
             if self.predictMon ~= nil then
                 self.attackTarget:doHarm(10)
             --弓箭手 发射弓箭
-            elseif self.kind == 23 then
-                local start = getPos(self.bg)
-                start[2] = start[2]+15
-                local over = getPos(self.attackTarget.bg)
-                over[1] = over[1]+math.random(20)-10
-                over[2] = over[2]+math.random(20)+20
-                self.map.bg:addChild(Arrow.new(self, self.attackTarget, start, over).bg, MAX_BUILD_ZORD)
             else
-                self.attackTarget:doHarm(10)
+                self.funcSoldier:doAttack()
             end
         end
     end
@@ -481,17 +487,16 @@ function Soldier:doMove(diff)
     if self.state == SOLDIER_STATE.FIND then
         self.state = SOLDIER_STATE.IN_MOVE
         self.curPoint = 1
-        self.passTime = 1
+        self.passTime = self.data.moveSpeed
 
         --print("myPath", simple.encode(self.path))
         self.map:updatePath(self.path)
         
         self.map:switchPathSol()
     end
-
     if self.state == SOLDIER_STATE.IN_MOVE then
         self.passTime = self.passTime+diff
-        if self.passTime > 1 then
+        if self.passTime > self.data.moveSpeed then
             self.passTime = 0
             if BattleLogic.inBattle then
                 local curPos = getPos(self.bg)
@@ -544,20 +549,12 @@ function Soldier:doMove(diff)
                 local cxy = setBuildMap({1, 1, np[1], np[2]})
                 --local cx, cy = normalToCartesian(np[1], np[2])
                 --cxy = {cx, cy}
-                self.bg:runAction(moveto(1, cxy[1], cxy[2]))    
+                self.bg:runAction(moveto(self.data.moveSpeed, cxy[1], cxy[2]))    
                 self:setDir(cxy[1], cxy[2])
                 self:setZord()
                 self.curPoint = self.curPoint+1
             end
         end
-        --[[
-        self.passTime = self.passTime+diff
-        if self.passTime > 3 then
-            self.passTime = 0
-            print("myPath", simple.encode(self.path))
-            self.map:updatePath(self.path)
-        end
-        --]]
     end
 end
 function Soldier:doHarm(n)

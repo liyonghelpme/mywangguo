@@ -157,7 +157,7 @@ function ui.newButton(params)
         local p = sp:convertToNodeSpace(ccp(x, y))
         local ret = checkIn(p.x, p.y, sz)
 
-        if ret then
+        if ret and params.callback ~= nil then
             local tempSp = CCSprite:create(params.image)
             lay:addChild(tempSp)
             local function removeTemp()

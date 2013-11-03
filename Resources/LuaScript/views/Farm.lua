@@ -72,30 +72,31 @@ function Farm:beginPlant(id)
     self.baseBuild.bg:addChild(self.planting.bg)
     global.user:updateBuilding(self.baseBuild)
 end
+--每小时 200  3600s  3600/200 = 18s  18s 收集到1点
 function Farm:doHarvest()
     self.baseBuild.state = getParam('buildFree')
     removeSelf(self.planting.bg)
-    local rate = getDefault(self.baseBuild.data, "rate", 100)
-    local gain = getGain(GOODS_KIND.PLANT, self.planting.id)
+    local gain = self:calGain()
     
-    if self.planting:getState() == ROT  then
-        gain = dict({{"exp", gain["exp"]}})
-    end
-    for k, v in pairs(gain) do
-        v = v*rate
-        gain[k] = math.floor(v/100)
-    end
     global.user:doAdd(gain)
     global.director.curScene.bg:addChild(FlyObject.new(self.baseBuild.bg, gain, self.harvestOver, self).bg)
     print("FlyObject new")
     planting = nil
     global.user:updateBuilding(self.baseBuild)
     self.inHarvest = false
-
-
 end
+
+--经验和 银币数量一致即可
+function Farm:calGain()
+    local now = Timer.now
+    local passTime = now-self.planting.objectTime
+    passTime = math.min(3600, passTime)
+    local gv = math.floor(passTime/3600*self.baseBuild.data.production)
+    return {silver=gv, exp=gv}
+end
+
 function Farm:harvestPlant()
-    local gain = getGain(GOODS_KIND.PLANT, self.planting.id)
+    local gain = self:calGain()
     if not self.inHarvest then
         self.inHarvest = true
         self.npid = math.random(20)-1

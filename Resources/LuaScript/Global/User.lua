@@ -60,7 +60,7 @@ function User:initDataOver(data, param)
         self.resource = data.resource
         print("youmi gold my gold", youmigold, self.resource.gold)
         --test gold
-        self.resource.gold = youmigold
+        self.resource.gold = 2000--youmigold
         --youmigold
 
         self:changeValue("exp", 0)

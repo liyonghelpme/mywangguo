@@ -1,4 +1,5 @@
 Plant = class()
+--self data 不起作用了
 function Plant:ctor(b, d, privateData)
     if privateData ~= nil then
         self.objectTime = privateData['objectTime']
@@ -7,7 +8,7 @@ function Plant:ctor(b, d, privateData)
     end
     
     self.building = b
-    self.data = d
+    --self.data = d
     self.id = privateData.objectId
     print("Plant id is", self.id)
     local sx = self.building.data["sx"]
@@ -28,7 +29,8 @@ function Plant:enterScene()
 end
 function Plant:receiveMsg(name, msg)
     if name == EVENT_TYPE.MATURE_FARM then
-        self.passTime = self.data['time']
+        local needTime = math.floor(3600/self.building.data.production)
+        self.passTime = needTime
     end
 end
 
@@ -37,15 +39,9 @@ function Plant:update(diff)
     self:setState()
 end
 function Plant:setState()
-    local needTime = self.data["time"]
+    local needTime = math.floor(3600/self.building.data.production)
     local newState = math.floor(self.passTime*3/needTime)
     newState = math.min(MATURE, math.max(SOW, newState))
-
-    --[[
-    if newState == MATURE and self.passTime >= 2*needTime and self.acced == 0 then
-        newState = ROT 
-    end
-    --]]
 
     if newState ~= self.curState then
         self.curState = newState;
@@ -64,14 +60,16 @@ function Plant:exitScene()
     Event:unregisterEvent(EVENT_TYPE.MATURE_FARM, self)
 end
 function Plant:getLeftTime()
-    return self.data['time']-self.passTime
+    local needTime = math.floor(3600/self.building.data.production)
+    return needTime-self.passTime
 end
 function Plant:getStartTime()
     return client2Server(Timer.now-self.passTime)
 end
 function Plant:finish()
+    local needTime = math.floor(3600/self.building.data.production)
     self.acced = 1
-    self.passTime = self.data["time"]
+    self.passTime = needTime 
     self:setState()
 end
 function Plant:getAccCost()

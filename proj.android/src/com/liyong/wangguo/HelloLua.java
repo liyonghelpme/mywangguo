@@ -39,9 +39,7 @@ import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 import org.cocos2dx.plugin.PluginWrapper;
 import org.json.JSONException;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
+
 import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
@@ -66,8 +64,7 @@ import android.provider.Settings.Secure;
 
 public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	LinearLayout layout;
-	AdView view;
-	AdRequest request;
+
 	
 	private HelloLua act;
 	private static native void setDeviceId(String deviceId);
@@ -107,7 +104,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		
 		//MobclickAgent.setDebugMode(true);
 		Log.v("Youmi", "initial You mi");
-		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", true);
+		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
 		
 		
 		try{
@@ -193,7 +190,14 @@ class LuaGLSurfaceView extends Cocos2dxGLSurfaceView{
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
     	// exit program when key back is entered
     	if (keyCode == KeyEvent.KEYCODE_BACK) {
-    		AlertDialog.Builder b = new AlertDialog.Builder(this.getContext(), AlertDialog.THEME_HOLO_LIGHT);
+            AlertDialog.Builder b;
+            try {
+    		    b = new AlertDialog.Builder(this.getContext(), AlertDialog.THEME_HOLO_LIGHT);
+            } catch (Exception e) {
+                Log.e("Alert", "Older Sdk");
+    		    b = new AlertDialog.Builder(this.getContext());
+            }
+
     		b.setTitle("关闭游戏")
     		.setMessage("要关闭游戏么?")
     		.setPositiveButton("确定", new DialogInterface.OnClickListener() {

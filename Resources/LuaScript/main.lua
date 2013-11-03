@@ -28,7 +28,7 @@ local function main()
         director:replaceScene(ca.bg)
         global.director:onlyRun(ca)
     end
-    global.director:pushView(Loading.new())
+    global.director:pushView(Loading.new(), 1, 0, 0)
     --等待加入场景之后 再初始化
     global.user:initData()
 end

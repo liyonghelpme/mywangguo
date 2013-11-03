@@ -25,7 +25,7 @@ function Director:pushPage(view, z)
 end
 
 --view 封装了 CCNode
-function Director:pushView(view, dark, autoPop)
+function Director:pushView(view, dark, autoPop, ani)
     print('pushView', #self.stack)
     if dark == 1 then
         local temp = {}
@@ -40,9 +40,12 @@ function Director:pushView(view, dark, autoPop)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
-    local sca = view.bg:getScale()
-    setScale(view.bg, 0.1)
-    view.bg:runAction(sinein(sequence({scaleto(0.2, sca, sca)})))
+    --默认有动画
+    if ani == nil then
+        local sca = view.bg:getScale()
+        setScale(view.bg, 0.1)
+        view.bg:runAction(sinein(sequence({scaleto(0.2, sca, sca)})))
+    end
     --MyPlugins:getInstance():sendCmd("hideAds", "");
 end
 

@@ -501,6 +501,10 @@ function setScale(sp, sca)
     sp:setScale(sca)
     return sp
 end
+function setScaleX(sp, x)
+    sp:setScaleX(x)
+    return sp
+end
 function adjustWidth(sp)
     sp:setScale(global.director.disSize[1]/global.director.designSize[1])
     return sp
@@ -789,13 +793,14 @@ function getLevelCost(kind, id, level)
     --普通建筑都是0级别购买 
     --水晶矿升级 是 另外的 方式
     --print(simple.encode(build))
+    --level 总是 0 只是根据level 不同价格不同
     if kind == GOODS_KIND.BUILD then
         if build["hasNum"] == 1 then
-            local curNum = getCurLevelBuildNum(id, level);
+            local curNum = getCurLevelBuildNum(id, level)
             --升级建筑物 建筑物的数量不变
-            curNum = math.min(#build.numCost[level+1]-1, curNum)
+            curNum = math.min(#build.numCost-1, curNum)
             --购买建筑物建筑
-            local c = build.numCost[level+1][curNum+1]
+            local c = build.numCost[curNum+1]
             for i = 1, #costKey, 1 do 
                 v = getDefault(c, costKey[i], 0)
                 if v > 0 then
@@ -1212,6 +1217,18 @@ end
 function jumpBy(t, x, y, hei, n)
     return CCJumpBy:create(t, ccp(x, y), hei, n)
 end
+function jumpTo(t, x, y, hei, n)
+    return CCJumpTo:create(t, ccp(x, y), hei, n)
+end
 function addCmd(c)
     global.director.curScene.dialogController:addCmd(c)
+end
+function STR(v)
+    if type(v) == 'boolean' then
+        if v then
+            return 'true'
+        end
+        return 'false'
+    end
+    return ''
 end

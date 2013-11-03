@@ -16,6 +16,7 @@ BattleLogic.resource = {}
 --用户要退出 战斗场景 cancel 或者 战斗胜利点击ok
 BattleLogic.quitBattle = false
 BattleLogic.endDialog = nil
+--出现游戏结束对话框的时候 paused = true 关闭之后 pause = false
 BattleLogic.paused = false
 
 function BattleLogic.prepareState()

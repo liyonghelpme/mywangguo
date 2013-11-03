@@ -22,12 +22,12 @@ function getBuildEnableNum(id)
 
     local num = bData.initNum+math.floor(level/bData.numLevel)
     local upBound = 0
-    if num >= #bData.numCost[1] then
+    if num >= #bData.numCost then
         upBound = 1
     end
     --建筑只有一个档次 
     --这个档次拥有不同数量建筑时， 新的建筑购买价格不同
-    return {math.min(num, #bData.numCost[1]), upBound, 1}
+    return {num, upBound, 1}
     --最大限制 当前拥有的建筑数量已经达到总数上限 总量是否存在限制 
 end
 function getCurBuildNum(id)

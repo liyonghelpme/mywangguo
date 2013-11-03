@@ -4,27 +4,14 @@ function GodBall:ctor(src, tar, start, over)
     self.bg = CCNode:create()
     setPos(self.bg, start)
     local function doHarm()
-        tar:doHarm(30)
+        tar:doHarm(src.data.attack)
     end
     local par = CCParticleSystemQuad:create("god1.plist")
     par:setPositionType(1)
     self.bg:addChild(par)
-    self.bg:runAction(sequence({moveto(0.7, over[1], over[2]), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
-    --self.bg:runAction(sequence({fadein(0.1), delaytime(0.5), fadeout(0.1)}))
-    --[[
-    local function genBall()
-        local temp = CCSprite:create("god0.png")
-        local bf = ccBlendFunc()
-        bf.src = GL_ONE
-        bf.dst = GL_ONE
-        temp:setBlendFunc(bf)
-        self.bg:addChild(temp)
-        setPos(setScale(temp, 0.1), {28, 21})
-        
-        temp:runAction(sequence({spawn({fadein(0.5), scaleto(0.5, 1.0, 1.0)}), delaytime(0.2), fadeout(0.5)}))
-    end
-    self.bg:runAction(repeatForever(sequence({callfunc(nil, genBall), delaytime(1)})))
-    --]]
+    --self.bg:runAction(sequence({moveto(0.7, over[1], over[2]), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
+
+    self.bg:runAction(sequence({jumpTo(2, over[1], over[2], 30, 1), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
 end
 
 GodBuild = class(FuncBuild)
@@ -38,22 +25,26 @@ function GodBuild:ctor(b)
     self.state = GOD_STATE.FREE
 end
 function GodBuild:initWorking(data)
-    if BattleLogic.inBattle == true then
-        self.bg = CCNode:create()
-        self.baseBuild.bg:addChild(self.bg)
-        registerUpdate(self)
-        registerEnterOrExit(self)
-    --经营页面只是显示一个闪光的ball
-    elseif self.par == nil then
+    if self.par == nil then
         local par = CCParticleSystemQuad:create("god1.plist")
         self.par = par
         par:setPositionType(1)
         setPos(par, {37, 161})
         self.baseBuild.bg:addChild(par)
     end
+    if BattleLogic.inBattle == true then
+        self.bg = CCNode:create()
+        self.baseBuild.bg:addChild(self.bg)
+        registerUpdate(self)
+        registerEnterOrExit(self)
+    end
 end
 function GodBuild:update(diff)
     if BattleLogic.paused or self.baseBuild.broken then
+        if self.par ~= nil then
+            removeSelf(self.par)
+            self.par = nil
+        end
         return
     end
     --findTarget
@@ -75,7 +66,7 @@ function GodBuild:update(diff)
                 end 
             end
             if minTar ~= nil then
-                if minDis < 500*500 then
+                if minDis < self.baseBuild.data.attackRange*self.baseBuild.data.attackRange then
                     self.attackTarget = minTar
                 end
             end
@@ -98,7 +89,7 @@ function GodBuild:update(diff)
     --doAttack
     if self.state == GOD_STATE.IN_ATTACK then
         self.attackTime = self.attackTime+diff
-        if self.attackTime > 1.5 then
+        if self.attackTime > self.baseBuild.data.attackSpeed then
             self.state = GOD_STATE.FREE
         end
     end

@@ -87,4 +87,5 @@ function ChallengeOver:onOk()
     global.director:pushView(Cloud.new(), 1, 0)
     --global.director:popScene()
     NewLogic.triggerEvent(NEW_STEP.FINISH_NEW)
+    BattleLogic.paused = false
 end

@@ -27,15 +27,17 @@ end
 function Mine:whenFree()
     return 0
 end
+function Mine:calGain()
+    local now = Timer.now
+    local passTime = now - self.planting.objectTime 
+    passTime = math.min(3600, passTime)
+    local gv = math.floor(passTime/3600*self.baseBuild.data.production)
+    return {crystal=gv, exp=gv}
+end
 function Mine:whenBusy()
     if self.planting.curState == 1 then
         self.baseBuild.state = getParam('buildFree')
-        local now = Timer.now
-        local passTime = now - self.planting.objectTime 
-        local n = math.floor(passTime/self.planting.needTime)
-        n = math.min(n, 30)
-        local gain = getProduction(self.baseBuild.buildLevel)
-        multiScalar(gain, n)  
+        local gain = self:calGain()
         sendReq("harvestMine", dict({{"uid", global.user.uid}, {"bid", self.baseBuild.bid}, {"gain", simple.encode(gain)}}), nil, nil) 
         global.user:doAdd(gain)
         removeSelf(self.flowBanner)
@@ -79,8 +81,7 @@ function MinePlant:ctor(b, d)
     print("initial objectTime", self.objectTime)
     self.bg = CCNode:create()
     self.curState = 0
-    local mineData = getData(GOODS_KIND.MINE_PRODUCTION, self.building.buildLevel)
-    self.needTime = mineData["time"]
+    self.needTime = math.floor(3600/self.building.data.production)
     registerEnterOrExit(self)
 end
 function MinePlant:getLeftTime()

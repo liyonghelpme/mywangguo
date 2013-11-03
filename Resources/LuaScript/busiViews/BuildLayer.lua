@@ -37,8 +37,22 @@ function BuildLayer:ctor(scene)
     self.treeTime = 0
     self.monsters = {}
     self:initGrassSprite()
+    self:initMagic()
+end
+--所有魔法特效图片
+function BuildLayer:initMagic()
+    local tex = CCTextureCache:sharedTextureCache():addImage("fig7.png")
+    local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
+    for i=0, 1 do
+        for j=0, 3 do
+            local r = CCRectMake(120*j, 120*i, 120, 120)
+            local sp = CCSpriteFrame:createWithTexture(tex, r)
+            ca:addSpriteFrame(sp, "ball"..i*10+j)
+        end
+    end
 end
 function BuildLayer:initGrassSprite()
+    --[[
     local tex = CCTextureCache:sharedTextureCache():addImage("tileset.png")
     local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
     for i=0, 7, 1 do
@@ -51,6 +65,7 @@ function BuildLayer:initGrassSprite()
     local r = CCRectMake(0, 22, 64, 38)
     local sp = CCSpriteFrame:createWithTexture(tex, r)
     ca:addSpriteFrame(sp, "realGrass")
+    --]]
 end
 function BuildLayer:showMapGrid()
     if self.showYet ~= true then
@@ -267,10 +282,12 @@ function BuildLayer:finishPlan()
     self:clearPlanState()
 end
 function BuildLayer:update(diff)
-    self.passTime = self.passTime+diff
-    if self.passTime > 30 then
-        self.passTime = 0
-        self:genMonster()
+    if not BattleLogic.inBattle then
+        self.passTime = self.passTime+diff
+        if self.passTime > 30 then
+            self.passTime = 0
+            self:genMonster()
+        end
     end
     self:genBird(diff)
     self:genTree(diff)

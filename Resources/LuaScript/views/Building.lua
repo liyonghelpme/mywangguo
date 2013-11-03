@@ -5,6 +5,7 @@ require "views.Farm"
 require "views.MineFunc"
 require "views.BuildAnimate"
 require "views.Camp"
+require "views.Castle"
 require "busiViews.BuildWorkMenu"
 
 Building = class()
@@ -15,15 +16,14 @@ function Building:ctor(m, d, privateData)
     self.kind = self.data["id"]
     self.sx = self.data["sx"]
     self.sy = self.data["sy"]
-    --self.kind = d["kind"]
     self.funcs = d["funcs"]
     self.showMenuYet = false
     --是否被摧毁掉
     self.broken = false
     --神像有防御效果 WorkNode
 
-    self.health = 100
-    self.maxHealth = 100
+    self.health = self.data.maxHealth
+    self.maxHealth = self.data.maxHealth
 
     self.bg = CCLayer:create()
     
@@ -41,6 +41,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = GodBuild.new(self)
     elseif self.funcs == WALL then
         self.funcBuild = Wall.new(self)
+    elseif self.funcs == CASTLE_BUILD then
+        self.funcBuild = Castle.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
@@ -65,24 +67,9 @@ function Building:ctor(m, d, privateData)
     local sz = self.changeDirNode:getContentSize()
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
     local sp = CCSprite:create("grass3.png")
-    sp:setOpacity(128)
+    sp:setOpacity(200)
     self.bg:addChild(sp, -1)
-    setSize(setAnchor(sp, {0.5, 0}), {SIZEX*(self.sx+self.sy), SIZEY*(self.sx+self.sy)})
-    
-    --[[
-    for i = 0, self.sx-1, 1 do
-        local curX = -i*SIZEX
-        local curY = i*SIZEY
-        for j =0, self.sy-1, 1 do
-            local sp = CCSprite:create("grass2.png")
-            self.bg:addChild(sp, -1)
-            setSize(setAnchor(setPos(sp, {curX+j*SIZEX, curY+j*SIZEY}), {0.5, 0}), {SIZEX*2, SIZEY*2})
-            local temp = CCSprite:createWithSpriteFrameName("grass6")
-            setAnchor(temp, {0, 0})
-            sp:addChild(temp)
-        end
-    end
-    --]]
+    setSize(setAnchor(sp, {0.5, 0.2}), {SIZEX*(self.sx+self.sy+2), SIZEY*(self.sx+self.sy+2)})
 
     setPos(self.changeDirNode, {0, self.data['offY']})
     self.dir = getDefault(privateData, 'dir', 0)
@@ -98,12 +85,6 @@ function Building:ctor(m, d, privateData)
     if self.bid ~= -1 then
         self.funcBuild:initWorking(privateData)
     end
-    --[[
-    if self.data['hasAni'] ~= 0 then
-        self.aniNode = BuildAnimate.new(self)
-        self.changeDirNode:addChild(self.aniNode.bg)
-    end
-    --]]
     if BattleLogic.inBattle then
         local rh = math.max(sz.height, 150)
         self.healthBar = setScale(setPos(CCSprite:create("mapSolBloodBar1.png"), {0, 150}), 0.7)
@@ -448,9 +429,11 @@ function Building:doHarm(n)
         self.healthBar:runAction(fadein(0.5))
         self.innerBar:runAction(fadein(0.5))
     end
+
     local b = self.health/self.maxHealth
     self.innerBar:runAction(scaleto(0.2, b, 1)) 
 
+    --[[
     if self.health > 0 then
         local function clearScale()
             self.inScale = nil
@@ -462,6 +445,22 @@ function Building:doHarm(n)
         local x = math.random()*6-3
         local y = math.random()*6-3
         self.bg:runAction(sequence({moveby(0.2, x, y), moveby(0.2, -x, -y)}))
+    end
+    --]]
+    if self.health > 0 then
+        if self.bigBomb == nil then
+            self.bigBomb = CCParticleSystemQuad:create('bigBomb.plist')
+            self.bg:addChild(self.bigBomb)
+            local function clearBigBomb()
+                removeSelf(self.bigBomb)
+                self.bigBomb = nil
+            end
+            local rx = math.random(20)-10
+            local ry = math.random(20)+self.sy*SIZEY-10
+            setPos(self.bigBomb, {rx, ry})
+            self.bigBomb:setPositionType(1)
+            self.bigBomb:runAction(sequence({delaytime(0.5), callfunc(nil, clearBigBomb)}))
+        end
     end
 
     if self.health == 0 and self.broken == false then
@@ -480,11 +479,17 @@ function Building:doHarm(n)
                     end
                 end
             end
-            bg:runAction(sequence({scaleto(0.3, 1.1, 1.1), scaleto(0.1,  1, 1) }))
+            --bg:runAction(sequence({scaleto(0.3, 1.1, 1.1), scaleto(0.1,  1, 1) }))
             if self.funcBuild.flowBanner ~= nil then
                 self.funcBuild.flowBanner.pl:runAction(fadeout(0.4))
             end
+
         end
-        self.bg:runAction(sequence({repeatN(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}), 4), callfunc(nil, fadeAll, self.bg)}))
+        --爆炸的效果
+        --repeatN(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}), 4), 
+        self.bg:runAction(sequence({callfunc(nil, fadeAll, self.bg)}))
+        local fire = CCParticleSystemQuad:create("inAttack.plist")
+        fire:setPositionType(1)
+        self.bg:addChild(fire)
     end
 end

@@ -28,18 +28,24 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.youmi.android.banner.AdSize;
+import net.youmi.android.banner.AdView;
 import net.youmi.android.offers.OffersManager;
 import net.youmi.android.offers.PointsManager;
 
-import com.google.ads.*;
-import com.google.ads.AdRequest.ErrorCode;
+//import com.google.ads.*;
+//import com.google.ads.AdRequest.ErrorCode;
 import com.liyong.wangguo.HelloLua;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
 
 public class AdsAdmob implements InterfaceAds {
@@ -54,7 +60,7 @@ public class AdsAdmob implements InterfaceAds {
 	private Set<String> mTestDevices = null;
 	private WindowManager mWm = null;
 	private String muid = "";
-	
+	private FrameLayout ll;
 	private static final int ADMOB_SIZE_BANNER = 0;
 	private static final int ADMOB_SIZE_IABMRect = 1;
 	private static final int ADMOB_SIZE_IABBanner = 2;
@@ -130,18 +136,6 @@ public class AdsAdmob implements InterfaceAds {
 	public void showAds(int adsType, int sizeEnum, int pos) {
 		Log.e("AdsMob", "showAds");
 		showBannerAd(sizeEnum, pos);
-		/*
-		switch (adsType) {
-		case AdsWrapper.ADS_TYPE_BANNER:
-			showBannerAd(sizeEnum, pos);
-			break;
-		case AdsWrapper.ADS_TYPE_FULL_SCREEN:
-			LogD("Now not support full screen view in Admob");
-			break;
-		default:
-			break;
-		}
-		*/
 	}
 
 	//显示有米的积分墙广告
@@ -181,17 +175,6 @@ public class AdsAdmob implements InterfaceAds {
 	public void hideAds(int adsType) {
 		Log.e("AdsMob", "hide Ads");
 		hideBannerAd();
-		/*
-		switch (adsType) {
-		case AdsWrapper.ADS_TYPE_BANNER:
-			hideBannerAd();
-			break;
-		case AdsWrapper.ADS_TYPE_FULL_SCREEN:
-			break;
-		default:
-			break;
-		}
-		*/
 	}
 
 	private void showBannerAd(int sizeEnum, int pos) {
@@ -203,59 +186,27 @@ public class AdsAdmob implements InterfaceAds {
 
 			@Override
 			public void run() {
-				// destory the ad view before
-				if (null != adView) {
-					/*
-					if (null != mWm) {
-						mWm.removeView(adView);
-					}
-					adView.destroy();
-					adView = null;
-					*/
-					adView.setVisibility(View.VISIBLE);
+				// TODO Auto-generated method stub
+				if(null != adView){
+					//adView.setVisibility(View.VISIBLE);
+					ll.setVisibility(View.VISIBLE);
 					return;
 				}
-
-				AdSize size = AdSize.BANNER;
-				switch (curSize) {
-				case AdsAdmob.ADMOB_SIZE_BANNER:
-					size = AdSize.BANNER;
-					break;
-				case AdsAdmob.ADMOB_SIZE_IABMRect:
-					size = AdSize.IAB_MRECT;
-					break;
-				case AdsAdmob.ADMOB_SIZE_IABBanner:
-					size = AdSize.IAB_BANNER;
-					break;
-				case AdsAdmob.ADMOB_SIZE_IABLeaderboard:
-					size = AdSize.IAB_LEADERBOARD;
-					break;
-				default:
-					break;
-				}
-				adView = new AdView(mContext, size, mPublishID);
-				AdRequest req = new AdRequest();
-				
-				try {
-					if (mTestDevices != null) {
-						Iterator<String> ir = mTestDevices.iterator();
-						while(ir.hasNext())
-						{
-							req.addTestDevice(ir.next());
-						}
-					}
-				} catch (Exception e) {
-					LogE("Error during add test device", e);
-				}
-				
-				adView.loadAd(req);
-				adView.setAdListener(new AdmobAdsListener());
-
-				if (null == mWm) {
-					mWm = (WindowManager) mContext.getSystemService("window");
-				}
-				AdsWrapper.addAdView(mWm, adView, AdsWrapper.POS_TOP_CENTER);
+				adView = new AdView(mContext, AdSize.FIT_SCREEN);
+				FrameLayout fl = (FrameLayout) mContext.findViewById(android.R.id.content);
+				FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+				        FrameLayout.LayoutParams.WRAP_CONTENT,
+				        FrameLayout.LayoutParams.WRAP_CONTENT);  
+				layoutParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+				ll = new FrameLayout(mContext);
+				FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+						FrameLayout.LayoutParams.FILL_PARENT,
+						FrameLayout.LayoutParams.FILL_PARENT);
+				fl.addView(ll, lp);;
+				ll.addView(adView, layoutParams);
+				//fl.addView(adView, layoutParams);
 			}
+			
 		});
 	}
 
@@ -264,14 +215,8 @@ public class AdsAdmob implements InterfaceAds {
 			@Override
 			public void run() {
 				if (null != adView) {
-					adView.setVisibility(View.INVISIBLE);
-					/*
-					if (null != mWm) {
-						mWm.removeView(adView);
-					}
-					adView.destroy();
-					adView = null;
-					*/
+					Log.v("Youmi", "hideAds");
+					ll.setVisibility(View.INVISIBLE);
 				}
 			}
 		});
@@ -284,7 +229,7 @@ public class AdsAdmob implements InterfaceAds {
 		}
 		mTestDevices.add(deviceID);
 	}
-
+	/*
 	private class AdmobAdsListener implements AdListener {
 		
 		@Override
@@ -297,7 +242,7 @@ public class AdsAdmob implements InterfaceAds {
 		@Override
 		public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
 			return;
-			/*
+			
 			int errorNo = AdsWrapper.RESULT_CODE_UnknownError;
 			String errorMsg = "Unknow error";
 			switch (arg1) {
@@ -317,7 +262,7 @@ public class AdsAdmob implements InterfaceAds {
 			}
 			LogD("failed to receive ad : " + errorNo + " , " + errorMsg);
 			AdsWrapper.onAdsResult(mAdapter, errorNo, errorMsg);
-			*/
+			
 		}
 
 		@Override
@@ -337,7 +282,7 @@ public class AdsAdmob implements InterfaceAds {
 			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_AdsReceived, "Ads request received success!");
 		}
 	}
-
+	*/
 	@Override
 	public String getPluginVersion() {
 		return "0.2.0";
