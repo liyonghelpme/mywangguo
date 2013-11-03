@@ -502,7 +502,16 @@ function Soldier:doMove(diff)
                 local curPos = getPos(self.bg)
                 local endPos = setBuildMap({1, 1, self.endPoint[1], self.endPoint[2]})
                 local attR = (self.data.range)*(self.data.range)*32*32 
-                if distance2(curPos, endPos) < attR then
+
+                --如果行走到建筑物的边界上面则停止行走
+                local map = getPosMapFloat(1, 1, curPos[1], curPos[1])
+                local mapDict = self.map.mapGridController.mapDict
+                local key = getMapKey(map[3], map[4])
+                if mapDict[key] ~= nil and mapDict[key][#mapDict[key]][1] == self.predictTarget then
+                    self.state = SOLDIER_STATE.START_ATTACK 
+                    self.map:clearCell(self.endPoint)
+                    self:setZord()
+                elseif distance2(curPos, endPos) < attR then
                     self.state = SOLDIER_STATE.START_ATTACK 
                     self.map:clearCell(self.endPoint)
                     self:setZord()
@@ -575,6 +584,20 @@ function Soldier:doHarm(n)
     end
     local b = self.health/self.maxHealth
     self.innerBar:runAction(scaleto(0.2, b, 1)) 
+
+    if not self.dead then
+        if self.blood == nil then
+            self.blood = CCParticleSystemQuad:create("solBlood.plist")
+            self.bg:addChild(self.blood)
+            setPos(self.blood, {0, 20})
+            local function clearBlood()
+                removeSelf(self.blood)
+                self.blood = nil
+            end
+            self.blood:runAction(sequence({delaytime(0.4), callfunc(nil, clearBlood)}))
+        end
+    end
+
     if self.dead then
         self.healthBar:setVisible(false)
         local function fadeAll(bg)

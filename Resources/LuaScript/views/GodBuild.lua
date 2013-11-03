@@ -11,7 +11,7 @@ function GodBall:ctor(src, tar, start, over)
     self.bg:addChild(par)
     --self.bg:runAction(sequence({moveto(0.7, over[1], over[2]), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
 
-    self.bg:runAction(sequence({jumpTo(2, over[1], over[2], 30, 1), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
+    self.bg:runAction(sequence({jumpTo(1, over[1], over[2], 30, 1), callfunc(nil, doHarm), callfunc(nil, removeSelf, self.bg)}))
 end
 
 GodBuild = class(FuncBuild)
@@ -29,7 +29,7 @@ function GodBuild:initWorking(data)
         local par = CCParticleSystemQuad:create("god1.plist")
         self.par = par
         par:setPositionType(1)
-        setPos(par, {37, 161})
+        setPos(par, {37, 185})
         self.baseBuild.bg:addChild(par)
     end
     if BattleLogic.inBattle == true then

@@ -6,6 +6,7 @@ require "views.MineFunc"
 require "views.BuildAnimate"
 require "views.Camp"
 require "views.Castle"
+require "views.CrystalDef"
 require "busiViews.BuildWorkMenu"
 
 Building = class()
@@ -43,6 +44,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = Wall.new(self)
     elseif self.funcs == CASTLE_BUILD then
         self.funcBuild = Castle.new(self)
+    elseif self.funcs == CRYSTAL_DEF then
+        self.funcBuild = CrystalDef.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
