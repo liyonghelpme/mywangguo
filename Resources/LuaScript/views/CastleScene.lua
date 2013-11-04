@@ -7,6 +7,7 @@ require "views.BuildMenu"
 require "views.DialogController"
 require "views.UseGold"
 require "views.SynGold"
+require "views.SellMenu"
 
 CastleScene = class()
 --CastleScene 和loading 页面
@@ -171,7 +172,9 @@ function CastleScene:setBuilding(build)
         self.curBuild:finishBottom()
     end
     self.curBuild = build
-    self.planView:setBuilding({PLAN_KIND.PLAN_BUILDING, build})
+    if self.planView ~= nil then
+        self.planView:setBuilding({PLAN_KIND.PLAN_BUILDING, build})
+    end
     return 1
 end
 
@@ -208,6 +211,20 @@ function CastleScene:doPlan()
     self.mc.buildLayer:keepPos()
     self.planView = BuildMenu.new(self, nil)
     global.director:pushView(self.planView, 0, 0)
+end
+
+function CastleScene:doSell()
+    self.ml:hideMenu()
+    self.Selling = true
+    self.mc.buildLayer:beginSell()
+    self.sellView = SellMenu.new(self)
+    global.director:pushView(self.sellView, 0, 0)
+end
+function CastleScene:finishSell()
+    self.Selling = false
+    self.sellView = nil
+    global.director:popView()
+    self.ml:showMenu()
 end
 
 function CastleScene:finishPlan()

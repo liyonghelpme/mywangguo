@@ -20,6 +20,7 @@ EVENT_TYPE = {
 
     ATTACK_ME=27,
     UPDATE_MSG = 28,
+    ROB_RESOURCE = 29,
 }
 
 --一个比较大的数字作为区分

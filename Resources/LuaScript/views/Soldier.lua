@@ -147,7 +147,7 @@ function Soldier:doAttack(diff)
         if self.attackTime >= self.data.attSpeed then
             self.attackTime = self.attackTime - self.data.attSpeed
             if self.predictMon ~= nil then
-                self.attackTarget:doHarm(10)
+                self.attackTarget:doHarm(self.data.attack)
             --弓箭手 发射弓箭
             else
                 self.funcSoldier:doAttack()
@@ -233,11 +233,9 @@ function Soldier:checkNeibor(x, y)
         local cx, cy = normalToCartesian(nv[1], nv[2])
         --小于左边界 则 只能+x
         if cx <= 100 and nv[1] < x then
-
         elseif cx > 3000 and nv[1] > x then
         elseif cy < 100 and nv[2] < y then
         elseif cy > 700 and nv[2] > y then
-        
         else
             local inOpen = false
             local nS
@@ -338,8 +336,8 @@ function Soldier:findPath(diff)
         --print("startFind")
         self.state = SOLDIER_STATE.IN_FIND
         local p = getPos(self.bg)
-        local mx, my = cartesianToNormal(p[1], p[2])
-        mx, my = sameOdd(mx, my)
+        local mxy = getPosMapFloat(1, 1, p[1], p[2])
+        local mx, my = mxy[3], mxy[4]
         
         self.startPoint = {mx, my} 
         self.endPoint = nil
@@ -411,7 +409,8 @@ function Soldier:findPath(diff)
         elseif self.predictTarget ~= nil then
             --self.oldPredictTarget = self.predictTarget
             local bp = getPos(self.predictTarget.bg)
-            local tx, ty = cartesianToNormal(bp[1], bp[2])
+            local txy = getPosMapFloat(1, 1, bp[1], bp[2])
+            local tx, ty = txy[3], txy[4]
             self.predictEnd = {tx, ty}
 
             local sk = getMapKey(mx, my)
@@ -524,24 +523,31 @@ function Soldier:doMove(diff)
         self.passTime = self.passTime+diff
         if self.passTime > self.data.moveSpeed then
             self.passTime = 0
+            local nextPoint = self.curPoint+1
+
             if BattleLogic.inBattle then
                 local curPos = getPos(self.bg)
                 local endPos = setBuildMap({1, 1, self.endPoint[1], self.endPoint[2]})
                 local attR = (self.data.range)*(self.data.range)*32*32 
 
+                local stopNow = false
                 --如果行走到建筑物的边界上面则停止行走
-                local map = getPosMapFloat(1, 1, curPos[1], curPos[1])
-                local mapDict = self.map.mapGridController.mapDict
-                local key = getMapKey(map[3], map[4])
-                if mapDict[key] ~= nil and mapDict[key][#mapDict[key]][1] == self.predictTarget then
+                if nextPoint <= #self.path then
+                    local np = self.path[nextPoint]
+                    local mapDict = self.map.mapGridController.mapDict
+                    local key = getMapKey(np[1], np[2])
+                    if mapDict[key] ~= nil and mapDict[key][#mapDict[key]][1] == self.predictTarget then
+                        stopNow = true
+                    end
+                end
+                if distance2(curPos, endPos) < attR then
+                    stopNow = true
+                end
+                if stopNow then
                     self.state = SOLDIER_STATE.START_ATTACK 
                     self.map:clearCell(self.endPoint)
                     self:setZord()
-                elseif distance2(curPos, endPos) < attR then
-                    self.state = SOLDIER_STATE.START_ATTACK 
-                    self.map:clearCell(self.endPoint)
-                    self:setZord()
-                    return 
+                    return
                 end
             end
 
@@ -552,7 +558,6 @@ function Soldier:doMove(diff)
                 return
             end
 
-            local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
                 if self.predictMon ~= nil then
                     if not self.predictMon.dead then
@@ -582,8 +587,6 @@ function Soldier:doMove(diff)
             else
                 local np = self.path[nextPoint]
                 local cxy = setBuildMap({1, 1, np[1], np[2]})
-                --local cx, cy = normalToCartesian(np[1], np[2])
-                --cxy = {cx, cy}
                 self.bg:runAction(moveto(self.data.moveSpeed, cxy[1], cxy[2]))    
                 self:setDir(cxy[1], cxy[2])
                 self:setZord()

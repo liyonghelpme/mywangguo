@@ -8,7 +8,9 @@ function BuildMenu:ctor(s, b)
 
     self.setYet = false
     self.bg = CCNode:create()
-    self.sp = setSca(setAnchor(setPos(addSprite(self.bg, "buildMenuBack.png"), {0, 0}), {0, 0}), global.director.disSize[1]/global.director.designSize[1])
+    local scaX = global.director.disSize[1]/global.director.designSize[1]
+    setScale(self.bg, scaX)
+    self.sp = setAnchor(setPos(addSprite(self.bg, "buildMenuBack.png"), {0, 0}), {0, 0})
     self.buttonNode = nil
     self:setBuilding(b)
 end
@@ -36,10 +38,11 @@ function BuildMenu:setBuilding(b)
         if self.setYet == true then
             local but0 = ui.newButton({image="buildOk0.png", delegate=self, callback=buildOk})
             self.buttonNode:addChild(but0.bg)
-            but0:setContentSize(50, 48)
-            setPos(but0.bg, {669, fixY(sz.height, 8, 48)})
+            but0:setContentSize(60, 68)
+            setPos(but0.bg, {669, fixY(sz.height, 8, 45)})
         end
         local but1 = ui.newButton({image='buildCancel1.png', delegate=self, callback=buildCancel})
+        but1:setContentSize(60, 60)
         setPos(but1.bg, {727, fixY(sz.height, 8, 45)})
         self.buttonNode:addChild(but1.bg)
         return 

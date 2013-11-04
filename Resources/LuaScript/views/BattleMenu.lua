@@ -24,6 +24,34 @@ function BattleMenu:ctor(s)
     self.data = {}
     self:updateTab()
     self:choose(1)
+
+    registerEnterOrExit(self)
+end
+function BattleMenu:enterScene()
+    Event:registerEvent(EVENT_TYPE.ROB_RESOURCE, self)
+end
+function BattleMenu:receiveMsg(name, msg)
+    if name == EVENT_TYPE.ROB_RESOURCE then
+        local ures = {silver=BattleLogic.silver, crystal=BattleLogic.crystal, exp=BattleLogic.exp}
+        local oldSilver = tonumber(self.silverText:getString())
+        local oldExp = tonumber(self.expText:getString())
+        local oldCrystal = tonumber(self.crystalText:getString())
+        if oldSilver ~= ures.silver then
+            self.silverText:stopAllActions()
+            numAct(self.silverText, oldSilver, ures.silver)
+        end
+        if oldExp ~= ures.exp then
+            self.expText:stopAllActions()
+            numAct(self.expText, oldExp, ures.exp)
+        end
+        if oldCrystal ~= ures.crystal then
+            self.crystalText:stopAllActions()
+            numAct(self.crystalText, oldCrystal, ures.crystal)
+        end
+    end
+end
+function BattleMenu:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.ROB_RESOURCE, self)
 end
 function BattleMenu:initDataOver()
     if BattleLogic.resource.name == nil then
@@ -45,9 +73,28 @@ function BattleMenu:initDataOver()
     self.bg:addChild(crystal)
 
     local temp = setSize(setPos(addSprite(self.bg, "exp.png"), {33, fixY(nil, 154)}), {30, 30})
-    local exp = ui.newBMFontLabel({text=str(10), size=25, color={109, 170, 44}})
+    local exp = ui.newBMFontLabel({text=str(math.floor((BattleLogic.resource.crystal+BattleLogic.resource.silver)/2)), size=25, color={109, 170, 44}})
     setAnchor(setPos(exp, {55, fixY(nil, 154)}), {0, 0.5})
     self.bg:addChild(exp)
+
+
+    local temp = setColor(setSize(setPos(addSprite(self.bg, "silver.png"), {33, fixY(nil, 194)}), {30, 30}), {102, 0, 0})
+    local silver = ui.newBMFontLabel({text=str(0), size=25, color={133, 149, 161}})
+    setAnchor(setPos(silver, {55, fixY(nil, 194)}), {0, 0.5})
+    self.bg:addChild(silver)
+    self.silverText = silver
+
+    local temp = setColor(setSize(setPos(addSprite(self.bg, "crystal.png"), {33, fixY(nil, 234)}), {30, 30}), {102, 0, 0})
+    local crystal = ui.newBMFontLabel({text=str(0), size=25, color={48, 52, 109}})
+    setAnchor(setPos(crystal, {55, fixY(nil, 234)}), {0, 0.5})
+    self.bg:addChild(crystal)
+    self.crystalText = crystal
+
+    local temp = setColor(setSize(setPos(addSprite(self.bg, "exp.png"), {33, fixY(nil, 274)}), {30, 30}), {102, 0, 0})
+    local exp = ui.newBMFontLabel({text=str(0), size=25, color={109, 170, 44}})
+    setAnchor(setPos(exp, {55, fixY(nil, 274)}), {0, 0.5})
+    self.bg:addChild(exp)
+    self.expText = exp
 end
 function BattleMenu:choose(n)
     if self.curChoose ~= nil then

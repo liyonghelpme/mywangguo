@@ -1,4 +1,4 @@
-require "Views.ChatDialog"
+require "views.ChatDialog"
 
 MenuLayer = class()
 function MenuLayer:ctor(sc)
@@ -6,7 +6,7 @@ function MenuLayer:ctor(sc)
     self.menus = {nil, nil}
     self.showChildMenu = false
     self.MainMenuFunc = {
-    [0]={"map", "rank", "plan", "setting"},
+    [0]={"map", "sell", "plan", "setting"},
     [1]={"attack", "store", "friend", "mail"},
     }
     self:initView()
@@ -57,6 +57,14 @@ function MenuLayer:receiveMsg(name, msg)
         local newN = #ChatModel.chatMessage
         numAct(self.finNum, oldN, newN)
         self.finNum:runAction(repeatN(sequence({scaleto(0.5, 1.2, 1.2), scaleto(0.5, 1, 1)}), 4))
+        local l = #ChatModel.chatMessage
+        if l > 0 then
+            local v = ChatModel.chatMessage[l]
+            local name = v[2]
+            local text = v[3] 
+            self.wordLabel:setString(name..': '..text)
+            self.wordLabel:runAction(sequence({fadeout(0.3), fadein(0.3)}))
+        end
     end
 end
 function MenuLayer:initView()
@@ -81,6 +89,10 @@ function MenuLayer:initView()
     self.finNum = ui.newBMFontLabel({text=0, size=20, font="bound.fnt"})
     setPos(self.finNum, {100, fixY(nil, designToRealY(416), 0, 0.5)})
     self.banner:addChild(self.finNum)
+
+    self.wordLabel = ui.newTTFLabel({text="", size=25, color={20, 12, 28}})
+    self.banner:addChild(self.wordLabel)
+    setAnchor(setPos(self.wordLabel, {20, 100}), {0, 0})
     
     self.expfiller = setAnchor(addSprite(self.banner, "exp_filler.png"), {0, 0})
     setPos(self.expfiller, {133, fixY(nil, designToRealY(419), getHeight(self.expfiller))})

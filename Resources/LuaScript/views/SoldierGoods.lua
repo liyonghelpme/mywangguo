@@ -110,7 +110,7 @@ function SoldierGoods:updateTab()
 
             panel:setTag(curNum)
             --当前选择的tab  当前士兵在goodNum数组中的位置 是否等级足够可以购买
-            self.data[curNum] = {self.selTab, curNum+1, canBuy, panel}
+            self.data[curNum] = {self.selTab, curNum+1, canBuy, panel, needLevel}
 
             if self.curSel ~= nil and self.curSel[2] == curNum+1 then
                 self:showGreenBut(panel)
@@ -173,6 +173,8 @@ function SoldierGoods:touchEnded(x, y)
             local buildData = self.data[child:getTag()]
             if buildData[3] == 1 then
                 self.curSel = buildData
+            else
+                addBanner(getStr("needLevel", {"[LEVEL]", buildData[5]+1}))
             end
         end
     end

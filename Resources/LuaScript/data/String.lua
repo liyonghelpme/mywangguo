@@ -1363,4 +1363,11 @@ WORDS = dict({
 {"feedback", {"任何游戏反馈可以发送邮件到233242872@qq.com", ""}},
 {"emptyMsg", {"不能发送空信息哦!", ""}},
 {"needCry", {"缺少水晶{NUM}!", ""}},
+{"needLevel", {"需要等级{LEVEL}!", ""}},
+{"crystalReward", {"恭喜获得发言奖励{NUM}水晶", ""}},
+{"silverReward", {"恭喜获得发言奖励{NUM}银币", ""}},
+{"monGen", {"右面地图出现了怪兽，快去点击攻击它们吧！", ""}},
+{"toSell", {"点击建筑物,卖出建筑物", ""}},
+{"sureSell", {"你确定卖出该建筑物获得{NUM}{KIND}", ""}},
+{"notSellCastle", {"不能卖出主基地!", ""}},
 })

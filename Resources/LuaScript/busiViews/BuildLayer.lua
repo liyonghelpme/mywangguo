@@ -243,6 +243,9 @@ function BuildLayer:keepPos()
     self:buildKeepPos()
     self:soldierKeepPos()
 end
+function BuildLayer:beginSell()
+end
+
 function BuildLayer:restorePos()
     self:restoreBuildPos()
     self:restoreSoldierPos()
@@ -282,13 +285,7 @@ function BuildLayer:finishPlan()
     self:clearPlanState()
 end
 function BuildLayer:update(diff)
-    if not BattleLogic.inBattle then
-        self.passTime = self.passTime+diff
-        if self.passTime > 30 then
-            self.passTime = 0
-            self:genMonster()
-        end
-    end
+    self:genMonster(diff)
     self:genBird(diff)
     self:genTree(diff)
 end
@@ -296,12 +293,20 @@ end
 --怪兽和士兵之间有战斗
 --最多同时4个怪兽
 --杀死怪兽的时候 清理怪兽
-function BuildLayer:genMonster()
-    if #self.monsters < 4 then
-        local m = Monster.new(self)
-        self.bg:addChild(m.bg, MAX_BUILD_ZORD)
-        self.mapGridController:addSoldier(m)
-        table.insert(self.monsters, m)
+function BuildLayer:genMonster(diff)
+    if BattleLogic.inBattle then
+        return
+    end
+    self.passTime = self.passTime+diff
+    if self.passTime > 30 then
+        self.passTime = 0
+        if #self.monsters < 4 then
+            local m = Monster.new(self)
+            self.bg:addChild(m.bg, MAX_BUILD_ZORD)
+            self.mapGridController:addSoldier(m)
+            table.insert(self.monsters, m)
+            addCmd({cmd="monGen"}) 
+        end
     end
 end
 

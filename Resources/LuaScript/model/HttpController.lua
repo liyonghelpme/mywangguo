@@ -3,6 +3,10 @@ HttpController = class()
 function HttpController:ctor()
     self.baseUrl = CCUserDefault:sharedUserDefault():getStringForKey("netUrl")
     self.chatUrl = CCUserDefault:sharedUserDefault():getStringForKey("chatUrl")
+    --configure 文件没有配置的话
+    if self.chatUrl == nil or self.chatUrl == "" then
+        self.chatUrl = 'http://112.124.41.186:8009/'
+    end
     self.requestList = {}
     self.busy = false
 end

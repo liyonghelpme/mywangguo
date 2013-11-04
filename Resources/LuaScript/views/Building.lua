@@ -8,6 +8,7 @@ require "views.Camp"
 require "views.Castle"
 require "views.CrystalDef"
 require "busiViews.BuildWorkMenu"
+require "views.SellDialog"
 
 Building = class()
 function Building:ctor(m, d, privateData)
@@ -299,8 +300,35 @@ function Building:touchesEnded(touches)
         end
     else
         if self.inSelf then
-            --print("accMove", self.accMove)
-            if self.state == getParam("buildFree") and self.accMove < 40 and global.director.curScene.inBuild == false then
+            --只能卖出普通建筑物不能卖出主基地
+            local function sellBuild()
+                local v = self.data.numCost[1]
+                global.director.curScene.bg:addChild(FlyObject.new(self.bg, v, nil, nil).bg)
+
+                local fire = CCParticleSystemQuad:create("inAttack.plist")
+                fire:setPositionType(1)
+                self.map.bg:addChild(fire)
+                setPos(fire, getPos(self.bg))
+
+                global.user:sellBuilding(self, v)
+                self.map.mapGridController:removeBuilding(self)
+                removeSelf(self.bg)
+                removeSelf(self.shadow)
+
+                sendReq("sellBuild", dict({{"uid", global.user.uid}, {"bid", self.bid}, {'gain', v}}))
+            end
+            if global.director.curScene.Selling then
+                if self.accMove < 40 then
+                    if self.kind == 200 then
+                        addBanner(getStr("notSellCastle"))
+                        return
+                    end
+                    local v = self.data.numCost[1]
+                    v = getNotZero(v)
+                    global.director:pushView(SellDialog.new(getStr("sureSell", {"[NUM]", str(v[2]), "[KIND]", getStr(v[1])}), sellBuild), 1, 0)
+                end
+                return
+            elseif self.state == getParam("buildFree") and self.accMove < 40 and global.director.curScene.inBuild == false then
                 self:doFree()
             elseif self.state == getParam("buildWork") and self.accMove < 40 then
                 local ret = self.funcBuild:whenBusy()
@@ -421,7 +449,7 @@ function Building:doHarm(n)
     if self.broken then
         return
     end
-
+    local realHurt = math.min(n, self.health)
     self.health = self.health-n
     self.health = math.max(0, self.health)
     local vs = self.healthBar:isVisible()
@@ -433,21 +461,125 @@ function Building:doHarm(n)
 
     local b = self.health/self.maxHealth
     self.innerBar:runAction(scaleto(0.2, b, 1)) 
+    
+    --农田
+    if self.resPar == nil and self.kind == 0 then
+        self.resPar = CCNode:create()
+        local n = math.random(4)+3
+        for i=1, n do
+            local kind = math.random(20)-1
+            local sp = CCSprite:create("Wplant"..kind..".png")
+            local sca = math.random()*0.3+0.3
+            sp:setScale(sca)
+            self.resPar:addChild(sp)
+            local rx, ry = math.random(100)-50, math.random(20)+10
+            sp:runAction(sequence({fadein(0.1), jumpBy(1, rx, ry, 200, 1), fadeout(0.1)}))
+            local ang = math.random(300)+360
+            local d = math.random(2)
+            if d == 1 then
+                ang = -ang
+            end
+            sp:runAction(rotateby(1, ang))
+        end
 
-    --[[
-    if self.health > 0 then
-        local function clearScale()
-            self.inScale = nil
+        self.bg:addChild(self.resPar)
+        setPos(self.resPar, {0, 30})
+        local function removeRes()
+            removeSelf(self.resPar)
+            self.resPar = nil
         end
-        if self.inScale == nil then
-            self.inScale = true
-            self.bg:runAction(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1), callfunc(nil, clearScale)}))
-        end
-        local x = math.random()*6-3
-        local y = math.random()*6-3
-        self.bg:runAction(sequence({moveby(0.2, x, y), moveby(0.2, -x, -y)}))
+        self.resPar:runAction(sequence({delaytime(1.2), callfunc(nil, removeRes)}))
     end
-    --]]
+    if self.resPar == nil and self.kind == 200 then
+        self.resPar = CCNode:create()
+        
+        for i=1, n do
+            local kind = math.random(20)-1
+            local sp = CCSprite:create("Wplant"..kind..".png")
+            local sca = math.random()*0.3+0.3
+            sp:setScale(sca)
+            self.resPar:addChild(sp)
+            local rx, ry = math.random(50)+30, math.random(20)+10
+            local dir = math.random(2)
+            sp:runAction(sequence({fadein(0.1), jumpBy(1, rx, ry, 200, 1), fadeout(0.1)}))
+            local ang = math.random(300)+360
+            local d = math.random(2)
+            if d == 1 then
+                ang = -ang
+            end
+            sp:runAction(rotateby(1, ang))
+        end
+
+        for i=1, n do
+            local sp = CCSprite:create("crystal.png")
+            local sca = math.random()*0.3+0.3
+            sp:setScale(sca)
+            self.resPar:addChild(sp)
+            local rx, ry = math.random(100)-50, math.random(20)+10
+            sp:runAction(sequence({fadein(0.1), jumpBy(1, rx, ry, 200, 1), fadeout(0.1)}))
+            local ang = math.random(300)+360
+            local d = math.random(2)
+            if d == 1 then
+                ang = -ang
+            end
+            sp:runAction(rotateby(1, ang))
+        end
+
+
+        self.bg:addChild(self.resPar)
+        setPos(self.resPar, {0, 30})
+        local function removeRes()
+            removeSelf(self.resPar)
+            self.resPar = nil
+        end
+        self.resPar:runAction(sequence({delaytime(1.2), callfunc(nil, removeRes)}))
+    end
+
+    if self.resPar == nil and self.kind == 300 then
+        self.resPar = CCNode:create()
+        for i=1, n do
+            local sp = CCSprite:create("crystal.png")
+            local sca = math.random()*0.3+0.3
+            sp:setScale(sca)
+            self.resPar:addChild(sp)
+            local rx, ry = math.random(100)-50, math.random(20)+10
+            sp:runAction(sequence({fadein(0.1), jumpBy(1, rx, ry, 200, 1), fadeout(0.1)}))
+            local ang = math.random(300)+360
+            local d = math.random(2)
+            if d == 1 then
+                ang = -ang
+            end
+            sp:runAction(rotateby(1, ang))
+        end
+
+        self.bg:addChild(self.resPar)
+        setPos(self.resPar, {0, 30})
+        local function removeRes()
+            removeSelf(self.resPar)
+            self.resPar = nil
+        end
+        self.resPar:runAction(sequence({delaytime(1.2), callfunc(nil, removeRes)}))
+    end
+
+    if self.kind == 0 then
+        local ts = math.floor(BattleLogic.resource.silver/2/2/BattleLogic.farmNum)
+        ts = math.max(math.floor(ts*realHurt/self.maxHealth), 1)
+        BattleLogic.addSilver(ts)
+    elseif self.kind == 200 then
+        local ts = math.floor(BattleLogic.resource.silver/2/2)
+        ts = math.max(math.floor(ts*realHurt/self.maxHealth), 1)
+        BattleLogic.addSilver(ts)
+
+        local ts = math.floor(BattleLogic.resource.crystal/2/2)
+        ts = math.max(math.floor(ts*realHurt/self.maxHealth), 1)
+        BattleLogic.addCrystal(ts)
+    elseif self.kind == 300 then
+        local ts = math.floor(BattleLogic.resource.crystal/2/2/BattleLogic.mineNum)
+        ts = math.max(math.floor(ts*realHurt/self.maxHealth), 1)
+        BattleLogic.addCrystal(ts)
+    end
+
+
     if self.health > 0 then
         if self.bigBomb == nil then
             self.bigBomb = CCParticleSystemQuad:create('bigBomb.plist')

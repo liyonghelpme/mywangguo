@@ -143,6 +143,10 @@ function ChildMenuLayer:onPlan()
     global.director.curScene:closeGlobalMenu(self)
     global.director.curScene:doPlan()
 end
+function ChildMenuLayer:onSell()
+    global.director.curScene:closeGlobalMenu(self)
+    global.director.curScene:doSell()
+end
 
 function ChildMenuLayer:onFriend()
     global.director.curScene:closeGlobalMenu(self)

@@ -148,6 +148,10 @@ function User:getLastColor()
     return self.lastColor
 end
 
+function User:sellBuilding(b, g)
+    self:doAdd(g)
+    self.buildings[b.bid] = nil
+end
 function User:buyBuilding(build, cost)
     print("buyBuilding", build.kind)
     --local cost = getCost(GOODS_KIND.BUILD, build.kind);

@@ -812,6 +812,13 @@ function getLevelCost(kind, id, level)
     end
     return cost
 end
+function getNotZero(val)
+    for k, v in pairs(val) do
+        if v > 0 then
+            return {k, v}
+        end
+    end
+end
 
 function getCost(kind, id)
     return getLevelCost(kind, id, 0)
@@ -1078,6 +1085,9 @@ function toCol(c)
 end
 function addBanner(w)
     global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}, nil, nil))
+end
+function addCmd(c)
+    global.director.curScene.dialogController:addCmd(c)
 end
 function Sign(v)
     if v > 0 then

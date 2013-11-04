@@ -19,12 +19,30 @@ BattleLogic.endDialog = nil
 --出现游戏结束对话框的时候 paused = true 关闭之后 pause = false
 BattleLogic.paused = false
 
+--用户当前掠夺到的资源
+BattleLogic.silver = 0
+BattleLogic.crystal = 0
+BattleLogic.exp = 0
+BattleLogic.farmNum = 0
+BattleLogic.mineNum = 0
+
 function BattleLogic.prepareState()
     BattleLogic.quitBattle = false
     BattleLogic.gameOver = false
     BattleLogic.inBattle = false
     BattleLogic.paused = false
 end
+function BattleLogic.addSilver(v)
+    BattleLogic.silver = BattleLogic.silver+v
+    BattleLogic.exp = BattleLogic.exp+v
+    Event:sendMsg(EVENT_TYPE.ROB_RESOURCE)
+end
+function BattleLogic.addCrystal(v)
+    BattleLogic.crystal = BattleLogic.crystal+v
+    BattleLogic.exp = BattleLogic.exp+v
+    Event:sendMsg(EVENT_TYPE.ROB_RESOURCE)
+end
+
 function BattleLogic.killKind(kind)
     local v = getDefault(BattleLogic.killedSoldier, kind, 0)
     v = v+1
@@ -44,6 +62,9 @@ function BattleLogic.startBattle()
     BattleLogic.inBattle = true
     BattleLogic.endDialog = nil
     BattleLogic.killedSoldier = {}
+    BattleLogic.silver = 0
+    BattleLogic.crystal = 0
+    BattleLogic.exp = 0
 end
 function BattleLogic.clearBattle()
     BattleLogic.inBattle = false

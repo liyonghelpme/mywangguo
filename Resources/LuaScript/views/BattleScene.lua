@@ -74,9 +74,17 @@ function BattleScene:initData(data, param)
         if data.code == 1 then
             BattleLogic.uid = data.uid 
             BattleLogic.buildings = {}
+            BattleLogic.farmNum = 0
+            BattleLogic.minNum = 0
             for k, v in ipairs(data.builds) do
                 BattleLogic.buildings[v['bid']] = v
                 v.objectList = simple.decode(v.objectList)
+                --总能发现不同种类的兵种 带来不同的玩法
+                if v.kind == 0 then
+                    BattleLogic.farmNum = BattleLogic.farmNum+1
+                elseif v.kind == 300 then
+                    BattleLogic.mineNum = BattleLogic.mineNum+1
+                end
             end
 
             BattleLogic.serverTime = data.serverTime

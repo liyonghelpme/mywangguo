@@ -1,3 +1,4 @@
+require "views.Happen"
 DialogController = class()
 function DialogController:ctor(sc)
     self.scene = sc
@@ -28,6 +29,8 @@ function DialogController:update(diff)
                 global.director:pushView(RoleName.new(), 1, 0)
             elseif curCmd['cmd'] == 'firstGame' then
                 global.director:pushView(NewDialog.new(getStr("firstGame")), 1, 0)
+            elseif curCmd['cmd'] == 'monGen' then
+                global.director:pushView(Happen.new(getStr("monGen")), 1, 0)
             end
         end
     end

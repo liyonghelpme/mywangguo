@@ -2,13 +2,16 @@ Monster = class()
 function Monster:ctor(m)
     self.map = m
     self.kind = 190
+    self.data = getData(GOODS_KIND.SOLDIER, self.kind) 
     self.state = SOLDIER_STATE.FREE
     self.dead = false
     self.inattack = false
-    self.health = 200
-    self.maxHealth = 200
+    --应该奖励多少水晶和经验呢
+    self.health = self.data.healthBoundary
+    self.maxHealth = self.data.healthBoundary
     --攻击怪兽的士兵
     self.attackerList = {}
+    self.safeTime = 0
 
     self.bg = setAnchor(CCLayer:create(), {0.5, 0.5})
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldierm"..self.kind..".plist")
@@ -91,10 +94,16 @@ function Monster:exitScene()
     Event:unregisterEvent(EVENT_TYPE.ATTACK_ME, self)
 end
 function Monster:update(diff)
+    self.safeTime = self.safeTime+diff
     if not self.dead then
         self:findPath(diff)
         self:doMove(diff)
         self:doAttack(diff)
+        if self.safeTime > 20 then
+            self.safeTime = 0
+            local vs = getVS()
+            self:touchEnded(vs.width/2, vs.height/2)
+        end
     end
 end
 --超过一定的空闲时间
@@ -337,9 +346,9 @@ function Monster:doAttack(diff)
             self.changeDirNode:runAction(self.moveAni)
         else
             self.attackTime = self.attackTime+diff
-            if self.attackTime >= 1 then
-                self.attackTime = self.attackTime - 1
-                self.attackTarget:doHarm(30)
+            if self.attackTime >= self.data.attSpeed then
+                self.attackTime = 0
+                self.attackTarget:doHarm(self.data.attack)
             end
         end
     end
@@ -534,7 +543,7 @@ function Monster:doHarm(n)
             rw = 'crystal'
         end
         --杀死一只怪兽 就清理一次killSol 还是士兵死亡了就同步一次士兵
-        local gain = dict({{rw, 100}, {'exp', 20}})
+        local gain = dict({{rw, self.data.crystal}, {'exp', self.data.crystal}})
         global.user:doAdd(gain)
         global.director.curScene.bg:addChild(FlyObject.new(self.changeDirNode, gain, nil, nil).bg)
         sendReq("killMonster", dict({{"uid", global.user.uid}, {"gain", simple.encode(gain)}}))
