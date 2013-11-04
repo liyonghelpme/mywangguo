@@ -9,9 +9,10 @@ def genAndMove():
     zipFile = zipfile.ZipFile('upload/test.zip', 'a') 
     im = os.listdir('newImg')
     for i in im:
-        print("insert image %s"%(i))
-        os.system('cp newImg/%s %s' % (i, i))
-        zipFile.write(i)
+        if i.find('~') == -1:
+            print("insert image %s"%(i))
+            os.system('cp newImg/%s %s' % (i, i))
+            zipFile.write(i)
     zipFile.close()
 
 

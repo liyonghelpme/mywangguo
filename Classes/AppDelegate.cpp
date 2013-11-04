@@ -106,6 +106,7 @@ void AppDelegate::updateFiles() {
     if(pAssetsManager == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();
 		pAssetsManager = new AssetsManager((def->getStringForKey("codeUrl")+def->getStringForKey("zipFile")).c_str(), (def->getStringForKey("codeUrl")+def->getStringForKey("versionFile")).c_str());
+        publicAssets = pAssetsManager;
         
     }
     bool suc = false;

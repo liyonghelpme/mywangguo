@@ -59,6 +59,7 @@ using namespace std;
 #define MAX_FILENAME   512
 
 int progress = 0;
+AssetsManager *publicAssets = NULL;
 
 AssetsManager::AssetsManager()
 : _packageUrl("")
@@ -125,7 +126,7 @@ bool AssetsManager::checkUpdate()
     // Clear _version before assign new value.
     _version.clear();
     
-    CCLog("start version url Update", _versionFileUrl.c_str());
+    CCLog("start version url Update %s", _versionFileUrl.c_str());
     CURLcode res;
     curl_easy_setopt(_curl, CURLOPT_URL, _versionFileUrl.c_str());
     curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -153,6 +154,16 @@ bool AssetsManager::checkUpdate()
     
     return true;
 }
+void AssetsManager::updateVersion() {
+    CCLog("updateVersion");
+
+    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_VERSION, _version.c_str());
+    // Unrecord downloaded version code.
+    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, "");
+    CCUserDefault::sharedUserDefault()->flush();
+    string v = CCUserDefault::sharedUserDefault()->getStringForKey(KEY_OF_VERSION);
+    CCLog("update new version %s %s", v.c_str(), _version.c_str());
+}
 //当progress == 200 的时候 下载结束
 static void* assetsManagerDownloadAndUncompress(void *data) {
 	AssetsManager* self = (AssetsManager*)data;
@@ -173,14 +184,8 @@ static void* assetsManagerDownloadAndUncompress(void *data) {
 		progress = 200;
 		return false;
 	}
-    // Record new version code.
-    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_VERSION, self->_version.c_str());
-    
-    // Unrecord downloaded version code.
-    CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, "");
-    
-    CCUserDefault::sharedUserDefault()->flush();
-    
+    //self->updateVersion();
+    //更新结束在主线程调用 updateVersion 写入到 UserDefault 中
     // Set resource search path.
     self->setSearchPath();
     
@@ -190,6 +195,7 @@ static void* assetsManagerDownloadAndUncompress(void *data) {
     {
         CCLOG("can not remove downloaded zip file");
     }
+    CCLog("finish update script");
 	progress = 200;
 }
 #if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32

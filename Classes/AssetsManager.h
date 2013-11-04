@@ -129,10 +129,10 @@ public:
     std::string _versionFileUrl;
     
     CURL *_curl;
-
-    
+    void updateVersion();
 };
 extern int progress;
+extern AssetsManager *publicAssets; 
 #if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
 extern pthread_mutex_t _message;
 #endif

@@ -48,8 +48,8 @@ void UpdateScene::loadPoint(int p) {
 void UpdateScene::update(float diff) {
     if(!updateYet) {
         updateYet = true;
-        CCUserDefault *def = CCUserDefault::sharedUserDefault();
 	    //不需要更新文件
+        CCUserDefault *def = CCUserDefault::sharedUserDefault();
         if(def->getStringForKey("update") != "0")
             ap->updateFiles();
         else  {
@@ -57,6 +57,12 @@ void UpdateScene::update(float diff) {
         }
     } else {
 		if(progress == 200) {
+            CCUserDefault *def = CCUserDefault::sharedUserDefault();
+            if(def->getStringForKey("update") != "0") {
+                if(publicAssets != NULL) {
+                    publicAssets->updateVersion();
+                }
+            }
 			CCDictionary *dict = CCDictionary::create();
 			CCDictionary *ads = CCDictionary::create();
 			ads->setObject(CCString::create("AdsAdmob"), "name");

@@ -60,8 +60,11 @@ function User:initDataOver(data, param)
         self.resource = data.resource
         print("youmi gold my gold", youmigold, self.resource.gold)
         --test gold
-        self.resource.gold = 2000--youmigold
-        --youmigold
+        if DEBUG then
+            self.resource.gold = 2000
+        else
+            self.resource.gold = youmigold
+        end
 
         self:changeValue("exp", 0)
         print("sendMsg")
