@@ -23,7 +23,8 @@ function ChallengeOver:initView()
     --无论打弱打强 都获得 10的经验么？ 还是根据建筑物数量计算经验 农田 多少分 矿多少分 主城多少分
     local reward = {}
     if suc then
-        reward = {silver=math.floor(BattleLogic.resource["silver"]/2), crystal=math.floor(BattleLogic.resource["crystal"]/2), exp=10}
+        reward = {silver=math.max(0, math.floor(BattleLogic.resource["silver"]/2)), crystal=math.max(math.floor(BattleLogic.resource["crystal"]/2))}
+        reward.exp = reward.silver+reward.crystal
     end
     self.reward = reward
 

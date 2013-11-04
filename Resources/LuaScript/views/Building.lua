@@ -67,11 +67,16 @@ function Building:ctor(m, d, privateData)
         offY = (self.sx+self.sy)*SIZEY/2
     end
 
+    --调整建筑物 setPos 的时候就需要调整sp位置
     local sz = self.changeDirNode:getContentSize()
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
     local sp = CCSprite:create("grass3.png")
+    self.shadow = sp
     sp:setOpacity(200)
-    self.bg:addChild(sp, -1)
+    --self.bg:addChild(sp, -1)
+    self.map.bg:addChild(sp)
+    local p = getPos(self.bg)
+    setPos(sp, p)
     setSize(setAnchor(sp, {0.5, 0.2}), {SIZEX*(self.sx+self.sy+2), SIZEY*(self.sx+self.sy+2)})
 
     setPos(self.changeDirNode, {0, self.data['offY']})
@@ -317,6 +322,7 @@ function Building:setPos(p)
         zord = MAX_BUILD_ZORD
     end
     self.bg:setPosition(ccp(curPos[1], curPos[2]))
+    setPos(self.shadow, curPos)
     local parent = self.bg:getParent()
     if parent == nil then
         return
@@ -326,14 +332,6 @@ function Building:setPos(p)
     --parent:addChild(self.bg, zord)
     print("zord is ", zord)
     self.bg:setZOrder(zord)
-
-    --[[
-    if self.tempNode ~= nil then
-        self.tempNode:removeFromParentAndCleanup(true)
-    end
-    self.tempNode = ui.newTTFLabel({text=""..curPos[1].." "..curPos[2]})
-    self.bg:addChild()
-    --]]
 end
 function Building:keepPos()
     self.oldPos = getPos(self.bg)
@@ -488,6 +486,7 @@ function Building:doHarm(n)
             end
 
         end
+        self.funcBuild:doBroken()
         --爆炸的效果
         --repeatN(sequence({scaleto(0.2, 0.95, 1.05), scaleto(0.2, 1, 1)}), 4), 
         self.bg:runAction(sequence({callfunc(nil, fadeAll, self.bg)}))

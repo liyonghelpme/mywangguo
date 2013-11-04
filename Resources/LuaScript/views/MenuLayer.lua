@@ -1,3 +1,4 @@
+require "Views.ChatDialog"
 
 MenuLayer = class()
 function MenuLayer:ctor(sc)
@@ -23,10 +24,13 @@ function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.CHANGE_NAME, self)
     Event:registerEvent(EVENT_TYPE.TAP_MENU, self)
     Event:registerEvent(EVENT_TYPE.CLOSE_STORE, self)
+    Event:registerEvent(EVENT_TYPE.UPDATE_MSG, self)
     self:updateText()
     self:updateExp(0)
+    ChatModel.startReceive()
 end
 function MenuLayer:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.UPDATE_MSG, self)
     Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
     Event:unregisterEvent(EVENT_TYPE.TAP_MENU, self)
     Event:unregisterEvent(EVENT_TYPE.CHANGE_NAME, self)
@@ -48,6 +52,11 @@ function MenuLayer:receiveMsg(name, msg)
         self.menuButton.bg:addChild(hint.bg)
         setPos(hint.bg, {50, 50})
         NewLogic.setHint(hint)
+    elseif name == EVENT_TYPE.UPDATE_MSG then
+        local oldN = tonumber(self.finNum:getString())
+        local newN = #ChatModel.chatMessage
+        numAct(self.finNum, oldN, newN)
+        self.finNum:runAction(repeatN(sequence({scaleto(0.5, 1.2, 1.2), scaleto(0.5, 1, 1)}), 4))
     end
 end
 function MenuLayer:initView()
@@ -69,7 +78,9 @@ function MenuLayer:initView()
     self.banner:addChild(self.taskButton.bg)
     
     self.taskFin = setPos(setAnchor(addSprite(self.banner, "taskFin0.png"), {0, 0}), {83, fixY(nil, designToRealY(402), 27)})
-    self.finNum = setColor(setPos(setAnchor(addLabel(self.banner, getStr("99+", nil), "", 18), {0.5, 0.5}), {96, fixY(nil, designToRealY(416), 0, 0.5)}), {255, 255, 255})
+    self.finNum = ui.newBMFontLabel({text=0, size=20, font="bound.fnt"})
+    setPos(self.finNum, {100, fixY(nil, designToRealY(416), 0, 0.5)})
+    self.banner:addChild(self.finNum)
     
     self.expfiller = setAnchor(addSprite(self.banner, "exp_filler.png"), {0, 0})
     setPos(self.expfiller, {133, fixY(nil, designToRealY(419), getHeight(self.expfiller))})
@@ -175,6 +186,7 @@ function MenuLayer:updateText()
 end
 
 function MenuLayer:onTask()
+    global.director:pushView(ChatDialog.new(s), 1, 0)
 end
 
 function MenuLayer:onRank()

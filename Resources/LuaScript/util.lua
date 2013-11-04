@@ -530,6 +530,7 @@ function setVisible(s, v)
     return s
 end
 
+
 function getStr(key, rep)
     local s = Strings[key]
     if s == nil then

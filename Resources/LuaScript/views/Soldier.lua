@@ -244,20 +244,46 @@ function Soldier:checkNeibor(x, y)
             --不在open 表里面
             --首次加入
             --or staticObstacle[key] ~= nil 
-            --没有河流阻碍
-            if self.cells[key] == nil and staticObstacle[key] == nil then
-                self.cells[key] = {}
-                self.cells[key].parent = curKey
-                self:calcG(nv[1], nv[2])
-                self:calcH(nv[1], nv[2])
-                self:calcF(nv[1], nv[2])
-                self:pushQueue(nv[1], nv[2])
-            --已经在open表里面了 不用再加入了
-            else
+            --没有河流阻碍 没有遍历过
+            if staticObstacle[key] == nil and self.closedList[key] == nil then
+                --不在open表里面 如果在open表里面那么 值不为nil
+                --在open表里面 值一定不为nil
+                if self.cells[key] == nil then
+                    self.cells[key] = {}
+                    self.cells[key].parent = curKey
+                    self:calcG(nv[1], nv[2])
+                    self:calcH(nv[1], nv[2])
+                    self:calcF(nv[1], nv[2])
+                    self:pushQueue(nv[1], nv[2])
+                --已经在open表里面了 不用再加入了
+                else
+                    local oldParent = self.cells[key]['parent']
+                    local oldGScore = self.cells[key]['gScore']
+                    local oldFScore = self.cells[key]['fScore']
+
+                    self.cells[key].parent = curKey
+                    self:calcG(nv[1], nv[2])
+                    if self.cells[key].gScore > oldGScore then
+                        self.cells[key]['parent'] = oldParent
+                        self.cells[key]['gScore'] = oldGScore
+                    else
+                        self:calcH(nv[1], nv[2])
+                        self:calcF(nv[1], nv[2])
+                        --从旧的possible 中删除对象 
+                        local oldPossible = self.pqDict[oldFScore]
+                        for k, v in ipairs(oldPossible) do
+                            if v == key then
+                                table.remove(oldPossible, k)
+                                break
+                            end
+                        end
+                        self:pushQueue(nv[1], nv[2])
+                    end
+                end
             end
         end
     end
-
+    self.closedList[curKey] = true
 end
 --根据endPoint cells 逆向找到回去的路径
 function Soldier:getPath()
@@ -309,7 +335,7 @@ function Soldier:findPath(diff)
         end
     end
     if self.state == SOLDIER_STATE.START_FIND then
-        print("startFind")
+        --print("startFind")
         self.state = SOLDIER_STATE.IN_FIND
         local p = getPos(self.bg)
         local mx, my = cartesianToNormal(p[1], p[2])

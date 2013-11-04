@@ -10,7 +10,7 @@ function RoleName:ctor()
     temp:addChild(lab)
 
     --setPos(addSprite(temp, "roleNameDia.png"), {sz.width/2, fixY(sz.height, 131)})
-    local eb = ui.newEditBox({image="roleNameDia.png", imagePressed="roleNameDia.png", imageDiabled="roleNameDia.png", listener=self, size={245, 42}})
+    local eb = ui.newEditBox({image="roleNameDia.png", imagePressed="roleNameDia.png", imageDisabled="roleNameDia.png", listener=self, size={245, 42}})
     setPos(eb, {sz.width/2, fixY(sz.height, 131)})
     temp:addChild(eb)
     self.editBox = eb

@@ -156,8 +156,8 @@ function ui.newButton(params)
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
         local ret = checkIn(p.x, p.y, sz)
-
-        if ret and params.callback ~= nil then
+        local vs = obj.bg:isVisible()
+        if ret and params.callback ~= nil and vs then
             local tempSp = CCSprite:create(params.image)
             lay:addChild(tempSp)
             local function removeTemp()
@@ -173,7 +173,8 @@ function ui.newButton(params)
     function obj:touchMoved(x, y)
     end
     function obj:touchEnded(x, y)
-        if params.callback ~= nil then
+        local vs = obj.bg:isVisible()
+        if params.callback ~= nil and vs then
             params.callback(params.delegate, params.param)
         end
     end

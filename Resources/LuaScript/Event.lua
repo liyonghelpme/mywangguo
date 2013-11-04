@@ -19,6 +19,7 @@ EVENT_TYPE = {
     BATTLE=26,
 
     ATTACK_ME=27,
+    UPDATE_MSG = 28,
 }
 
 --一个比较大的数字作为区分

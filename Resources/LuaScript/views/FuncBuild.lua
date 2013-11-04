@@ -30,3 +30,11 @@ end
 
 function FuncBuild:removeBuild()
 end
+function FuncBuild:doBroken()
+    if self.par ~= nil then
+        removeSelf(self.par)
+        self.par = nil
+    end
+end
+function FuncBuild:doAttack()
+end

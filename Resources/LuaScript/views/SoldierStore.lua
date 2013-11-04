@@ -206,11 +206,32 @@ function SoldierStore:initLeftPanel()
         local temp = setPos(ui.newBMFontLabel({text="--:--:--", size = 20, color={208, 70, 72}}), {90, fixY(102, 87)})
         sp:addChild(temp)
 
-        table.insert(self.leftPanel, {solId, sp, temp})
+        local but = ui.newButton({text=getStr("accTitle"), image="roleNameBut0.png", conSize={80, 40}, size=30, callback=self.onAcc, delegate=self, param=solId})
+        sp:addChild(but.bg)
+        but:setAnchor(0.5, 0.5)
+        setPos(but.bg, {180, 102-84})
+        but.bg:setVisible(false)
+
+        table.insert(self.leftPanel, {solId, sp, temp, but})
         n = n+1
     end
 end
 
+function SoldierStore:onAcc(param)
+    if #self.leftPanel > 0 then
+        local leftTime = self.scene.funcBuild:getRealLeftTime()
+        local solId = self.leftPanel[1][1]
+        local cost = getCost(GOODS_KIND.SOLDIER, solId)
+        local buyable = global.user:checkCost(cost)
+        if buyable.ok == 0 then
+            addBanner("needCry", {"[NUM]", str(buyable.crystal)})
+            return
+        end
+        sendReq("accCamp", dict({{"uid", global.user.uid}, {"cost", simple.encode(cost)}}))
+        global.user:doCost(cost)
+        self.scene.funcBuild.objectTime = self.scene.funcBuild.objectTime-leftTime[1]
+    end
+end
 function SoldierStore:updateLeftPanel()
     local initX = 96
     local initY = 64
@@ -222,7 +243,8 @@ function SoldierStore:updateLeftPanel()
     if #self.leftPanel < #self.scene.objectList then
         local sp = setPos(addSprite(self.leftBack, "solBlock.png"), {initX, fixY(sz.height, initY+offY*n)})
         local solId = self.scene.objectList[#self.scene.objectList]
-
+        
+        --只能加速第一个士兵的生产
 
         local pic = setPos(addSprite(sp, "soldier"..solId..".png"), {90, 51})
         --不停抖动的小兵
@@ -233,7 +255,13 @@ function SoldierStore:updateLeftPanel()
         local temp = setPos(ui.newBMFontLabel({text="--:--:--", size = 20, color={208, 70, 72}}), {90, fixY(102, 87)})
         sp:addChild(temp)
 
-        table.insert(self.leftPanel, {solId, sp, temp})
+        local but = ui.newButton({text=getStr("accTitle"), image="roleNameBut0.png", conSize={80, 40}, size=30, callback=self.onAcc, delegate=self, param=solId})
+        sp:addChild(but.bg)
+        but:setAnchor(0.5, 0.5)
+        setPos(but.bg, {180, 102-84})
+        but.bg:setVisible(false)
+
+        table.insert(self.leftPanel, {solId, sp, temp, but})
         sp:setScale(0.1)
         sp:runAction(spawn({fadein(0.3), scaleto(0.3, 1, 1)}))
 
@@ -257,6 +285,8 @@ function SoldierStore:update(diff)
             local p = self.leftPanel[1][3]
             p:setColor(toCol({52, 101, 36}))
             p:setString(getWorkTime(leftTime[1]))
+            local but = self.leftPanel[1][4]
+            but.bg:setVisible(true)
         end
     end
 end

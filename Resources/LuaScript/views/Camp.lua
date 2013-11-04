@@ -73,24 +73,24 @@ function Camp:whenBusy()
 end
 --生产新的士兵的时候 更新当前的工作时间
 function Camp:initWorking(data)
-    if self.workLight == nil then
-        self.workLight = CCNode:create()
-        self.baseBuild.bg:addChild(self.workLight, 2)
-        setScale(setPos(self.workLight, {0, 0}), 1)
+    if self.par == nil then
+        self.par = CCNode:create()
+        self.baseBuild.bg:addChild(self.par, 2)
+        setScale(setPos(self.par, {0, 0}), 1)
         print("initWorking camp!!!!!!!!!!!!!")
 
-        local temp = addSprite(self.workLight, "camp_l.png")
+        local temp = addSprite(self.par, "camp_l.png")
         local sz = self.baseBuild.changeDirNode:getContentSize()
         setPos(temp, {101-sz.width/2, sz.height-88})
         setColor(temp, {238, 221, 130})
         temp:runAction(repeatForever(sequence({fadein(0.5), fadeout(0.5), delaytime(0.4)})))
 
-        local temp = addSprite(self.workLight, "camp_l.png")
+        local temp = addSprite(self.par, "camp_l.png")
         setPos(temp, {111-sz.width/2, sz.height-90})
         setColor(temp, {238, 221, 130})
         temp:runAction(repeatForever(sequence({delaytime(0.2), fadein(0.5), fadeout(0.5), delaytime(0.2)})))
 
-        local temp = addSprite(self.workLight, "camp_l.png")
+        local temp = addSprite(self.par, "camp_l.png")
         setPos(temp, {122-sz.width/2, sz.height-94})
         setColor(temp, {238, 221, 130})
         temp:runAction(repeatForever(sequence({delaytime(0.4), fadein(0.5), fadeout(0.5)})))

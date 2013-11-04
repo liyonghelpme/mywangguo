@@ -187,7 +187,7 @@ end
 
 function User:getPeopleNum()
     local level = self:getValue("level")
-    local n = (level+1)*3
+    local n = (level+1)*5
     return n
 end
 function User:getCampProductNum()

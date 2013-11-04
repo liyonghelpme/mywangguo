@@ -4,7 +4,7 @@ function Mine:ctor(b)
     self.baseBuild = b
     self.planting = nil
     self.flowBanner = nil
-    self.workLight = nil
+    self.par = nil
 end
 function Mine:getLeftTime()
     if self.planting ~= nil then
@@ -21,7 +21,7 @@ function Mine:setFlowBanner()
         pl:setScale(sca)
         self.flowBanner:runAction(repeatForever(sequence({spawn({moveby(0.5, 0, -20), scaleto(0.5, 0.8, 0.8)}), delaytime(0.1), spawn({moveby(0.5, 0, 20), scaleto(0.5, 1.2, 1.2)})})))
         self.flowBanner.pl = pl
-        --removeSelf(self.workLight)
+        --removeSelf(self.par)
     end
 end
 function Mine:whenFree()
@@ -66,11 +66,11 @@ function Mine:initWorking(data)
     local privateData = dict({{"objectTime", startTime}})
     self.planting = MinePlant.new(self.baseBuild, privateData)
     self.baseBuild.bg:addChild(self.planting.bg)
-    if self.workLight == nil then
-        self.workLight = addSprite(self.baseBuild.bg, "build300_l.png")
-        self.workLight:setPosition(ccp(-40, 44))
-        setColor(self.workLight, {238, 221, 130})
-        self.workLight:runAction(repeatForever(sequence({fadein(0.3), fadeout(0.3)})))
+    if self.par == nil then
+        self.par = addSprite(self.baseBuild.bg, "build300_l.png")
+        self.par:setPosition(ccp(-40, 44))
+        setColor(self.par, {238, 221, 130})
+        self.par:runAction(repeatForever(sequence({fadein(0.3), fadeout(0.3)})))
     end
 end
 
