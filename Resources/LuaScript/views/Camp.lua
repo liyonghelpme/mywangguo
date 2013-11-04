@@ -102,7 +102,7 @@ function Camp:initWorking(data)
     self.baseBuild:setState(getParam("buildWork"))
     self.objectId = 0
     self.objectTime = server2Client(data.objectTime)
-    print("initWorking", self.objectTime, data.objectTime, global.user.serverTime, global.user.clientTime)
+    print("initWorking Camp", self.objectTime, data.objectTime, global.user.serverTime, global.user.clientTime)
 end
 function Camp:getRealLeftTime()
     if #self.baseBuild.objectList > 0 then

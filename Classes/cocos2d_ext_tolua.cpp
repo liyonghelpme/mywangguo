@@ -1163,6 +1163,32 @@ static int tolua_Cocos2d_CCCrypto_rsaSign00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_getNow00
+static int tolua_Cocos2d_getNow00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isnoobj(tolua_S,1,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        float now = getNow();
+        //CCLog("now time %f", now);
+		tolua_pushnumber(tolua_S, (lua_Number)now);
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'getNow'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
 /* method: openURL of class CCNative */
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_CCNative_openURL00
 static int tolua_Cocos2d_CCNative_openURL00(lua_State* tolua_S)
@@ -1492,6 +1518,8 @@ TOLUA_API int tolua_ext_reg_types(lua_State* tolua_S)
 TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
+  tolua_function(tolua_S,"getNow", tolua_Cocos2d_getNow00);
+
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);
   tolua_beginmodule(tolua_S,"CCExtendNode");
    tolua_function(tolua_S, "create", tolua_Cocos2d_CCExtendNode_create00);

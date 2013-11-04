@@ -37,4 +37,6 @@ private:
 
 NS_CC_EXT_END
 
+float getNow();
+
 #endif // __CC_EXTENSION_CCNATIVE_H_

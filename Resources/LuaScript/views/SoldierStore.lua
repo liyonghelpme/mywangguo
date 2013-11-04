@@ -142,7 +142,7 @@ function SoldierStore:realBuySol(gold)
     else
         objectTime = client2Server(self.scene.funcBuild.objectTime)
     end
-    print("objectTime", #objectList, self.scene.funcBuild.objectTime, Timer.now)
+    print("start camp work time objectTime", #objectList, self.scene.funcBuild.objectTime, Timer.now)
     table.insert(objectList, solId)
     local privateData = {objectId=0, objectTime=objectTime}
     self.scene.funcBuild:initWorking(privateData)
