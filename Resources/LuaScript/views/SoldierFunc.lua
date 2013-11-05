@@ -20,3 +20,9 @@ end
 function SoldierFunc:getAttTime()
     return self.soldier.data.attSpeed
 end
+function SoldierFunc:checkFavorite(k)
+    return true
+end
+function SoldierFunc:waitTime()
+    return self.soldier.data.attSpeed
+end

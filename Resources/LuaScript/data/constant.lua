@@ -98,11 +98,7 @@ GOODS_KIND = {
 	MINE_PRODUCTION = 27,
 }
 costKey = {"silver", "gold", "crystal"}
-addKey = {"people", "cityDefense", "attack", "defense", "health", "gainsilver", "gaincrystal", "gaingold", "exp", 
-    "healthBoundary", "physicAttack", "physicDefense", "magicAttack", "magicDefense", "recoverSpeed",
-    "percentHealth", "percentHealthBoundary", "percentAttack", "percentDefense", "effectLevel",
-    "attack", "defense", "percentHealth",
-}
+addKey = {"exp", }
 PLAN_KIND = {
     PLAN_BUILDING=1,
     PLAN_SOLDIER=2,

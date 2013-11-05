@@ -117,6 +117,7 @@ end
 function CastleScene:finishBuild()
     local other = self.mc.buildLayer:checkCollision(self.curBuild)
     if other ~= nil then
+        addBanner(getStr("notHere"))
         return
     end
     local function useGoldFin(p)

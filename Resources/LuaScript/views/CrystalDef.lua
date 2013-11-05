@@ -49,7 +49,8 @@ function CrystalDef:update(diff)
                 if k.dead == false then
                     local sp = getPos(k.bg)
                     local dist = distance2(sp, bp)
-                    if dist < minDis then
+                    --不能攻击鸟人
+                    if dist < minDis and k.kind ~= 1130 then
                         minDis = dist
                         minTar = k
                     end
@@ -90,7 +91,7 @@ function CrystalDef:update(diff)
                 if k.dead == false then
                     local kp = getPos(k.bg)
                     local dist = distance2(kp, bp)
-                    if dist < attDist then
+                    if dist < attDist and k.kind ~= 1130 then
                         table.insert(arrange, k)
                         k:doHarm(self.baseBuild.data.attack)
                     end

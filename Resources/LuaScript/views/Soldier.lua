@@ -158,7 +158,6 @@ function Soldier:doAttack(diff)
             self.attackTime = self.attackTime - self.data.attSpeed
             if self.predictMon ~= nil then
                 self.attackTarget:doHarm(self.data.attack)
-            --弓箭手 发射弓箭
             else
                 self.funcSoldier:doAttack()
             end
@@ -367,16 +366,28 @@ function Soldier:findPath(diff)
         if BattleLogic.inBattle then
             local allBuild = self.map.mapGridController.allBuildings
             local minDis = 99999999
+
+            local minFDist = 99999999
+            local minFTar = nil
             for k, v in pairs(allBuild) do
                 --建筑物未被摧毁
                 if k.broken == false then
                     local bp = getPos(k.bg) 
                     local d = distance2(p, bp)
+                    local favor = self.funcSoldier:checkFavorite(k)
                     if d < minDis then
                         minDis = d
                         self.predictTarget = k
                     end
+                    if d < minFDist and favor then
+                        minFDist = d
+                        minFTar = k
+                    end
                 end
+            end
+            --有最喜欢的建筑物 则移动去攻击这个建筑物
+            if minFTar ~= nil then
+                self.predictTarget = minFTar
             end
         --攻击骷髅 当骷髅处于静止状态的时候 向骷髅移动
         elseif self.tryAttackTarget ~= nil and not self.tryAttackTarget.dead and self.tryAttackTarget.state == SOLDIER_STATE.FREE then

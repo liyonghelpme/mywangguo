@@ -328,12 +328,14 @@ function Building:touchesEnded(touches)
                     global.director:pushView(SellDialog.new(getStr("sureSell", {"[NUM]", str(v[2]), "[KIND]", getStr(v[1])}), sellBuild), 1, 0)
                 end
                 return
-            elseif self.state == getParam("buildFree") and self.accMove < 40 and global.director.curScene.inBuild == false then
-                self:doFree()
-            elseif self.state == getParam("buildWork") and self.accMove < 40 then
-                local ret = self.funcBuild:whenBusy()
-                if ret == 0 then
-                    global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)
+            elseif global.directorl.curScene.inBuild == false then
+                if self.state == getParam("buildFree") and self.accMove < 40 then
+                    self:doFree()
+                elseif self.state == getParam("buildWork") and self.accMove < 40 then
+                    local ret = self.funcBuild:whenBusy()
+                    if ret == 0 then
+                        global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)
+                    end
                 end
             end
         end
@@ -355,9 +357,6 @@ function Building:setPos(p)
     if parent == nil then
         return
     end
-    --self.bg:retain()
-    --self.bg:removeFromParentAndCleanup(true)
-    --parent:addChild(self.bg, zord)
     print("zord is ", zord)
     self.bg:setZOrder(zord)
 end
