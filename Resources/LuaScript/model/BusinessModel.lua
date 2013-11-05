@@ -61,5 +61,6 @@ function calGold(cost)
     for k, v in pairs(cost) do
         temp.gold = temp.gold + v
     end
+    temp.gold = math.max(1, math.ceil(temp.gold/10))
     return temp
 end

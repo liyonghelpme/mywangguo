@@ -36,9 +36,13 @@ import net.youmi.android.offers.PointsManager;
 //import com.google.ads.*;
 //import com.google.ads.AdRequest.ErrorCode;
 import com.liyong.wangguo.HelloLua;
+import com.umeng.example.xp.TabFragment;
+import com.umeng.fb.FeedbackAgent;
 
+import android.R;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -167,6 +171,27 @@ public class AdsAdmob implements InterfaceAds {
 				
 			});
 		} else if(points == 3) {
+			PluginWrapper.runOnMainThread(new Runnable(){
+
+				@Override
+				public void run() {
+					Log.v("YouMeng", "feedback");
+					// TODO Auto-generated method stub
+					FeedbackAgent agent = new FeedbackAgent(mContext);
+					agent.startFeedbackActivity();
+				}
+				
+			});
+		} else if(points == 4) {
+			PluginWrapper.runOnMainThread(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					Intent in = new Intent(mContext, TabFragment.class);
+					mContext.startActivity(in);
+				}
+				
+			});
 			
 		}
 	}

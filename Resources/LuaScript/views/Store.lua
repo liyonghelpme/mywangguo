@@ -132,7 +132,22 @@ function Store:buy(gi)
     local buyable
     local ret
     if kind == GOODS_KIND.GOLD then
-        MyPlugins:getInstance():sendCmd("showOffers", "")
+        if id == 0 then
+            MyPlugins:getInstance():sendCmd("showOffers", "")
+        elseif id == 1 then
+            MyPlugins:getInstance():sendCmd("freeCrystal", "")
+            local reward = {}
+            local dir = math.random(2)
+            if dir == 1 then
+                reward.crystal = 100
+                addBanner(getStr("getRew", {"[NUM]", 100, "[KIND]", getStr("crystal")}))
+            else
+                reward.silver = 100
+                addBanner(getStr("getRew", {"[NUM]", 100, "[KIND]", getStr("silver")}))
+            end
+            sendReq("killMonster", dict({{"uid", global.user.uid}, {"gain", reward}}))
+            global.user:doAdd(reward)
+        end
         return
     end
 
@@ -148,19 +163,6 @@ function Store:buy(gi)
         end
         return
     end
-    --资源不足使用金币购买
-    --[[
-    cost = getCost(kind, id)
-    buyable = global.user:checkCost(cost)
-    --用户先摆好建筑物 点击确定的时候 提示资源不够 cancel 建造 或者 使用金币建造
-    if buyable.ok == 0 then
-        buyable.ok = nil
-        for k, v in pairs(buyable) do
-            addBanner(getStr("resLack", {"[NAME]", getStr(k, nil), "[NUM]", str(v)}) )
-        end
-        return
-    end
-    --]]
 
     if kind == GOODS_KIND.BUILD then
         global.director:popView()

@@ -181,6 +181,10 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
             info["cmd"] = "spendGold";
             info["gold"] = args;
             m_pAds->configDeveloperInfo(info);
+        } else if(c == "feedback") {
+            m_pAds->spendPoints(3);
+        } else if(c == "freeCrystal") {
+            m_pAds->spendPoints(4);
         }
 	}  
 }

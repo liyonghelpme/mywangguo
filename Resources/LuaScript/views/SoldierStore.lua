@@ -224,7 +224,7 @@ function SoldierStore:onAcc(param)
         local cost = getCost(GOODS_KIND.SOLDIER, solId)
         local buyable = global.user:checkCost(cost)
         if buyable.ok == 0 then
-            addBanner("needCry", {"[NUM]", str(buyable.crystal)})
+            addBanner(getStr("needCry", {"[NUM]", str(buyable.crystal)}))
             return
         end
         sendReq("accCamp", dict({{"uid", global.user.uid}, {"cost", simple.encode(cost)}}))

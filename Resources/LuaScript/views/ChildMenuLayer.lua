@@ -168,7 +168,7 @@ end
 
 function ChildMenuLayer:onMail()
     global.director.curScene:closeGlobalMenu(self)
-    addBanner(getStr("noFunc"))
+    MyPlugins:getInstance():sendCmd("feedback", "")
 end
 
 

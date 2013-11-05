@@ -65,6 +65,7 @@ function BattleLogic.startBattle()
     BattleLogic.silver = 0
     BattleLogic.crystal = 0
     BattleLogic.exp = 0
+    BattleLogic.finishInitBuild = false
 end
 function BattleLogic.clearBattle()
     BattleLogic.inBattle = false

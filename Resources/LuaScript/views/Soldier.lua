@@ -4,6 +4,7 @@ require "views.SoldierFunc"
 require "views.Archer"
 require "views.Warrior"
 require "views.Magic"
+require "views.BirdMan"
 
 Soldier = class()
 SOLDIER_STATE = {
@@ -32,8 +33,6 @@ function Soldier:ctor(map, data, pd)
     --if BattleLogic.inBattle then
         --print("init Attack")
         --Don't forget to load plist first
-        CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldiera"..self.kind..".plist")
-        createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, self.data.attSpeed, true) 
     --end
     self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("ss"..self.kind.."m0.png"), {0.5, 0})
     self.bg:addChild(self.changeDirNode)
@@ -70,15 +69,21 @@ function Soldier:ctor(map, data, pd)
         self.funcSoldier = Warrior.new(self)
     elseif self.kind == 493 then
         self.funcSoldier = Magic.new(self)
+    elseif self.kind == 1130 then
+        self.funcSoldier = BirdMan.new(self)
     else
         self.funcSoldier = SoldierFunc.new(self)
     end
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("soldiera"..self.kind..".plist")
+    local at = self.funcSoldier:getAttTime()
+    createAnimation("soldiera"..self.kind, "ss"..self.kind.."a%d.png", 0, 7, 1, at, true) 
+
     registerEnterOrExit(self)
     if DEBUG then
         self.stateStr = ui.newBMFontLabel({text="0", size=20})
         self.bg:addChild(self.stateStr)
     end
-
+    self.funcSoldier:adjustHeight()
 end
 function Soldier:enterScene()
     registerUpdate(self)
@@ -115,6 +120,7 @@ function Soldier:doAttack(diff)
         print("animation", animation)
         self.changeDirNode:runAction(repeatForever(CCAnimate:create(animation)))
         self.attackTime = 0
+        self.funcSoldier:showAttack()  
         --setDir 
         if self.predictMon ~= nil then
             self.attackTarget = self.predictMon
@@ -125,11 +131,14 @@ function Soldier:doAttack(diff)
             end
         else
             self.attackTarget = self.predictTarget
+            local p = getPos(self.attackTarget.bg)
+            self:setDir(p[1], p[2])
         end
     end
     if self.state == SOLDIER_STATE.IN_ATTACK then
         if self.attackTarget.dead == true then
             self.state = SOLDIER_STATE.FREE
+            self.funcSoldier:finishAttack()
             self.map:clearCell(self.endPoint)
             self.changeDirNode:stopAllActions()
             local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
@@ -137,6 +146,7 @@ function Soldier:doAttack(diff)
             return
         elseif self.attackTarget.broken == true then
             self.state = SOLDIER_STATE.FREE
+            self.funcSoldier:finishAttack()
             self.map:clearCell(self.endPoint)
             self.changeDirNode:stopAllActions()
             local animation = CCAnimationCache:sharedAnimationCache():animationByName("soldierm"..self.kind)
@@ -503,9 +513,7 @@ function Soldier:setDir(cx, cy)
     end
 end
 function Soldier:setZord()
-    local p = getPos(self.bg)
-    local zOrd = MAX_BUILD_ZORD-p[2]
-    self.bg:setZOrder(zOrd)
+    self.funcSoldier:setZord()
 end
 --如果和怪兽足够靠近的话 攻击怪兽
 function Soldier:doMove(diff)
@@ -603,6 +611,7 @@ function Soldier:doHarm(n)
     self.health = math.max(self.health, 0)
     if self.health <= 0 then
         self.dead = true
+        self.funcSoldier:finishAttack()
     end
 
     local vs = self.healthBar:isVisible()

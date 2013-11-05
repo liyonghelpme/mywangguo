@@ -40,8 +40,20 @@ function Goods:initSameElement(buildData, panel)
     local data = getData(objKind, objId)
     local needLevel = getDefault(data, "level", 0)
     local gain = getGain(objKind, objId)
+    
+    local buildPicName
+    if objKind == GOODS_KIND.GOLD then
+        if objId == 0 then
+            buildPicName = "gold.png"
+        elseif objId == 1 then
+            buildPicName = "crystal.png"
+        elseif objId == 2 then
+            buildPicName = "silver.png" 
+        end
+    else
+        buildPicName = replaceStr(KindsPre[objKind], {"[ID]", objId})
+    end
 
-    local buildPicName = replaceStr(KindsPre[objKind], {"[ID]", objId})
     local showaGain = getDefault(data, "showGain", 1)
 
     --panel is a touchButton or background is a touch zone
@@ -61,9 +73,10 @@ function Goods:initSameElement(buildData, panel)
             setColor(setPos(setAnchor(addLabel(panel, str(getCurBuildNum(objId)).."/"..str(getBuildEnableNum(objId)[1]), "", 20), {0.5, 0.5}), {121, fixY(sz.height, 134)}), fixColor({43, 25, 9}))
             showGain = 0
         end
+        setColor(setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5}), {0, 0, 0})
+    elseif objKind == GOODS_KIND.GOLD then
+        setColor(setAnchor(setPos(addLabel(panel, getStr("freeIt"), "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5}), {0, 0, 0})
     end
-
-    setColor(setAnchor(setPos(addLabel(panel, data.name, "", 20), {78, fixY(sz.height, 25)}), {0.5, 0.5}), {0, 0, 0})
     local cn = 0
     for k, v in pairs(cost) do
         local c = {109, 170, 44}
@@ -81,10 +94,16 @@ function Goods:initSameElement(buildData, panel)
         break
     end
     --免费获得金币
-    if cn == 0 then
-        local cNum = ui.newTTFLabel({text=getStr("free0"), size=20, color={255, 215, 0}})
-        panel:addChild(cNum)
-        setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
+    if objKind == GOODS_KIND.GOLD then
+        if objId == 0 then
+            local cNum = ui.newTTFLabel({text=getStr("free0"), size=20, color={255, 215, 0}})
+            panel:addChild(cNum)
+            setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
+        elseif objId == 1 then
+            local cNum = ui.newTTFLabel({text=getStr("free1"), size=20, color={255, 215, 0}})
+            panel:addChild(cNum)
+            setAnchor(setPos(cNum, {83, fixY(sz.height, 169)}), {0.5, 0.5})
+        end
     end
 
     local sca

@@ -41,6 +41,7 @@ import org.json.JSONException;
 
 
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -72,6 +73,8 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		UmengUpdateAgent.update(this);
+		
 		act = this;
 		PluginWrapper.init(this); // for plugins
 		PluginWrapper.setGLSurfaceView(Cocos2dxGLSurfaceView.getInstance());
