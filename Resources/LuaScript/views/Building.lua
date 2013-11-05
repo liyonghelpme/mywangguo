@@ -328,7 +328,7 @@ function Building:touchesEnded(touches)
                     global.director:pushView(SellDialog.new(getStr("sureSell", {"[NUM]", str(v[2]), "[KIND]", getStr(v[1])}), sellBuild), 1, 0)
                 end
                 return
-            elseif global.directorl.curScene.inBuild == false then
+            elseif global.director.curScene.inBuild == false then
                 if self.state == getParam("buildFree") and self.accMove < 40 then
                     self:doFree()
                 elseif self.state == getParam("buildWork") and self.accMove < 40 then
