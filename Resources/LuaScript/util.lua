@@ -1160,3 +1160,10 @@ function setRotation(p, ang)
     p:setRotation(ang)
     return p
 end
+
+function jumpBy(t, x, y, hei, n)
+    return CCJumpBy:create(t, ccp(x, y), hei, n)
+end
+function jumpTo(t, x, y, hei, n)
+    return CCJumpTo:create(t, ccp(x, y), hei, n)
+end

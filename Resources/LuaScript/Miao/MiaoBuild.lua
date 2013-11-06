@@ -18,6 +18,7 @@ function MiaoBuild:ctor(m, data)
     self.dir = 0
     self.deleted = false
     self.moveTarget = nil
+    self.rate = 0
 
     self.bg = CCLayer:create()
     if self.picName == 'build' then
@@ -313,15 +314,57 @@ function MiaoBuild:adjustRoad()
         end
     end
 end
+--建造花坛 拆除花坛影响周围建筑属性 
+function MiaoBuild:showIncrease(n)
+    local sp = ui.newBMFontLabel({text=str(n)..'%', font="bound.fnt", size=30})
+    self.bg:addChild(sp)
+    setPos(sp, {0, 40})
+    sp:runAction(sequence({fadein(1), fadeout(1), callfunc(nil, removeSelf, sp)}))
+    self.rate = self.rate+n/100
+end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
 function MiaoBuild:finishBuild()
     --白名单 方法
     if self.picName == 't' or self.picName == 's' then
         self:adjustRoad()
-    elseif self.picName == 'build' and self.id == 4 then
-        removeSelf(self.gridNode)
-        self.gridNode = nil
+    elseif self.picName == 'build' then
+        --樱花树
+        if self.id == 4 then
+            removeSelf(self.gridNode)
+            self.gridNode = nil
+
+            local allBuild = {}
+            local map = getBuildMap(self) 
+            local initX = 0
+            local initY = -4
+            local offX = 1
+            local offY = 1
+            local mapDict = self.map.mapGridController.mapDict
+            for i =0, 4, 1 do
+                local curX = initX-i
+                local curY = initY+i
+                for j = 0, 4, 1 do
+                    local key = getMapKey(curX+map[3], curY+map[4])
+                    if mapDict[key] ~= nil then
+                        local ob = mapDict[key][#mapDict[key]][1]
+                        local dist = math.abs(curX)+math.abs(curY)
+                        --周围要是匹配的建筑物才行 农田等
+                        if ob.id == 1 or ob.id == 2 then
+                            if dist == 2 then
+                                ob:showIncrease(10)
+                            elseif dist == 4 then
+                                ob:showIncrease(5)
+                            end
+                        end
+                    end
+
+                    curX = curX+1
+                    curY = curY+1
+                end
+            end
+
+        end
     end
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
@@ -337,12 +380,6 @@ function MiaoBuild:setState(s)
     if self.state == BUILD_STATE.MOVE and self.bottom == nil then
         self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
         self.bg:addChild(self.bottom, 1)
-    end
-end
-function MiaoBuild:finishBottom()
-    if self.bottom ~= nil then
-        self.bottom:removeFromParentAndCleanup(true)
-        self.bottom = nil
     end
 end
 

@@ -23,10 +23,6 @@ function MiaoPeople:ctor(m, data)
     self.lastState = nil
     self.id = data.id
     self.name = str(math.random(99999))
-    --附近影响的建筑物列表 
-    self.affectBuild = {}
-    --1.1 1.3 1.5
-    self.rate = 1
 
     self.bg = CCNode:create()
     --不同人物动画的角度也有可能不同
@@ -344,11 +340,19 @@ function MiaoPeople:doMove(diff)
                     self.bg:setVisible(false)
                     local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
                     setPos(self.bg, np)
-                --移动到了目的点 开始 往回走了
+                --商人 工作移动到了目的点 开始 往回走了
                 elseif self.id == 2 then
                     if self.goBack == nil then
                         self.state = PEOPLE_STATE.FREE
                         self.goBack = true
+                        --开始交易 回家啦
+                        local sp = CCSprite:create("gold.png")
+                        local p = getPos(self.predictTarget.bg)
+                        self.map.bg:addChild(sp)
+                        setPos(sp, p)
+                        local rx = math.random(20)-10
+                        sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+                        doGain({silver=10*math.floor(self.predictTarget.rate+1)})
                     else
                         print("GO AWAY Now!")
                         self.state = PEOPLE_STATE.GO_AWAY
@@ -395,7 +399,8 @@ function MiaoPeople:doWork(diff)
         self.restTime = self.restTime+diff
         if self.restTime > 1 then
             self.restTime = 0
-            self.health = self.health +1
+            --用小数表示health 但是 休息结束的时候 需要做成 整数
+            self.health = self.health +1*(self.myHouse.rate+1)
         end
         --下一步开始寻路 去工作
         --如果找到可以工作的地方再出现并且根据 目标调整当前位置

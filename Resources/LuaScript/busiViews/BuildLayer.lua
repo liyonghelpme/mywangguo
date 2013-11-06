@@ -116,6 +116,8 @@ function BuildLayer:initBuilding()
         self.bg:addChild(build.bg, MAX_BUILD_ZORD)
         build:setPos(normalizePos({bdata["px"], bdata["py"]}, data["sx"], data["sy"]))
         self.mapGridController:addBuilding(build)
+        build:setPos(normalizePos({bdata["px"], bdata["py"]}, data["sx"], data["sy"]))
+        build:setState(getParam("free"))
     end
     --[[
     local temp = CCSprite:create("images/loadingCircle.png")
