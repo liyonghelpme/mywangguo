@@ -5,4 +5,5 @@ function doGain(r)
         Logic.resource[k] = Logic.resource[k]+v
     end
 end
+Logic.paused = false
 

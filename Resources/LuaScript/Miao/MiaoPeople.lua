@@ -1,4 +1,6 @@
 require "heapq"
+require "Miao.FuncPeople"
+require "Miao.Worker"
 MiaoPeople = class()
 PEOPLE_STATE = {
     FREE = 0,
@@ -16,7 +18,7 @@ function MiaoPeople:ctor(m, data)
     self.map = m
     self.state = PEOPLE_STATE.FREE
     self.health = 0
-    self.maxHealth = 5
+    self.maxHealth = 15
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
@@ -30,14 +32,20 @@ function MiaoPeople:ctor(m, data)
     local sz = self.changeDirNode:getContentSize()
     --人物图像向上偏移一半高度 到达块中心位置
     setAnchor(self.changeDirNode, {Logic.people[1].ax/sz.width, (sz.height-Logic.people[1].ay-SIZEY)/sz.height})
-    self.stateLabel = ui.newBMFontLabel({text=str(self.state), size=30})
+    self.stateLabel = ui.newBMFontLabel({text=str(self.state), size=20})
     setPos(self.stateLabel, {0, 100})
     self.bg:addChild(self.stateLabel)
+    if self.id == 1 then
+        self.funcPeople = Worker.new(self)
+    elseif self.id == 2 then
+        self.funcPeople = Merchant.new(self) 
+    end
     
     createAnimation("people"..self.id.."_lb", "people"..self.id.."_lb_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("people"..self.id.."_lt", "people"..self.id.."_lt_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("people"..self.id.."_rb", "people"..self.id.."_rb_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("people"..self.id.."_rt", "people"..self.id.."_rt_%d.png", 0, 4, 1, 0.5, false)
+    createAnimation("peopleSend", "people3_%d.png", 1, 11, 1, 1, false)
     registerEnterOrExit(self)
 end
 function MiaoPeople:setZord()
@@ -91,30 +99,120 @@ end
 function MiaoPeople:findWorkBuilding()
     local allBuild = self.map.mapGridController.allBuildings
     local num = getLen(allBuild)
+    local allPossible = {}
+    local allFreeFactory = {}
+    local allFreeStore = {}
+
     for k, v in pairs(allBuild) do
         --休息结束
         --找农田
         local ret = false
         --商人 不需要 占用 建筑物
+
         if self.id == 2 then
-            ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE)
+            --农田没有购买者 走到后发现目标被移除了就取消工作 
+            --移动建筑物相当于新建一个建筑物 broken = true
+            --避免抢占 owner == nil
+            ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
+            if not ret then
+                ret = (k.picName == 'build' and k.id == 6 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
+            end
         --农民要占用建筑物
         elseif self.id == 1 then
-            ret = (k.picName == 'build' and k.owner == nil and k.id == 2 and k.state == BUILD_STATE.FREE) 
-        end
-        if ret then
-            print("findWorkBuilding setOwner")
-            --农民才设定要对农田占用 放置别人也来开垦 
-            if self.id == 1 then
-                k:setOwner(self)
+            --两种情况 给 其它工厂运输农作物 丰收状态 
+            --生产农作物
+            --先不允许并行处理
+            if k.picName == 'build' and k.owner == nil then
+                if k.id == 2 then
+                    ret = (k.state == BUILD_STATE.FREE and k.workNum < 10)
+                    if not ret then
+                    --可以运送到工厂了 寻找最近的工厂 拉着拉着 没有工厂了怎么办？ 到目标地发现建筑物不在了则停止
+                        ret = (k.state == BUILD_STATE.FREE and k.workNum >= 10)
+                    end
+                    --一条链路
+                --去工厂生产产品 运送粮食到工厂 或者 到工厂生产产品 
+                elseif k.id == 5 then
+                    ret = (k.food > 0 and getDefault(k.product, 1, 0) < 10)
+                    --生产好的商品
+                    if not ret then
+                        ret = (getDefault(k.product, 1, 0) > 0)
+                    end
+                end
+                --工厂 空闲状态 没有粮食储备 且没有其它用户 
             end
-            self.predictTarget = k
-            break
+            print("build kind ", k.id, k.food, k.owner)
+            if k.id == 5 and k.food == 0 and k.owner == nil and getDefault(k.product, 1, 0) < 10 then
+                print("free factory")
+                table.insert(allFreeFactory, k)
+            end
+
+            --按照大区块划分的AI 区域
+            if k.id == 6 and k.workNum < 10 then
+                table.insert(allFreeStore, k)
+            end
+        end
+
+        --print("building state", ret)
+        if ret then
+            table.insert(allPossible, k)
         end
     end
+    print("allPossible", #allPossible)
+    print("allFreeFactory num", #allFreeFactory)
+    if #allPossible > 0 then
+        local rd = math.random(#allPossible)
+        local k = allPossible[rd]
+        --基本潜质
+        --工作种类
+        if self.id == 1 then
+            --寻找空闲的工厂 运送物资过去
+            --寻找最近的工厂运送过去  行为转变了
+            if k.id == 2 and k.workNum >= 10 then
+                --锁定了农田和 工厂的 使用者
+                if #allFreeFactory > 0 then
+                    self.stateLabel:setString("findFactory!!!")
+                    self.predictFactory = allFreeFactory[1]
+                    self.predictFactory:setOwner(self) 
+                    k:setOwner(self)
+                    self.predictTarget = k
+                    print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.predictFactory)
+                end
+                --种地去
+            elseif k.id == 2 and k.workNum < 10 then
+                k:setOwner(self)
+                self.predictTarget = k
+            elseif k.id == 5 then
+                --还有剩余粮食
+                if k.food > 0 then
+                    k:setOwner(self)
+                    self.predictTarget = k
+                --只有生产好的商品
+                else
+                    if #allFreeStore > 0 then
+                        self.predictStore = allFreeStore[1]
+                        self.predictStore:setOwner(self)
+                        k:setOwner(self)
+                        self.predictTarget = k
+                    end
+                end
+            end
+        --购买粮食
+        elseif self.id == 2 then
+            --一块农田只有一个购买者
+            --购买结束需要clearBuyer
+            --一次购买不成功 还会尝试去购买别的
+            --去商店购买
+            k:setOwner(self)
+            self.predictTarget = k
+        end
+    end 
 end
 
 function MiaoPeople:update(diff)
+    if Logic.paused then
+        return
+    end
+
     self:checkHealth()
     self:findPath(diff)
     self:initFind(diff) 
@@ -123,7 +221,11 @@ function MiaoPeople:update(diff)
     self:doMove(diff)
     self:doWork(diff)
     self:doPaused(diff)
-    self.stateLabel:setString(str(self.state))
+    if self.predictTarget ~= nil then
+        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health)
+    else
+        self.stateLabel:setString(str(self.state).." hea "..self.health)
+    end
 end
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
@@ -151,6 +253,8 @@ function MiaoPeople:initFind(diff)
         self.cells = {}
 
         self.predictTarget = nil
+        self.predictFactory = nil
+        self.predictStore = nil
         self.predictEnd = nil
         self.realTarget = nil
         
@@ -161,6 +265,13 @@ function MiaoPeople:initFind(diff)
             self:findHouse()
         elseif self.goBack then
             self.predictTarget = self.map.backPoint
+        elseif self.goStore then
+            self.predictTarget = self.tempStore
+            self.goStore = false
+        elseif self.goFactory then
+            print("goFactory !!!!!")
+            self.predictTarget = self.tempFactory
+            self.goFactory = false
         else
             --寻找要去收割的建筑物
             self:findWorkBuilding()
@@ -276,6 +387,7 @@ function MiaoPeople:doFind(diff)
     end
 end
 function MiaoPeople:initMove(diff)
+    --print("initMove")
     if self.state == PEOPLE_STATE.FIND then
         --开始从房间里面出来了 调整一下初始的位置 people 所在网格靠近附近邻居的位置 中点
         if self.lastState == PEOPLE_STATE.IN_HOME then
@@ -337,22 +449,31 @@ function MiaoPeople:doMove(diff)
                 if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
                     self.state = PEOPLE_STATE.IN_HOME
                     self.restTime = 0
-                    self.bg:setVisible(false)
+                    --self.bg:setVisible(false)
+
                     local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
                     setPos(self.bg, np)
                 --商人 工作移动到了目的点 开始 往回走了
                 elseif self.id == 2 then
+                    --收获农作物 商店资源
                     if self.goBack == nil then
                         self.state = PEOPLE_STATE.FREE
                         self.goBack = true
+                        self.realTarget:setOwner(nil)
                         --开始交易 回家啦
-                        local sp = CCSprite:create("gold.png")
-                        local p = getPos(self.predictTarget.bg)
-                        self.map.bg:addChild(sp)
-                        setPos(sp, p)
-                        local rx = math.random(20)-10
-                        sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                        doGain({silver=10*math.floor(self.predictTarget.rate+1)})
+                        if self.predictTarget.workNum > 0 then
+                            local sp = CCSprite:create("silver.png")
+                            local p = getPos(self.predictTarget.bg)
+                            self.map.bg:addChild(sp)
+                            setPos(sp, p)
+                            local rx = math.random(20)-10
+                            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+                            local num = ui.newBMFontLabel({text=str(self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)), font="bound.fnt", size=30})
+                            sp:addChild(num)
+                            setPos(num, {50, 0})
+                            doGain({silver=self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)})
+                            self.predictTarget.workNum = 0
+                        end
                     else
                         print("GO AWAY Now!")
                         self.state = PEOPLE_STATE.GO_AWAY
@@ -360,9 +481,44 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
-                    --self.state = PEOPLE_STATE.FREE
-                    self.state = PEOPLE_STATE.IN_WORK
-                    self.workTime = 0
+                    --运送物资到工厂 带走农田产量
+                    --之前的是农田 并且 农田已经 种植好了 则 走向 工厂
+                    if self.realTarget.id == 2 and self.realTarget.workNum >= 10 then
+                        self.predictTarget:setOwner(nil)
+                        self.food = self.realTarget.workNum
+                        self.realTarget.workNum = 0
+                        self.tempFactory = self.predictFactory
+                        self.goFactory = true
+                        self.state = PEOPLE_STATE.FREE
+                    elseif self.realTarget.id == 5 then
+                        --运送粮食
+                        if self.food ~= nil then
+                            self.realTarget.food = self.realTarget.food + self.food
+                            self.food = 0
+                        end
+                        --运送商品到商店
+                        if self.predictStore ~= nil then
+                            self.product = self.realTarget.product[1]
+                            self.realTarget.product[1] = 0
+                            self.realTarget:setOwner(nil)
+                            self.tempStore = self.predictStore
+                            self.goStore = true
+                            self.state = PEOPLE_STATE.FREE
+                        else
+                            --生产商品
+                            self.state = PEOPLE_STATE.IN_WORK
+                            self.workTime = 0
+                        end
+                    --商店产品
+                    elseif self.realTarget.id == 6 then
+                        self.realTarget.workNum = self.realTarget.workNum +self.product
+                        self.realTarget:setOwner(nil)
+                        self.realTarget = nil
+                        self.state = PEOPLE_STATE.FREE
+                    else
+                        self.state = PEOPLE_STATE.IN_WORK
+                        self.workTime = 0
+                    end
                 end
                 self:setZord()
             else
@@ -384,15 +540,43 @@ end
 function MiaoPeople:doWork(diff)
     if self.state == PEOPLE_STATE.IN_WORK then
         self.workTime = self.workTime+diff
-        if self.workTime > 1 then
-            self.workTime = 0
-            self.health = self.health-1
-            self.realTarget:changeWorkNum(1)
-            --种地的时候 tired 直接 回去即可
-            if self.health <= 0 then
-                self.state = PEOPLE_STATE.FREE 
-                self.realTarget:setOwner(nil)
-                self.realTarget = nil
+        --工厂工作
+        if self.realTarget.id == 5 then
+            if self.workTime > 1 then
+                self.workTime = 0
+                self.health = self.health -1
+                self.realTarget.food = self.realTarget.food - 1
+                changeTable(self.realTarget.product, 1, 1)
+                --如果工厂生产数量超过上限 就不要生产了
+                if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 then
+                    self.state = PEOPLE_STATE.FREE
+                    self.realTarget:setOwner(nil)
+                    self.realTarget = nil
+                    return
+                end
+                if self.health <= 0 then
+                    self.state = PEOPLE_STATE.FREE
+                    self.realTarget:setOwner(nil)
+                    self.realTarget = nil
+                end
+            end
+        else
+            if self.workTime > 1 then
+                self.workTime = 0
+                self.health = self.health-1
+                if self.realTarget.workNum >= 10 then
+                    self.state = PEOPLE_STATE.FREE
+                    self.realTarget:setOwner(nil)
+                    self.realTarget = nil
+                else
+                    self.realTarget:changeWorkNum(1)
+                    --种地的时候 tired 直接 回去即可
+                    if self.health <= 0 then
+                        self.state = PEOPLE_STATE.FREE 
+                        self.realTarget:setOwner(nil)
+                        self.realTarget = nil
+                    end
+                end
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
@@ -584,11 +768,18 @@ function MiaoPeople:getPath()
             local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
             table.insert(self.path, {mx, my})
             self.tempEndPoint = {path[1][1], path[1][2]}
+        --进入工厂中工作
+        elseif self.predictTarget.id == 5 then
+            print("go into factory !!!!!!!!!!")
+            table.insert(self.path, path[1])
         elseif self.predictTarget.id == 2 then
             --进入农田中心去工作
             table.insert(self.path, path[1])
         --商人走到路中心位置
         elseif self.predictTarget.picName == 'backPoint' then
+            table.insert(self.path, path[1])
+        --进入商店
+        elseif self.predictTarget.id == 6 then
             table.insert(self.path, path[1])
         end
         --设置全局Cell 中此处的权重+10

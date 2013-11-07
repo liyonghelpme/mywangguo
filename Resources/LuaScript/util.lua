@@ -1055,6 +1055,12 @@ function getNodeSca(n, box)
     return sca
 end
 function str(v)
+    if type(v) == 'table' then
+        return 'table'
+    end
+    if v == nil then
+        return "nil"
+    end
     return ""..v
 end
 function disappear(obj)
@@ -1166,4 +1172,10 @@ function jumpBy(t, x, y, hei, n)
 end
 function jumpTo(t, x, y, hei, n)
     return CCJumpTo:create(t, ccp(x, y), hei, n)
+end
+function changeTable(t, k, v)
+    if t[k] == nil then
+        t[k] = 0
+    end
+    t[k] = t[k]+v
 end

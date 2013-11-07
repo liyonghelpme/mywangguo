@@ -1,3 +1,10 @@
+require "Miao.FuncBuild"
+require "Miao.Tree"
+require "Miao.Bridge"
+require "Miao.Farm"
+require "Miao.Road"
+require "Miao.Factory"
+
 MiaoBuild = class()
 BUILD_STATE = {
     FREE = 0,
@@ -20,62 +27,77 @@ function MiaoBuild:ctor(m, data)
     self.moveTarget = nil
     self.rate = 0
 
+
+    self.food = 0
+    self.wood = 0
+    self.stone = 0
+    --id --> num
+    self.product = {}
+
+
     self.bg = CCLayer:create()
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0.5})
-            setPos(self.changeDirNode, {0, SIZEY})
-            setRotation(self.changeDirNode, 45)
+            self.funcBuild = Bridge.new(self)
+            self.funcBuild:initView()
         --樱花树
         elseif self.id == 4 then
+            self.funcBuild = Tree.new(self)
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
-            local bd = Logic.buildings[self.id]
-            local sz = self.changeDirNode:getContentSize()
-            setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
-            
-            local temp = CCSpriteBatchNode:create("white2.png")
-            self.bg:addChild(temp)
-            self.gridNode = temp
-            local initX = 0
-            local initY = -SIZEY*2*2
-            local offX = SIZEX
-            local offY = SIZEY
-            for i =0, 4, 1 do
-                local curX = initX-SIZEX*i
-                local curY = initY+SIZEY*i
-                for j = 0, 4, 1 do
-                    local no = CCSprite:create("white2.png")
-                    temp:addChild(no)
-                    setAnchor(setSize(setPos(no, {curX, curY}), {SIZEX*2, SIZEY*2}), {0.5, 0})
-                    curX = curX+SIZEX
-                    curY = curY+SIZEY
-                end
-            end
+            self.funcBuild:initView()
+        --民居 农田
+        elseif self.id == 1 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = House.new(self) 
+            self.funcBuild:initView()
+        elseif self.id == 2 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Farm.new(self) 
+            self.funcBuild:initView()
+        elseif self.id == 5 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Factory.new(self)
+            self.funcBuild:initView()
+        elseif self.id == 6 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Store.new(self)
+            self.funcBuild:initView()
         else
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
-            local bd = Logic.buildings[self.id]
-            local sz = self.changeDirNode:getContentSize()
-            setAnchor(self.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height})
-
-            --local temp = setPos(setSize(addSprite(self.changeDirNode, "green2.png"), {10, 10}), {Logic.buildings[self.id].doorx, (sz.height-Logic.buildings[self.id].doory)})
-            --self.doorPoint = temp
+            self.funcBuild = Factory.new(self)
+            self.funcBuild:initView()
         end
     elseif self.picName == 'move' then
         self.changeDirNode = setPos(setRotation(CCSprite:create("move.png"), 45), {0, SIZEY})
+        self.funcBuild = MoveBuild.new(self) 
     elseif self.picName == 'backPoint' then
         self.changeDirNode = setColor(setSize(setAnchor(CCSprite:create("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
+        self.funcBuild = FuncBuild.new(self) 
     elseif self.picName == 'remove' then
         self.changeDirNode = setPos(setRotation(CCSprite:create("hammer.png"), 45), {0, SIZEY})
+        self.funcBuild = RemoveBuild.new(self) 
+    --道路 或者 河流
     else
         self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
+        self.funcBuild = Road.new(self)
     end
+
     self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     self.nameLabel = ui.newBMFontLabel({text="", size=21})
     setPos(self.nameLabel, {0, 100})
     self.bg:addChild(self.nameLabel)
+
+    self.posLabel = ui.newBMFontLabel({text="", size=15})
+    setPos(self.posLabel, {0, 50})
+    self.bg:addChild(self.posLabel)
+
+    self.stateLabel = ui.newBMFontLabel({text="", size=15})
+    setPos(self.stateLabel, {0, 70})
+    self.bg:addChild(self.stateLabel)
 
     --看一下 CCNode 0 0 位置 和 一半位置
     --
@@ -112,14 +134,18 @@ function MiaoBuild:touchesBegan(touches)
                 self.dirty = 1
                 self.accMove = 0
                 self.map.mapGridController:clearMap(self)
+                --正在建造当中 touch 过程不调整 属性只在确认之后调整属性
+                --移动过程中 一开始就要调整属性 除非建造的时候 一开始就对周围产生影响力
+                --移动建筑物 只在setMoveTarget 的时候 和 放下moveTarget的时候 生效
                 self:showBottom()
-
                 self.doMove = true
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
             end
 
         end
     end
+
+    self.moveStart = self.lastPos[0]
 end
 function MiaoBuild:touchesMoved(touches)
     local oldPos = self.lastPos
@@ -135,7 +161,10 @@ function MiaoBuild:touchesMoved(touches)
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-offY))
         local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
         --先判定是否冲突 再 设置位置
-        if math.abs(difx)+math.abs(dify) > 20 then
+        local curPos = self.lastPos[0]
+        local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
+        if dx+dy > 20 then
+            self.moveStart = self.lastPos[0]
             self:setColPos()
         end
         self:setPos(newPos)
@@ -170,47 +199,17 @@ function MiaoBuild:touchesEnded(touches)
         local p = getPos(self.bg)
         self:setPos(p)
         self.map.mapGridController:updateMap(self)
+        
+        --建造建筑物在finish的时候 生效
+        --self:doMyEffect()
+        --self:doEffect()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         if self.colNow == 1 then
             if self.picName == 'move' then
-                if self.moveTarget == nil then
-                    --print("move collide ", self.otherBuild.picName, self.lastColBuild.picName, self.moveTarget)
-                    print("move Collide")
-                    --确认移动建筑物了
-                    if self.lastColBuild == self.otherBuild and self.otherBuild.picName == 'build' then
-                        local tex = self.otherBuild.changeDirNode:getTexture()
-                        --确认当前移动的建筑物
-                        self.changeDirNode:setTexture(tex)
-                        self.moveTarget = self.otherBuild
-                    else
-                        self.lastColBuild = self.otherBuild
-                    end
-                --如果上次点击位置 和这次位置一样 则 确认移动  要移动的目的地和原来的目的地相同则不变
-                --之后需要加上朝向direction
-                else
-                    print("moveBuilding now", self.accMove)
-                    if self.accMove < 20 and self.otherBuild == self.moveTarget then
-                        local p = getPos(self.bg)
-                        self.moveTarget:moveToPos(p)
-                        self:clearMoveState()
-                    end
-                end
+                self.funcBuild:handleTouchEnded()
             --和一个建筑物 冲突 
             elseif self.picName == 'remove' then
-                if type(self.otherBuild) == 'table' then
-                    print("removeBuilding", self.otherBuild, type(self.otherBuild))
-                    if self.lastColBuild == self.otherBuild then
-                        --self.map:removeBuilding(self.otherBuild)
-                        --只能移除 建筑物 和 道路
-                        if self.otherBuild.picName == 'build' or self.otherBuild.picName == 't' then
-                            self.otherBuild:removeSelf()
-                            self.lastColBuild = nil
-                            self.otherBuild = nil
-                        end
-                    else
-                        self.lastColBuild = self.otherBuild
-                    end
-                end
+                self.funcBuild:handleTouchEnded()
             --建造桥梁
             elseif self.picName == 'build' and self.id == 3 then
                 if type(self.otherBuild) == 'table' then
@@ -220,20 +219,18 @@ function MiaoBuild:touchesEnded(touches)
         else
             --没有冲突 顺利移动建筑物
             if self.picName == 'move' then
-                if self.moveTarget ~= nil then
-                    print("sure to move", self.accMove)
-                    if self.accMove < 20 then
-                        local p = getPos(self.bg)
-                        self.moveTarget:moveToPos(p)
-                        self:clearMoveState()
-                    end
-                end
+                self.funcBuild:handleFinMove()
             end
         end
     end
 end
-
+function MiaoBuild:update(diff)
+    local map = getBuildMap(self)
+    self.posLabel:setString("     "..map[3].." "..map[4])
+    self.stateLabel:setString(str(self.food).." "..simple.encode(self.product).." "..self.workNum)
+end
 function MiaoBuild:enterScene()
+    registerUpdate(self)
 end
 function MiaoBuild:exitScene()
 end
@@ -250,69 +247,7 @@ function MiaoBuild:setPos(p)
     self.bg:setZOrder(zord)
 end
 function MiaoBuild:adjustRoad()
-    print("MiaoBuild")
-    local bm = getBuildMap(self) 
-    print("self map", bm[1], bm[2], bm[3], bm[4])
-    --判定周围八个map状态
-    local nei = {
-        {bm[3]-1, bm[4]+1},
-        {bm[3], bm[4]+2},
-        {bm[3]+1, bm[4]+1},
-        {bm[3]+2, bm[4]},
-        {bm[3]+1, bm[4]-1},
-        {bm[3], bm[4]-2},
-        {bm[3]-1, bm[4]-1},
-        {bm[3]-2, bm[4]},
-    }
-    local neiState = {
-    }
-    local neiborNode = {
-    }
-    local allCell = self.map.mapGridController.mapDict
-    for k, v in ipairs(nei) do
-        local key = getMapKey(v[1], v[2])
-        print("check Key", key, allCell[key])
-        if allCell[key] ~= nil and allCell[key][1][1].picName == self.picName then
-            table.insert(neiState, true)
-            table.insert(neiborNode, allCell[key][1][1])
-        else
-            table.insert(neiState, false)
-            table.insert(neiborNode, false)
-        end
-    end
-    print("neiState", simple.encode(neiState))
-    local num = {1, 3, 5, 7}
-    local val = 0
-    local wei = 1
-    for i=1, #num, 1 do
-        if neiState[num[i]] then
-            val = val+wei
-        end
-        wei = wei*2
-    end
-    print("check Value", val, wei)
-    --adjust neibor state
-    local tex = CCTextureCache:sharedTextureCache():addImage(self.picName..val..".png") 
-    --if wei == 0 then
-    self.changeDirNode:setTexture(tex)
-    --end
-    --调整邻居的状态
-    self.value = val
-    local addVal = {
-        [1]=4,
-        [3]=8,
-        [5]=1,
-        [7]=2,
-    }
-    if val ~= 0 then
-        for k, v in ipairs(num) do
-            --邻居点存在
-            if neiborNode[v] ~= false then
-                neiborNode[v].value = neiborNode[v].value+addVal[v]
-                neiborNode[v]:adjustValue()
-            end
-        end
-    end
+    self.funcBuild:adjustRoad()
 end
 --建造花坛 拆除花坛影响周围建筑属性 
 function MiaoBuild:showIncrease(n)
@@ -322,50 +257,100 @@ function MiaoBuild:showIncrease(n)
     sp:runAction(sequence({fadein(1), fadeout(1), callfunc(nil, removeSelf, sp)}))
     self.rate = self.rate+n/100
 end
+function MiaoBuild:showDecrease(n)
+    local sp = ui.newBMFontLabel({text='-'..str(n)..'%', font="bound.fnt", size=30, color={102, 0, 0}})
+    self.bg:addChild(sp)
+    setPos(sp, {0, 40})
+    sp:runAction(sequence({fadein(1), fadeout(1), callfunc(nil, removeSelf, sp)}))
+    self.rate = self.rate-n/100
+end
+
+--普通建筑物的移动 和放下
+function MiaoBuild:clearMyEffect()
+    --不是农田 和 民居
+    if self.id ~= 1 and self.id ~= 2 then
+        return
+    end
+
+    local map = getBuildMap(self) 
+    local initX = 0
+    local initY = -4
+    local offX = 1
+    local offY = 1
+    local mapDict = self.map.mapGridController.mapDict
+    for i =0, 4, 1 do
+        local curX = initX-i
+        local curY = initY+i
+        for j = 0, 4, 1 do
+            local key = getMapKey(curX+map[3], curY+map[4])
+            if mapDict[key] ~= nil then
+                local ob = mapDict[key][#mapDict[key]][1]
+                local dist = math.abs(curX)+math.abs(curY)
+                --周围要是匹配的建筑物才行 农田等
+                if ob.id == 4 then
+                    if dist == 2 then
+                        self:showDecrease(10)
+                    elseif dist == 4 then
+                        self:showDecrease(5)
+                    end
+                end
+            end
+
+            curX = curX+1
+            curY = curY+1
+        end
+    end
+end
+function MiaoBuild:doMyEffect()
+    if self.id ~= 1 and self.id ~= 2 then
+        return
+    end
+
+    local map = getBuildMap(self) 
+    local initX = 0
+    local initY = -4
+    local offX = 1
+    local offY = 1
+    local mapDict = self.map.mapGridController.mapDict
+    for i =0, 4, 1 do
+        local curX = initX-i
+        local curY = initY+i
+        for j = 0, 4, 1 do
+            local key = getMapKey(curX+map[3], curY+map[4])
+            if mapDict[key] ~= nil then
+                local ob = mapDict[key][#mapDict[key]][1]
+                local dist = math.abs(curX)+math.abs(curY)
+                --周围要是匹配的建筑物才行 农田等
+                if ob.id == 4 then
+                    if dist == 2 then
+                        self:showIncrease(10)
+                    elseif dist == 4 then
+                        self:showIncrease(5)
+                    end
+                end
+            end
+
+            curX = curX+1
+            curY = curY+1
+        end
+    end
+end
+
+--樱花树的移动和放下
+function MiaoBuild:clearEffect()
+    --不是樱花树
+    self.funcBuild:clearEffect()
+end
+function MiaoBuild:doEffect()
+    --不是樱花树 不对周围产生效果
+    self.funcBuild:doEffect()
+end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
 function MiaoBuild:finishBuild()
     --白名单 方法
-    if self.picName == 't' or self.picName == 's' then
-        self:adjustRoad()
-    elseif self.picName == 'build' then
-        --樱花树
-        if self.id == 4 then
-            removeSelf(self.gridNode)
-            self.gridNode = nil
-
-            local allBuild = {}
-            local map = getBuildMap(self) 
-            local initX = 0
-            local initY = -4
-            local offX = 1
-            local offY = 1
-            local mapDict = self.map.mapGridController.mapDict
-            for i =0, 4, 1 do
-                local curX = initX-i
-                local curY = initY+i
-                for j = 0, 4, 1 do
-                    local key = getMapKey(curX+map[3], curY+map[4])
-                    if mapDict[key] ~= nil then
-                        local ob = mapDict[key][#mapDict[key]][1]
-                        local dist = math.abs(curX)+math.abs(curY)
-                        --周围要是匹配的建筑物才行 农田等
-                        if ob.id == 1 or ob.id == 2 then
-                            if dist == 2 then
-                                ob:showIncrease(10)
-                            elseif dist == 4 then
-                                ob:showIncrease(5)
-                            end
-                        end
-                    end
-
-                    curX = curX+1
-                    curY = curY+1
-                end
-            end
-
-        end
-    end
+    self:adjustRoad()
+    self.funcBuild:finishBuild()
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
 end
@@ -395,6 +380,7 @@ function MiaoBuild:finishBottom()
         self.bottom = nil
     end
 end
+
 function MiaoBuild:setOwner(s)
     self.owner = s
     if s == nil then
@@ -403,80 +389,13 @@ function MiaoBuild:setOwner(s)
         self.nameLabel:setString(s.name)    
     end
 end
+
 function MiaoBuild:changeWorkNum(n)
     self.workNum = self.workNum+n
 end
 function MiaoBuild:removeSelf()
     print("removeSelf Building", self.picName, self.id)
-    if self.picName == 't' then
-        local bm = getBuildMap(self) 
-        print("self map", bm[1], bm[2], bm[3], bm[4])
-        --判定周围八个map状态
-        local nei = {
-            {bm[3]-1, bm[4]+1},
-            {bm[3], bm[4]+2},
-            {bm[3]+1, bm[4]+1},
-            {bm[3]+2, bm[4]},
-            {bm[3]+1, bm[4]-1},
-            {bm[3], bm[4]-2},
-            {bm[3]-1, bm[4]-1},
-            {bm[3]-2, bm[4]},
-        }
-        local neiState = {
-        }
-        local neiborNode = {
-        }
-        local allCell = self.map.mapGridController.mapDict
-        for k, v in ipairs(nei) do
-            local key = getMapKey(v[1], v[2])
-            print("check Key", key, allCell[key])
-            if allCell[key] ~= nil and allCell[key][1][1].picName == self.picName then
-                table.insert(neiState, true)
-                table.insert(neiborNode, allCell[key][1][1])
-            else
-                table.insert(neiState, false)
-                table.insert(neiborNode, false)
-            end
-        end
-        print("neiState", simple.encode(neiState))
-        local num = {1, 3, 5, 7}
-        --调整邻居的状态
-        local addVal = {
-            [1]=4,
-            [3]=8,
-            [5]=1,
-            [7]=2,
-        }
-        if val ~= 0 then
-            for k, v in ipairs(num) do
-                --邻居点存在
-                if neiborNode[v] ~= false then
-                    neiborNode[v].value = neiborNode[v].value-addVal[v]
-                    neiborNode[v]:adjustValue()
-                end
-            end
-        end
-    elseif self.picName == 'build' then
-        --拆除民居
-        if self.id == 1 then
-            print("remove House", self.owner)
-            if self.owner ~= nil then
-                self.owner:clearHouse()
-                self.owner = nil
-            end
-        --农田
-        elseif self.id == 2 then
-            --商人来收获 或者 村民正在过来 工作 
-            --商人自己检测如果 目标不存在了 则终止行动
-            --农民自己检测 目标不存在了则终止行动
-            if self.owner ~= nil then
-                self.owner:clearWork()
-                self.owner = nil
-            end
-        --桥梁
-        elseif self.id == 3 then
-        end
-    end
+    self.funcBuild:removeSelf()
     self.deleted = true
     self.map:removeBuilding(self)
 end
@@ -511,12 +430,5 @@ function MiaoBuild:moveToPos(p)
     self.map.mapGridController:clearMap(self)
     setPos(self.bg, p)
     self.map.mapGridController:updateMap(self)
-    if self.owner ~= nil then
-        if self.id == 1 then
-            self.owner:clearHouse()
-        elseif self.id == 2 then
-            self.owner:clearWork()
-        end
-        self.owner = nil
-    end
+    self.funcBuild:finishMove()
 end

@@ -156,6 +156,8 @@ function MiaoPage:beginBuild(kind, id)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
+        
+        Logic.paused = true
     end
     return self.curBuild
 end
@@ -164,29 +166,9 @@ function MiaoPage:addPeople(param)
 end
 
 function MiaoPage:finishBuild()
-    print("finishBuild", self.curBuild.picName, self.curBuild.id)
     if self.curBuild ~= nil then
+        print("finishBuild", self.curBuild.picName, self.curBuild.id)
         if self.curBuild.picName == 'move' then
-            --[[
-            --有拖动的建筑物 没有冲突  或者没有移动 建筑物尺寸一样大  对于伐木场的移动 和旋转需要另外考虑 要求 新旧位置完全一样才行 
-            if self.curBuild.moveTarget ~= nil  then
-                local ret = false
-                if  self.curBuild.colNow == 0 then
-                    ret = true
-                else
-                    --额外考虑所有的块
-                    --TODO
-                    if self.curBuild.otherBuild == self.curBuild.moveTarget then
-                        ret = true
-                    end
-                end
-                if ret then
-                    local p = getPos(self.curBuild.bg)
-                    self.curBuild.moveTarget:moveToPos(p)
-                    self.curBuild:clearMoveState()
-                end
-            end
-            --]]
             if self.curBuild.moveTarget == nil then
                 self.curBuild:removeSelf()
                 self.curBuild = nil
@@ -220,6 +202,7 @@ function MiaoPage:finishBuild()
         else
             addBanner("和其它建筑物冲突啦！")
         end
+        Logic.paused = false
     end
 end
 
