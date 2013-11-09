@@ -36,7 +36,7 @@ function CastleScene:enterScene()
         Event:registerEvent(EVENT_TYPE.INITDATA, self)
     end
     print("sendCmd showAds")
-    MyPlugins:getInstance():sendCmd("showAds", "");
+    --MyPlugins:getInstance():sendCmd("showAds", "");
 end
 function CastleScene:exitScene()
     self.initScene = true

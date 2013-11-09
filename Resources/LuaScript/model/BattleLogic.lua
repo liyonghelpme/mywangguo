@@ -26,11 +26,14 @@ BattleLogic.exp = 0
 BattleLogic.farmNum = 0
 BattleLogic.mineNum = 0
 
+BattleLogic.challengeWho = nil
+
 function BattleLogic.prepareState()
     BattleLogic.quitBattle = false
     BattleLogic.gameOver = false
     BattleLogic.inBattle = false
     BattleLogic.paused = false
+    BattleLogic.challengeWho = nil
 end
 function BattleLogic.addSilver(v)
     BattleLogic.silver = BattleLogic.silver+v

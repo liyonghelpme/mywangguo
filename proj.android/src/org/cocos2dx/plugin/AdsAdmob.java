@@ -69,6 +69,7 @@ public class AdsAdmob implements InterfaceAds {
 	private static final int ADMOB_SIZE_IABMRect = 1;
 	private static final int ADMOB_SIZE_IABBanner = 2;
 	private static final int ADMOB_SIZE_IABLeaderboard = 3;
+	
 
 	protected static void LogE(String msg, Exception e) {
 		Log.e(LOG_TAG, msg, e);
@@ -193,6 +194,16 @@ public class AdsAdmob implements InterfaceAds {
 				
 			});
 			
+		} else if(points == 5) {
+			PluginWrapper.runOnMainThread(new Runnable(){
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					HelloLua.mController.openShare(mContext, false);
+				}
+				
+			});
 		}
 	}
 
@@ -254,60 +265,7 @@ public class AdsAdmob implements InterfaceAds {
 		}
 		mTestDevices.add(deviceID);
 	}
-	/*
-	private class AdmobAdsListener implements AdListener {
-		
-		@Override
-		public void onDismissScreen(Ad arg0) {
-			LogD("onDismissScreen invoked");
-			return;
-			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewDismissed, "Full screen ads view dismissed!");
-		}
-
-		@Override
-		public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
-			return;
-			
-			int errorNo = AdsWrapper.RESULT_CODE_UnknownError;
-			String errorMsg = "Unknow error";
-			switch (arg1) {
-			case NETWORK_ERROR:
-				errorNo =  AdsWrapper.RESULT_CODE_NetworkError;
-				errorMsg = "Network error";
-				break;
-			case INVALID_REQUEST:
-				errorNo = AdsWrapper.RESULT_CODE_NetworkError;
-				errorMsg = "The ad request is invalid";
-				break;
-			case NO_FILL:
-				errorMsg = "The ad request is successful, but no ad was returned due to lack of ad inventory.";
-				break;
-			default:
-				break;
-			}
-			LogD("failed to receive ad : " + errorNo + " , " + errorMsg);
-			AdsWrapper.onAdsResult(mAdapter, errorNo, errorMsg);
-			
-		}
-
-		@Override
-		public void onLeaveApplication(Ad arg0) {
-			LogD("onLeaveApplication invoked");
-		}
-
-		@Override
-		public void onPresentScreen(Ad arg0) {
-			LogD("onPresentScreen invoked");
-			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_FullScreenViewShown, "Full screen ads view shown!");
-		}
-
-		@Override
-		public void onReceiveAd(Ad arg0) {
-			LogD("onReceiveAd invoked");
-			//AdsWrapper.onAdsResult(mAdapter, AdsWrapper.RESULT_CODE_AdsReceived, "Ads request received success!");
-		}
-	}
-	*/
+	
 	@Override
 	public String getPluginVersion() {
 		return "0.2.0";

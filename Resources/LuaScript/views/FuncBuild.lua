@@ -1,5 +1,8 @@
 FuncBuild = class()
 
+function FuncBuild:ctor(b)
+    self.baseBuild = b
+end
 function FuncBuild:whenFree()
     return 0
 end

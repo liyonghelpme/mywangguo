@@ -305,7 +305,12 @@ function BuildLayer:genMonster(diff)
             self.bg:addChild(m.bg, MAX_BUILD_ZORD)
             self.mapGridController:addSoldier(m)
             table.insert(self.monsters, m)
-            addCmd({cmd="monGen"}) 
+            if CCUserDefault:sharedUserDefault():getBoolForKey("firstGame") then
+                local rd = math.random(2)
+                if rd == 1 then
+                    addCmd({cmd="monGen"}) 
+                end
+            end
         end
     end
 end

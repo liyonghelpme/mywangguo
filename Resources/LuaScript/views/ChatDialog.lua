@@ -140,20 +140,30 @@ function ChatDialog:initMsg()
     self.flowHeight = 0 
 
     self.messages = {}
+
+    local total = #ChatModel.chatMessage
     --留下余量的margin
     for k, v in ipairs(ChatModel.chatMessage) do
         local name = v[2]
         local text = v[3]
-        local temp = ui.newTTFLabel({text=name..":", size=25, color={52, 101, 36}})
-        setAnchor(temp, {0, 1})
-        local sz = temp:getContentSize()
-        local con = ui.newTTFLabel({text=text, size=25, color={20, 12, 28}, dimensions={vs.width-100-sz.width, 0}})
-        local hei = con:getContentSize()
-        setAnchor(con, {0, 1})
-        self.flowNode:addChild(temp)
-        setPos(temp, {0, -self.flowHeight})
-        self.flowNode:addChild(con)
-        setPos(con, {sz.width, -self.flowHeight})
+        local temp
+        local con
+        local hei
+        --在用户拖动上去的时候显示
+        if total > 20 and k < total-20 then
+            hei = {width=0, height=0}
+        else
+            temp = ui.newTTFLabel({text=name..":", size=25, color={52, 101, 36}})
+            setAnchor(temp, {0, 1})
+            local sz = temp:getContentSize()
+            con = ui.newTTFLabel({text=text, size=25, color={20, 12, 28}, dimensions={vs.width-100-sz.width, 0}})
+            hei = con:getContentSize()
+            setAnchor(con, {0, 1})
+            self.flowNode:addChild(temp)
+            setPos(temp, {0, -self.flowHeight})
+            self.flowNode:addChild(con)
+            setPos(con, {sz.width, -self.flowHeight})
+        end
 
         self.flowHeight = self.flowHeight+hei.height
         
@@ -190,6 +200,7 @@ function ChatDialog:touchEnded(x, y)
     end
     oldPos[2] = math.max(minH, math.min(self.flowHeight, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]))
+
 end
 
 function ChatDialog:onSend()

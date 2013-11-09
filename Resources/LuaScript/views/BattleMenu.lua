@@ -12,10 +12,12 @@ function BattleMenu:ctor(s)
     setPos(cancelBut.bg, {fixX(654), fixY(nil, 65)})
     self.bg:addChild(cancelBut.bg)
     
-    local randomBut = ui.newButton({image="random.png", callback=self.onRandom, delegate=self})
-    setPos(randomBut.bg, {fixX(731), fixY(nil, 65)})
-    self.bg:addChild(randomBut.bg)
-    self.randomBut = randomBut
+    if BattleLogic.challengeWho == nil then
+        local randomBut = ui.newButton({image="random.png", callback=self.onRandom, delegate=self})
+        setPos(randomBut.bg, {fixX(731), fixY(nil, 65)})
+        self.bg:addChild(randomBut.bg)
+        self.randomBut = randomBut
+    end
     
 
 
@@ -172,8 +174,10 @@ end
 function BattleMenu:startBattle()
     if self.hideYet == nil then
         self.hideYet = true
-        self.randomBut.sp:runAction(fadeout(0.3))
-        self.randomBut:setCallback(nil)
+        if self.randomBut ~= nil then
+            self.randomBut.sp:runAction(fadeout(0.3))
+            self.randomBut:setCallback(nil)
+        end
     end
 end
 

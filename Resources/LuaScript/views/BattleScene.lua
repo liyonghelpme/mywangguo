@@ -26,16 +26,22 @@ function BattleScene:ctor()
     self.state = BATTLE_STATE.PREPARE
     self.show = false
 end
+
 function BattleScene:enterScene()
     --设置inBattle状态之后 再 获取游戏数据
     BattleLogic.startBattle()
-    if DEBUG then
-        sendReq("getCertainOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+    if BattleLogic.challengeWho ~= nil then
+        sendReq("getCertainOther", dict({{"uid", BattleLogic.challengeWho}}), self.initData, nil, self)
     else
-        sendReq("getRandomOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+        if DEBUG then
+            sendReq("getCertainOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+        else
+            sendReq("getRandomOther", dict({{"uid", global.user.uid}}), self.initData, nil, self)
+        end
     end
     NewLogic.triggerEvent(NEW_STEP.BATTLE_NOW)
 end
+
 function BattleScene:exitScene()
 end
 function BattleScene:initFx()

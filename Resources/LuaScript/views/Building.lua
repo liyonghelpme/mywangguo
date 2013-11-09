@@ -9,6 +9,7 @@ require "views.Castle"
 require "views.CrystalDef"
 require "busiViews.BuildWorkMenu"
 require "views.SellDialog"
+require "views.Wind"
 
 Building = class()
 function Building:ctor(m, d, privateData)
@@ -47,6 +48,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = Castle.new(self)
     elseif self.funcs == CRYSTAL_DEF then
         self.funcBuild = CrystalDef.new(self)
+    elseif self.funcs == WIND then
+        self.funcBuild = Wind.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
@@ -328,7 +331,7 @@ function Building:touchesEnded(touches)
                     global.director:pushView(SellDialog.new(getStr("sureSell", {"[NUM]", str(v[2]), "[KIND]", getStr(v[1])}), sellBuild), 1, 0)
                 end
                 return
-            elseif global.director.curScene.inBuild == false then
+            elseif not global.director.curScene.inBuild then
                 if self.state == getParam("buildFree") and self.accMove < 40 then
                     self:doFree()
                 elseif self.state == getParam("buildWork") and self.accMove < 40 then
@@ -583,6 +586,7 @@ function Building:doHarm(n)
         if self.bigBomb == nil then
             self.bigBomb = CCParticleSystemQuad:create('bigBomb.plist')
             self.bg:addChild(self.bigBomb)
+            self.bigBomb:setTotalParticles(50)
             local function clearBigBomb()
                 removeSelf(self.bigBomb)
                 self.bigBomb = nil

@@ -1375,4 +1375,5 @@ WORDS = dict({
 {"freeIt", {"免费!", ""}},
 {"getRew", {"获得奖励{NUM}{KIND}!", ""}},
 {"notHere", {"不能在这里建造!", ""}},
+{"shareReward", {"分享奖励{NUM}{KIND}", ""}},
 })

@@ -1,5 +1,6 @@
 require "views.Cloud"
 require "views.FriendDialog"
+require "views.BigMap"
 ChildMenuLayer = class()
 function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
     self.buts = dict({
@@ -150,8 +151,19 @@ end
 
 function ChildMenuLayer:onFriend()
     global.director.curScene:closeGlobalMenu(self)
-    --global.director:pushView(FriendDialog.new(), 1, 0)
-    addBanner(getStr("noFunc"))
+    MyPlugins:getInstance():sendCmd("share", "")
+
+    local r = math.random(2)
+    local reward = {}
+    if r == 1 then
+        reward.silver = 10
+        addBanner(getStr("shareReward", {"[NUM]", str(10), "[KIND]", getStr("silver")}))
+    else 
+        reward.crystal = 10
+        addBanner(getStr("shareReward", {"[NUM]", str(10), "[KIND]", getStr("crystal")}))
+    end
+    sendReq("killMonster", dict({{"uid", global.user.uid}, {"gain", reward}}))
+    global.user:doAdd(reward)
 end
 function ChildMenuLayer:onSetting()
     global.director.curScene:closeGlobalMenu(self)
@@ -159,7 +171,7 @@ function ChildMenuLayer:onSetting()
 end
 function ChildMenuLayer:onMap()
     global.director.curScene:closeGlobalMenu(self)
-    addBanner(getStr("noFunc"))
+    global.director:pushView(BigMap.new(), 1, 0)
 end
 function ChildMenuLayer:onRank()
     global.director.curScene:closeGlobalMenu(self)

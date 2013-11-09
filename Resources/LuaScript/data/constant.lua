@@ -179,6 +179,7 @@ RING_FIGHTING = 11
 CAMP = 12
 WALL = 13
 CRYSTAL_DEF = 14
+WIND = 15
 
 buildFunc = dict({
 {FARM_BUILD, {{"photo"}, {"acc", "sell"}}},

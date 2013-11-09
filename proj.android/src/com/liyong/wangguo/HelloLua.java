@@ -41,6 +41,11 @@ import org.json.JSONException;
 
 
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.socialize.controller.RequestType;
+import com.umeng.socialize.controller.UMServiceFactory;
+import com.umeng.socialize.controller.UMSocialService;
+import com.umeng.socialize.controller.UMSsoHandler;
+import com.umeng.socialize.media.UMImage;
 import com.umeng.update.UmengUpdateAgent;
 
 import android.app.Activity;
@@ -65,7 +70,11 @@ import android.provider.Settings.Secure;
 
 public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	LinearLayout layout;
-
+	String appID = "wx883ea78bc363fc31";
+	String contentUrl = "http://www.appchina.com/app/com.liyong.wangguo/";
+	
+	public static final UMSocialService mController = UMServiceFactory.getUMSocialService("com.umeng.share",
+            RequestType.SOCIAL);
 	
 	private HelloLua act;
 	private static native void setDeviceId(String deviceId);
@@ -129,6 +138,12 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		} catch(Exception e){
 			Log.e("Youmi", "initial points error", e);
 		}
+		
+		mController.setShareContent("快来和我一起玩王国危机吧！一起称霸整个大陆！");
+		mController.setShareMedia(new UMImage(this, R.drawable.icon));
+		mController.getConfig().supportWXPlatform(this, appID, contentUrl);
+		mController.getConfig().supportWXCirclePlatform(this, appID, contentUrl) ;
+		
 	}
 	
 	public void onDestroy() {
@@ -181,7 +196,14 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 			
 		});
 	}
-	
+	@Override 
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		 UMSsoHandler ssoHandler = mController.getConfig().getSsoHandler(requestCode) ;
+		 if(ssoHandler != null){
+		       ssoHandler.authorizeCallBack(requestCode, resultCode, data);
+		 }
+	}
 }
 
 class LuaGLSurfaceView extends Cocos2dxGLSurfaceView{
