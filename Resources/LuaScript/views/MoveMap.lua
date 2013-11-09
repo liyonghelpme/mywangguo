@@ -151,6 +151,9 @@ function MoveMap:addBuilding(chd, z)
     if chd.picName == 'build' then
         if chd.id == 2 then
             self.farmLayer:addChild(chd.bg, z)
+        --斜坡
+        elseif chd.data.kind == 1 then
+            self.roadLayer:addChild(chd.bg, z)
         else
             self.buildingLayer:addChild(chd.bg, z)
         end

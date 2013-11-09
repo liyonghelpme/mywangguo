@@ -1179,3 +1179,48 @@ function changeTable(t, k, v)
     end
     t[k] = t[k]+v
 end
+
+--4321
+function bit(p)
+  return 2 ^ (p - 1)  -- 1-based indexing
+end
+
+-- Typical call:  if hasbit(x, bit(3)) then ...
+function hasbit(x, p)
+  return x % (p + p) >= p       
+end
+-- setbit(x, bit(3))
+function setbit(x, p)
+  return hasbit(x, p) and x or x + p
+end
+function clearbit(x, p)
+  return hasbit(x, p) and x - p or x
+end
+
+
+function bitor(x, y)
+  local p = 1
+  while p < x do p = p + p end
+  while p < y do p = p + p end
+  local z = 0
+  repeat
+    if p <= x or p <= y then
+      z = z + p
+      if p <= x then x = x - p end
+      if p <= y then y = y - p end
+    end
+    p = p * 0.5
+  until p < 1
+  return z
+end
+
+function bitand(x, y)
+  local p = 1; local z = 0; local limit = x > y and x or y
+  while p <= limit do
+    if hasbit(x, p) and hasbit(y, p) then
+      z = z + p
+    end
+    p = p + p
+  end
+  return z
+end

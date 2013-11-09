@@ -3,8 +3,8 @@ require "model.MapGridController"
 MiaoBuildLayer = class(MoveMap)
 function MiaoBuildLayer:ctor(s)
     self.scene = s
-    self.moveZone = {{0, 0, 1000, 1000}}
-    self.buildZone = {{0, 0, 1000, 1000}}
+    self.moveZone = {{0, 0, MapWidth, MapHeight}}
+    self.buildZone = {{0, 0, MapWidth, MapHeight}}
     self.staticObstacle = {}
 
     
@@ -57,6 +57,32 @@ function MiaoBuildLayer:switchPathSol()
     end
 end
 
+function MiaoBuildLayer:initSlope()
+    local initX = 11
+    local initY = 19
+    for i=0, 14, 1 do
+        local curX = initX+i
+        local curY = initY-i
+
+        local b = MiaoBuild.new(self, {picName='build', id=8})
+        local p = normalizePos({curX*SIZEX, curY*SIZEY-SIZEY}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+    end
+
+    local b = MiaoBuild.new(self, {picName='build', id=7})
+    local p = normalizePos({10*SIZEX, 20*SIZEY-SIZEY}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+end
 function MiaoBuildLayer:initBuild()
     local b = MiaoBuild.new(self, {picName='build', id=1})
     local p = normalizePos({200, 200}, 1, 1)
@@ -93,6 +119,24 @@ function MiaoBuildLayer:initBuild()
     b:setPos(p)
     b:finishBuild()
     self.backPoint = b
+
+    --矿坑
+    local b = MiaoBuild.new(self, {picName='build', id=11})
+    local p = normalizePos({17*SIZEX, 13*SIZEY-SIZEY}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+    --采矿营地
+    local b = MiaoBuild.new(self, {picName='build', id=12})
+    local p = normalizePos({13*SIZEX, 13*SIZEY-SIZEY}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
 end
 
 function MiaoBuildLayer:initSea()
@@ -265,10 +309,21 @@ function MiaoBuildLayer:initRoad()
     b:setPos(p)
     b:finishBuild()
 
+    --绕开那个 breakpoint
+    for i=0, 5, 1 do
+        local b = MiaoBuild.new(self, {picName='t'})
+        local p = normalizePos({(14+i)*SIZEX, (12+i)*SIZEY-SIZEY}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+    end
 end
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     self:initSea()
+    self:initSlope()
     self:initRoad()
     self:initMerchantRoad()
     self:initBuild()

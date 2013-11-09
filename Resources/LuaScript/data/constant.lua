@@ -1,5 +1,5 @@
 MapWidth=3000
-MapHeight=1120
+MapHeight=3000
 SIZEX=64
 SIZEY=47
 DEBUG=true

@@ -4,9 +4,9 @@ MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
-    setContentSize(self.bg, {1000, 1000})
-    local col = math.ceil(1000/256)
-    local row = math.ceil(1000/192)
+    setContentSize(self.bg, {MapWidth, MapHeight})
+    local col = math.ceil(MapWidth/256)
+    local row = math.ceil(MapHeight/192)
     local offX = 256
     local offY = 192
     local bat = CCSpriteBatchNode:create("grasstile.png")
@@ -29,6 +29,7 @@ function MiaoPage:ctor(s)
 
     registerEnterOrExit(self)
     registerMultiTouch(self)
+    self.touchDelegate:scaleToMax(1)
 end
 
 function MiaoPage:enterScene()
@@ -176,6 +177,41 @@ function MiaoPage:finishBuild()
             else
                 self.curBuild:removeSelf()
                 self.curBuild = nil
+            end
+        --道路和 斜坡冲突 斜坡不能移动
+        elseif self.curBuild.picName == 't' then
+            if self.curBuild.colNow == 0 then
+                self.curBuild:finishBuild()
+                self.curBuild = nil
+            else
+                if type(self.curBuild.otherBuild) == 'table' then
+                    local ob = self.curBuild.otherBuild
+                    --斜坡
+                    if ob.picName == 'build' and ob.data.kind == 1 then
+                        self.curBuild:finishBuild()
+                        self.curBuild = nil
+                    else
+                        addBanner("道路不能修建在这里！")
+                    end
+                end
+            end
+        --矿坑
+        elseif self.curBuild.picName == 'build' and self.curBuild.id == 11 then
+            if self.curBuild.colNow == 0 then
+                addBanner("必须建造到斜坡上面！")
+            else
+                local ret = false
+                if type(self.curBuild.otherBuild) == 'table' then
+                    local ob = self.curBuild.otherBuild
+                    if ob.picName == 'build' and ob.data.kind == 1 then
+                        ret = true
+                        self.curBuild:finishBuild()
+                        self.curBuild = nil
+                    end
+                end
+                if not ret then
+                    addBanner("必须建造到斜坡上面！")
+                end
             end
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突

@@ -23,9 +23,9 @@ function Road:adjustRoad()
     for k, v in ipairs(nei) do
         local key = getMapKey(v[1], v[2])
         print("check Key", key, allCell[key])
-        if allCell[key] ~= nil and allCell[key][1][1].picName == self.baseBuild.picName then
+        if allCell[key] ~= nil and allCell[key][#allCell[key]][1].picName == self.baseBuild.picName then
             table.insert(neiState, true)
-            table.insert(neiborNode, allCell[key][1][1])
+            table.insert(neiborNode, allCell[key][#allCell[key]][1])
         else
             table.insert(neiState, false)
             table.insert(neiborNode, false)
@@ -87,9 +87,9 @@ function Road:removeSelf()
     for k, v in ipairs(nei) do
         local key = getMapKey(v[1], v[2])
         print("check Key", key, allCell[key])
-        if allCell[key] ~= nil and allCell[key][1][1].picName == self.baseBuild.picName then
+        if allCell[key] ~= nil and allCell[key][#allCell[key]][1].picName == self.baseBuild.picName then
             table.insert(neiState, true)
-            table.insert(neiborNode, allCell[key][1][1])
+            table.insert(neiborNode, allCell[key][#allCell[key]][1])
         else
             table.insert(neiState, false)
             table.insert(neiborNode, false)

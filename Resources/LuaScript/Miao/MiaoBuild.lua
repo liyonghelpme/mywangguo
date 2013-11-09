@@ -4,6 +4,7 @@ require "Miao.Bridge"
 require "Miao.Farm"
 require "Miao.Road"
 require "Miao.Factory"
+require "Miao.Slope"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -26,6 +27,7 @@ function MiaoBuild:ctor(m, data)
     self.deleted = false
     self.moveTarget = nil
     self.rate = 0
+    self.data = Logic.buildings[self.id]
 
 
     self.food = 0
@@ -63,6 +65,10 @@ function MiaoBuild:ctor(m, data)
         elseif self.id == 6 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
+            self.funcBuild:initView()
+        elseif self.id == 7 or self.id == 8 or self.id == 9 or self.id == 10 then
+            self.changeDirNode = setAnchor(CCSprite:create("slope"..(self.id-6)..".png"), {0.5, 0})
+            self.funcBuild = Slope.new(self)
             self.funcBuild:initView()
         else
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
@@ -227,7 +233,7 @@ end
 function MiaoBuild:update(diff)
     local map = getBuildMap(self)
     self.posLabel:setString("     "..map[3].." "..map[4])
-    self.stateLabel:setString(str(self.food).." "..simple.encode(self.product).." "..self.workNum)
+    self.stateLabel:setString(str(self.food).." "..simple.encode(self.product).." "..self.workNum.." "..self.stone)
 end
 function MiaoBuild:enterScene()
     registerUpdate(self)
