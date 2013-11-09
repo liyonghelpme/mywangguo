@@ -21,6 +21,12 @@ function BigMap:ctor()
     local lab = ui.newTTFLabel({text="1 挑战自我", size=18, color={0, 0, 0}})
     temp.bg:addChild(lab)
     setPos(setAnchor(lab, {0, 0.5}), {40-541/2, 0})
+
+    local close = ui.newButton({image="closeBut.png", delegate=self, callback=self.onClose})
+    self.bg:addChild(close.bg)
+    close:setAnchor(0.5, 0.5)
+    setPos(close.bg, {763, fixY(480, 30)})
+    MyPlugins:getInstance():sendCmd("hideAds", "")
 end
 function BigMap:onScroll()
     global.director:popView()
@@ -28,4 +34,7 @@ function BigMap:onScroll()
     --挑战自我功能
     BattleLogic.challengeWho = global.user.uid
     global.director:pushView(Cloud.new(), 1, 0)
+end
+function BigMap:onClose()
+    global.director:popView()
 end
