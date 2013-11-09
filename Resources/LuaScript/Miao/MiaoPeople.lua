@@ -1,8 +1,6 @@
 require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
-require "Miao.ActionList"
-require "Miao.MyAction"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -31,8 +29,6 @@ function MiaoPeople:ctor(m, data)
     self.stone = 0
 
     self.bg = CCNode:create()
-    self.actionList = ActionList.new(self)
-    --self.bg:addChild(self.actionList.bg)
 
     --不同人物动画的角度也有可能不同
     self.changeDirNode = addSprite(self.bg, "people"..self.id.."_lb_0.png")
@@ -54,11 +50,6 @@ function MiaoPeople:ctor(m, data)
     createAnimation("people"..self.id.."_rt", "people"..self.id.."_rt_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("peopleSend", "people3_%d.png", 1, 11, 1, 1, false)
     registerEnterOrExit(self)
-end
-function MiaoPeople:setZord()
-    local p = getPos(self.bg)
-    local zOrd = MAX_BUILD_ZORD-p[2]
-    self.bg:setZOrder(zOrd)
 end
 function MiaoPeople:enterScene()
     registerUpdate(self)
@@ -89,11 +80,13 @@ end
 --只寻找 已经建造好的建筑物作为目标
 --农田建筑物的zord 总是比layer 人类要低的所以 用一个farmLayer 添加比较合适
 function MiaoPeople:findHouse()
-    if self.myHouse == nil then
+    --房间被拆除了也不行
+    if self.myHouse == nil or self.myHouse.deleted then
+        self.myHouse = nil
         local allBuild = self.map.mapGridController.allBuildings
         for k, v in pairs(allBuild) do
             --找house
-            if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 then
+            if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 and k.deleted == false then
                 self.myHouse = k
                 print("findHouse setOwner")
                 k:setOwner(self)
@@ -118,7 +111,7 @@ function MiaoPeople:findWorkBuilding()
         local ret = false
         --商人 不需要 占用 建筑物
 
-        if self.id == 2 then
+        if self.id == 2 and k.deleted == false then
             --农田没有购买者 走到后发现目标被移除了就取消工作 
             --移动建筑物相当于新建一个建筑物 broken = true
             --避免抢占 owner == nil
@@ -138,7 +131,7 @@ function MiaoPeople:findWorkBuilding()
                 ret = (k.picName == 'build' and k.id == 13 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
             end
         --农民要占用建筑物
-        elseif self.id == 1 then
+        elseif self.id == 1 and k.deleted == false then
             --两种情况 给 其它工厂运输农作物 丰收状态 
             --生产农作物
             --先不允许并行处理
@@ -288,7 +281,6 @@ function MiaoPeople:update(diff)
     if Logic.paused then
         return
     end
-    self.actionList:update(diff)
 
     self:checkHealth()
     self:findPath(diff)
@@ -502,36 +494,6 @@ function MiaoPeople:initMove(diff)
         self.map:updatePath(self.path)
         self.map:switchPathSol()
 
-        for k, v in ipairs(self.path) do
-            local act = MoveToNode.new(self, nil, v)
-            self.actionList:push(act)
-        end
-    end
-end
-function MiaoPeople:setDir(x, y)
-    local p = getPos(self.bg)
-    local dx = x-p[1]
-    local dy = y-p[2]
-    if dx > 0 then
-        if dy > 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rt")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        elseif dy < 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rb")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        end
-    elseif dx < 0 then
-        if dy > 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lt")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        elseif dy < 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lb")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        end
     end
 end
 function MiaoPeople:doMove(diff)
@@ -540,10 +502,7 @@ function MiaoPeople:doMove(diff)
         if self.passTime > 1 then
             self.passTime = 0
             local nextPoint = self.curPoint+1
-            if self.realTarget.deleted then
-                self.realTarget = nil
-                self.state = PEOPLE_STATE.FREE
-            elseif nextPoint > #self.path then
+            if nextPoint > #self.path then
                 --去休息
                 if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
                     self.state = PEOPLE_STATE.IN_HOME
@@ -600,51 +559,10 @@ function MiaoPeople:doMove(diff)
                     --运送物资到工厂 带走农田产量
                     --之前的是农田 并且 农田已经 种植好了 则 走向 工厂
                     if self.realTarget.id == 2 then
-                        --去工厂生产食物
-                        if self.predictFactory ~= nil then
-                            self.predictTarget:setOwner(nil)
-                            self.food = self.realTarget.workNum
-                            self.realTarget.workNum = 0
-                            self.tempFactory = self.predictFactory
-                            self.goFactory = true
-                            self.tempStore = self.predictStore
-                            self.state = PEOPLE_STATE.FREE
-                        --去农田劳作
-                        else
-                            self.state = PEOPLE_STATE.IN_WORK
-                            self.workTime = 0
-                        end
+                        self:handleFarm()
                     --向工厂前进
                     elseif self.realTarget.id == 5 then
-                        --运送粮食
-                        if self.food ~= nil then
-                            self.realTarget.food = self.realTarget.food + self.food
-                            self.food = 0
-                        end
-                        --运送石头
-                        if self.stone > 0 then
-                            self.realTarget.stone = self.realTarget.stone + self.stone
-                            self.stone = 0
-                        end
-                        --在工厂工作
-                        --tempSmith
-                        --运送商品到商店
-                        --运送商品到铁匠铺
-                        if self.predictStore ~= nil then
-                            --[[
-                            self.product = self.realTarget.product[1]
-                            self.realTarget.product[1] = 0
-                            self.realTarget:setOwner(nil)
-                            self.tempStore = self.predictStore
-                            self.goStore = true
-                            self.state = PEOPLE_STATE.FREE
-                            --]]
-                        elseif self.predictSmith ~= nil then
-                        else
-                            --生产商品
-                            self.state = PEOPLE_STATE.IN_WORK
-                            self.workTime = 0
-                        end
+                        self:handleFactory()
                     --商店产品
                     elseif self.realTarget.id == 6 then
                         self.realTarget.workNum = self.realTarget.workNum +self.product
@@ -813,6 +731,10 @@ function MiaoPeople:doWork(diff)
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
+        if self.realTarget.deleted then
+            self.state = PEOPLE_STATE.FREE
+            self.myHouse = nil
+        end
         self.restTime = self.restTime+diff
         if self.restTime > 1 then
             self.restTime = 0
@@ -1025,21 +947,6 @@ function MiaoPeople:getPath()
         end
     end
 end
---从房子里面跳出来了
-function MiaoPeople:clearHouse()
-    print("clearHouse", self.myHouse)
-    self.myHouse = nil
-    if self.state == PEOPLE_STATE.IN_HOME then
-        self.tired = false
-        self.state = PEOPLE_STATE.FREE
-        self.bg:setVisible(true)
-    end
-end
-function MiaoPeople:clearWork()
-    if self.state == PEOPLE_STATE.IN_WORK then
-        self.state = PEOPLE_STATE.FREE
-    end
-end
 
 function MiaoPeople:doPaused(diff)
     if self.state == PEOPLE_STATE.PAUSED then
@@ -1050,3 +957,5 @@ function MiaoPeople:doPaused(diff)
         end
     end
 end
+
+require "Miao.MiaoPeopStatic"

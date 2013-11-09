@@ -134,6 +134,7 @@ function MoveBuild:handleTouchEnded()
                 self.baseBuild.moveTarget:moveToPos(p)
                 self.baseBuild.moveTarget:doEffect()
                 self.baseBuild.moveTarget:doMyEffect()
+
                 self.baseBuild:clearMoveState()
             else
                 addBanner("不能在这里建造！")
@@ -145,10 +146,21 @@ function MoveBuild:handleFinMove()
     if self.baseBuild.moveTarget ~= nil then
         print("sure to move", self.baseBuild.accMove)
         if self.baseBuild.accMove < 20 then
-            local p = getPos(self.baseBuild.bg)
-            self.baseBuild.moveTarget:moveToPos(p)
-            self.baseBuild.moveTarget:doEffect()
-            self.baseBuild.moveTarget:doMyEffect()
+            local np = getPos(self.baseBuild.bg)
+            --移除旧的建筑物
+            print("remove oldBuilding")
+            self.baseBuild.moveTarget:removeSelf()
+            --新的位置新建一个新的建筑物
+            
+            print("add NewBuilding")
+            local nb = MiaoBuild.new(self.baseBuild.map, {picName='build', id=self.baseBuild.moveTarget.id})
+            local p = normalizePos(np, 1, 1)
+            nb:setPos(p)
+            nb:setColPos()
+            self.baseBuild.map:addBuilding(nb, MAX_BUILD_ZORD)
+            nb:setPos(p)
+            nb:finishBuild()
+
             self.baseBuild:clearMoveState()
         end
     end

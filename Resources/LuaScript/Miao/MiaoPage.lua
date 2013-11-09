@@ -252,6 +252,7 @@ function MiaoPage:onRemove()
         self.curBuild:setPos(p)
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        Logic.paused = true
     end
 end
 --拖动某个建筑物 还是  
@@ -266,5 +267,6 @@ function MiaoPage:onMove()
         self.curBuild:setPos(p)
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        Logic.paused = true
     end
 end
