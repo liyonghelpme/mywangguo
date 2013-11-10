@@ -3,6 +3,7 @@
 #define __CC_EXTENSION_CCNATIVE_H_
 
 #include "cocos2d_ext_const.h"
+#include <string>
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 #include "platform/android/jni/JniHelper.h"
@@ -29,7 +30,6 @@ public:
 
 	static void clearLocalNotification();
 
-
     
 private:
     CCNative(void) {}
@@ -38,5 +38,7 @@ private:
 NS_CC_EXT_END
 
 float getNow();
+void writeFile(const char* fname, const char *content, int size);
+std::string getFileData(const char *fname);
 
 #endif // __CC_EXTENSION_CCNATIVE_H_

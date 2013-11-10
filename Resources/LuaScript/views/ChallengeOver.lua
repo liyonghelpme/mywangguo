@@ -87,4 +87,11 @@ function ChallengeOver:onOk()
     --global.director:popScene()
     NewLogic.triggerEvent(NEW_STEP.FINISH_NEW)
     BattleLogic.paused = false
+
+    if BattleLogic.challengeLevel then
+        local level = CCUserDefault:sharedUserDefault():getIntegerForKey("level")
+        if level <= BattleLogic.challengeWho then
+            CCUserDefault:sharedUserDefault():setIntegerForKey("level", BattleLogic.challengeLevel)
+        end
+    end
 end

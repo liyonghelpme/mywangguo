@@ -27,6 +27,8 @@ BattleLogic.farmNum = 0
 BattleLogic.mineNum = 0
 
 BattleLogic.challengeWho = nil
+BattleLogic.challengeLevel = nil
+BattleLogic.levels = nil
 
 function BattleLogic.prepareState()
     BattleLogic.quitBattle = false
@@ -34,6 +36,7 @@ function BattleLogic.prepareState()
     BattleLogic.inBattle = false
     BattleLogic.paused = false
     BattleLogic.challengeWho = nil
+    BattleLogic.challengeLevel = nil
 end
 function BattleLogic.addSilver(v)
     BattleLogic.silver = BattleLogic.silver+v
@@ -83,3 +86,6 @@ function BattleLogic.updateKill(kind)
     global.user:killSoldier(kind)
 end
 
+BattleLogic.levelData = {
+    {name="初试牛刀", crystal=1000, silver=1000},
+}

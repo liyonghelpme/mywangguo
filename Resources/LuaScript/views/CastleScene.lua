@@ -50,8 +50,11 @@ function CastleScene:receiveMsg(name, msg)
 
         local tempName = global.user:getValue("name")
         print("global user name ", tempName)
-        if tempName == "" or tempName == 0 then
-            self.dialogController:addCmd({cmd="roleName"})
+        --完成新手任务才会出现命名
+        if CCUserDefault:sharedUserDefault():getBoolForKey("firstGame") then
+            if tempName == "" or tempName == 0 then
+                self.dialogController:addCmd({cmd="roleName"})
+            end
         end
 
         if not CCUserDefault:sharedUserDefault():getBoolForKey("firstGame") then

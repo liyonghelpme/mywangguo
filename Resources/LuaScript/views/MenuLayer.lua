@@ -6,7 +6,7 @@ function MenuLayer:ctor(sc)
     self.menus = {nil, nil}
     self.showChildMenu = false
     self.MainMenuFunc = {
-    [0]={"map", "sell", "plan", "setting"},
+    [0]={"map", "sell", "plan", "rank"},
     [1]={"attack", "store", "friend", "mail"},
     }
     self:initView()

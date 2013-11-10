@@ -1,6 +1,7 @@
 require "views.Cloud"
 require "views.FriendDialog"
 require "views.BigMap"
+require "views.Rank"
 ChildMenuLayer = class()
 function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
     self.buts = dict({
@@ -175,7 +176,7 @@ function ChildMenuLayer:onMap()
 end
 function ChildMenuLayer:onRank()
     global.director.curScene:closeGlobalMenu(self)
-    addBanner(getStr("noFunc"))
+    global.director:pushView(Rank.new(), 1, 0)
 end
 
 function ChildMenuLayer:onMail()

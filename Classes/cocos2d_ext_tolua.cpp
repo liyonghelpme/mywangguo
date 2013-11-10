@@ -1163,6 +1163,61 @@ static int tolua_Cocos2d_CCCrypto_rsaSign00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_getFileData00
+static int tolua_Cocos2d_getFileData00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isstring(tolua_S,1,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,2,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+		const char* fname = ((const char*) tolua_tostring(tolua_S,1,0));
+        std::string str = getFileData(fname);
+        tolua_pushcppstring(tolua_S, (const char*)str);
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'getFileData'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_writeFile00
+static int tolua_Cocos2d_writeFile00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isstring(tolua_S,1,0,&tolua_err) ||
+		!tolua_isstring(tolua_S,2,0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,4,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+		const char* fname = ((const char*) tolua_tostring(tolua_S,1,0));
+		const char* content = ((const char*) tolua_tostring(tolua_S,2,0));
+		int size = ((int) tolua_tonumber(tolua_S,3,0));
+        writeFile(fname, content, size);
+	}
+	return 0;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'writeFile'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
 
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_getNow00
 static int tolua_Cocos2d_getNow00(lua_State* tolua_S)
@@ -1177,7 +1232,6 @@ static int tolua_Cocos2d_getNow00(lua_State* tolua_S)
 #endif
 	{
         float now = getNow();
-        //CCLog("now time %f", now);
 		tolua_pushnumber(tolua_S, (lua_Number)now);
 	}
 	return 1;
@@ -1519,6 +1573,8 @@ TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
   tolua_function(tolua_S,"getNow", tolua_Cocos2d_getNow00);
+  tolua_function(tolua_S,"writeFile", tolua_Cocos2d_writeFile00);
+  tolua_function(tolua_S,"getFileData", tolua_Cocos2d_getFileData00);
 
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);
   tolua_beginmodule(tolua_S,"CCExtendNode");

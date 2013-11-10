@@ -292,10 +292,10 @@ function Soldier:checkNeibor(x, y)
     end
     self.closedList[curKey] = true
 end
+
 --根据endPoint cells 逆向找到回去的路径
 function Soldier:getPath()
     if self.endPoint ~= nil then
-        
         local path = {self.endPoint}
         local parent = self.cells[getMapKey(self.endPoint[1], self.endPoint[2])].parent
         while parent ~= nil do

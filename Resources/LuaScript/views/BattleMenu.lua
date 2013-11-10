@@ -18,7 +18,13 @@ function BattleMenu:ctor(s)
         self.bg:addChild(randomBut.bg)
         self.randomBut = randomBut
     end
-    
+
+    if DEBUG then
+        local randomBut = ui.newButton({image="random.png", callback=self.save, delegate=self})
+        setPos(randomBut.bg, {fixX(731), fixY(nil, 65)})
+        self.bg:addChild(randomBut.bg)
+        self.randomBut = randomBut
+    end
 
 
     self.cl = setPos(addNode(self.bg), {self.INIT_X, self.INIT_Y})
@@ -28,6 +34,13 @@ function BattleMenu:ctor(s)
     self:choose(1)
 
     registerEnterOrExit(self)
+end
+--写到level.txt 文件里面
+function BattleMenu:save()
+    local bData = simple.encode(BattleLogic.buildings)
+    local wp = CCFileUtils:sharedFileUtils():getWritablePath()
+    wp = wp.."level.txt"
+    writeFile(wp, bData, #bData)
 end
 function BattleMenu:enterScene()
     Event:registerEvent(EVENT_TYPE.ROB_RESOURCE, self)
@@ -203,18 +216,4 @@ function BattleMenu:updateKill(kind)
             break
         end
     end
-    --所有死光游戏才结束
-    --[[
-    local has = false
-    for k, v in ipairs(self.data) do
-        print("k, v,", k, v.total)
-        if v.total > 0 then
-            has = true
-            break
-        end
-    end
-    if not has then
-        global.director:pushView(ChallengeOver.new(self.scene, {suc=false}), 1, 0)
-    end
-    --]]
 end
