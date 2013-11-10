@@ -69,9 +69,27 @@ function CastleScene:beginBuild(id)
     self.ml:hideMenu()
     self.curBuild = self.mc:beginBuild(building)
     self.inBuild = true
-    global.director:pushView(BuildMenu.new(self, {PLAN_KIND.PLAN_BUILDING, self.curBuild}), 0, 0)
+    self.buildMenu = BuildMenu.new(self, {PLAN_KIND.PLAN_BUILDING, self.curBuild})
+    global.director:pushView(self.buildMenu, 0, 0)
+
 end
+
+function CastleScene:finishWall()
+    local lastPos = getPos(self.curBuild.bg)
+
+    local building = getData(GOODS_KIND.BUILD, 301)
+    self.curBuild = self.mc:beginBuild(building)
+    self.buildMenu:setBuilding({PLAN_KIND.PLAN_BUILDING, self.curBuild})
+    --根据上一个城墙的位置 和 方向 调整新城墙的位置
+    self.curBuild.map.mapGridController:clearMap(self.curBuild)
+    self.curBuild.funcBuild:removeBuild()
+    self.curBuild:setPos({lastPos[1]+SIZEX, lastPos[2]+SIZEY})
+    self.curBuild.map.mapGridController:updateMap(self.curBuild)
+    self.curBuild.funcBuild:finishBuild() 
+end
+
 --是否使用金币购买
+--finish 城墙跟其它建筑物不同 
 function CastleScene:realFinishBuild(gold)
     local p = getPos(self.curBuild.bg)
     local now = client2Server(Timer.now)
@@ -111,10 +129,16 @@ function CastleScene:realFinishBuild(gold)
     --应该在buyBuilding 消耗资源之后再finishBuild
     --可能消耗的是金币因此由这里计算花费
     global.user:buyBuilding(self.curBuild, cost)
-    self.mc:finishBuild()
-    self:closeBuild()
 
-    NewLogic.triggerEvent(NEW_STEP.HARVEST)
+    --建造城墙
+    if self.curBuild.kind == 301 then 
+        self.mc:finishBuild()
+        self:finishWall()
+    else
+        self.mc:finishBuild()
+        self:closeBuild()
+        NewLogic.triggerEvent(NEW_STEP.HARVEST)
+    end
 end
 
 function CastleScene:finishBuild()

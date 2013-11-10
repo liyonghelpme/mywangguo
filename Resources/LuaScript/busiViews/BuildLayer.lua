@@ -75,7 +75,7 @@ function BuildLayer:showMapGrid()
             --removeSelf(self.showBuildLayer)
             self.showBuildLayer = CCSpriteBatchNode:create("white2.png")
             self.bg:addChild(self.showBuildLayer)
-            for k, v in pairs(self.mapGridController.mapDict) do
+            for k, v in pairs(self.mapGridController.effectDict) do
                 local x = math.floor(k/10000)
                 local y = k%10000
                 local p = setBuildMap({1, 1, x, y})
@@ -205,12 +205,6 @@ function BuildLayer:initBuilding()
         self.mapGridController:addBuilding(build)
         build:setZord()
     end
-    --[[
-    local temp = CCSprite:create("images/loadingCircle.png")
-    temp:setPosition(ccp(992, 320))
-    self.bg:addChild(temp)
-    temp:setScale(0.2)
-    --]]
     self:initWall()
 end
 function BuildLayer:initSoldier()

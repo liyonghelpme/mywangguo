@@ -16,7 +16,7 @@ function Goods:ctor(s)
     self.bg:addChild(self.cl)
     self.cl:setPosition(ccp(271, fixY(global.director.designSize[2], 145, self.HEIGHT)))
     local sca = getDesignSca()
-    self.cl:setContentSize(CCSizeMake(500*sca, self.HEIGHT*sca))
+    self.cl:setContentSize(CCSizeMake(800*sca, self.HEIGHT*sca))
 
     self.title = setPos(setAnchor(addSprite(self.bg, "buyDrug.png"), {0.5, 0.5}), {515, fixY(global.director.designSize[2], 112)})
 

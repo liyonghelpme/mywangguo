@@ -197,7 +197,7 @@ function ui.newButton(params)
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
+        obj.text = setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
     end
     return obj
 end

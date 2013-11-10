@@ -95,7 +95,12 @@ function CastlePage:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
     if self.lastPos.count == 1 then
         local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
-        local allCell = self.buildLayer.mapGridController.mapDict
+        local allCell
+        if BattleLogic.inBattle then
+            allCell = self.buildLayer.mapGridController.effectDict
+        else
+            allCell = self.buildLayer.mapGridController.mapDict
+        end
         local map = getPosMapFloat(1, 1, tp.x, tp.y)
         local key = getMapKey(map[3], map[4])
         local allRiver = self.buildLayer.staticObstacle 
@@ -243,8 +248,8 @@ function CastlePage:finishBuild()
     self.curBuild = nil
 end
 function CastlePage:cancelBuild()
+    self.curBuild:cancelBuild()
     self.buildLayer:removeBuilding(self.curBuild)
-    --self.curBuild:cancelBuild()
     self.curBuild = nil
 end
 

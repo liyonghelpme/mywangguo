@@ -224,11 +224,12 @@ end
 --先检测近的邻居 再检测远的邻居
 function Soldier:checkNeibor(x, y)
     --近的邻居先访问
+    --不允许斜向走
     local neibors = {
-        {x, y-2},
-        {x+2, y},
-        {x, y+2},
-        {x-2, y},
+        --{x, y-2},
+        --{x+2, y},
+        --{x, y+2},
+        --{x-2, y},
         {x-1, y-1},
         {x+1, y-1},
         {x+1, y+1},

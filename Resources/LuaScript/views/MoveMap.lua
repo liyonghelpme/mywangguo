@@ -11,7 +11,13 @@ function MoveMap:updateMapGrid()
         removeSelf(self.gridLayer)
         self.gridLayer = CCSpriteBatchNode:create("white2.png")
         self.bg:addChild(self.gridLayer)
-        for k, v in pairs(self.mapGridController.mapDict) do
+        local allCell
+        if BattleLogic.inBattle then
+            allCell = self.mapGridController.effectDict
+        else
+            allCell = self.mapGridController.mapDict
+        end
+        for k, v in pairs(allCell) do
             local x = math.floor(k/10000)
             local y = k%10000
             local p = setBuildMap({1, 1, x, y})

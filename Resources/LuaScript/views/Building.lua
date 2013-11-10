@@ -420,6 +420,7 @@ function Building:finishBottom()
     self.bottom = nil
 end
 function Building:cancelBuild()
+    self.funcBuild:removeBuild()
 end
 
 function Building:getPos()

@@ -97,7 +97,7 @@ function BigMap:initLevel()
         --显示附近的几个关卡
         if k > level-6 then
             --只显示当前用户没有闯关的关卡
-            if k > level+2 then
+            if k >= level+2 then
                 break
             end
             local temp = CCSprite:create("scroll.png")
@@ -134,13 +134,27 @@ function BigMap:initLevel()
             temp:addChild(num)
             setAnchor(setPos(num, {319, 33}), {0, 0.5})
 
-
+            local cl = {0, 0, 0}
+            if k == level+1 then
+                cl = {102, 0, 0}
+            end
             local but = ui.newButton({image="blueButton.png", text="挑战", conSize={80, 33}, size=18, callback=self.onLevel, delegate=self, param=k})
+            setColor(but.text, cl)
             temp:addChild(but.bg)
             but:setAnchor(0.5, 0.5)
             setPos(but.bg, {472, 33})
         end
     end
+
+    local temp = CCSprite:create("scroll.png")
+    setAnchor(temp, {0.5, 1})
+    setPos(temp, {400, -self.flowHeight})
+    self.flowNode:addChild(temp)
+    self.flowHeight = self.flowHeight+72
+
+    local lab = ui.newTTFLabel({text="???", size=18, color={0, 0, 0}})
+    temp:addChild(lab)
+    setPos(setAnchor(lab, {0, 0.5}), {40, 33})
 end
 function BigMap:onLevel(k)
     global.director:popView()

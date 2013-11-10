@@ -29,9 +29,16 @@ function Wall:calValue()
     for k, v in pairs(nei) do
         local key = getMapKey(v[1], v[2])
         --print("check Key", key, allCell[key])
-        if allCell[key] ~= nil and allCell[key][#allCell[key]][1].funcs == WALL then
-            neiState[k] = true
-            neiborNode[k] = allCell[key][#allCell[key]][1]
+        if allCell[key] ~= nil then
+            local allB = allCell[key]
+            --此处存在一个城墙
+            for tk, tv in ipairs(allB) do
+                if tv[1].funcs == WALL and tv[2] == 1 then
+                    neiState[k] = true
+                    neiborNode[k] = allCell[key][#allCell[key]][1]
+                    break
+                end
+            end
         end
     end
     
@@ -46,25 +53,7 @@ function Wall:calValue()
     end
     self.value = val
     self:adjustValue()
-    
-    --[[
-    local addVal = {
-        [1]=4,
-        [3]=8,
-        [5]=1,
-        [7]=2,
-    }
-    
-    if val ~= 0 then
-        for k, v in ipairs(num) do
-            --邻居点存在
-            if neiborNode[v] ~= nil then
-                neiborNode[v].funcBuild.value = neiborNode[v].funcBuild.value+addVal[v]
-                neiborNode[v].funcBuild:adjustValue()
-            end
-        end
-    end
-    --]]
+    print("wall value", val) 
 end
 --增加城墙调整邻居状态
 --确认建造的时候
@@ -152,18 +141,6 @@ function Wall:removeBuild()
     end
 
     local num = {1, 3, 5, 7}
-    --[[
-    local val = 0
-    local wei = 1
-    for i=1, #num, 1 do
-        if neiState[num[i] ] then
-            val = val+wei
-        end
-        wei = wei*2
-    end
-    --]]
-    --self.value = val
-    --self:adjustValue()
     
     local addVal = {
         [1]=4,

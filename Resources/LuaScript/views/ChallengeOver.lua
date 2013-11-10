@@ -90,8 +90,9 @@ function ChallengeOver:onOk()
 
     if BattleLogic.challengeLevel then
         local level = CCUserDefault:sharedUserDefault():getIntegerForKey("level")
+        print("challenge Level update", level, BattleLogic.challengeWho)
         if level <= BattleLogic.challengeWho then
-            CCUserDefault:sharedUserDefault():setIntegerForKey("level", BattleLogic.challengeLevel)
+            CCUserDefault:sharedUserDefault():setIntegerForKey("level", BattleLogic.challengeWho)
         end
     end
 end

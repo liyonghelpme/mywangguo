@@ -88,4 +88,9 @@ end
 
 BattleLogic.levelData = {
     {name="初试牛刀", crystal=1000, silver=1000},
+    {name="密不透风", crystal=2000, silver=2000},
+    {name="水晶之塔", crystal=3000, silver=3000},
+    {name="圈地运动", crystal=4000, silver=4000},
+    {name="魔鬼风车", crystal=5000, silver=5000},
+    {name="宝贝矿藏", crystal=10000, silver=5000},
 }
