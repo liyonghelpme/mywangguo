@@ -1,6 +1,7 @@
 require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
+require "Miao.MiaoPath"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -19,7 +20,7 @@ function MiaoPeople:ctor(m, data)
     self.map = m
     self.state = PEOPLE_STATE.FREE
     self.health = 0
-    self.maxHealth = 15
+    self.maxHealth = 5
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
@@ -29,6 +30,7 @@ function MiaoPeople:ctor(m, data)
     self.stone = 0
 
     self.bg = CCNode:create()
+    self.miaoPath = MiaoPath.new(self)
 
     --不同人物动画的角度也有可能不同
     self.changeDirNode = addSprite(self.bg, "people"..self.id.."_lb_0.png")
@@ -83,28 +85,50 @@ function MiaoPeople:findHouse()
     --房间被拆除了也不行
     if self.myHouse == nil or self.myHouse.deleted then
         self.myHouse = nil
-        local allBuild = self.map.mapGridController.allBuildings
+        --暂时测试用
+        local p = getPos(self.bg)
+        local mxy = getPosMapFloat(1, 1, p[1], p[2])
+        local mx, my = mxy[3], mxy[4]
+        self.miaoPath:init(mx, my)
+        self.miaoPath:update()
+        local allBuild = self.miaoPath.allBuilding
+
+        local minHouse = nil
+        local minDist = 999999
+        --local allBuild = self.map.mapGridController.allBuildings
         for k, v in pairs(allBuild) do
             --找house
             if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 and k.deleted == false then
-                self.myHouse = k
-                print("findHouse setOwner")
-                k:setOwner(self)
-                break
+                if v < minDist then
+                    minHouse = k
+                    minDist = v
+                end
             end
         end
+
+        self.myHouse = minHouse
+        print("findHouse setOwner")
+        self.myHouse:setOwner(self)
     end
     self.predictTarget = self.myHouse
 end
 function MiaoPeople:findWorkBuilding()
-    local allBuild = self.map.mapGridController.allBuildings
-    local num = getLen(allBuild)
+    --local allBuild = self.map.mapGridController.allBuildings
     local allPossible = {}
     local allFreeFactory = {}
     local allFreeStore = {}
     local allFreeMine = {}
     local allFreeSmith = {}
 
+    local p = getPos(self.bg)
+    local mxy = getPosMapFloat(1, 1, p[1], p[2])
+    local mx, my = mxy[3], mxy[4]
+    self.miaoPath:init(mx, my)
+    self.miaoPath:update()
+    local allBuild = self.miaoPath.allBuilding
+
+
+    --v 是到这个建筑物的距离
     for k, v in pairs(allBuild) do
         --休息结束
         --找农田
@@ -205,8 +229,16 @@ function MiaoPeople:findWorkBuilding()
     print("allFreeStore num", #allFreeStore)
     print("allFreeSmith num", #allFreeSmith)
     if #allPossible > 0 then
-        local rd = math.random(#allPossible)
-        local k = allPossible[rd]
+        local minb = nil
+        local minDist = 99999
+        for k, v in ipairs(allPossible) do
+            if allBuild[v] < minDist then
+                minDist = allBuild[v]
+                minb = v
+            end
+        end
+        local k = minb
+        --
         --基本潜质
         --工作种类
         if self.id == 1 then
@@ -308,8 +340,6 @@ function MiaoPeople:initFind(diff)
     if self.state == PEOPLE_STATE.START_FIND then
         self.state = PEOPLE_STATE.IN_FIND
         local p = getPos(self.bg)
-        --local mx, my = cartesianToNormal(p[1], p[2])
-        --mx, my = sameOdd(mx, my)
         local mxy = getPosMapFloat(1, 1, p[1], p[2])
         local mx, my = mxy[3], mxy[4]
         
@@ -373,6 +403,10 @@ function MiaoPeople:initFind(diff)
         end
 
         --所有cartesianToNormal 全部转化成getBuildMap 来计算
+        --开始寻找工厂的路 但是工厂已经不存在了 因此不能这么搞。。。
+        --getPath----->得到农田路径
+        --getPath----->得到到工厂路径
+        --得到到商店路径
         if self.predictTarget ~= nil then
             local bp = getPos(self.predictTarget.bg)
             --local tx, ty = cartesianToNormal(bp[1], bp[2])
