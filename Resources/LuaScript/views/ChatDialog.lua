@@ -229,5 +229,5 @@ end
 
 function ChatDialog:onClose()
     global.director:popView()
-    MyPlugins:getInstance():sendCmd("showAds", "")
+    --MyPlugins:getInstance():sendCmd("showAds", "")
 end

@@ -187,6 +187,8 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
             m_pAds->spendPoints(4);
         } else if(c == "share") {
             m_pAds->spendPoints(5);
+        } else if(c == "showSpot") {
+            m_pAds->spendPoints(6);
         }
 	}  
 }

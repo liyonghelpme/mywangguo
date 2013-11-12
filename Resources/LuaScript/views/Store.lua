@@ -104,7 +104,7 @@ end
 function Store:exitScene()
     Event:unregisterEvent(EVENT_TYPE.TAP_FARM, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
-    MyPlugins:getInstance():sendCmd("showAds", "");
+    --MyPlugins:getInstance():sendCmd("showAds", "");
 end
 
 function Store:closeDialog()

@@ -1243,3 +1243,11 @@ function STR(v)
     end
     return ''
 end
+function delayCall(t, cb, par)
+    local handler
+    local function cancel()
+        cb(par)
+        CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(handler)
+    end
+    handler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(cancel, t, false)
+end

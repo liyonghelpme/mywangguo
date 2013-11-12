@@ -33,6 +33,7 @@ import net.youmi.android.AdManager;
 import net.youmi.android.offers.OffersManager;
 import net.youmi.android.offers.PointsChangeNotify;
 import net.youmi.android.offers.PointsManager;
+import net.youmi.android.spot.SpotManager;
 
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
@@ -143,6 +144,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		mController.setShareMedia(new UMImage(this, R.drawable.icon));
 		mController.getConfig().supportWXPlatform(this, appID, contentUrl);
 		mController.getConfig().supportWXCirclePlatform(this, appID, contentUrl) ;
+		SpotManager.getInstance(this).loadSpotAds();
 		
 	}
 	

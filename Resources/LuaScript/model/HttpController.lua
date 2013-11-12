@@ -39,7 +39,11 @@ function HttpController:doRequest()
 
             request:release()    
             if callback ~= nil then
-                callback(delegate, rep, param)
+                if delegate ~= nil then
+                    callback(delegate, rep, param)
+                else
+                    callback(rep, param)
+                end
             end
             self.busy = false
             --进行下一次请求测试

@@ -32,6 +32,7 @@ import net.youmi.android.banner.AdSize;
 import net.youmi.android.banner.AdView;
 import net.youmi.android.offers.OffersManager;
 import net.youmi.android.offers.PointsManager;
+import net.youmi.android.spot.SpotManager;
 
 //import com.google.ads.*;
 //import com.google.ads.AdRequest.ErrorCode;
@@ -201,6 +202,16 @@ public class AdsAdmob implements InterfaceAds {
 				public void run() {
 					// TODO Auto-generated method stub
 					HelloLua.mController.openShare(mContext, false);
+				}
+				
+			});
+		} else if(points == 6) {
+			PluginWrapper.runOnMainThread(new Runnable(){
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					SpotManager.getInstance(mContext).showSpotAds(mContext);
 				}
 				
 			});

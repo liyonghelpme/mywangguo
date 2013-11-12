@@ -1,4 +1,5 @@
 require "views.ChatDialog"
+require "views.Message"
 
 MenuLayer = class()
 function MenuLayer:ctor(sc)
@@ -16,6 +17,7 @@ function MenuLayer:initDataOver()
     self:updateText()
     self:updateExp(0)
     self.name:setString(global.user:getValue("name"))
+    MsgModel.initMsg()
 end
 function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
@@ -25,11 +27,13 @@ function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.TAP_MENU, self)
     Event:registerEvent(EVENT_TYPE.CLOSE_STORE, self)
     Event:registerEvent(EVENT_TYPE.UPDATE_MSG, self)
+    Event:registerEvent(EVENT_TYPE.INIT_MSG, self)
     self:updateText()
     self:updateExp(0)
     ChatModel.startReceive()
 end
 function MenuLayer:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.INIT_MSG, self)
     Event:unregisterEvent(EVENT_TYPE.UPDATE_MSG, self)
     Event:unregisterEvent(EVENT_TYPE.CLOSE_STORE, self)
     Event:unregisterEvent(EVENT_TYPE.TAP_MENU, self)
@@ -65,7 +69,12 @@ function MenuLayer:receiveMsg(name, msg)
             self.wordLabel:setString(name..': '..text)
             self.wordLabel:runAction(sequence({fadeout(0.3), fadein(0.3)}))
         end
+    elseif name == EVENT_TYPE.INIT_MSG then
+        numAct(self.msgNum, 0, #MsgModel.msg.res)
     end
+end
+function MenuLayer:onMsg()
+    global.director:pushView(Message.new(), 1, 0)
 end
 function MenuLayer:initView()
     self.bg = CCLayer:create()
@@ -81,6 +90,8 @@ function MenuLayer:initView()
 
     local temp = setPos(setAnchor(addSprite(self.banner, "menuFeather.png"), {0, 0}), {107, fixY(global.director.disSize[2], designToRealY(367), 59)})
     
+
+
     self.taskButton = ui.newButton({image="task.png", delegate=self, callback=self.onTask}) 
     setPos(self.taskButton.bg, {12, fixY(nil, designToRealY(395), 82)})
     self.banner:addChild(self.taskButton.bg)
@@ -126,6 +137,15 @@ function MenuLayer:initView()
     self.expBanner:addChild(self.expWord)
 
 
+    local message = ui.newButton({image="message.png", callback=self.onMsg, delegate=self})
+    message:setAnchor(0.5, 0.5)
+    setPos(message.bg, {665, 73})
+    self.banner:addChild(message.bg)
+    local temp = setPos(addSprite(message.bg, "mnum.png"), {29, 13})
+    local msgNum = ui.newBMFontLabel({text="0", font="bound.fnt", size=12})
+    setPos(msgNum, {16, 16})
+    temp:addChild(msgNum)
+    self.msgNum = msgNum
 end
 
 local EXP_LEN = 108-22

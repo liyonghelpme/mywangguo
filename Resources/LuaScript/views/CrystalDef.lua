@@ -109,10 +109,10 @@ function CrystalDef:update(diff)
             sp:addChild(temp)
             temp:setBlendFunc(bf)
             temp:setScale(0.1)
-            temp:runAction(sequence({scaleto(0.5, 1, 1)}))
+            temp:runAction(repeatForever(sequence({scaleto(0.5, 1, 1), fadeout(0.1), scaleto(0.1, 0.1, 0.1), fadein(0.1)})))
             setPos(temp, {sz.width/2, sz.height/2})
         end
-        sp:runAction(repeatForever(sequence({delaytime(0.2), callfunc(nil, show)})))
+        sp:runAction(callfunc(nil, show))
     end
 
     if self.state == CRY_STATE.IN_ATTACK then

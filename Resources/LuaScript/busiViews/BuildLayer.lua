@@ -50,6 +50,18 @@ function BuildLayer:initMagic()
             ca:addSpriteFrame(sp, "ball"..i*10+j)
         end
     end
+
+    local r = CCRectMake(0, 240, 240, 60)
+    local sp = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(sp, "arrow0")
+
+    local r = CCRectMake(0, 300, 240, 60)
+    local sp = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(sp, "arrow1")
+
+    local r = CCRectMake(0, 360, 240, 60)
+    local sp = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(sp, "arrow2")
 end
 function BuildLayer:initGrassSprite()
     --[[

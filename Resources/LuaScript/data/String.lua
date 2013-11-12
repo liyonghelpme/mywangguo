@@ -666,7 +666,6 @@ WORDS = dict({
 {"finTask", {"{DO}/{NEED}", ""}},
 {"needExp", {"{EXP}xp", "{EXP}xp"}},
 {"free0", {"免费获得金币", ""}},
-{"share", {"分 享", "Share"}},
 {"pageNO", {"-{NUM}-", "-{NUM}-"}},
 {"free", {"免费", "Free"}},
 {"haha", {"hah", ""}},
@@ -1366,6 +1365,8 @@ WORDS = dict({
 {"needLevel", {"需要等级{LEVEL}!", ""}},
 {"crystalReward", {"恭喜获得发言奖励{NUM}水晶", ""}},
 {"silverReward", {"恭喜获得发言奖励{NUM}银币", ""}},
+{"crystalShare", {"恭喜获得分享奖励{NUM}水晶", ""}},
+{"silverShare", {"恭喜获得分享奖励{NUM}银币", ""}},
 {"monGen", {"右面地图出现了怪兽，快去点击攻击它们吧！", ""}},
 {"toSell", {"点击建筑物,卖出建筑物", ""}},
 {"sureSell", {"你确定卖出该建筑物获得{NUM}{KIND}", ""}},
@@ -1376,4 +1377,5 @@ WORDS = dict({
 {"getRew", {"获得奖励{NUM}{KIND}!", ""}},
 {"notHere", {"不能在这里建造!", ""}},
 {"shareReward", {"分享奖励{NUM}{KIND}", ""}},
+{"share", {"分享得水晶", "Share"}},
 })

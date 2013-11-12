@@ -5,7 +5,7 @@ function SoldierStore:ctor(s)
     self:initView()
 end
 function SoldierStore:onClose()
-    MyPlugins:getInstance():sendCmd("showAds", "");
+    --MyPlugins:getInstance():sendCmd("showAds", "");
     global.director:popView()
 end
 

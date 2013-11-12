@@ -7,6 +7,6 @@ function Timer.update(diff)
     Timer.now = os.time()
 end
 
-Timer.updateFunc = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(Timer.update, 0, false)
+Timer.updateFunc = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(Timer.update, 1, false)
 
 

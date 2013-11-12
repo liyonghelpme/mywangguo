@@ -69,17 +69,50 @@ function ChallengeOver:initView()
     end
     self.bg:runAction(sequence({moveby(0.2, 0, -sz.height), repeatN(sequence({callfunc(nil, quake), delaytime(0.2)}), 4), callfunc(nil, calNum)}))
 
-    local but0 = ui.newButton({image="roleNameBut0.png", conSize={125, 41}, text=getStr("ok", nil), size=20, callback=self.onOk, delegate=self})
-    setPos(but0.bg, {266, fixY(sz.height, 357)})
+    local but0 = ui.newButton({image="roleNameBut0.png", conSize={100, 41}, text=getStr("ok", nil), size=20, callback=self.onOk, delegate=self})
+    setPos(but0.bg, {266-60, fixY(sz.height, 357)})
     self.back:addChild(but0.bg)
     but0:setAnchor(0.5, 0.5)
 
+    local but0 = ui.newButton({image="roleNameBut0.png", conSize={100, 41}, text=getStr("share", nil), size=15, callback=self.onShare, delegate=self})
+    setPos(but0.bg, {266+60, fixY(sz.height, 357)})
+    self.back:addChild(but0.bg)
+    but0:setAnchor(0.5, 0.5)
 end
+
+function ChallengeOver:onShare()
+    MyPlugins:getInstance():sendCmd("share", "")
+    self:onOk()
+
+    local r = math.random(2)
+    local reward = {}
+    if r == 1 then
+        reward.silver = 1000
+        local function test()
+            addBanner(getStr("silverShare", {"[NUM]", str(reward.silver)}))
+        end
+        delayCall(3, test)
+    else 
+        reward.crystal = 1000
+        local function test()
+            addBanner(getStr("crystalShare", {"[NUM]", str(reward.crystal)}))
+        end
+        delayCall(3, test)
+    end
+    sendReq("killMonster", dict({{"uid", global.user.uid}, {"gain", reward}}))
+    global.user:doAdd(reward)
+end
+
 function ChallengeOver:onOk()
     --成功同步奖励 失败 也要同步死亡的士兵
     --退出战斗场景也要杀死这些士兵在经营页面
     sendReq("synBattleRes", dict({{"uid", global.user.uid}, {"reward", simple.encode(self.reward)}, {'killedSoldier', simple.encode(BattleLogic.getKilled())}}))
     global.user:doAdd(self.reward)
+    --普通挑战 不是复仇 不是 闯关
+    if not BattleLogic.challengeLevel then
+        print("battle over sendMessage")
+        sendReq("sendMessage", dict({{"uid", global.user.uid}, {"eid", BattleLogic.uid}, {"text", simple.encode({name=global.user:getValue("name"), crystal=self.reward.crystal, silver=self.reward.silver})}}))
+    end
     --BattleLogic.clearBattle()
     BattleLogic.quitBattle = true
     global.director:popView()
