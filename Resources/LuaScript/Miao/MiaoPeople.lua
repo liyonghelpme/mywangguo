@@ -273,7 +273,9 @@ function MiaoPeople:findWorkBuilding()
         end
     end
     print("people kind", self.data.kind)
-    print("allBuildNum", getLen(allBuild))
+    if allBuild ~= nil then
+        print("allBuildNum", getLen(allBuild))
+    end
     print("allPossible", #allPossible)
     print("allFreeFactory num", #allFreeFactory)
     print("allFreeStore num", #allFreeStore)
@@ -358,7 +360,7 @@ function MiaoPeople:findWorkBuilding()
                     self.predictFactory = allFreeFactory[1]
                     self.predictFactory:setOwner(self)
                     self.predictQuarry = allStoneQuarry[1]
-                    self.predictQuarry:setOwner(self)]
+                    self.predictQuarry:setOwner(self)
                     self.predictTarget = allFoodFarm[1]
                     self.predictTarget:setOwner(self)
                 end
