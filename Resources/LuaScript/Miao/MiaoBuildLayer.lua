@@ -1,5 +1,6 @@
 require "miao.MiaoPeople"
 require "model.MapGridController"
+require "Miao.TestCat"
 MiaoBuildLayer = class(MoveMap)
 function MiaoBuildLayer:ctor(s)
     self.scene = s
@@ -409,6 +410,14 @@ function MiaoBuildLayer:initData()
             b:finishBuild()
         end
     end
+end
+function MiaoBuildLayer:addCat()
+    local p = MiaoPeople.new(self, {id=3})
+    self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+    local pos = normalizePos({600, 400}, 1, 1)
+    setPos(p.bg, pos)
+    p:setZord()
+
 end
 function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param})

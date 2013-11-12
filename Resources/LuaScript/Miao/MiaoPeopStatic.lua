@@ -44,6 +44,83 @@ function MiaoPeople:clearWork()
     end
 end
 
+--在回到房屋之后 处理房屋被拆迁的问题
+function MiaoPeople:handleHome()
+    self.state = PEOPLE_STATE.IN_HOME
+    self.restTime = 0
+    --self.bg:setVisible(false)
+
+    local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
+    setPos(self.bg, np)
+end
+function MiaoPeople:handleStore()
+    --即便商店deleted 掉了 也不用考虑了
+    self.realTarget.workNum = self.realTarget.workNum +self.product
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.state = PEOPLE_STATE.FREE
+end
+function MiaoPeople:handleQuarry()
+    if self.stone == 0 then
+        --获取工具去采矿
+        if self.predictMine ~= nil then
+            --矿场被拆除了
+            if self.realTarget.deleted then
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+                self.predictMine:setOwner(nil)
+                self.predictMine = nil
+                self.state = PEOPLE_STATE.FREE
+            else
+                --owner 还是 该用户 直到回家休息才放弃owner权限
+                self.predictQuarry = self.realTarget
+                self.tempMine = self.predictMine
+                self.goMine = true
+                self.state = PEOPLE_STATE.FREE
+            end
+        --将矿石运往工厂 生产结束后 运往铁匠铺
+        elseif self.predictSmith ~= nil then
+            if self.realTarget.deleted then
+                self.realTarget = nil
+                self.predictSmith:setOwner(nil)
+                self.predictSmith = nil
+                self.predictFactory:setOwner(nil)
+                self.predictFactory = nil
+                self.state = PEOPLE_STATE.FREE
+            else
+                self.stone = self.predictTarget.stone
+                self.realTarget.stone = 0
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+                self.goFactory = true
+                self.tempFactory = self.predictFactory
+                self.tempSmith = self.predictSmith
+                self.state = PEOPLE_STATE.FREE
+            end
+        end
+    --运送矿石回来
+    else
+        self.realTarget.stone = self.realTarget.stone+self.stone
+        self.stone = 0
+        --不要占用采矿场了
+        self.realTarget:setOwner(nil)
+        self.realTarget = nil
+        self.state = PEOPLE_STATE.FREE
+    end
+end
+
+function MiaoPeople:handleMine()
+    self.state = PEOPLE_STATE.IN_WORK
+    self.workTime = 0
+end
+function MiaoPeople:handleSmith()
+    self.realTarget.workNum = self.realTarget.workNum +self.product
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.product = 0
+    self.state = PEOPLE_STATE.FREE
+end
+
 function MiaoPeople:handleFarm()
     --拉走去工厂生产食物
     if self.predictFactory ~= nil then

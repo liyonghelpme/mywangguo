@@ -54,8 +54,8 @@ function MiaoPath:checkNeibor(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
-    --不能超过10格
-    if self.cells[curKey].gScore >= 100 then
+    --农民不能超过10格 商人无限制
+    if self.cells[curKey].gScore >= 100 and self.target.data.kind == 1 then
         return
     end
     for n, nv in ipairs(neibors) do
@@ -133,8 +133,8 @@ function MiaoPath:update()
     --所有建筑物  水面 道路
     local buildCell = self.target.map.mapGridController.mapDict
     local staticObstacle = self.target.map.staticObstacle 
-
-    while true do
+    print("MiaoPath update")
+    while n < 50 do
         if #self.openList == 0 then
             break
         end

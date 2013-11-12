@@ -359,6 +359,7 @@ function MiaoBuild:finishBuild()
     self.funcBuild:finishBuild()
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
+    Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 
 function MiaoBuild:adjustValue()

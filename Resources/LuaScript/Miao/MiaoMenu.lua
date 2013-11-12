@@ -23,6 +23,11 @@ function MiaoMenu:ctor(s)
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
 
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onCat, delegate=self, text="猫咪", size=20, param=3})
+    setPos(but.bg, {550, 100})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
+
 
     --拆除道路和 建筑物
     local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onRemove, delegate=self, text="拆除", size=20, param=2})
@@ -34,6 +39,9 @@ function MiaoMenu:ctor(s)
     setPos(but.bg, {550, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
+end
+function MiaoMenu:onCat()
+    self.scene.page.buildLayer:addCat()
 end
 function MiaoMenu:initDataOver()
     local initX = 50

@@ -113,4 +113,5 @@ function Road:removeSelf()
             end
         end
     end
+    Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
