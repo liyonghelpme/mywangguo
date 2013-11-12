@@ -62,8 +62,27 @@ function MiaoPeople:handleStore()
 end
 function MiaoPeople:handleQuarry()
     if self.stone == 0 then
-        --获取工具去采矿
-        if self.predictMine ~= nil then
+        --获取工具去采矿 需要矿石
+        if self.tempFactory ~= nil then
+            if self.realTarget.deleted then
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+                self.tempFactory:setOwner(nil)
+                --不能生产物品了终止
+                self.tempFactory.productKind = nil
+                self.tempFactory = nil
+                self.tempTower:setOwner(nil)
+                self.tempTower = nil
+                self.state = PEOPLE_STATE.FREE
+            else
+                self.stone = self.predictTarget.stone
+                self.realTarget.stone = 0
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+                self.goFactory = true
+                self.state = PEOPLE_STATE.FREE
+            end
+        elseif self.predictMine ~= nil then
             --矿场被拆除了
             if self.realTarget.deleted then
                 self.realTarget:setOwner(nil)
@@ -122,8 +141,31 @@ function MiaoPeople:handleSmith()
 end
 
 function MiaoPeople:handleFarm()
+    --销售塔的商品 
+    if self.predictTower ~= nil then
+        if self.realTarget.deleted then
+            self.state = PEOPLE_STATE.FREE
+            self.predictFactory:setOwner(nil)
+            self.predictFactory = nil
+            self.predictTower:setOwner(nil)
+            self.predictTower = nil
+            self.predictQuarry:setOwner(nil)
+            self.predictQuarry = nil
+            self.realTarget:setOwner(nil)
+            self.realTarget = nil
+        else
+            self.realTarget:setOwner(nil)
+            self.food = self.realTarget.workNum
+            self.realTarget.workNum = 0
+            self.tempFactory = self.predictFactory
+            self.goFactory = true
+            self.tempTower = self.predictTower
+            self.tempQuarry = self.predictQuarry
+            self.state = PEOPLE_STATE.FREE
+            self.realTarget = nil
+        end
     --拉走去工厂生产食物
-    if self.predictFactory ~= nil then
+    elseif self.predictFactory ~= nil then
         if self.realTarget.deleted then
             print("Farm removed!!!")
             self.state = PEOPLE_STATE.FREE
@@ -131,6 +173,7 @@ function MiaoPeople:handleFarm()
             self.predictFactory = nil
             self.predictStore:setOwner(nil)
             self.predictStore = nil
+            self.realTarget:setOwner(nil)
             self.realTarget = nil
         else
             self.realTarget:setOwner(nil)
@@ -167,13 +210,21 @@ function MiaoPeople:handleFactory()
     end
     --在工厂生产产品运到目的地 结果工厂被拆除了
     if self.realTarget.deleted then
-        if self.predictStore ~= nil then
-            self.predictStore:setOwner(nil)
-            self.predictStore = nil
+        if self.tempStore ~= nil then
+            self.tempStore:setOwner(nil)
+            self.tempStore = nil
         end
-        if self.predictSmith ~= nil then
-            self.predictSmith:setOwner(nil)
-            self.predictSmith = nil
+        if self.tempSmith ~= nil then
+            self.tempSmith:setOwner(nil)
+            self.tempSmith = nil
+        end
+        if self.tempQuarry ~= nil then
+            self.tempQuarry:setOwner(nil)
+            self.tempQuarry = nil
+        end
+        if self.tempTower ~= nil then
+            self.tempTower:setOwner(nil)
+            self.tempTower = nil
         end
         self.state = PEOPLE_STATE.FREE
         self.realTarget = nil
@@ -182,12 +233,27 @@ function MiaoPeople:handleFactory()
         --tempSmith
         --运送商品到商店
         --运送商品到铁匠铺
-        if self.predictStore ~= nil then
-        elseif self.predictSmith ~= nil then
+        --材料没有收集足够接着去收集 石头 = 0 
+        if self.tempTower ~= nil and self.realTarget.stone == 0 then
+            --去获取 石头
+            self.goQuarry = true
+            self.tempFactory = self.realTarget
+            self.state = PEOPLE_STATE.FREE
+            self.realTarget.productKind = 3
         else
             --生产商品
             self.state = PEOPLE_STATE.IN_WORK
             self.workTime = 0
         end
     end
+end
+function MiaoPeople:handleTower()
+    self.realTarget.workNum = self.realTarget.workNum +self.product
+    self.product = 0
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.state = PEOPLE_STATE.FREE
+end
+
+function MiaoPeople:handleWork(diff)
 end

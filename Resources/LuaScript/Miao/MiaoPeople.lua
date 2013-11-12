@@ -148,7 +148,9 @@ function MiaoPeople:findWorkBuilding()
     local allFreeMine = {}
     local allFreeSmith = {}
     local allBuild
-
+    --有粮食的 农田 有石材的采石场
+    local allFoodFarm = {}
+    local allStoneQuarry = {}
     --拆除了最近的工作建筑物之后
     --当所有的工作地点都ko的时候 就要findHouse
     --self.myHouse == nil? self.myHouse.deleted == true? 
@@ -214,24 +216,10 @@ function MiaoPeople:findWorkBuilding()
                             ret = (k.state == BUILD_STATE.FREE and k.workNum >= 10)
                         end
                         --一条链路
-
                     --去工厂生产产品 运送粮食到工厂 或者 到工厂生产产品
                     --运送物资到工厂 如果工厂 的 stone > 0 就可以开始生产了  
                     --或者将生产好的产品运送到 商店
                     --没有直接去工厂的说法
-                    --[[
-                    elseif k.id == 5 then
-                        ret = (k.food > 0 and getDefault(k.product, 1, 0) < 10)
-                        ret = (k.stone > 0 and getDefault(k.product, 2, 0) < 10)
-                        --生产好食物
-                        if not ret then
-                            ret = (getDefault(k.product, 1, 0) > 0)
-                        end
-                        --生产好铁器
-                        if not ret then
-                            ret = (getDefault(k.product, 2, 0) > 0)
-                        end
-                    --]]
                     --采矿场
                     elseif k.id == 12 then
                         print("mine stone", k.stone)
@@ -242,6 +230,9 @@ function MiaoPeople:findWorkBuilding()
                         end
                     elseif k.id == 11 then
                         --ret = k.stone ~= nil and k.stone > 0 
+                    --灯塔可以生产
+                    elseif k.id == 14 then
+                        ret = k.workNum < 10
                     end
                     --工厂 空闲状态 没有粮食储备 且没有其它用户 
                 end
@@ -265,6 +256,14 @@ function MiaoPeople:findWorkBuilding()
                 if k.id == 13 and k.workNum < 10 and k.owner == nil then
                     table.insert(allFreeSmith, k)
                 end
+
+                --可以收集的 农田和矿市场 
+                if k.id == 2 and k.workNum >= 0 then
+                    table.insert(allFoodFarm, k)
+                end
+                if k.id == 12 and k.stone >= 0 then
+                    table.insert(allStoneQuarry, k)
+                end
             end
 
             --print("building state", ret)
@@ -280,6 +279,8 @@ function MiaoPeople:findWorkBuilding()
     print("allFreeStore num", #allFreeStore)
     print("allFreeSmith num", #allFreeSmith)
     print("allFreeMine num", #allFreeMine)
+    print("allFoodFarm num", #allFoodFarm)
+    print("allStoneQuary num", #allStoneQuarry)
     if #allPossible > 0 then
         local minb = nil
         local minDist = 99999
@@ -349,6 +350,18 @@ function MiaoPeople:findWorkBuilding()
                         k:setOwner(self)
                     end
                 end
+            elseif k.id == 14 then
+                --很难攒够原材料
+                if #allFoodFarm > 0 and #allStoneQuarry > 0 and #allFreeFactory > 0 then
+                    self.predictTower = k
+                    k:setOwner(self)
+                    self.predictFactory = allFreeFactory[1]
+                    self.predictFactory:setOwner(self)
+                    self.predictQuarry = allStoneQuarry[1]
+                    self.predictQuarry:setOwner(self)]
+                    self.predictTarget = allFoodFarm[1]
+                    self.predictTarget:setOwner(self)
+                end
             end
         --购买粮食
         elseif self.id == 2 then
@@ -410,6 +423,8 @@ function MiaoPeople:initFind(diff)
         self.predictStore = nil
         self.predictMine = nil
         self.predictSmith = nil
+        self.predictQuarry = nil
+        self.predictTower = nil
 
         self.predictEnd = nil
         self.realTarget = nil
@@ -419,15 +434,18 @@ function MiaoPeople:initFind(diff)
         --tired 不能中断操作
         if self.goSmith then
             self.predictTarget = self.tempSmith
+            self.tempSmith = nil
             self.goSmith = false
         elseif self.goBack then
             self.predictTarget = self.map.backPoint
             print("goBack now")
         elseif self.goStore then
             self.predictTarget = self.tempStore
+            self.tempStore = nil
             self.goStore = false
         elseif self.goMine then
             self.predictTarget = self.tempMine
+            self.tempMine = nil
             self.goMine = false
         --因为角色还占用着 矿场的 工具呢 所以需要返回
         elseif self.goQuarry then
@@ -437,7 +455,12 @@ function MiaoPeople:initFind(diff)
         elseif self.goFactory then
             print("goFactory !!!!!")
             self.predictTarget = self.tempFactory
+            self.tempFactory = nil
             self.goFactory = false
+        elseif self.goTower then
+            self.predictTarget = self.tempTower
+            self.tempTower = nil
+            self.goTower = false
         --寻找住宅
         elseif self.tired then
             self:findHouse()
@@ -670,6 +693,8 @@ function MiaoPeople:doMove(diff)
                     --将货物放到 铁匠铺里面
                     elseif self.realTarget.id == 13 then
                         self:handleSmith()
+                    elseif self.realTarget.id == 14 then
+                        self:handleTower()
                     end
                 end
                 self:setZord()
@@ -697,8 +722,24 @@ function MiaoPeople:doWork(diff)
             if self.workTime > 1 then
                 self.workTime = 0
                 self.health = self.health -1
+                --生产混合原材料物品
+                if self.realTarget.productKind ~= nil then
+                    if self.realTarget.food > 0 and self.realTarget.stone > 0 then
+                        self.realTarget.food = self.realTarget.food - 1
+                        self.realTarget.stone = self.realTarget.stone - 1
+                        changeTable(self.realTarget.product, 3, 1)
+                        if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 or self.realTarget.stone <= 0 then
+                            self.state = PEOPLE_STATE.FREE
+                            self.realTarget:setOwner(nil)
+                            self.product = self.realTarget.product[3]
+                            self.realTarget.product[3] = 0
+                            self.realTarget = nil
+                            self.goTower = true
+                            return
+                        end
+                    end
                 --生产食物
-                if self.realTarget.food > 0 then
+                elseif self.realTarget.food > 0 then
                     self.realTarget.food = self.realTarget.food - 1
                     changeTable(self.realTarget.product, 1, 1)
                     --如果工厂生产数量超过上限 就不要生产了
