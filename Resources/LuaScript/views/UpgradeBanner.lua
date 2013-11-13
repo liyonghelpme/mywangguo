@@ -18,8 +18,7 @@ function UpgradeBanner:ctor(w, col, cb, delegate)
     local bSize = sb:getContentSize()
     local nbSize ={math.max(wSize.width+10, bSize.width), bSize.height}  
     setSize(sb, nbSize)
-
-    word:setPosition(ccp(nbSize[1]/2, nbSize[2]/2))
+    setPos(word, {nbSize[1]/2, nbSize[2]/2})
     
     self.bg:runAction(sequence({delaytime(2), fadeout(1), callfunc(self, self.removeNow)}))
 end
@@ -30,7 +29,6 @@ function UpgradeBanner:removeNow()
     end
 end
 function UpgradeBanner:setMoveAni(X, Y)
-    print("moveAni", X, Y)
     if self.moveAni ~= nil then
         self.sb:stopAction(self.moveAni)
     end

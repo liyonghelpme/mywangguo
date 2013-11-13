@@ -24,13 +24,15 @@ function DialogController:update(diff)
         if #self.cmds > 0 then
             local curCmd = table.remove(self.cmds, 1)
             if curCmd['cmd'] == "login" then
+            elseif curCmd['cmd'] == "roleName" then
+                global.director:pushView(RoleName.new(), 1, 0)
             end
         end
     end
 end
 --可能t[1] 已经删除自己了 只是DialogController 还不知道
 function DialogController:addBanner(banner)
-    while #self.bannerStack > 5 do
+    while #self.bannerStack > getParam("maxBannerNum") do
         local t = table.remove(self.bannerStack, 1)
         removeSelf(t[1])
     end

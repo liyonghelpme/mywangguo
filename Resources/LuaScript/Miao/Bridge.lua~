@@ -1,0 +1,5 @@
+Bridge = class(FuncBuild)
+function Bridge:initView()
+    setPos(self.changeDirNode, {0, SIZEY})
+    setRotation(self.changeDirNode, 45)
+end

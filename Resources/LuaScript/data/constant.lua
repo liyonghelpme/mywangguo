@@ -1,8 +1,8 @@
 MapWidth=3000
-MapHeight=1120
-SIZEX=32
-SIZEY=16
-DEBUG=true
+MapHeight=3000
+SIZEX=64
+SIZEY=47
+DEBUG=false
 MAX_BUILD_ZORD=10000
 
 Keys = {
@@ -110,25 +110,25 @@ PLAN_KIND = {
 
 
 KindsPre = {
-    "build[ID].png",
-    "equip[ID].png",
-    "drug[ID].png",
+    "build{ID}.png",
+    "equip{ID}.png",
+    "drug{ID}.png",
     "storeGold.png",
     "storeSilver.png",
     "storeCrystal.png",
-    "Wplant[ID].png",
-    "soldier[ID].png",
+    "Wplant{ID}.png",
+    "soldier{ID}.png",
     "storeGold.png",
     "task",
-    "herb[ID].png",
+    "herb{ID}.png",
     "prescription",
     nil,
-    "drug[ID].png",
+    "drug{ID}.png",
     "",
-    "stone[ID].png",
-    "magicStone[ID].png",
-    "skill[ID].png",
-    "status[ID].png",
+    "stone{ID}.png",
+    "magicStone{ID}.png",
+    "skill{ID}.png",
+    "status{ID}.png",
     nil,
     nil,
 }
@@ -142,19 +142,7 @@ ZoneCenter = {
 }
 
 
-FARM_BUILD = 0
-HOUSE_BUILD = 1
-DECOR_BUILD = 2
-CASTLE_BUILD = 3
-GOD_BUILD = 4
-DRUG_BUILD = 5
-FORGE_SHOP = 6
-BUSI_SOL = 7
-STATIC_BOARD = 8
-MINE_KIND = 9
-LOVE_TREE = 10
-RING_FIGHTING = 11
-CAMP = 12
+
 
 
 SOW = 0
@@ -180,4 +168,46 @@ buildAnimate = dict({
     {162, {{"build162.png", "build162a1.png", "build162a2.png", "build162a3.png", "build162a4.png"}, {0, 0}, 2000, 2, {0, 0}}},
 })
 
+FARM_BUILD = 0
+HOUSE_BUILD = 1
+DECOR_BUILD = 2
+CASTLE_BUILD = 3
+GOD_BUILD = 4
+DRUG_BUILD = 5
+FORGE_SHOP = 6
+BUSI_SOL = 7
+STATIC_BOARD = 8
+MINE_KIND = 9
+LOVE_TREE = 10
+RING_FIGHTING = 11
+CAMP = 12
+
+buildFunc = dict({
+{FARM_BUILD, {{"photo"}, {"acc", "sell"}}},
+{HOUSE_BUILD, {{"photo"}, { "sell" }}},
+{DECOR_BUILD, {{"photo"}, {"sell"}}},
+{CASTLE_BUILD, {{"photo"}, {"tip"}}},
+{GOD_BUILD, {{"photo"}, {"soldier"}}},
+{DRUG_BUILD, {{"photo"}, {"allDrug"}}},
+{FORGE_SHOP, {{"photo"}, {"allEquip"}}},
+{MINE_KIND, {{"photo"}, {"acc"}}},
+{LOVE_TREE, {{"photo", "invite"}, {"love", "loveRank"}}},
+{RING_FIGHTING, {{}, {}}},
+{CAMP, {{"photo"}, {"call"}}},
+})
+
+
+BUY_RES = dict({
+    {"silver", "buySilver"},
+    {"crystal", "buyCrystal"},
+    {"gold", "buyGold"},
+})
+
+obstacleBlock = dict(
+{{320006, 1}, {310005, 1}, {310007, 1}, {310003, 1}, {330007, 1}, {320004, 1}, {320002, 1}, {330005, 1}, {620026, 1}, {630025, 1}, {620024, 1}, {680008, 1}, {690009, 1}, {690007, 1}, {680008, 1}, {680006, 1}, {690005, 1}, {680004, 1}, {690003, 1}, {330015, 1}, {330017, 1}, {330019, 1}, {650013, 1}, {620018, 1}, {650017, 1}, {640028, 1}, {660030, 1}, {300042, 1}, {640018, 1}, {290025, 1}, {290029, 1}, {290027, 1}, {650029, 1}, {610039, 1}, {640016, 1}, {660016, 1}, {660014, 1}, {320008, 1}, {280030, 1}, {280028, 1}, {320010, 1}, {630033, 1}, {620020, 1}, {650015, 1}, {630019, 1}, {630017, 1}, {280032, 1}, {600024, 1}, {600022, 1}, {280036, 1}, {280038, 1}, {630027, 1}, {610019, 1}, {310043, 1}, {640034, 1}, {640032, 1}, {600020, 1}, {650031, 1}, {610021, 1}, {610025, 1}, {610023, 1}, {600040, 1}, {300010, 1}, {300008, 1}, {630039, 1}, {600042, 1}, {270031, 1}, {270037, 1}, {310027, 1}, {310029, 1}, {310023, 1}, {310025, 1}, {310021, 1}, {330009, 1}, {300016, 1}, {300020, 1}, {300018, 1}, {270029, 1}, {290039, 1}, {290037, 1}, {650035, 1}, {650033, 1}, {290031, 1}, {310019, 1}, {310017, 1}, {310015, 1}, {310011, 1}, {320018, 1}, {300028, 1}, {320020, 1}, {300030, 1}, {300024, 1}, {320016, 1}, {300026, 1}, {300022, 1}, {290043, 1}, {290041, 1}, {330021, 1}, {660032, 1}, {670015, 1}, {670013, 1}, {310009, 1}, {660036, 1}, {320024, 1}, {320022, 1}, {590023, 1}, {300040, 1}, {590021, 1}}
+)
+
+
+TrainZone = {{100, 100, 2400, 400}}
+FullZone = {{987, 100, 1914, 438}}
 

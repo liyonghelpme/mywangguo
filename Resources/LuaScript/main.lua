@@ -18,22 +18,11 @@ local function main()
 
     ---------------
     require "Global.INCLUDE"
-    require "logic.Logic"
-    require "values.Value"
-    require "MyDia.MainDialog"
-    require "MyDia.AllFight"
-    require "MyDia.AllHeroes"
-    require "MyDia.AllLevel"
-    require "MyDia.AllUser"
-    require "MyDia.AllFriend"
-    require 'MyDia.Formation'
-    require "Battle.BattleGround"
-    --require "Mock.MainMap"
-    
+    require "Miao.Logic"
+    require "Miao.MiaoScene"
 
-    --global.director:runWithScene(ui.createScene(MainMap.new()))
-    print("mainScene")
-    global.director:runWithScene(mainScene())
+
+    global.director:runWithScene(MiaoScene.new())
 end
 
 xpcall(main, __G__TRACKBACK__)

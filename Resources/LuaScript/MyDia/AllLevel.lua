@@ -1,16 +1,4 @@
 AllLevel = class()
-function AllLevel:goBack()
-    global.director:popView()
-    return true
-end
-function AllLevel:goUpdate()
-    global.httpController:addRequest('getAllLevel', dict(), self.getAllLevel, nil, self)
-    return true
-end
-function AllLevel:goLevel(num, dataNum)
-    global.director:pushView(AllFriend.new(nil, Logic.level[dataNum]), 1, 0, 1)
-    return false
-end
 function AllLevel:ctor()
     self.INIT_X = 0
     self.INIT_Y = 0
@@ -18,7 +6,7 @@ function AllLevel:ctor()
     self.HEIGHT = 70
     self.BACK_HEI = global.director.disSize[2]
     self.INITOFF = self.BACK_HEI-80
-    self.content = {{'返回', self.goBack}, {'更新', self.goUpdate}, {'兽族1', goLevel}}
+    self.content = {'兽族1', '兽族2', '兽族3', '更新', '返回'}
     self.TabNum = #self.content
     self.data = {}
 
@@ -35,17 +23,14 @@ function AllLevel:ctor()
 end
 
 function AllLevel:getAllLevel(rep, param)
-    Logic.level = rep['level']
+    self.level = rep['level']
     self.content = {}
-    local count = 0
-    table.insert(self.content, {'返回', self.goBack})
-    table.insert(self.content, {'更新', self.goUpdate})
-    count = #self.content
-    for k, v in ipairs(Logic.level) do
-        count = count+1
-        table.insert(self.content, {v['name'], self.goLevel, count, k})
+    for k, v in ipairs(self.level) do
+        table.insert(self.content, v['name'])
     end
-
+    
+    table.insert(self.content, '更新')
+    table.insert(self.content, '返回')
     self.TabNum = #self.content
 
     removeSelf(self.flowTab)
@@ -83,8 +68,10 @@ function AllLevel:touchEnded(x, y)
         if child ~= nil then
             local i = child:getTag()
             print(i)
-            local ret = self.content[i][2](self, self.content[i][3], self.content[i][4])
-            if ret then
+            if i == #self.content-1 then
+                global.httpController:addRequest('getAllLevel', dict(), self.getAllLevel, nil, self)
+            elseif i == #self.content then
+                global.director:popView()
                 return
             end
         end
@@ -111,7 +98,7 @@ function AllLevel:initTabs()
         t:setTag(i)
         self.data[i] = sp
         local sz = sp:getContentSize()
-        local w = setColor(setPos(addLabel(sp, self.content[i][1], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
+        local w = setColor(setPos(addLabel(sp, self.content[i], "", 33), {sz.width/2, sz.height/2}), {0, 0, 0})
     end
 end
 

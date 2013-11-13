@@ -1,0 +1,250 @@
+require "heapq"
+require "Miao.FuncPeople"
+require "Miao.Worker"
+
+PEOPLE_STATE = {
+    FREE = 0,
+    START_FIND = 1,
+    IN_FIND = 2,
+    FIND = 3,
+    IN_MOVE = 4,
+    START_WORK = 5,
+    IN_WORK = 7,
+    IN_HOME = 8,
+    GO_AWAY = 9,
+    PAUSED = 10,
+}
+MiaoPeople2 = class()
+function MiaoPeople2:ctor(m, data)
+    self.map = m
+    self.state = PEOPLE_STATE.FREE
+    self.health = 0
+    self.maxHealth = 15
+    self.tired = false
+    self.goBack = nil
+    self.myHouse = nil
+    self.lastState = nil
+    self.id = data.id
+    self.name = str(math.random(99999))
+    self.stone = 0
+    self.food = 0
+    self.product = 0
+    self.productKind = 0
+        
+    self.bg = CCNode:create()
+
+    self.changeDirNode = addSprite(self.bg, "people"..self.id.."_lb_0.png")
+    local sz = self.changeDirNode:getContentSize()
+    --人物图像向上偏移一半高度 到达块中心位置
+    setAnchor(self.changeDirNode, {Logic.people[1].ax/sz.width, (sz.height-Logic.people[1].ay-SIZEY)/sz.height})
+
+    if self.id == 1 then
+        self.funcPeople = Worker.new(self)
+    elseif self.id == 2 then
+        self.funcPeople = Merchant.new(self) 
+    end
+
+    createAnimation("people"..self.id.."_lb", "people"..self.id.."_lb_%d.png", 0, 4, 1, 0.5, false)
+    createAnimation("people"..self.id.."_lt", "people"..self.id.."_lt_%d.png", 0, 4, 1, 0.5, false)
+    createAnimation("people"..self.id.."_rb", "people"..self.id.."_rb_%d.png", 0, 4, 1, 0.5, false)
+    createAnimation("people"..self.id.."_rt", "people"..self.id.."_rt_%d.png", 0, 4, 1, 0.5, false)
+    createAnimation("peopleSend", "people3_%d.png", 1, 11, 1, 1, false)
+    registerEnterOrExit(self)
+
+    self.stateLabel = ui.newBMFontLabel({text=str(self.state), size=20})
+    setPos(self.stateLabel, {0, 100})
+    self.bg:addChild(self.stateLabel)
+
+    self.posLabel = ui.newBMFontLabel({text="0, 0", font="bound.fnt"})
+    setPos(self.posLabel, {0, 150})
+    self.bg:addChild(self.posLabel)
+end
+
+function MiaoPeople2:enterScene()
+    registerUpdate(self)
+    --Event:registerEvent(EVENT_TYPE.ROAD_CHANGED, self)
+end
+function MiaoPeople2:receiveMsg(name, msg)
+    if name == EVENT_TYPE.ROAD_CHANGED then
+    end
+end
+
+function MiaoPeople2:findHouse()
+    if self.myHouse == nil then
+        local allBuild = self.map.mapGridController.allBuildings
+        for k, v in pairs(allBuild) do
+            --找house
+            if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 then
+                self.myHouse = k
+                print("findHouse setOwner")
+                k:setOwner(self)
+                break
+            end
+        end
+    end
+    self.predictTarget = self.myHouse
+end
+
+
+--CCAction加回调函数来做动作
+function MiaoPeople2:doFree()
+    if self.state == PEOPLE_STATE.FREE then
+        self:findWorkBuilding()
+        self:findHouse()
+        if self.predictTarget ~= nil then
+            self.state = PEOPLE_STATE.START_FIND
+        end
+    end
+end
+function MiaoPeople2:doPath()
+    if self.state == PEOPLE_STATE.START_FIND then
+        local p = getPos(self.bg)
+        local mxy = getPosMapFloat(1, 1, p[1], p[2])
+        local mx, my = mxy[3], mxy[4]
+        
+        self.startPoint = {mx, my} 
+        self.endPoint = nil
+        self.openList = {}
+        self.pqDict = {}
+        self.closedList = {}
+        self.path = {}
+        self.cells = {}
+        
+        local bp = getPos(self.predictTarget.bg)
+        local txy = getPosMapFloat(1, 1, bp[1], bp[2])
+        local tx, ty = txy[3], txy[4]
+        self.predictEnd = {tx, ty}
+
+        local sk = getMapKey(mx, my)
+        self.cells[sk] = {}
+        self.cells[sk].gScore = 0
+        self:calcH(mx, my)
+        self:calcF(mx, my)
+        self:pushQueue(mx, my)
+
+        self.state = PEOPLE_STATE.IN_FIND
+    end
+    --加入了一组action 但是前面的action需要等待后面的action结束之后才能 执行
+    if self.state == PEOPLE_STATE.IN_FIND then
+        local n = 1
+        --所有建筑物  水面 道路
+        local buildCell = self.map.mapGridController.mapDict
+        local staticObstacle = self.map.staticObstacle 
+        while n < 50 do
+            if #self.openList == 0 then
+                break
+            end
+            local fScore = heapq.heappop(self.openList)
+            local possible = self.pqDict[fScore]
+            if #possible > 0 then
+                --print("possible", simple.encode(possible))
+                local n = math.random(#possible)
+                local point = table.remove(possible, n)
+                --local point = table.remove(possible)
+                --print("point", point)
+                local x, y = getXY(point)
+                --print("x, y", x, y)
+                --仿射坐标
+                --local ax, ay = normalToAffine(x, y)
+                local key = getMapKey(x, y)
+                if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
+                    self.endPoint = {x, y} 
+                    self.realTarget = buildCell[key][#buildCell[key]][1]
+                    print("findTarget", self.predictTarget.picName, self.realTarget.picName)
+                    break
+                end
+
+                if self.endPoint == nil then
+                    self:checkNeibor(x, y)
+                end
+            end
+            n = n+1
+        end
+        self.map:updateCells(self.cells, self.map.cells)
+        --找到路径
+        if self.endPoint ~= nil then
+            print("Find Path Over")
+            self.state = PEOPLE_STATE.FIND
+            self:getPath()
+
+            self.oldPredictTarget = self.predictTarget
+            self.openList = nil
+            self.closedList = nil
+            self.pqDict = nil
+            self.cells = nil
+
+
+        elseif #self.openList == 0 then
+        --回家无路可走了 休息 
+            self.state = PEOPLE_STATE.FREE
+            self.openList = nil
+            self.closedList = nil
+            self.pqDict = nil
+            self.cells = nil
+        --下一帧继续寻路
+        else
+        end
+    end
+
+    if self.state == PEOPLE_STATE.FIND then
+        self.state = PEOPLE_STATE.IN_MOVE
+        local temp = {} 
+        for i=2, #self.path, 1 do
+            local np = self.path[i]
+            local cxy = setBuildMap({1, 1, np[1], np[2]})
+            table.insert(temp, sequence({callfunc(self, self.setDir, cxy), moveto(1, cxy[1], cxy[2]), callfunc(self, self.setZord)}))
+        end
+        local function toWork()
+            self.state = PEOPLE_STATE.START_WORK 
+        end
+        table.insert(temp, callfunc(nil, toWork))
+        self.bg:runAction(sequence(temp))
+    end
+end
+function MiaoPeople2:startRest(diff)
+    if self.state == PEOPLE_STATE.START_WORK then
+        if self.realTarget.id == 1 then
+            self.workTime = 0 
+            self.state = PEOPLE_STATE.IN_WORK
+            local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
+            setPos(self.bg, np)
+            self.changeDirNode:runAction(fadeout(0.5))
+        end
+    end
+end
+function MiaoPeople2:doRest(diff)
+    if self.state == PEOPLE_STATE.IN_WORK then
+        if self.realTarget.id == 1 then
+            self.workTime = self.workTime+diff
+            if self.realTarget.deleted then
+                self.state = PEOPLE_STATE.FREE
+                self.myHouse = nil
+                self.changeDirNode:runAction(fadein(0.5))
+            else
+            end
+        end
+    end
+end
+function MiaoPeople2:startWork(diff)
+    if self.state == PEOPLE_STATE.START_WORK then
+    end
+end
+function MiaoPeople2:doWork(diff)
+    if self.state == PEOPLE_STATE.IN_WORK then
+    end
+end
+function MiaoPeople2:doMove(diff)
+    if self.state == PEOPLE_STATE.IN_MOVE then
+    end
+end
+function MiaoPeople2:update(diff)
+    self:doFree(diff)
+    self:doPath(diff)
+    self:doMove(diff)
+    self:startWork(diff)
+    self:doWork(diff)
+    self:startRest(diff)
+    self:doRest(diff)
+end
+
+require "Miao.MiaoPeople3"

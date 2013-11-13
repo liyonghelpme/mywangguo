@@ -64,6 +64,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     //搜索文件路径
     CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
+    CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");

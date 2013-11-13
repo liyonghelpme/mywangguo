@@ -4,6 +4,8 @@ function MapGridController:ctor(scene)
     self.mapDict = {}
     self.allBuildings = {}
     self.allSoldiers = {}
+    self.allEnvTile = {}
+    self.solList = {}
 end
 
 --掉落物品占用单个网格
@@ -12,8 +14,30 @@ end
 function MapGridController:clearRxRyMap(rx, ry, obj)
 end
 function MapGridController:addSoldier(sol)
+    --暂时不用管理所有soldier信息
+    self.allSoldiers[sol] = true
+    --士兵当前不占用地面体积 建筑物可以摆放在士兵身上
+    table.insert(self.solList, sol)
 end
 function MapGridController:removeSoldier(sol)
+    self.allSoldiers[sol] = false
+    for k, v in ipairs(self.solList) do
+        if v == sol then
+            table.remove(self.solList, k)
+            break
+        end
+    end
+    --不用删除node soldier自己删除自己的node
+    --removeSelf(sol.bg)
+end
+--TODO
+function MapGridController:removeTheseSol(t)
+    local temp = {}
+    for k, v in ipairs(self.allSoldiers) do
+        if t[k.kind] > 0 then
+            t[k.kind] = t[k.kind]-1
+        end
+    end
 end
 function MapGridController:removeAllSoldiers()
 end
@@ -46,6 +70,7 @@ function MapGridController:clearMap(build)
             curY = curY+1
         end
     end
+    self.scene:updateMapGrid()
 end
 
 function MapGridController:updatePosMap(sizePos)
@@ -71,14 +96,17 @@ function MapGridController:updatePosMap(sizePos)
     return {initX, initY}
 end
 
-
 function MapGridController:addBuilding(chd)
-    self.allBuildings[chd] = true
+    if chd.picName == 'build' then
+        self.allBuildings[chd] = true
+    else
+        self.allEnvTile[chd] = true
+    end
     self:updateMap(chd)
 end
 function MapGridController:removeBuilding(build)
     self:clearMap(build)
     self.allBuildings[build] = nil
+    self.allEnvTile[build] = nil
 end
-
 

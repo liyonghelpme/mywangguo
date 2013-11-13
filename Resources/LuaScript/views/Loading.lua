@@ -7,13 +7,13 @@ function Loading:ctor()
     registerUpdate(self)
     registerEnterOrExit(self)
 
-    local temp = setColor(setSize(setPos(setAnchor(addSprite(self.bg, "images/loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255})
+    local temp = setColor(setSize(setPos(setAnchor(addSprite(self.bg, "loadMain.png"), {0, 0}), {0, 0}), global.director.disSize), {255, 255, 255, 255})
 
 
-    setSize(setPos(setAnchor(addSprite(self.bg, "images/wangguoLogo.png"), {0, 0}), {19,  fixY(480, 4, 116)}), {184, 116})
-    addAction(setSize(setPos(setAnchor(addSprite(self.bg, "images/loadingCircle.png"), {0.5, 0.5}), {763, fixY(480, 37, 0)}), {50, 57}), repeatForever(rotateby(2000, 360)))
-    setSize(setPos(setAnchor(addSprite(self.bg, "images/loadingWord.png"), {0, 0}), {607, fixY(480, 23, 29)}), {129, 29}) 
-    addAction(setAnchor(setPos(addSprite(self.bg, nil), {0, 0}), {0, 0}), repeatForever(animate(1500, frames("images/lighting%d.png", 0, 6))))
+    setSize(setPos(setAnchor(addSprite(self.bg, "wangguoLogo.png"), {0, 0}), {19,  fixY(480, 4, 116)}), {184, 116})
+    addAction(setSize(setPos(setAnchor(addSprite(self.bg, "loadingCircle.png"), {0.5, 0.5}), {763, fixY(480, 37, 0)}), {50, 57}), repeatForever(rotateby(2000, 360)))
+    setSize(setPos(setAnchor(addSprite(self.bg, "loadingWord.png"), {0, 0}), {607, fixY(480, 23, 29)}), {129, 29}) 
+    addAction(setAnchor(setPos(addSprite(self.bg, nil), {0, 0}), {0, 0}), repeatForever(animate(1500, frames("lighting%d.png", 0, 6))))
     
     self.processNum = altasWord('red', '0%')
     self.bg:addChild(self.processNum)
