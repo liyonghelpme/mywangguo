@@ -84,6 +84,7 @@ function MiaoPath:checkNeibor(x, y)
                     --建筑物不能贯通周围邻居
                     local oldDist = self.allBuilding[bb] or 999999
                     self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
+                    table.insert(bb.belong, self.target.name)
                     print("add Building ", bb.id, bb.picName)
                 else
                     print("no road")

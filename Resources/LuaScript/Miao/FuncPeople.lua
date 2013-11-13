@@ -19,3 +19,6 @@ function FuncPeople:initView()
     createAnimation("people"..self.people.id.."_rt", "people"..self.people.id.."_rt_%d.png", 0, 4, 1, 0.5, false)
     createAnimation("peopleSend", "people3_%d.png", 1, 11, 1, 1, false)
 end
+function FuncPeople:checkWork(k)
+    return false
+end

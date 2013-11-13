@@ -28,6 +28,7 @@ function MiaoBuild:ctor(m, data)
     self.moveTarget = nil
     self.rate = 0
     self.data = Logic.buildings[self.id]
+    self.belong = {}
 
 
     self.food = 0
@@ -104,6 +105,14 @@ function MiaoBuild:ctor(m, data)
     self.stateLabel = ui.newBMFontLabel({text="", size=15})
     setPos(self.stateLabel, {0, 70})
     self.bg:addChild(self.stateLabel)
+
+    self.inRangeLabel = ui.newBMFontLabel({text="", size=15, color={102, 0, 0}})
+    setPos(self.inRangeLabel, {0, 120})
+    self.bg:addChild(self.inRangeLabel)
+    
+    self.possibleLabel = ui.newBMFontLabel({text="", size=15, color={0, 102, 0}})
+    setPos(self.possibleLabel, {0, 130})
+    self.bg:addChild(self.possibleLabel)
 
     --看一下 CCNode 0 0 位置 和 一半位置
     --
@@ -233,7 +242,12 @@ end
 function MiaoBuild:update(diff)
     local map = getBuildMap(self)
     self.posLabel:setString("     "..map[3].." "..map[4])
-    self.stateLabel:setString(str(self.food).." "..simple.encode(self.product).." "..self.workNum.." "..self.stone)
+    self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
+    local s = ''
+    for k, v in ipairs(self.belong) do
+        s = s..v.." "
+    end
+    self.inRangeLabel:setString(s)
 end
 function MiaoBuild:enterScene()
     registerUpdate(self)
@@ -405,6 +419,7 @@ function MiaoBuild:removeSelf()
     self.funcBuild:removeSelf()
     self.deleted = true
     self.map:removeBuilding(self)
+    Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 --用于Move 建筑
 --再次点击 确认

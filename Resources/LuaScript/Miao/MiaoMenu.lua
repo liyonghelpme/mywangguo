@@ -39,6 +39,12 @@ function MiaoMenu:ctor(s)
     setPos(but.bg, {550, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
+
+    local vs = getVS()
+    local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
+    self.bg:addChild(stateLabel)
+    setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
+    self.stateLabel = stateLabel
 end
 function MiaoMenu:onCat()
     self.scene.page.buildLayer:addCat()
