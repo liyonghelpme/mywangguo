@@ -1,4 +1,4 @@
-require "miao.MiaoPeople"
+require "Miao.MiaoPeople"
 require "model.MapGridController"
 require "Miao.TestCat"
 MiaoBuildLayer = class(MoveMap)
