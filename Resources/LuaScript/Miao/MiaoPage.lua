@@ -148,7 +148,7 @@ function MiaoPage:beginBuild(kind, id)
     if self.curBuild == nil then
         local vs = getVS()
         --先确定位置 再加入到 buildLayer里面
-        self.curBuild = MiaoBuild.new(self.buildLayer, {picName=kind, id=id}) 
+        self.curBuild = MiaoBuild.new(self.buildLayer, {picName=kind, id=id, bid=getBid()}) 
         local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         p = normalizePos({p.x, p.y}, 1, 1)
         self.curBuild:setPos(p)

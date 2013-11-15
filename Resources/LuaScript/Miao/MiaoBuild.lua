@@ -15,9 +15,14 @@ function MiaoBuild:ctor(m, data)
     self.map = m
     self.sx = 1
     self.sy = 1
+    self.bid = data.bid
     self.colNow = 0
     --道路的状态
     self.value = 0
+    if data.picName == 'build' and data.id == 15 then
+        data.picName = 't'
+        data.id = nil
+    end
     self.picName = data.picName
     self.id = data.id
     self.owner = nil

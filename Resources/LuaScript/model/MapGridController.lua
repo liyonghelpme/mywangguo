@@ -6,6 +6,7 @@ function MapGridController:ctor(scene)
     self.allSoldiers = {}
     self.allEnvTile = {}
     self.solList = {}
+    self.bidToBuilding = {}
 end
 
 --掉落物品占用单个网格
@@ -97,8 +98,9 @@ function MapGridController:updatePosMap(sizePos)
 end
 
 function MapGridController:addBuilding(chd)
-    if chd.picName == 'build' then
+    if chd.picName == 'build' and chd.data ~= nil and chd.data.kind == 0 then
         self.allBuildings[chd] = true
+        self.bidToBuilding[chd.bid] = chd
     else
         self.allEnvTile[chd] = true
     end

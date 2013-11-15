@@ -84,6 +84,46 @@ function MiaoBuildLayer:initSlope()
     b:finishBuild()
 
 end
+function MiaoBuildLayer:initCat()
+    local u = CCUserDefault:sharedUserDefault()
+    local cat = u:getStringForKey("people")
+    if cat ~= "" then
+        cat = simple.decode(cat)
+        for k, v in ipairs(cat) do
+            local p = MiaoPeople.new(self, {id=3})
+            self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+            local pos = normalizePos({v.px, v.py}, 1, 1)
+            setPos(p.bg, pos)
+            p:setZord()
+            self.mapGridController:addSoldier(p)
+            if v.hid ~= nil then
+                p.myHouse = self.mapGridController.bidToBuilding[v.hid]
+                p.myHouse:setOwner(p)
+            end
+        end
+    end
+end
+function MiaoBuildLayer:initBuild()
+    local u = CCUserDefault:sharedUserDefault()
+    local build = u:getStringForKey("build")
+    local mbid = 0
+    if build ~= "" then
+        build = simple.decode(build)
+        for k, v in ipairs(build) do
+            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            local p = normalizePos({v.px, v.py}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+            mbid = math.max(v.bid, mbid)
+        end
+        mbid = mbid+1
+        Logic.maxBid = mbid
+    end
+end
+--[[
 function MiaoBuildLayer:initBuild()
     local b = MiaoBuild.new(self, {picName='build', id=1})
     local p = normalizePos({200, 200}, 1, 1)
@@ -139,7 +179,7 @@ function MiaoBuildLayer:initBuild()
     b:finishBuild()
 
 end
-
+--]]
 function MiaoBuildLayer:initSea()
     local initX = -128
     local initY = 500
@@ -328,6 +368,7 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initMerchantRoad()
     self:initBuild()
+    self:initCat()
 end
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
@@ -417,7 +458,7 @@ function MiaoBuildLayer:addCat()
     local pos = normalizePos({600, 400}, 1, 1)
     setPos(p.bg, pos)
     p:setZord()
-
+    self.mapGridController:addSoldier(p)
 end
 function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param})

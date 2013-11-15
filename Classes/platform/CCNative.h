@@ -3,6 +3,8 @@
 #define __CC_EXTENSION_CCNATIVE_H_
 
 #include "cocos2d_ext_const.h"
+#include "cocos2d.h"
+using namespace cocos2d;
 
 NS_CC_EXT_BEGIN
 
@@ -24,5 +26,7 @@ private:
 };
 
 NS_CC_EXT_END
+
+void setScriptTouchPriority(CCLayer *lay, int pri);
 
 #endif // __CC_EXTENSION_CCNATIVE_H_

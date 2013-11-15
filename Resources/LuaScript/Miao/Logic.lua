@@ -1,4 +1,6 @@
 Logic = {}
+Logic.name = "liyong"
+Logic.uid = nil
 Logic.resource = {silver=0, food=0, wood=0, stone=0}
 function doGain(r)
     for k, v in pairs(r) do
@@ -6,4 +8,11 @@ function doGain(r)
     end
 end
 Logic.paused = false
+Logic.maxBid = 0
+function getBid()
+    Logic.maxBid = Logic.maxBid+1
+    return Logic.maxBid
+end
+
+
 

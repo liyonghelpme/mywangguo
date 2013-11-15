@@ -24,17 +24,20 @@ function MiaoPeople:ctor(m, data)
     self.state = PEOPLE_STATE.APPEAR
     self.passTime = 0
     self.health = 0
-    self.maxHealth = 5
+    self.maxHealth = 20
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
     self.lastState = nil
     self.id = data.id
     self.name = str(math.random(99999))
+    self.food = 0
     self.stone = 0
+    self.product = 0
     self.data = Logic.people[self.id]
     self.miaoPath = MiaoPath.new(self)
     self.stateStack = {}
+
 
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
@@ -295,20 +298,6 @@ function MiaoPeople:findWorkBuilding()
                     self.predictTarget = allStoneQuarry[1]
                     self.predictTarget:setOwner(self)
                 end
-            --[[
-            if k.id == 2 and k.workNum >= 10 then
-                --锁定了农田和 工厂的 使用者
-                if #allFreeFactory > 0 and #allFreeStore > 0 then
-                    self.stateLabel:setString("findFactory!!!")
-                    self.predictFactory = allFreeFactory[1]
-                    self.predictFactory:setOwner(self) 
-                    self.predictStore = allFreeStore[1]
-                    self.predictStore:setOwner(self)
-                    k:setOwner(self)
-                    self.predictTarget = k
-                    print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.predictFactory)
-                end
-            --]]
                 --种地去
             elseif k.id == 2 and k.workNum < 10 then
                 k:setOwner(self)
@@ -332,23 +321,11 @@ function MiaoPeople:findWorkBuilding()
             elseif k.id == 12 then
                 print("try to collect stone")
                 --还可以采集石头
-                if k.stone < 10 then
-                    if #allFreeMine > 0 then
-                        self.predictMine = allFreeMine[1]
-                        self.predictMine:setOwner(self)
-                        self.predictTarget = k
-                        k:setOwner(self)
-                    end
-                --准备生产铁器
-                elseif k.stone >= 10 then
-                    if #allFreeSmith > 0 and #allFreeFactory > 0 then
-                        self.predictFactory = allFreeFactory[1] 
-                        self.predictFactory:setOwner(self)
-                        self.predictSmith = allFreeSmith[1]
-                        self.predictSmith:setOwner(self)
-                        self.predictTarget = k
-                        k:setOwner(self)
-                    end
+                if #allFreeMine > 0 then
+                    self.predictMine = allFreeMine[1]
+                    self.predictMine:setOwner(self)
+                    self.predictTarget = k
+                    k:setOwner(self)
                 end
             elseif k.id == 14 then
                 --很难攒够原材料
@@ -473,6 +450,7 @@ function MiaoPeople:initFind(diff)
             --没有找到工作地点 或者 购买物品的地点
             if self.predictTarget == nil then
                 --普通村民 没有呆在房间内 则回到房间内
+                --重新生成建筑物连通性路径
                 if self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
                     self:findHouse()
                 --商人往回走 miaoPath 初始化结束
@@ -712,6 +690,10 @@ function MiaoPeople:doMove(diff)
                 self:setDir(cxy[1], cxy[2])
                 self:setZord()
                 self.curPoint = self.curPoint+1
+                --是否在运送货物
+                if self.food > 0 or self.stone > 0 or self.product > 0 then
+                    self.health = self.health-1
+                end
             end
         end
     end

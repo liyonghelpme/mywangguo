@@ -145,8 +145,9 @@ function ui.newButton(params)
     lay:setAnchorPoint(ccp(0, 0))
     sp:setAnchorPoint(ccp(0, 0))
     local text = params.text
-    local size = params.size
+    local size = params.size or 18
     local conSize = params.conSize
+    local priority = params.priority
 
     local spSize = {sz.width, sz.height}
 
@@ -188,12 +189,12 @@ function ui.newButton(params)
         setSize(sp, {w, h})
     end
     obj.sp = sp
-    registerTouch(obj)
+    registerTouch(obj, priority)
     if conSize ~= nil then
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
+        obj.text = setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
     end
     obj:setAnchor(0.5, 0.5)
     return obj

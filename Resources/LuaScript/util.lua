@@ -31,7 +31,7 @@ function registerMultiTouch(obj)
     obj.bg:registerScriptTouchHandler(onTouch, true, kCCMenuHandlerPriority, true)
     obj.bg:setTouchEnabled(true)
 end
-function registerTouch(obj)
+function registerTouch(obj, pri)
     local function onTouch(eventType, x, y)
         if eventType == "began" then   
             return obj:touchBegan(x, y)
@@ -41,8 +41,11 @@ function registerTouch(obj)
             return obj:touchEnded(x, y)
         end
     end
+    if pri == nil then
+        pri = kCCMenuHandlerPriority
+    end
     --single Touch
-    obj.bg:registerScriptTouchHandler(onTouch, false, kCCMenuHandlerPriority, true)
+    obj.bg:registerScriptTouchHandler(onTouch, false, pri, true)
     obj.bg:setTouchEnabled(true)
 end
 --注册更新通常需要注册enter和exitScene 这样在退出场景的时候自动关闭更新
@@ -1223,4 +1226,13 @@ function bitand(x, y)
     p = p + p
   end
   return z
+end
+
+function delayCall(t, cb, par)
+    local handler
+    local function cancel()
+        cb(par)
+        CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(handler)
+    end
+    handler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(cancel, t, false)
 end
