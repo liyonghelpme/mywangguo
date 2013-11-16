@@ -19,10 +19,11 @@ local function main()
     ---------------
     require "Global.INCLUDE"
     require "Miao.Logic"
-    require "Miao.MiaoScene"
+    --require "Miao.MiaoScene"
+    require "Miao.TMXScene"
 
 
-    global.director:runWithScene(MiaoScene.new())
+    global.director:runWithScene(TMXScene.new())
 end
 
 xpcall(main, __G__TRACKBACK__)

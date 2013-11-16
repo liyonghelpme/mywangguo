@@ -15,11 +15,11 @@ function PressMenu:ctor(s)
     }
     local vs = getVS()
     local initX = 10+50
-    local initY = vs.height-10-20
+    local initY = vs.height-10-20-40
     local offY = -45
     local dTime= 0
     for i=1, #temp, 1 do
-        local but = ui.newButton({image="blueButton.png", conSize={100, 40}, text=temp[i], callback=self.onBut, delegate=self, param=i, size=20})
+        local but = ui.newButton({image="yearboard.jpg", conSize={100, 40}, text=temp[i], callback=self.onBut, delegate=self, param=i, size=20, color={10, 10, 10}})
         setPos(but.bg, {initX, initY+(i-1)*offY})
         but:setAnchor(0.5, 0.5)
         self.bg:addChild(but.bg)

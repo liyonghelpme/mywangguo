@@ -545,6 +545,7 @@ function getPosMap(sx, sy, px, py)
     return {sx, sy, px+sx, py+1}
 end
 
+
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]
@@ -669,7 +670,7 @@ function cartesianToNormal(x, y)
     return round(x/SIZEX), round(y/SIZEY)
 end
 function normalToAffine(nx, ny)
-    return round((nx+ny)/2), round((ny-nx)/2)
+    return round((ny-nx)/2), round((nx+ny)/2)
 end
 
 --用于计算当前位置和攻击范围的关系
@@ -1235,4 +1236,9 @@ function delayCall(t, cb, par)
         CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(handler)
     end
     handler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(cancel, t, false)
+end
+function addCLayer(b)
+    local l = CCLayer:create()
+    b:addChild(l)
+    return l
 end

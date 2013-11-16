@@ -14,5 +14,24 @@ function getBid()
     return Logic.maxBid
 end
 
+Logic.date = 0
+--s 秒
+--每周 1 分钟
+--每个月 4周
+--每年 12个月
+function getDate(t)
+    local w = math.floor(t/60)
+    local m = math.floor(w/4)
+    w = w%4
+    local y = math.floor(m/12)
+    m = m%12
+    return y, m, w
+end
+function checkCost(c)
+end
+function doCost(c)
+end
+function doGain(g)
+end
 
 

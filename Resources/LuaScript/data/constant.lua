@@ -1,8 +1,10 @@
-MapWidth=3000
-MapHeight=3000
+MapWidth=3136
+MapHeight=1568
 SIZEX=64
-SIZEY=47
-DEBUG=true
+SIZEY=32
+MapGX = 23
+MapGY = 26
+DEBUG=false
 MAX_BUILD_ZORD=10000
 
 Keys = {
