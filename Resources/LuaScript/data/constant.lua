@@ -1,5 +1,6 @@
 MapWidth=3136
-MapHeight=1568
+FIX_HEIGHT = 128
+MapHeight=1700+FIX_HEIGHT
 SIZEX=64
 SIZEY=32
 MapGX = 23

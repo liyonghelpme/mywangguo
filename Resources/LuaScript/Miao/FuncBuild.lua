@@ -29,3 +29,5 @@ function FuncBuild:setWorker(b)
 end
 function FuncBuild:clearWorker(b)
 end
+function FuncBuild:initWork()
+end

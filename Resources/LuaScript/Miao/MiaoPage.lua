@@ -5,20 +5,26 @@ function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
     setContentSize(self.bg, {MapWidth, MapHeight})
-    local col = math.ceil(MapWidth/256)
-    local row = math.ceil(MapHeight/192)
-    local offX = 256
-    local offY = 192
-    local bat = CCSpriteBatchNode:create("grasstile.png")
-    self.bat = bat
-    self.bg:addChild(bat)
-    for i = 0, row-1, 1 do
-        for j =0, col-1, 1 do
-            local temp = CCSprite:create("grasstile.png")
-            self.bat:addChild(temp)
-            setAnchor(setPos(temp, {j*offX, i*offY}), {0, 0})
+
+    self.backpg = CCSpriteBatchNode:create("sea.png")
+    self.bg:addChild(self.backpg)
+    local col = math.ceil(MapWidth/64)
+    local row = math.ceil(MapHeight/32)+1
+    for i=0, row-1, 1 do
+        local initx = 0
+        if i%2 == 1 then
+            initx = 64 
+        end
+        for j=0, col-1, 1 do
+            local s = CCSprite:create("sea.png")
+            self.backpg:addChild(s)
+            setPos(s, {j*64+initx, i*32})
         end
     end
+
+    self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
+    self.bg:addChild(self.tileMap)
+    setPos(self.tileMap, {200, -100+FIX_HEIGHT})
 
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate.bg = self.bg
@@ -41,6 +47,8 @@ function MiaoPage:exitScene()
     Event:unregisterEvent(EVENT_TYPE.FINISH_MOVE, self)
 end
 
+function MiaoPage:initDataOver()
+end
 function MiaoPage:receiveMsg(name, msg)
     if name == EVENT_TYPE.DO_MOVE then
         self.blockMove = true
@@ -157,6 +165,7 @@ function MiaoPage:beginBuild(kind, id)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
+        self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         
         Logic.paused = true
     end
@@ -269,4 +278,12 @@ function MiaoPage:onMove()
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
         Logic.paused = true
     end
+end
+
+function MiaoPage:setBuilding(b)
+    print("setBuilding", self.curBuild, b)
+    if b == self.curBuild then
+        return 1
+    end
+    return 0
 end

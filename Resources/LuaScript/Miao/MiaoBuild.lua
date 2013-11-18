@@ -1,6 +1,7 @@
 require "Miao.FuncBuild"
 require "Miao.Tree"
 require "Miao.Bridge"
+require "Miao.House"
 require "Miao.Farm"
 require "Miao.Road"
 require "Miao.Factory"
@@ -21,7 +22,7 @@ function MiaoBuild:ctor(m, data)
     self.value = 0
     if data.picName == 'build' and data.id == 15 then
         data.picName = 't'
-        data.id = nil
+        --data.id = nil
     end
     self.picName = data.picName
     self.id = data.id
@@ -119,6 +120,7 @@ function MiaoBuild:ctor(m, data)
     setPos(self.possibleLabel, {0, 130})
     self.bg:addChild(self.possibleLabel)
 
+    self.funcBuild:initWork()
     --看一下 CCNode 0 0 位置 和 一半位置
     --
     --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
@@ -126,7 +128,6 @@ function MiaoBuild:ctor(m, data)
 
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
-    --registerMultiTouch(self)
 end
 function MiaoBuild:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
@@ -147,12 +148,11 @@ function MiaoBuild:touchesBegan(touches)
             self.inSelf = true
             local setSuc = 0
             if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
-                setSuc = global.director.curScene:setBuilding(self)
+                setSuc = self.map.scene:setBuilding(self)
             end
             --print("touchesBegan", setSuc, self.state, self.Planing)
             if setSuc == 1 then
                 self.dirty = 1
-                self.accMove = 0
                 self.map.mapGridController:clearMap(self)
                 --正在建造当中 touch 过程不调整 属性只在确认之后调整属性
                 --移动过程中 一开始就要调整属性 除非建造的时候 一开始就对周围产生影响力
@@ -165,6 +165,7 @@ function MiaoBuild:touchesBegan(touches)
         end
     end
 
+    self.accMove = 0
     self.moveStart = self.lastPos[0]
 end
 function MiaoBuild:touchesMoved(touches)
@@ -188,8 +189,9 @@ function MiaoBuild:touchesMoved(touches)
             self:setColPos()
         end
         self:setPos(newPos)
-        self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
+        self:setMenuWord()
     end
+    self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
 end
 
 function MiaoBuild:setColor(c)
@@ -201,17 +203,55 @@ function MiaoBuild:setColor(c)
         end
     end
 end
+
+function MiaoBuild:calNormal()
+    local p = getPos(self.bg)
+    local px, py = fixToAffXY(p[1]-1472, p[2])
+    local nx, ny = cartesianToNormal(px, py)
+    return nx, ny
+end
+--修正一下坐标
+function MiaoBuild:calAff()
+    local nx, ny = self:calNormal()
+    local ax, ay = normalToAffine(nx, ny)
+    local ax, ay = MapGX-1-ax, MapGY-1-ay
+    return ax, ay
+end
 function MiaoBuild:setColPos()
-    self.colNow = 0
-    local other = self.map:checkCollision(self)
-    print("checkCollision result", other)
-    if other ~= nil then
+
+    self.colNow = 1
+    self.otherBuild = nil
+    self:setColor(0)
+
+    local ax, ay = self:calAff()
+    
+    local layer = self.map.scene.tileMap:layerNamed("dirt1");
+    if ax < 0 or ay < 0 or ax >= MapGX or ay >= MapGY or ax >= 21 then
         self.colNow = 1
         self:setColor(0)
-    else
-        self:setColor(1);
+        return
     end
-    self.otherBuild = other
+
+    --可以建造的位置 并且没有其它建筑物
+    local gid = layer:tileGIDAt(ccp(ax, ay))
+    local pro = self.map.scene.tileMap:propertiesForGID(gid)
+    if pro ~= nil then
+        local v = pro:valueForKey("b"):intValue()
+        print("tile gid", gid, v)
+        if v == 1 then
+
+            local other = self.map:checkCollision(self)
+            print("checkCollision result", other)
+            if other ~= nil then
+                self.colNow = 1
+                self.otherBuild = other
+                self:setColor(0)
+            else
+                self.colNow = 0
+                self:setColor(1)
+            end
+        end
+    end
 end
 function MiaoBuild:touchesEnded(touches)
     if self.doMove then
@@ -237,6 +277,9 @@ function MiaoBuild:touchesEnded(touches)
                 end
             end
         else
+            if self.accMove < 20 and self.state == BUILD_STATE.MOVE then
+                self.map.scene:finishBuild() 
+            end
             --没有冲突 顺利移动建筑物
             if self.picName == 'move' then
                 self.funcBuild:handleFinMove()
@@ -375,6 +418,8 @@ end
 function MiaoBuild:finishBuild()
     --白名单 方法
     self:adjustRoad()
+    self.changeDirNode:stopAllActions()
+    self.changeDirNode:runAction(fadein(0))
     self.funcBuild:finishBuild()
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
@@ -458,4 +503,11 @@ function MiaoBuild:moveToPos(p)
     setPos(self.bg, p)
     self.map.mapGridController:updateMap(self)
     self.funcBuild:finishMove()
+end
+
+function MiaoBuild:setMenuWord()
+    if self.state == BUILD_STATE.MOVE then
+        local ax, ay = self:calAff()
+        self.map.scene.scene.menu.infoWord:setString(Logic.buildings[self.id].name..'('..ax..","..ay..")")
+    end
 end

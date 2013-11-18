@@ -41,11 +41,6 @@ function MiaoMenu:ctor(s)
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
 
-    local vs = getVS()
-    local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
-    self.bg:addChild(stateLabel)
-    setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
-    self.stateLabel = stateLabel
 
     self.menu = nil
     local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onMenu, delegate=self, text="菜单", size=20, param=2, priority=-127})
@@ -59,6 +54,12 @@ function MiaoMenu:ctor(s)
     setPos(but.bg, {vs.width-60, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
+
+    local vs = getVS()
+    local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
+    self.bg:addChild(stateLabel)
+    setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
+    self.stateLabel = stateLabel
 end
 function MiaoMenu:onSave()
     self.scene:saveGame()

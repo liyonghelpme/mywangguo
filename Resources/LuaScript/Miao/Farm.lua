@@ -1,19 +1,3 @@
-House = class(FuncBuild)
-function House:finishBuild()
-    self.baseBuild:doMyEffect()
-end
-function House:removeSelf()
-    if self.baseBuild.owner ~= nil then
-        self.baseBuild.owner:clearHouse()
-        self.baseBuild.owner = nil
-    end
-end
-function House:finishMove()
-    if self.owner ~= nil then
-        self.owner:clearHouse()
-        self.owner = nil
-    end
-end
 
 Farm = class(FuncBuild)
 --workNum 有个最大值

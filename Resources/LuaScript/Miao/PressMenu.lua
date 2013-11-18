@@ -1,3 +1,4 @@
+require "Miao.Setting"
 require "Miao.NewBuildMenu"
 require "Miao.PeopleMenu"
 PressMenu = class()
@@ -49,5 +50,9 @@ function PressMenu:onBut(p)
         local pm = PeopleMenu.new(self)
         self.bg:addChild(pm.bg)
         setPos(pm.bg, {10+100+50, vs.height-10-45-20})
+    elseif p == 7 then
+        local set = Setting.new(self)
+        self.bg:addChild(set.bg)
+        setPos(set.bg, {10+100+50, vs.height-10-45-20})
     end
 end

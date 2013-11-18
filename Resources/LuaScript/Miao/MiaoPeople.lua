@@ -2,6 +2,7 @@ require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
 require "Miao.MiaoPath"
+require "Miao.TestCat"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -39,6 +40,7 @@ function MiaoPeople:ctor(m, data)
     self.stateStack = {}
 
 
+    print("init MiaoPeople", self.id)
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
     elseif self.id == 2 then

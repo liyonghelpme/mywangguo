@@ -74,8 +74,10 @@ function MapGridController:clearMap(build)
     self.scene:updateMapGrid()
 end
 
+--存储affine 坐标如何
 function MapGridController:updatePosMap(sizePos)
     local map = getPosMap(sizePos[1], sizePos[2], sizePos[3], sizePos[4])
+    --local map = sizePos[5]:calAff()
     local sx = map[1]
     local sy = map[2]
     local initX = map[3]

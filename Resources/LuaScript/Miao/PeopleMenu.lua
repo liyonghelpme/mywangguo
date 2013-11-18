@@ -1,4 +1,5 @@
 require "Miao.AllPeople"
+require "Miao.FindPeople"
 PeopleMenu = class()
 function PeopleMenu:ctor(p)
     self.parent = p
@@ -14,7 +15,7 @@ function PeopleMenu:ctor(p)
     local initY = 0
     local offY = -45
     for i=1, #temp, 1 do
-        local but = ui.newButton({image="blueButton.png", conSize={100, 40}, text=temp[i], callback=self.onBut, delegate=self, param=i, size=20})
+        local but = ui.newButton({image="yearboard.jpg", conSize={100, 40}, text=temp[i], callback=self.onBut, delegate=self, param=i, size=20, color={10, 10, 10}})
         setPos(but.bg, {initX, initY+(i-1)*offY})
         but:setAnchor(0.5, 0.5)
         self.bg:addChild(but.bg)
@@ -26,5 +27,9 @@ function PeopleMenu:onBut(p)
         self.parent.scene.menu.menu = ap
         global.director:popView()
         global.director:pushView(ap, 1, 0)
+    elseif p==4 then
+        local fp = FindPeople.new(self.parent.scene)
+        global.director:popView()
+        global.director:pushView(fp, 1, 0)
     end
 end

@@ -696,8 +696,25 @@ function normalToCartesian(nx, ny)
     return nx*SIZEX, ny*SIZEY
 end
 function affineToNormal(dx, dy)
-    return dx-dy, dx+dy
+    return dy-dx, dx+dy
 end
+--加上坐标修正
+--x y 修正
+function affineToCartesian(ax, ay)
+    ax, ay = MapGX-ax-1, MapGY-ay-1 
+    local nx, ny = affineToNormal(ax, ay)
+    local cx, cy = normalToCartesian(nx, ny)
+    return fixToCarXY(cx, cy)
+end
+--修正要转化成affine 坐标的 笛卡尔坐标的xy值
+function fixToAffXY(x, y)
+    return x, y-FIX_HEIGHT
+end
+--修正从affine坐标转化来的car坐标的xy值
+function fixToCarXY(x, y)
+    return x, y+FIX_HEIGHT
+end
+
 
 function checkMiaoPoint(x, y, px, py, sx, sy)
     local nx, ny = cartesianToNormalFloat(x, y)
@@ -1242,3 +1259,4 @@ function addCLayer(b)
     b:addChild(l)
     return l
 end
+

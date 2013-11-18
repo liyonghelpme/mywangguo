@@ -35,6 +35,20 @@ function MiaoBuildLayer:ctor(s)
     --寻路功能模块
     self.curSol = nil
     self.cells = {}
+    self.passTime = 10
+    registerEnterOrExit(self)
+end
+function MiaoBuildLayer:enterScene()
+    registerUpdate(self)
+end
+
+--商人的状态也要保存么？
+function MiaoBuildLayer:update(diff)
+    self.passTime = self.passTime+diff
+    if self.passTime >= 10 then
+        self.passTime = 0
+        self:addPeople(2)
+    end
 end
 
 function MiaoBuildLayer:switchPathSol()
@@ -102,6 +116,17 @@ function MiaoBuildLayer:initCat()
             end
         end
     end
+end
+function MiaoBuildLayer:initBackPoint()
+    local b = MiaoBuild.new(self, {picName='backPoint'})
+    local cx, cy = affineToCartesian(22, 0)
+    local p = normalizePos({cx+1472, cy}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+    self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
     local u = CCUserDefault:sharedUserDefault()
@@ -363,12 +388,16 @@ function MiaoBuildLayer:initRoad()
 end
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
+    --[[
     self:initSea()
     self:initSlope()
     self:initRoad()
     self:initMerchantRoad()
+    --]]
     self:initBuild()
+    self:initBackPoint()
     self:initCat()
+
 end
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
@@ -464,11 +493,14 @@ function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
     local pos
-    if param == 1 then
-        pos = normalizePos({600, 400}, 1, 1)
+    if param == 3 or param == 1 then
+        local vs = getVS()
+        pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+        pos = normalizePos({pos.x, pos.y}, 1, 1)
     --商人
-    else
-        pos = normalizePos({200, 20}, 1, 1)
+    elseif param == 2 then
+        local cx, cy = affineToCartesian(21, 24)
+        pos = normalizePos({cx+1472, cy}, 1, 1)
     end
     setPos(p.bg, pos)
     p:setZord()
