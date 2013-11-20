@@ -4,6 +4,9 @@ require "Miao.TestCat"
 MiaoBuildLayer = class(MoveMap)
 function MiaoBuildLayer:ctor(s)
     self.scene = s
+    self.offX = 1472
+    self.offY = 0
+
     self.moveZone = {{0, 0, MapWidth, MapHeight}}
     self.buildZone = {{0, 0, MapWidth, MapHeight}}
     self.staticObstacle = {}
@@ -45,7 +48,7 @@ end
 --商人的状态也要保存么？
 function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
-    if self.passTime >= 10 then
+    if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
         self:addPeople(2)
     end
@@ -119,8 +122,8 @@ function MiaoBuildLayer:initCat()
 end
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint'})
-    local cx, cy = affineToCartesian(22, 0)
-    local p = normalizePos({cx+1472, cy}, 1, 1)
+    local cx, cy = affineToCartesian(21, 0)
+    local p = normalizePos({cx, cy}, 1, 1)
     b:setPos(p)
     b:setColPos()
     self:addBuilding(b, MAX_BUILD_ZORD)
@@ -299,6 +302,7 @@ function MiaoBuildLayer:initMerchantRoad()
         end
     end
 end
+--[[
 function MiaoBuildLayer:initRoad()
     local initX = 60
     local initY = 60
@@ -386,6 +390,7 @@ function MiaoBuildLayer:initRoad()
         b:finishBuild()
     end
 end
+--]]
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     --[[
@@ -394,11 +399,52 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initMerchantRoad()
     --]]
+    self:initRoad()
     self:initBuild()
     self:initBackPoint()
     self:initCat()
+    self.initYet = true
+end
+function MiaoBuildLayer:initRoad()
+    --不用调整road 的 方向信息的info
+    local nlayer = self.scene.tileMap:layerNamed("road")
+    print("init road now", nlayer)
+    if nlayer ~= nil then
+        for i = 0, MapGX-1, 1 do
+            for j=0, MapGY-1, 1 do
+                --28 ~ 36
+                local gid = nlayer:tileGIDAt(ccp(i, j))
+                if gid ~= 0 then
+                    local cx, cy = affineToCartesian(i, j)
+                    print("road x y", cx, cy)
+                    local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
+                    local p = normalizePos({cx, cy}, 1, 1)
+                    b:setPos(p)
+                    b:setColPos()
+                    self:addBuilding(b, MAX_BUILD_ZORD)
+                    b:setPos(p)
+                    b:finishBuild()
+                end
+            end
+        end
+    end
+    
+    --[[
+    for i=1, 24, 1 do
+        local cx, cy = affineToCartesian(21, i)
+        print("road x y", cx, cy)
+        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
+        local p = normalizePos({cx, cy}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+    end
+    --]]
 
 end
+
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
     local initX = 60
@@ -492,15 +538,17 @@ end
 function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+    
+    local data = Logic.people[param]
     local pos
-    if param == 3 or param == 1 then
+    if data.kind == 1 then
         local vs = getVS()
         pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         pos = normalizePos({pos.x, pos.y}, 1, 1)
     --商人
-    elseif param == 2 then
+    elseif data.kind == 2 then
         local cx, cy = affineToCartesian(21, 24)
-        pos = normalizePos({cx+1472, cy}, 1, 1)
+        pos = normalizePos({cx, cy}, 1, 1)
     end
     setPos(p.bg, pos)
     p:setZord()

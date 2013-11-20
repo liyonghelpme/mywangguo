@@ -102,6 +102,7 @@ end
 function MapGridController:addBuilding(chd)
     if chd.picName == 'build' and chd.data ~= nil and chd.data.kind == 0 then
         self.allBuildings[chd] = true
+        --用于初始化进入游戏的时候 确定人物的房间
         self.bidToBuilding[chd.bid] = chd
     else
         self.allEnvTile[chd] = true

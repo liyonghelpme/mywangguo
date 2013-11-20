@@ -704,8 +704,19 @@ function affineToCartesian(ax, ay)
     ax, ay = MapGX-ax-1, MapGY-ay-1 
     local nx, ny = affineToNormal(ax, ay)
     local cx, cy = normalToCartesian(nx, ny)
+    cx = cx+1472
     return fixToCarXY(cx, cy)
 end
+
+--大地图坐标被抬高了
+function bigAffineToCartesian(ax, ay)
+    ax, ay = BIG_MAPX-ax-1, BIG_MAPY-ay-1 
+    local nx, ny = affineToNormal(ax, ay)
+    local cx, cy = normalToCartesian(nx, ny)
+    cx = cx+3200
+    return fixToCarXY(cx, cy)
+end
+
 --修正要转化成affine 坐标的 笛卡尔坐标的xy值
 function fixToAffXY(x, y)
     return x, y-FIX_HEIGHT

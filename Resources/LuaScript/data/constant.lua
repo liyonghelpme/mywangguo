@@ -8,6 +8,11 @@ MapGY = 26
 DEBUG=false
 MAX_BUILD_ZORD=10000
 
+BIG_MAPX = 50
+BIG_MAPY = 25
+BIG_MAPWIDTH = 4800
+BIG_MAPHEIGHT= 2400
+
 Keys = {
     buildingKey,
     equipKey,

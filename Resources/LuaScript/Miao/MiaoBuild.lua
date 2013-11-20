@@ -20,6 +20,7 @@ function MiaoBuild:ctor(m, data)
     self.colNow = 0
     --道路的状态
     self.value = 0
+    self.setYet = data.setYet
     if data.picName == 'build' and data.id == 15 then
         data.picName = 't'
         --data.id = nil
@@ -77,9 +78,13 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(CCSprite:create("slope"..(self.id-6)..".png"), {0.5, 0})
             self.funcBuild = Slope.new(self)
             self.funcBuild:initView()
-        else
+        elseif self.id == 5 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
+            self.funcBuild:initView()
+        else
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = FuncBuild.new(self)
             self.funcBuild:initView()
         end
     elseif self.picName == 'move' then
@@ -92,7 +97,7 @@ function MiaoBuild:ctor(m, data)
         self.changeDirNode = setPos(setRotation(CCSprite:create("hammer.png"), 45), {0, SIZEY})
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
-    else
+    elseif self.picName == 't' then
         self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
         self.funcBuild = Road.new(self)
     end
@@ -206,7 +211,7 @@ end
 
 function MiaoBuild:calNormal()
     local p = getPos(self.bg)
-    local px, py = fixToAffXY(p[1]-1472, p[2])
+    local px, py = fixToAffXY(p[1]-self.map.offX, p[2])
     local nx, ny = cartesianToNormal(px, py)
     return nx, ny
 end
@@ -417,7 +422,9 @@ end
 --只有拆除路径 铺设路径 
 function MiaoBuild:finishBuild()
     --白名单 方法
-    self:adjustRoad()
+    if not self.setYet then
+        self:adjustRoad()
+    end
     self.changeDirNode:stopAllActions()
     self.changeDirNode:runAction(fadein(0))
     self.funcBuild:finishBuild()

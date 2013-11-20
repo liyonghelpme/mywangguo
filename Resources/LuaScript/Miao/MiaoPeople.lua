@@ -45,7 +45,7 @@ function MiaoPeople:ctor(m, data)
         self.funcPeople = Worker.new(self)
     elseif self.id == 2 then
         self.funcPeople = Merchant.new(self) 
-    elseif self.id == 3 then
+    elseif self.id == 3 or self.id == 4 then
         self.funcPeople = Cat.new(self)
     end
     self.funcPeople:initView()
@@ -459,7 +459,7 @@ function MiaoPeople:initFind(diff)
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
                     self.goBack = true
                 --农民没有地方去工作 则休息一下 miaoPath 已经初始化ok了
-                elseif self.data.kind == 1 and self.state == PEOPLE_STATE.START_FIND then
+                elseif (self.data.kind == 1 or self.data.kind == 2) and self.state == PEOPLE_STATE.START_FIND then
                     self.state = PEOPLE_STATE.PAUSED
                     self.pausedTime = 0
                 end

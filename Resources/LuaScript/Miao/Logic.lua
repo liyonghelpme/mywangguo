@@ -2,6 +2,11 @@ Logic = {}
 Logic.name = "liyong"
 Logic.uid = nil
 Logic.resource = {silver=0, food=0, wood=0, stone=0}
+Logic.battleTime = nil
+Logic.battleSoldier = nil
+
+Logic.waitPeople = {}
+
 function doGain(r)
     for k, v in pairs(r) do
         Logic.resource[k] = Logic.resource[k]+v
@@ -33,5 +38,6 @@ function doCost(c)
 end
 function doGain(g)
 end
+
 
 
