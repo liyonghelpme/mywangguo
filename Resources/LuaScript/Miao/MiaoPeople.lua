@@ -2,6 +2,8 @@ require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
 require "Miao.MiaoPath"
+require "Miao.TestCat"
+require "Miao.TestCat2"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -24,24 +26,30 @@ function MiaoPeople:ctor(m, data)
     self.state = PEOPLE_STATE.APPEAR
     self.passTime = 0
     self.health = 0
-    self.maxHealth = 5
+    self.maxHealth = 20
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
     self.lastState = nil
     self.id = data.id
     self.name = str(math.random(99999))
+    self.food = 0
     self.stone = 0
+    self.product = 0
     self.data = Logic.people[self.id]
     self.miaoPath = MiaoPath.new(self)
     self.stateStack = {}
 
+
+    print("init MiaoPeople", self.id)
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
     elseif self.id == 2 then
         self.funcPeople = Merchant.new(self) 
     elseif self.id == 3 then
         self.funcPeople = Cat.new(self)
+    elseif self.id >= 4 then
+        self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
 
@@ -54,7 +62,8 @@ end
 function MiaoPeople:receiveMsg(name, msg)
     if name == EVENT_TYPE.ROAD_CHANGED then
         --清理寻路的road信息
-        self.miaoPath.allBuilding = nil
+        self.dirty = true
+        --self.miaoPath.allBuilding = nil
     end
 end
 function MiaoPeople:exitScene()
@@ -147,6 +156,7 @@ function MiaoPeople:findWorkBuilding()
     local allFreeStore = {}
     local allFreeMine = {}
     local allFreeSmith = {}
+    local allFreeQuarry = {}
     local allBuild
     --有粮食的 农田 有石材的采石场
     local allFoodFarm = {}
@@ -155,7 +165,8 @@ function MiaoPeople:findWorkBuilding()
     --当所有的工作地点都ko的时候 就要findHouse
     --self.myHouse == nil? self.myHouse.deleted == true? 
     --农民才从房屋附近寻路
-    if self.miaoPath.allBuilding == nil then
+    if self.miaoPath.allBuilding == nil or self.dirty == true then
+        self.dirty = false
         --从房子寻找
         if self.data.kind == 1 then
             print("miao Path init find!!!!!!!!!!!!")
@@ -176,6 +187,7 @@ function MiaoPeople:findWorkBuilding()
             self.state = PEOPLE_STATE.FIND_NEAR_BUILDING
         end
     else
+        --TODO!! 猫使用的是Cat
         allBuild = self.miaoPath.allBuilding
         --v 是到这个建筑物的距离
         for k, v in pairs(allBuild) do
@@ -185,58 +197,15 @@ function MiaoPeople:findWorkBuilding()
             --商人 不需要 占用 建筑物
 
             if self.data.kind == 2 and k.deleted == false then
+                ret = self.funcPeople:checkWork(k)
                 --农田没有购买者 走到后发现目标被移除了就取消工作 
                 --移动建筑物相当于新建一个建筑物 broken = true
                 --避免抢占 owner == nil
                 --去农田
-                ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-                --去商店
-                if not ret then
-                    ret = (k.picName == 'build' and k.id == 6 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-                end
-                --采矿场
-                if not ret then
-                    print("stone ", k.stone)
-                    ret = (k.picName == 'build' and k.id == 12 and k.state == BUILD_STATE.FREE and k.stone > 0 and k.owner == nil)
-                end
-                --铁匠铺
-                if not ret then
-                    ret = (k.picName == 'build' and k.id == 13 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-                end
             --农民要占用建筑物
             elseif self.data.kind == 1 and k.deleted == false then
-                --两种情况 给 其它工厂运输农作物 丰收状态 
-                --生产农作物
-                --先不允许并行处理
-                if k.picName == 'build' and k.owner == nil then
-                    if k.id == 2 then
-                        ret = (k.state == BUILD_STATE.FREE and k.workNum < 10)
-                        if not ret then
-                        --可以运送到工厂了 寻找最近的工厂 拉着拉着 没有工厂了怎么办？ 到目标地发现建筑物不在了则停止
-                            ret = (k.state == BUILD_STATE.FREE and k.workNum >= 10)
-                        end
-                        --一条链路
-                    --去工厂生产产品 运送粮食到工厂 或者 到工厂生产产品
-                    --运送物资到工厂 如果工厂 的 stone > 0 就可以开始生产了  
-                    --或者将生产好的产品运送到 商店
-                    --没有直接去工厂的说法
-                    --采矿场
-                    elseif k.id == 12 then
-                        print("mine stone", k.stone)
-                        ret = k.stone < 10 
-                        --运送矿石到 商店 不同类型商店经营物品不同
-                        if not ret then
-                            ret = k.stone >= 10
-                        end
-                    elseif k.id == 11 then
-                        --ret = k.stone ~= nil and k.stone > 0 
-                    --灯塔可以生产
-                    elseif k.id == 14 then
-                        ret = k.workNum < 10
-                    end
-                    --工厂 空闲状态 没有粮食储备 且没有其它用户 
-                end
-                print("build kind ", k.id, k.food, k.owner)
+                print("build kind ", k.id, k.food, k.owner, k.workNum)
+                ret = self.funcPeople:checkWork(k)
                 --空闲工厂 没有生产产品
                 --工厂就只管生产产品就得了
                 if k.id == 5 and k.owner == nil then
@@ -258,11 +227,14 @@ function MiaoPeople:findWorkBuilding()
                 end
 
                 --可以收集的 农田和矿市场 
-                if k.id == 2 and k.workNum >= 0 then
+                if k.id == 2 and k.workNum > 0 then
                     table.insert(allFoodFarm, k)
                 end
-                if k.id == 12 and k.stone >= 0 then
+                if k.id == 12 and k.stone > 0 then
                     table.insert(allStoneQuarry, k)
+                end
+                if k.id == 12 and k.owner == nil then
+                    table.insert(allFreeQuarry, k)
                 end
             end
 
@@ -282,10 +254,17 @@ function MiaoPeople:findWorkBuilding()
     print("allFreeSmith num", #allFreeSmith)
     print("allFreeMine num", #allFreeMine)
     print("allFoodFarm num", #allFoodFarm)
-    print("allStoneQuary num", #allStoneQuarry)
+    print("allStoneQuarry num", #allStoneQuarry)
+    print("allFreeQuarry num", #allFreeQuarry)
+    global.director.curScene.menu.stateLabel:setString(string.format("allFoodFarm %d\nallStoneQuarry %d\n", #allFoodFarm, #allStoneQuarry))
     if #allPossible > 0 then
         local minb = nil
         local minDist = 99999
+        --但是最近的possible 的 条件不成熟 不能选择啊~~
+        local r = math.random(#allPossible)
+        local k = allPossible[r]
+        print("do what??", k.id)
+        --[[
         for k, v in ipairs(allPossible) do
             print("allBuild  distance", v.id, allBuild[v], minDist)
             if allBuild[v] < minDist then
@@ -294,23 +273,35 @@ function MiaoPeople:findWorkBuilding()
             end
         end
         local k = minb
-        --
+        --]]
         --基本潜质
         --工作种类
         if self.data.kind == 1 then
             --寻找空闲的工厂 运送物资过去
             --寻找最近的工厂运送过去  行为转变了
-            if k.id == 2 and k.workNum >= 10 then
-                --锁定了农田和 工厂的 使用者
-                if #allFreeFactory > 0 and #allFreeStore > 0 then
+            --去食品商店 
+            --Planning
+            if k.id == 6 then
+                if #allFoodFarm > 0 and #allFreeFactory > 0 then
                     self.stateLabel:setString("findFactory!!!")
                     self.predictFactory = allFreeFactory[1]
                     self.predictFactory:setOwner(self) 
-                    self.predictStore = allFreeStore[1]
+                    self.predictStore = k 
                     self.predictStore:setOwner(self)
-                    k:setOwner(self)
-                    self.predictTarget = k
+
+                    self.predictTarget = allFoodFarm[1]
+                    self.predictTarget:setOwner(self)
                     print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.predictFactory)
+                end
+            elseif k.id == 13 then
+                if #allStoneQuarry > 0 and #allFreeFactory > 0 then
+                    self.predictFactory = allFreeFactory[1] 
+                    self.predictFactory:setOwner(self)
+                    self.predictSmith = k
+                    self.predictSmith:setOwner(self)
+
+                    self.predictTarget = allStoneQuarry[1]
+                    self.predictTarget:setOwner(self)
                 end
                 --种地去
             elseif k.id == 2 and k.workNum < 10 then
@@ -333,27 +324,17 @@ function MiaoPeople:findWorkBuilding()
                 end
             --采矿场
             elseif k.id == 12 then
+                print("try to collect stone")
                 --还可以采集石头
-                if k.stone < 10 then
-                    if #allFreeMine > 0 then
-                        self.predictMine = allFreeMine[1]
-                        self.predictMine:setOwner(self)
-                        self.predictTarget = k
-                        k:setOwner(self)
-                    end
-                --准备生产铁器
-                elseif k.stone >= 10 then
-                    if #allFreeSmith > 0 and #allFreeFactory > 0 then
-                        self.predictFactory = allFreeFactory[1] 
-                        self.predictFactory:setOwner(self)
-                        self.predictSmith = allFreeSmith[1]
-                        self.predictSmith:setOwner(self)
-                        self.predictTarget = k
-                        k:setOwner(self)
-                    end
+                if #allFreeMine > 0 then
+                    self.predictMine = allFreeMine[1]
+                    self.predictMine:setOwner(self)
+                    self.predictTarget = k
+                    k:setOwner(self)
                 end
             elseif k.id == 14 then
                 --很难攒够原材料
+                print("goto Tower")
                 if #allFoodFarm > 0 and #allStoneQuarry > 0 and #allFreeFactory > 0 then
                     self.predictTower = k
                     k:setOwner(self)
@@ -366,6 +347,8 @@ function MiaoPeople:findWorkBuilding()
                 end
             end
         --购买粮食
+        --去商店
+        --去矿石头场
         elseif self.id == 2 then
             --一块农田只有一个购买者
             --购买结束需要clearBuyer
@@ -451,8 +434,8 @@ function MiaoPeople:initFind(diff)
             self.goMine = false
         --因为角色还占用着 矿场的 工具呢 所以需要返回
         elseif self.goQuarry then
-            self.predictTarget = self.predictQuarry
-            self.predictQuarry = nil
+            self.predictTarget = self.tempQuarry
+            self.tempQuarry = nil
             self.goQuarry = false
         elseif self.goFactory then
             print("goFactory !!!!!")
@@ -472,11 +455,16 @@ function MiaoPeople:initFind(diff)
             --没有找到工作地点 或者 购买物品的地点
             if self.predictTarget == nil then
                 --普通村民 没有呆在房间内 则回到房间内
+                --重新生成建筑物连通性路径
                 if self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
                     self:findHouse()
-                --商人往回走
-                elseif self.id == 2 then
+                --商人往回走 miaoPath 初始化结束
+                elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
                     self.goBack = true
+                --农民没有地方去工作 则休息一下 miaoPath 已经初始化ok了
+                elseif (self.data.kind == 1 or self.data.kind == 2) and self.state == PEOPLE_STATE.START_FIND then
+                    self.state = PEOPLE_STATE.PAUSED
+                    self.pausedTime = 0
                 end
             end
         end
@@ -707,6 +695,10 @@ function MiaoPeople:doMove(diff)
                 self:setDir(cxy[1], cxy[2])
                 self:setZord()
                 self.curPoint = self.curPoint+1
+                --是否在运送货物
+                if self.food > 0 or self.stone > 0 or self.product > 0 then
+                    self.health = self.health-1
+                end
             end
         end
     end
@@ -721,132 +713,16 @@ function MiaoPeople:doWork(diff)
         self.workTime = self.workTime+diff
         --工厂工作
         if self.realTarget.id == 5 then
-            if self.workTime > 1 then
-                self.workTime = 0
-                self.health = self.health -1
-                --生产混合原材料物品
-                if self.realTarget.productKind ~= nil then
-                    if self.realTarget.food > 0 and self.realTarget.stone > 0 then
-                        self.realTarget.food = self.realTarget.food - 1
-                        self.realTarget.stone = self.realTarget.stone - 1
-                        changeTable(self.realTarget.product, 3, 1)
-                        if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 or self.realTarget.stone <= 0 then
-                            self.state = PEOPLE_STATE.FREE
-                            self.realTarget:setOwner(nil)
-                            self.product = self.realTarget.product[3]
-                            self.realTarget.product[3] = 0
-                            self.realTarget = nil
-                            self.goTower = true
-                            return
-                        end
-                    end
-                --生产食物
-                elseif self.realTarget.food > 0 then
-                    self.realTarget.food = self.realTarget.food - 1
-                    changeTable(self.realTarget.product, 1, 1)
-                    --如果工厂生产数量超过上限 就不要生产了
-                    --运送生产物到商店里面
-                    if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 then
-                        self.state = PEOPLE_STATE.FREE
-                        self.realTarget:setOwner(nil)
-                        self.product = self.realTarget.product[1]
-                        self.realTarget.product[1] = 0
-                        self.realTarget = nil
-                        self.goStore = true
-                        return
-                    end
-                --生产铁器
-                elseif self.realTarget.stone > 0 then
-                    self.realTarget.stone = self.realTarget.stone - 1
-                    changeTable(self.realTarget.product, 2, 1)
-                    --铁器数量
-                    if getDefault(self.realTarget.product, 2, 0) >= 10 or self.realTarget.stone <= 0 then
-                        self.state = PEOPLE_STATE.FREE
-                        self.realTarget:setOwner(nil)
-                        self.product = self.realTarget.product[2]
-                        self.realTarget.product[2] = 0
-                        self.realTarget = nil
-                        --运输铁器到商店里面
-                        self.goSmith = true
-                        return
-                    end
-                end
-                --生产结束 直到运送到工厂
-            end
+            self:workInFactory()
         --在采石场工作
         elseif self.realTarget.id == 11 then
-            if self.workTime > 1 then
-                self.workTime = 0
-                self.health = self.health -1
-                self.realTarget.stone = self.realTarget.stone + 1
-                --如果工厂生产数量超过上限 就不要生产了
-                --离开矿坑 但是predictQuarry 不会消除
-                if self.realTarget.stone >= 10 then
-                    self.state = PEOPLE_STATE.FREE
-                    self.stone = self.realTarget.stone
-                    self.realTarget.stone = 0
-
-                    self.realTarget:setOwner(nil)
-                    self.realTarget = nil
-                    self.goQuarry = true
-                    return
-                end
-                --正在工作的时候不要去休息
-                --[[
-                if self.health <= 0 then
-                    self.state = PEOPLE_STATE.FREE
-                    self.realTarget:setOwner(nil)
-                    self.realTarget = nil
-                end
-                --]]
-            end
+            self:workInMine()
         --农田工作 
         elseif self.realTarget.id == 2 then
-            if self.workTime > 1 then
-                self.workTime = 0
-                self.health = self.health-1
-                if self.realTarget.workNum >= 10 then
-                    self.state = PEOPLE_STATE.FREE
-                    self.realTarget:setOwner(nil)
-                    self.realTarget = nil
-                else
-                    self.realTarget:changeWorkNum(1)
-                    --种地的时候 tired 直接 回去即可
-                    --正在工作的时候 不要去休息
-                    --[[
-                    if self.health <= 0 then
-                        self.state = PEOPLE_STATE.FREE 
-                        self.realTarget:setOwner(nil)
-                        self.realTarget = nil
-                    end
-                    --]]
-                end
-            end
+            self:workInFarm()
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
-        if self.realTarget.deleted then
-            self.state = PEOPLE_STATE.FREE
-            self.myHouse = nil
-        end
-        self.restTime = self.restTime+diff
-        if self.restTime > 1 then
-            self.restTime = 0
-            --用小数表示health 但是 休息结束的时候 需要做成 整数
-            self.health = self.health +1*(self.myHouse.rate+1)
-        end
-        --下一步开始寻路 去工作
-        --如果找到可以工作的地方再出现并且根据 目标调整当前位置
-        --找到可以去工作的目标 前提满足了出现在门口位置 四处找一个坐标可以移动
-        --调整当前的位置 
-        --开始行走
-        self.health = math.min(self.health, self.maxHealth)
-        if self.health >= self.maxHealth then
-            self.tired = false
-            self.lastState = PEOPLE_STATE.IN_HOME
-            self.lastEndPoint = self.tempEndPoint
-            self.state = PEOPLE_STATE.FREE
-            --self.bg:setVisible(true)
-        end
+        self:workInHome(diff)
     end
 end
 

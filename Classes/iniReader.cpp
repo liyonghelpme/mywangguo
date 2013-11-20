@@ -7,38 +7,38 @@ using namespace std;
 const int INI_LINE_MAX=400;
 
 map<string, string> *handleIni(const char *data, long size) {
-    printf("read File\n");
-    for (int i = 0; i < size; i++) {
-        printf("%c", data[i]);
-    }
     char line[INI_LINE_MAX];
-    //const char *start = data;
+    const char *start = data;
     bool finish = false;
     map<string, string> *nm = new map<string, string>();
     long count = 0;
-    CCLog("handleIni %ld", size);
+    CCLog("handleIni %d", size);
     while(!finish && count < size) {
-        //CCLog("count %d %c", count, data[count]);
-        int i;
+        CCLog("count %d %c", count, data[count]);
+        int i = 0;
+        while(start[0] == '\r' || start[0] == '\n') {
+            start = start++;
+            count++;
+        }
+
         for(i=0; count < size; i++, count++) {
-            if(data[count] == '\n') {
+            //request neturl not matter \n \r 
+            if(start[i] == '\n' || start[i] == '\r') {
                 break;
             }
-            line[i] = data[count];
+            line[i] = start[i];
         }
         if(count >= size)
             finish = true;
 
-        //start = start+i+1;
-        //跳过最后的换行 或者 最后一个
-        if(count < size)
-            count++;
+        start = start+i+1;
+        count++;
 
         int end = i;
         
         char key[INI_LINE_MAX];
         char value[INI_LINE_MAX];
-        for(i = 0; line[i] != '=' && i < end; i++) {
+        for(i = 0; line[i] != '='; i++) {
             key[i] = line[i];
         }
         key[i]='\0';
@@ -50,6 +50,11 @@ map<string, string> *handleIni(const char *data, long size) {
         value[j] = '\0';
         (*nm)[(char*)key] = (char*)value; 
         CCLog("key value %s %s", key, value);
+
+        while(start[0] == '\r' || start[0] == '\n') {
+            start = start++;
+            count++;
+        }
     }
     CCLog("finish handleIni");
     return nm;

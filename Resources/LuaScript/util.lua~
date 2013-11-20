@@ -31,7 +31,7 @@ function registerMultiTouch(obj)
     obj.bg:registerScriptTouchHandler(onTouch, true, kCCMenuHandlerPriority, true)
     obj.bg:setTouchEnabled(true)
 end
-function registerTouch(obj)
+function registerTouch(obj, pri)
     local function onTouch(eventType, x, y)
         if eventType == "began" then   
             return obj:touchBegan(x, y)
@@ -41,8 +41,11 @@ function registerTouch(obj)
             return obj:touchEnded(x, y)
         end
     end
+    if pri == nil then
+        pri = kCCMenuHandlerPriority
+    end
     --single Touch
-    obj.bg:registerScriptTouchHandler(onTouch, false, kCCMenuHandlerPriority, true)
+    obj.bg:registerScriptTouchHandler(onTouch, false, pri, true)
     obj.bg:setTouchEnabled(true)
 end
 --注册更新通常需要注册enter和exitScene 这样在退出场景的时候自动关闭更新
@@ -542,6 +545,7 @@ function getPosMap(sx, sy, px, py)
     return {sx, sy, px+sx, py+1}
 end
 
+
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]
@@ -666,7 +670,7 @@ function cartesianToNormal(x, y)
     return round(x/SIZEX), round(y/SIZEY)
 end
 function normalToAffine(nx, ny)
-    return round((nx+ny)/2), round((ny-nx)/2)
+    return round((ny-nx)/2), round((nx+ny)/2)
 end
 
 --用于计算当前位置和攻击范围的关系
@@ -692,8 +696,35 @@ function normalToCartesian(nx, ny)
     return nx*SIZEX, ny*SIZEY
 end
 function affineToNormal(dx, dy)
-    return dx-dy, dx+dy
+    return dy-dx, dx+dy
 end
+--加上坐标修正
+--x y 修正
+function affineToCartesian(ax, ay)
+    ax, ay = MapGX-ax-1, MapGY-ay-1 
+    local nx, ny = affineToNormal(ax, ay)
+    local cx, cy = normalToCartesian(nx, ny)
+    cx = cx+1472
+    return fixToCarXY(cx, cy)
+end
+
+function bigAffineToCartesian(ax, ay)
+    ax, ay = BIG_MAPX-ax-1, BIG_MAPY-ay-1 
+    local nx, ny = affineToNormal(ax, ay)
+    local cx, cy = normalToCartesian(nx, ny)
+    cx = cx+3200
+    return fixToCarXY(cx, cy)
+end
+
+--修正要转化成affine 坐标的 笛卡尔坐标的xy值
+function fixToAffXY(x, y)
+    return x, y-FIX_HEIGHT
+end
+--修正从affine坐标转化来的car坐标的xy值
+function fixToCarXY(x, y)
+    return x, y+FIX_HEIGHT
+end
+
 
 function checkMiaoPoint(x, y, px, py, sx, sy)
     local nx, ny = cartesianToNormalFloat(x, y)
@@ -1224,3 +1255,18 @@ function bitand(x, y)
   end
   return z
 end
+
+function delayCall(t, cb, par)
+    local handler
+    local function cancel()
+        cb(par)
+        CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(handler)
+    end
+    handler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(cancel, t, false)
+end
+function addCLayer(b)
+    local l = CCLayer:create()
+    b:addChild(l)
+    return l
+end
+

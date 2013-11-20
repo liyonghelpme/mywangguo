@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" width="50" height="25" tilewidth="128" tileheight="64">
+ <tileset firstgid="1" name="big" tilewidth="128" tileheight="128">
+  <image source="tiles-novos.png" width="640" height="1024"/>
+ </tileset>
+ <tileset firstgid="41" name="cas" tilewidth="140" tileheight="150">
+  <image source="castle.png" width="140" height="150"/>
+ </tileset>
+ <tileset firstgid="42" name="castle2" tilewidth="140" tileheight="150">
+  <image source="castle2.png" width="140" height="150"/>
+  <tile id="0">
+   <properties>
+    <property name="home" value="1"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="sea" width="50" height="25" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztw0ENAAAMA6HzUf8+p2I/SFg1VVVVVfX1AdyEg9c=
+  </data>
+ </layer>
+ <layer name="dirt1" width="50" height="25">
+  <data encoding="base64" compression="zlib">
+   eJztV9EOgyAQuy9wbtNt7v8/dBjT7EKuIIiCiZf0gbBg2ysDRK66aqne4e7wIuOz1M3h4TCS8VkKvN+y9OHrjc/SF+hgqN2XtTlvXUcs59CJHLWmw+fHeMT6UFsH+H0cng5D5Het64h9v1Uda/OEalWHzwv//wyx/a3X2eMMge+5vHJQuid9It95r08VdDCv0de1mdaZKNGnVB2MJzKaqqNWrkI857U6+ecE5wNDTp78NSfJ06F5Mk9Knw8h37fc4UPZsu7V7C5oraP3vfae+d5J+E6QoyM1v9Y6o9ge7/F2YtmCf9ac9X14qTGI7fEW33X5bwXmZWyudrE3ss4z5pjPLZTfVz0u1fMj6gd64CHf
+  </data>
+ </layer>
+ <layer name="road" width="50" height="25" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1kEKwCAMBMB8RGv1/3/UQz0qqMFs6A7sRRATzCEiREREvsSW0JKtCzn0WheghH1gQe0jDJIm51bixp1n8fyGnbcR+0gynp/ZXKHR/A9Lf+4DQd+BerztQuWLt7qJNFX2MgZQ
+  </data>
+ </layer>
+ <layer name="build" width="50" height="25" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1EEKACAIBEC/U/9/YETXLtFBwZm7sKhsBADdjOwAQCsvnVOhnypk4G5+zrttDntn8wdwLPHLAUo=
+  </data>
+ </layer>
+</map>

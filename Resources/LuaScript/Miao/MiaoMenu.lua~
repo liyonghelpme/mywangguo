@@ -1,3 +1,4 @@
+require "Miao.PressMenu"
 MiaoMenu = class()
 function MiaoMenu:ctor(s)
     self.scene = s
@@ -24,7 +25,7 @@ function MiaoMenu:ctor(s)
     self.bg:addChild(but.bg)
 
     local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onCat, delegate=self, text="猫咪", size=20, param=3})
-    setPos(but.bg, {440, 50})
+    setPos(but.bg, {550, 100})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
 
@@ -39,6 +40,51 @@ function MiaoMenu:ctor(s)
     setPos(but.bg, {550, 50})
     but:setAnchor(0.5, 0.5)
     self.bg:addChild(but.bg)
+
+
+    self.menu = nil
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onMenu, delegate=self, text="菜单", size=20, param=2, priority=-127})
+    setPos(but.bg, {vs.width-60, 100})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
+    self.mbut = but
+    --在进入场景之前 否则需要disable touch enabletouch
+
+    local but = ui.newButton({image="roleNameBut0.png", conSize={100, 50}, callback=self.onSave, delegate=self, text="保存", size=20, param=2, priority=-127})
+    setPos(but.bg, {vs.width-60, 50})
+    but:setAnchor(0.5, 0.5)
+    self.bg:addChild(but.bg)
+
+    local vs = getVS()
+    local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
+    self.bg:addChild(stateLabel)
+    setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
+    self.stateLabel = stateLabel
+end
+function MiaoMenu:onSave()
+    self.scene:saveGame()
+end
+function MiaoMenu:onMenu()
+    if self.menu == nil then
+        self.menu = PressMenu.new(self.scene)
+        global.director:pushView(self.menu, 1, 0)
+
+        print("priority 没办法调整啊 script的 Touch Entry 优先级")
+        local function adp()
+            setScriptTouchPriority(self.mbut.bg, -256)
+        end
+        --调整touch 优先级需要在touch处理结束之后 进行 touch中调整没有效果
+        delayCall(1, adp)
+        self.mbut.text:setString("返回")
+    else
+        self.menu = nil
+        global.director:popView()
+        self.mbut.text:setString("菜单")
+    end
+end
+function MiaoMenu:clearMenu()
+    self.menu = nil
+    self.mbut.text:setString("菜单")
 end
 function MiaoMenu:onCat()
     self.scene.page.buildLayer:addCat()

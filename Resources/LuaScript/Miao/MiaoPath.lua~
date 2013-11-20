@@ -54,8 +54,8 @@ function MiaoPath:checkNeibor(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
-    --不能超过10格
-    if self.cells[curKey].gScore >= 100 then
+    --农民不能超过10格 商人无限制
+    if self.cells[curKey].gScore >= 100 and self.target.data.kind == 1 then
         return
     end
     for n, nv in ipairs(neibors) do
@@ -84,6 +84,7 @@ function MiaoPath:checkNeibor(x, y)
                     --建筑物不能贯通周围邻居
                     local oldDist = self.allBuilding[bb] or 999999
                     self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
+                    table.insert(bb.belong, self.target.name)
                     print("add Building ", bb.id, bb.picName)
                 else
                     print("no road")

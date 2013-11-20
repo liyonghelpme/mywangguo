@@ -46,42 +46,36 @@ function Cat:initView()
     setPos(self.people.stateLabel, {0, 100})
     self.people.bg:addChild(self.people.stateLabel)
 end
---[[
-function Cat:enterScene()
-    registerUpdate(self)
-end
-function Cat:setZord()
-    local p = getPos(self.bg)
-    local zOrd = MAX_BUILD_ZORD-p[2]
-    self.bg:setZOrder(zOrd)
-end
-function Cat:update(diff)
-    self.passTime = self.passTime+diff
-    if self.passTime > 5 then
-        self.passTime = 0
-        print("self.state ", self.state)
-        if self.state == CAT_STATE.FREE then
-            self.state = CAT_STATE.RB
-            self.changeDirNode:stopAllActions()
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.rbMove)))
-        elseif self.state == CAT_STATE.RB then
-            print("left bottom")
-            self.state = CAT_STATE.LB
-            self.changeDirNode:stopAllActions()
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.lbMove)))
-        elseif self.state == CAT_STATE.LB then
-            self.state = CAT_STATE.RT
-            self.changeDirNode:stopAllActions()
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.rtMove)))
-        elseif self.state == CAT_STATE.RT then
-            self.state = CAT_STATE.LT
-            self.changeDirNode:stopAllActions()
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.ltMove)))
-        elseif self.state == CAT_STATE.LT then
-            self.state = CAT_STATE.FREE
-            self.changeDirNode:stopAllActions()
-            self.passTime = 5
+
+function Cat:checkWork(k)
+    local ret = false
+    --两种情况 给 其它工厂运输农作物 丰收状态 
+    --生产农作物
+    --先不允许并行处理
+    if k.picName == 'build' and k.owner == nil then
+        if k.id == 2 then
+            ret = (k.state == BUILD_STATE.FREE and k.workNum < 10)
+        --去工厂生产产品 运送粮食到工厂 或者 到工厂生产产品
+        --运送物资到工厂 如果工厂 的 stone > 0 就可以开始生产了  
+        --或者将生产好的产品运送到 商店
+        --没有直接去工厂的说法
+        --采矿场
+        elseif k.id == 6 then
+            print('try goto store')
+            ret = k.state == BUILD_STATE.FREE and k.workNum == 0
+        elseif k.id == 12 then
+            print("mine stone", k.stone)
+            ret = k.stone < 10 
+            --运送矿石到 商店 不同类型商店经营物品不同
+        elseif k.id == 13 then
+            ret = k.state == BUILD_STATE.FREE and k.workNum == 0
+        elseif k.id == 11 then
+            --ret = k.stone ~= nil and k.stone > 0 
+        --灯塔可以生产
+        elseif k.id == 14 then
+            ret = k.workNum < 10
         end
+        --工厂 空闲状态 没有粮食储备 且没有其它用户 
     end
+    return ret
 end
---]]

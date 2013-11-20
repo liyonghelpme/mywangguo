@@ -92,7 +92,8 @@ function MiaoPeople:handleQuarry()
                 self.state = PEOPLE_STATE.FREE
             else
                 --owner 还是 该用户 直到回家休息才放弃owner权限
-                self.predictQuarry = self.realTarget
+                --self.predictQuarry = self.realTarget
+                self.tempQuarry = self.realTarget
                 self.tempMine = self.predictMine
                 self.goMine = true
                 self.state = PEOPLE_STATE.FREE
@@ -247,5 +248,134 @@ function MiaoPeople:handleFactory()
         end
     end
 end
-function MiaoPeople:handleWork(diff)
+function MiaoPeople:handleTower()
+    self.realTarget.workNum = self.realTarget.workNum +self.product
+    self.product = 0
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.state = PEOPLE_STATE.FREE
 end
+
+
+function MiaoPeople:workInFactory()
+    if self.workTime > 1 then
+        self.workTime = 0
+        self.health = self.health -1
+        --生产混合原材料物品
+        print("product what??", self.realTarget.productKind)
+        if self.realTarget.productKind ~= nil then
+            print("product kind 3")
+            if self.realTarget.food > 0 and self.realTarget.stone > 0 then
+                self.realTarget.food = self.realTarget.food - 1
+                self.realTarget.stone = self.realTarget.stone - 1
+                changeTable(self.realTarget.product, 3, 1)
+                if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 or self.realTarget.stone <= 0 then
+                    self.state = PEOPLE_STATE.FREE
+                    self.realTarget:setOwner(nil)
+                    self.product = self.realTarget.product[3]
+                    self.realTarget.product[3] = 0
+                    self.realTarget = nil
+                    self.goTower = true
+                    return
+                end
+            end
+        --生产食物
+        elseif self.realTarget.food > 0 then
+            self.realTarget.food = self.realTarget.food - 1
+            changeTable(self.realTarget.product, 1, 1)
+            --如果工厂生产数量超过上限 就不要生产了
+            --运送生产物到商店里面
+            if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 then
+                self.state = PEOPLE_STATE.FREE
+                self.realTarget:setOwner(nil)
+                self.product = self.realTarget.product[1]
+                self.realTarget.product[1] = 0
+                self.realTarget = nil
+                self.goStore = true
+                return
+            end
+        --生产铁器
+        elseif self.realTarget.stone > 0 then
+            self.realTarget.stone = self.realTarget.stone - 1
+            changeTable(self.realTarget.product, 2, 1)
+            --铁器数量
+            if getDefault(self.realTarget.product, 2, 0) >= 10 or self.realTarget.stone <= 0 then
+                self.state = PEOPLE_STATE.FREE
+                self.realTarget:setOwner(nil)
+                self.product = self.realTarget.product[2]
+                self.realTarget.product[2] = 0
+                self.realTarget = nil
+                --运输铁器到商店里面
+                self.goSmith = true
+                return
+            end
+        end
+        --生产结束 直到运送到工厂
+    end
+end
+
+--把actionList 打出来
+--一个action 结束执行下一个action
+function MiaoPeople:workInMine()
+    if self.workTime > 1 then
+        self.workTime = 0
+        self.health = self.health -1
+        self.realTarget.stone = self.realTarget.stone + 1
+        --如果工厂生产数量超过上限 就不要生产了
+        --离开矿坑 但是predictQuarry 不会消除
+        print("workInMine", self.goQuarry)
+        if self.realTarget.stone >= 10 then
+            self.state = PEOPLE_STATE.FREE
+            self.stone = self.realTarget.stone
+            self.realTarget.stone = 0
+
+            self.realTarget:setOwner(nil)
+            self.realTarget = nil
+            self.goQuarry = true
+            return
+        end
+    end
+end
+function MiaoPeople:workInFarm()
+    if self.workTime > 1 then
+        self.workTime = 0
+        self.health = self.health-1
+        if self.realTarget.workNum >= 10 then
+            self.state = PEOPLE_STATE.FREE
+            self.realTarget:setOwner(nil)
+            self.realTarget = nil
+        else
+            self.realTarget:changeWorkNum(1)
+        end
+    end
+end
+function MiaoPeople:workInHome(diff)
+    if self.realTarget.deleted then
+        self.state = PEOPLE_STATE.FREE
+        self.myHouse = nil
+    end
+    self.restTime = self.restTime+diff
+    --0.5 恢复一下 共8s 总共16下
+    --调整一下时间频率即可
+    local ntime = 0.5/(1+self.myHouse.rate)
+    if self.restTime >= ntime then
+        self.restTime = 0
+        --用小数表示health 但是 休息结束的时候 需要做成 整数
+        local r = math.max(math.floor(self.maxHealth/16), 1)
+        self.health = self.health +r*(self.myHouse.rate+1)
+    end
+    --下一步开始寻路 去工作
+    --如果找到可以工作的地方再出现并且根据 目标调整当前位置
+    --找到可以去工作的目标 前提满足了出现在门口位置 四处找一个坐标可以移动
+    --调整当前的位置 
+    --开始行走
+    self.health = math.min(self.health, self.maxHealth)
+    if self.health >= self.maxHealth then
+        self.tired = false
+        self.lastState = PEOPLE_STATE.IN_HOME
+        self.lastEndPoint = self.tempEndPoint
+        self.state = PEOPLE_STATE.FREE
+        --self.bg:setVisible(true)
+    end
+end
+

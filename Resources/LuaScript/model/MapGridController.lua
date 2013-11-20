@@ -6,6 +6,7 @@ function MapGridController:ctor(scene)
     self.allSoldiers = {}
     self.allEnvTile = {}
     self.solList = {}
+    self.bidToBuilding = {}
 end
 
 --掉落物品占用单个网格
@@ -73,8 +74,10 @@ function MapGridController:clearMap(build)
     self.scene:updateMapGrid()
 end
 
+--存储affine 坐标如何
 function MapGridController:updatePosMap(sizePos)
     local map = getPosMap(sizePos[1], sizePos[2], sizePos[3], sizePos[4])
+    --local map = sizePos[5]:calAff()
     local sx = map[1]
     local sy = map[2]
     local initX = map[3]
@@ -97,8 +100,10 @@ function MapGridController:updatePosMap(sizePos)
 end
 
 function MapGridController:addBuilding(chd)
-    if chd.picName == 'build' then
+    if chd.picName == 'build' and chd.data ~= nil and chd.data.kind == 0 then
         self.allBuildings[chd] = true
+        --用于初始化进入游戏的时候 确定人物的房间
+        self.bidToBuilding[chd.bid] = chd
     else
         self.allEnvTile[chd] = true
     end

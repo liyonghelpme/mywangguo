@@ -1,8 +1,7 @@
 local simple = require "dkjson"
 HttpController = class()
 function HttpController:ctor()
-    --self.baseUrl = CCUserDefault:sharedUserDefault():getStringForKey("netUrl")
-    self.baseUrl = "http://192.168.3.117:9100/"
+    self.baseUrl = CCUserDefault:sharedUserDefault():getStringForKey("netUrl")
     self.requestList = {}
     self.busy = false
 end
