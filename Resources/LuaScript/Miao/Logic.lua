@@ -4,8 +4,12 @@ Logic.uid = nil
 Logic.resource = {silver=0, food=0, wood=0, stone=0}
 Logic.battleTime = nil
 Logic.battleSoldier = nil
+Logic.buildings = {}
+Logic.people = {}
+Logic.allPeople = {}
 
 Logic.waitPeople = {}
+
 
 function doGain(r)
     for k, v in pairs(r) do

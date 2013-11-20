@@ -18,6 +18,8 @@ function MiaoScene:initData(rep, param)
     end
     Logic.buildList = rep.build
     Logic.people = {}
+    Logic.allPeople = rep.people
+    print("allPeople", #Logic.allPeople)
     for k, v in ipairs(rep.people) do
         Logic.people[v.id] = v
     end

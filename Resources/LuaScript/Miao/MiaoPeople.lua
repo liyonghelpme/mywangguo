@@ -3,6 +3,7 @@ require "Miao.FuncPeople"
 require "Miao.Worker"
 require "Miao.MiaoPath"
 require "Miao.TestCat"
+require "Miao.TestCat2"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -45,8 +46,10 @@ function MiaoPeople:ctor(m, data)
         self.funcPeople = Worker.new(self)
     elseif self.id == 2 then
         self.funcPeople = Merchant.new(self) 
-    elseif self.id == 3 or self.id == 4 then
+    elseif self.id == 3 then
         self.funcPeople = Cat.new(self)
+    elseif self.id >= 4 then
+        self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
 
