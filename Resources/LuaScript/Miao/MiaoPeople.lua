@@ -906,8 +906,10 @@ function MiaoPeople:getPath()
         
         --走到房间边缘消失掉
         if self.predictTarget.id == 1 then
-            local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
-            table.insert(self.path, {mx, my})
+            if #self.path >= 2 then
+                local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
+                table.insert(self.path, {mx, my})
+            end
             self.tempEndPoint = {path[1][1], path[1][2]}
         --进入工厂中工作
         elseif self.predictTarget.id == 5 then

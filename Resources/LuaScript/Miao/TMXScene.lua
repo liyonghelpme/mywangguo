@@ -56,7 +56,7 @@ function TMXScene:saveGame()
             if k.myHouse ~= nil  then
                 hid = k.myHouse.bid
             end
-            table.insert(allPeople, {px=p[1], py=p[2], hid=hid})
+            table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id})
         end
     end
     local p = simple.encode(allPeople)

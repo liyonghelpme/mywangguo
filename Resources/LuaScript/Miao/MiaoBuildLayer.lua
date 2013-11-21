@@ -107,7 +107,7 @@ function MiaoBuildLayer:initCat()
     if cat ~= "" then
         cat = simple.decode(cat)
         for k, v in ipairs(cat) do
-            local p = MiaoPeople.new(self, {id=3})
+            local p = MiaoPeople.new(self, {id=v.id or 3})
             self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
             local pos = normalizePos({v.px, v.py}, 1, 1)
             setPos(p.bg, pos)

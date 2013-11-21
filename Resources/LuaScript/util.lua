@@ -1270,4 +1270,16 @@ function addCLayer(b)
     b:addChild(l)
     return l
 end
+function addChild(p, c)
+    p:addChild(c)
+    return c
+end
 
+function setScaleX(s, v)
+    s:setScaleX(v)
+    return s
+end
+function addCmd(c)
+    print("addCmd", c)
+    global.director.curScene.dialogController:addCmd(c)
+end

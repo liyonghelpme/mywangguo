@@ -8,4 +8,7 @@ function MiaoMap:ctor()
     
     self.menu = BigMenu.new(self)
     self.bg:addChild(self.menu.bg)
+
+    self.dialogController = DialogController.new(self)
+    self.bg:addChild(self.dialogController.bg)
 end

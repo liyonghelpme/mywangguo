@@ -1,3 +1,4 @@
+require "Miao.BigInfo"
 require "Miao.TestPeople"
 require "Miao.TestBuild"
 BigBuildLayer = class(MoveMap)
@@ -85,9 +86,15 @@ function BigBuildLayer:initCastle()
         end
     end
 end
-function BigBuildLayer:addPeople(build)
+function BigBuildLayer:startBattle(b)
+    self.targetBuild = b
+    local m = BigInfo.new(self)
+    self.scene.scene.menu.menu = m 
+    global.director:pushView(m, 1, 0)
+end
+function BigBuildLayer:addPeople()
     local p = TestPeople.new(self)
-    p:setTarget(build)
+    p:setTarget(self.targetBuild)
     local bp = getPos(self.homeTile.bg)
     setPos(p.bg, bp)
     p:setZord()
