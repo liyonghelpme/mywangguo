@@ -16,9 +16,9 @@ function Choice:ctor(s)
     self.bg = setContentSize(setPos(CCNode:create(), {self.INIT_X, fixY(global.director.designSize[2], self.INIT_Y, self.BACK_HEI)}), {self.WIDTH, self.BACK_HEI})
     --setDesignXY(self.bg)
     self.sci = Scissor:create()
-    self.sci:setContentSize(CCSizeMake(self.WIDTH, self.BACK_HEI))
+    local sca = getDesignSca()
+    self.sci:setContentSize(CCSizeMake(self.WIDTH*sca, self.BACK_HEI))
     self.bg:addChild(self.sci)
-    
     --bg 的高度
     self.flowTab = setPos(addNode(self.sci), {0, self.INITOFF+self.HEIGHT*2})
 

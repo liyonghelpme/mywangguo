@@ -10,6 +10,7 @@ require "views.CrystalDef"
 require "busiViews.BuildWorkMenu"
 require "views.SellDialog"
 require "views.Wind"
+require "views.Laser"
 
 Building = class()
 function Building:ctor(m, d, privateData)
@@ -50,6 +51,8 @@ function Building:ctor(m, d, privateData)
         self.funcBuild = CrystalDef.new(self)
     elseif self.funcs == WIND then
         self.funcBuild = Wind.new(self)
+    elseif self.funcs == FORGE_SHOP then
+        self.funcBuild = Laser.new(self)
     else
         self.funcBuild = FuncBuild.new(self) 
     end
@@ -84,6 +87,9 @@ function Building:ctor(m, d, privateData)
     setSize(setAnchor(sp, {0.5, 0.2}), {SIZEX*(self.sx+self.sy+2), SIZEY*(self.sx+self.sy+2)})
 
     setPos(self.changeDirNode, {0, self.data['offY']})
+    if self.funcs == FORGE_SHOP then
+        setPos(self.changeDirNode, {0, -20})
+    end
     self.dir = getDefault(privateData, 'dir', 0)
     self:setState(getParam("buildFree"))
     self:setDir(self.dir)
