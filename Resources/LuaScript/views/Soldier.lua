@@ -183,8 +183,9 @@ function Soldier:calcG(x, y)
 
     --此块有建筑物 要绕过
     local buildCell = self.map.mapGridController.mapDict
+    local ignore = self.funcSoldier:ignoreGround()
     --建筑物 阻挡移动的块 和 阻挡放置的块不同
-    if buildCell[key] ~= nil and buildCell[key][1][2] == 1 then
+    if not ignore and buildCell[key] ~= nil and buildCell[key][1][2] == 1 then
         dist = 30
     end
     if self.map.cells[key] == true then
@@ -238,6 +239,7 @@ function Soldier:checkNeibor(x, y)
     local curKey = getMapKey(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
+    local ignore = self.funcSoldier:ignoreGround()
     for n, nv in ipairs(neibors) do
         local key = getMapKey(nv[1], nv[2])
         local cx, cy = normalToCartesian(nv[1], nv[2])
@@ -253,7 +255,7 @@ function Soldier:checkNeibor(x, y)
             --首次加入
             --or staticObstacle[key] ~= nil 
             --没有河流阻碍 没有遍历过
-            if staticObstacle[key] == nil and self.closedList[key] == nil then
+            if (ignore or staticObstacle[key] == nil) and self.closedList[key] == nil then
                 --不在open表里面 如果在open表里面那么 值不为nil
                 --在open表里面 值一定不为nil
                 if self.cells[key] == nil then
@@ -483,7 +485,8 @@ function Soldier:findPath(diff)
                         break
                     end
                 else
-                    if buildCell[key] ~= nil and buildCell[key][1][2] == 1 and buildCell[key][1][1] ~= self.oldPredictTarget and buildCell[key][1][1].broken == false then
+                    --走到某个建筑物块上面了 要求并且是实际的攻击目标 mapDict 只有可攻击目标
+                    if buildCell[key] ~= nil and buildCell[key][1][2] == 1 and buildCell[key][1][1] == self.predictTarget and buildCell[key][1][1].broken == false then
                         self.endPoint = {x, y} 
                         --找到建筑了
                         break
@@ -561,6 +564,9 @@ function Soldier:doMove(diff)
                     end
                 end
                 if distance2(curPos, endPos) < attR then
+                    stopNow = true
+                end
+                if self.predictTarget.broken then
                     stopNow = true
                 end
                 if stopNow then

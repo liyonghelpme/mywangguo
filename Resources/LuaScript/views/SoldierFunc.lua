@@ -26,3 +26,7 @@ end
 function SoldierFunc:waitTime()
     return self.soldier.data.attSpeed
 end
+--忽略地面建筑物
+function SoldierFunc:ignoreGround()
+    return false
+end

@@ -47,10 +47,13 @@ function BirdMan:getAttTime()
     return 1
 end
 function BirdMan:checkFavorite(k)
-    if k.kind == 202 or k.kind == 144 then
+    if k.kind == 202 or k.kind == 144 or k.kind == 140 or k.kind == 206 then
         return true
     end
     return false
+end
+function BirdMan:ignoreGround()
+    return true
 end
 
 function BirdMan:waitTime()
