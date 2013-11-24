@@ -15,6 +15,7 @@ CCSprite3D::CCSprite3D() {
 }
 CCSprite3D::~CCSprite3D() {
     CC_SAFE_RELEASE(pTex);
+    CC_SAFE_RELEASE(pNor);
 }
 void CCSprite3D::initModel() {
     /*
@@ -183,6 +184,7 @@ bool CCSprite3D::init() {
     x = y= z = 0;
     sx = sy = sz = 1;
     pTex = NULL;
+    pNor = NULL;
 
     initModel();
     return true;
@@ -275,7 +277,7 @@ void CCSprite3D::stdTransform() {
     */
 
     kmVec3 l;
-    kmVec3Fill(&l, 1000, 100, 1000);
+    kmVec3Fill(&l, 200, 200, 200);
     
 
     prog->setUniformLocationWithMatrix4fv(pmat, matrixP.mat, 1);
@@ -315,6 +317,12 @@ void CCSprite3D::draw() {
         ccGLBindTexture2D(0);
         ccGLEnableVertexAttribs( kCCVertexAttribFlag_Position | kCCVertexAttribFlag_Color );
     }
+    //bind normal纹理数据到 1号槽位置
+    //1号槽位置 对应 shader 中的normalmap
+    if(pNor != NULL) {
+        ccGLBindTexture2DN(1, pNor->getName());
+    }
+
     //enable normal array
     glEnableVertexAttribArray(3);
 
@@ -341,6 +349,13 @@ void CCSprite3D::loadMd2(const char *fileName) {
     delete fcon;
 }
 
+void CCSprite3D::setNormalMap(CCTexture2D *nm) {
+    if(pNor != nm) {
+        CC_SAFE_RETAIN(nm);
+        CC_SAFE_RELEASE(pNor);
+        pNor = nm;
+    }
+}
 void CCSprite3D::setTexture(CCTexture2D *texture) {
     //initProgram();
     if(pTex != texture) {
@@ -349,17 +364,6 @@ void CCSprite3D::setTexture(CCTexture2D *texture) {
         pTex = texture;
         //updateBlendFunc();
     }
-
-    /*
-    if (texture)
-    {
-        setShaderProgram(CCShaderCache::sharedShaderCache()->programForKey(kCCShader_PositionTextureColor));
-    }
-    else
-    {
-        setShaderProgram(CCShaderCache::sharedShaderCache()->programForKey(kCCShader_PositionColor));
-    }
-    */
 }
 void CCSprite3D::setTextureRect() {
     
@@ -398,4 +402,7 @@ void CCSprite3D::initProgram() {
     mvpmat = glGetUniformLocation( getShaderProgram()->getProgram(), "CC_MVPMatrix");
     nmat = glGetUniformLocation(getShaderProgram()->getProgram(), "u_normalMatrix");
     light = glGetUniformLocation(getShaderProgram()->getProgram(), "light");
+    nmap = glGetUniformLocation(getShaderProgram()->getProgram(), "u_normalMap");
+    //使用第一个纹理槽
+    getShaderProgram()->setUniformLocationWith1i(nmap, 1);
 }

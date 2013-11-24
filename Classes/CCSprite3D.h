@@ -66,6 +66,7 @@ public:
     virtual void setTexture(CCTexture2D *texture);
     void setTextureRect();
     void initProgram();
+    virtual void setNormalMap(CCTexture2D *normalMap);
 
 
     //绕X 轴旋转 按照角度旋转
@@ -116,9 +117,9 @@ protected:
     vector< vector<float> > animations;
     //attribute only for draw in RenderTexture then render sprite in 2d Scene  
 
-    GLuint pmat, mvmat, mvpmat, nmat, light;
+    GLuint pmat, mvmat, mvpmat, nmat, light, nmap;
 
-    CCTexture2D *pTex;
+    CCTexture2D *pTex, *pNor;
 
     int vertNum;
 };
