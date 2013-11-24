@@ -84,7 +84,9 @@ function HttpController:chatRequest(url, data, callback, param, delegate, settin
             print('issuc', isSuc)
             rep = nil
         else
-            print("chat url data", url, simple.encode(data), request:getResponseString())
+            if DEBUG then
+                print("chat url data", url, simple.encode(data), request:getResponseString())
+            end
             rep = simple.decode(request:getResponseString())
         end
 

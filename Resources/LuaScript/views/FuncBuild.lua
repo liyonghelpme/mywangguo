@@ -41,3 +41,6 @@ function FuncBuild:doBroken()
 end
 function FuncBuild:doAttack()
 end
+function FuncBuild:getHarm()
+    return self.baseBuild.data.attack*(self.baseBuild.level+1)
+end

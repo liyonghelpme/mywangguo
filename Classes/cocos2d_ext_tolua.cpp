@@ -1189,6 +1189,88 @@ static int tolua_Cocos2d_getFileData00(lua_State* tolua_S)
 }
 #endif
 
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_createSprite00
+static int tolua_Cocos2d_createSprite00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isstring(tolua_S,1,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,2,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{ 
+		char* fname = ((char*) tolua_tostring(tolua_S,1,0));
+        CCSprite *tolua_ret = createSprite(fname);
+        int nID = (tolua_ret) ? tolua_ret->m_uID : -1;
+        int* pLuaID = (tolua_ret) ? &tolua_ret->m_nLuaID : NULL;
+        toluafix_pushusertype_ccobject(tolua_S, nID, pLuaID, (void*)tolua_ret,"CCSprite");
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'createSprite'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_setOffset00
+static int tolua_Cocos2d_setOffset00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isusertype(tolua_S,1, "CCSprite",0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,3,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        CCSprite *sp = (CCSprite*)tolua_tousertype(tolua_S, 1, 0);
+		float offset = ((float) tolua_tonumber(tolua_S,2,0));
+        setOffset(sp, offset);
+	}
+	return 0;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'setOffset'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_setGLProgram00
+static int tolua_Cocos2d_setGLProgram00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isusertype(tolua_S,1, "CCSprite",0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,2,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        CCSprite *sp = (CCSprite*)tolua_tousertype(tolua_S, 1, 0);
+        int res = setGLProgram(sp);
+		tolua_pushnumber(tolua_S, (lua_Number)res);
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'setGLProgram'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_writeFile00
 static int tolua_Cocos2d_writeFile00(lua_State* tolua_S)
 {
@@ -1575,6 +1657,9 @@ TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
   tolua_function(tolua_S,"getNow", tolua_Cocos2d_getNow00);
   tolua_function(tolua_S,"writeFile", tolua_Cocos2d_writeFile00);
   tolua_function(tolua_S,"getFileData", tolua_Cocos2d_getFileData00);
+  tolua_function(tolua_S,"setGLProgram", tolua_Cocos2d_setGLProgram00);
+  tolua_function(tolua_S,"setOffset", tolua_Cocos2d_setOffset00);
+  tolua_function(tolua_S,"createSprite", tolua_Cocos2d_createSprite00);
 
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);
   tolua_beginmodule(tolua_S,"CCExtendNode");

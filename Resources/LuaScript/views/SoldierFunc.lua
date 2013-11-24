@@ -30,3 +30,6 @@ end
 function SoldierFunc:ignoreGround()
     return false
 end
+function SoldierFunc:getRange()
+    return 0
+end

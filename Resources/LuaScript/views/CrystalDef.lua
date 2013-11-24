@@ -57,7 +57,7 @@ function CrystalDef:update(diff)
                 end 
             end
             if minTar ~= nil then
-                if minDis < self.baseBuild.data.attackRange*self.baseBuild.data.attackRange then
+                if minDis < 220*220 then
                     self.attackTarget = minTar
                 end
             end
@@ -93,7 +93,7 @@ function CrystalDef:update(diff)
                     local dist = distance2(kp, bp)
                     if dist < attDist and k.kind ~= 1130 then
                         table.insert(arrange, k)
-                        k:doHarm(self.baseBuild.data.attack)
+                        k:doHarm(self:getHarm())
                     end
                 end 
             end

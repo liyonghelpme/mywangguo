@@ -119,7 +119,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		Log.v("Youmi", "initial You mi");
 		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
 		
-		
+		/*
 		try{
 			Log.v("Youmi", "before get points");
 			OffersManager.getInstance(this).onAppLaunch();
@@ -139,7 +139,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		} catch(Exception e){
 			Log.e("Youmi", "initial points error", e);
 		}
-		
+		*/
 		mController.setShareContent("快来和我一起玩王国危机吧！一起称霸整个大陆！");
 		mController.setShareMedia(new UMImage(this, R.drawable.icon));
 		mController.getConfig().supportWXPlatform(this, appID, contentUrl);
@@ -162,6 +162,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	public void onResume() {
 		super.onResume();
 		MobclickAgent.onResume(this);
+		/*
 		try {
 			final int myPoints = PointsManager.getInstance(act).queryPoints();
 			PluginWrapper.runOnGLThread(new Runnable() {
@@ -175,6 +176,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		}catch(Exception e){
 			Log.e("Youmi", "resume points error ", e);
 		}
+		*/
 	}
 	@Override
 	public void onPause() {

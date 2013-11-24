@@ -61,7 +61,9 @@ function User:initDataOver(data, param)
         print("youmi gold my gold", youmigold, self.resource.gold)
         --test gold
         if DEBUG then
-            self.resource.gold = 2000
+            self.resource.gold = 20000000
+            self.resource.crystal = 20000000
+            self.resource.silver = 20000000
         else
             self.resource.gold = youmigold
         end

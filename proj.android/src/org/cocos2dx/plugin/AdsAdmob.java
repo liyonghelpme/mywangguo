@@ -154,6 +154,8 @@ public class AdsAdmob implements InterfaceAds {
 
 				@Override
 				public void run() {
+					//暂停积分广告
+					/*
 					// TODO Auto-generated method stub
 					OffersManager.getInstance(mContext).showOffersWall();
 					try{
@@ -169,6 +171,7 @@ public class AdsAdmob implements InterfaceAds {
 					}catch(Exception e) {
 						Log.e("Youmi", "showoffer get points ", e);
 					}
+					*/
 				}
 				
 			});
@@ -186,11 +189,12 @@ public class AdsAdmob implements InterfaceAds {
 			});
 		} else if(points == 4) {
 			PluginWrapper.runOnMainThread(new Runnable() {
+				
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					Intent in = new Intent(mContext, TabFragment.class);
-					mContext.startActivity(in);
+					//Intent in = new Intent(mContext, TabFragment.class);
+					//mContext.startActivity(in);
 				}
 				
 			});
@@ -208,6 +212,7 @@ public class AdsAdmob implements InterfaceAds {
 		} else if(points == 6) {
 			PluginWrapper.runOnMainThread(new Runnable(){
 
+				//暂停广告显示
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub

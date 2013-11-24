@@ -27,7 +27,7 @@ function Cloud:ctor()
     self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishShow)}))
     --当云朵覆盖满了之后 再replace Scene 并且要保持住Cloud transfer
     registerEnterOrExit(self)
-    MyPlugins:getInstance():sendCmd("showSpot", "")
+    --MyPlugins:getInstance():sendCmd("showSpot", "")
 end
 function Cloud:enterScene()
     registerUpdate(self)

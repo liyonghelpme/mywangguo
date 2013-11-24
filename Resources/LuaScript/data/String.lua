@@ -1378,4 +1378,6 @@ WORDS = dict({
 {"notHere", {"不能在这里建造!", ""}},
 {"shareReward", {"分享奖励{NUM}{KIND}", ""}},
 {"share", {"分享得水晶", "Share"}},
+{"upgradeBuild", {"是否要花费{NUM}{KIND}升级建筑物{NAME}到{LEVEL}级?", ""}},
+{"bInfo", {"{NAME} 等级 {LEVEL}", ""}},
 })

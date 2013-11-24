@@ -24,6 +24,7 @@ function Building:ctor(m, d, privateData)
     self.showMenuYet = false
     --是否被摧毁掉
     self.broken = false
+    self.level = privateData.level or 0
     --神像有防御效果 WorkNode
 
     self.health = self.data.maxHealth
@@ -77,7 +78,7 @@ function Building:ctor(m, d, privateData)
     --调整建筑物 setPos 的时候就需要调整sp位置
     local sz = self.changeDirNode:getContentSize()
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
-    local sp = CCSprite:create("grass3.png")
+    local sp = createSprite("grass3.png")
     self.shadow = sp
     sp:setOpacity(200)
     --self.bg:addChild(sp, -1)
@@ -113,9 +114,16 @@ function Building:ctor(m, d, privateData)
         self.healthBar:setVisible(false)
     end
 
-
+    self:setOffset()
+    --self:setGLProgram()
     registerEnterOrExit(self)
     --registerMultiTouch(self)
+end
+function Building:setGLProgram()
+    --self.offset = setGLProgram(self.shadow)
+end
+function Building:setOffset()
+    setOffset(self.shadow, self.level*60)
 end
 function Building:setMap(m)
     self.map = m
@@ -281,17 +289,21 @@ function Building:showGlobalMenu()
     self.acced = 0
     self.selled = 0
     self.showMenuYet = 1
-    local func = getBuildFunc(self.funcs)
+    local func = {} 
      
     global.director:pushView(BuildWorkMenu.new(self, func[0], func[1]), 0, 0)
 end
 function Building:doFree()
-    local ret = self.funcBuild:whenFree()
+    --local ret = self.funcBuild:whenFree()
+    if self.data.defType == 1 then
+        global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)
+    end
+    --[[
     if ret == 0 then
         if self.showMenuYet == 0 then
-            global.director.curScene:showGlobalMenu(self, self.showGlobalMenu, self)
         end
     end
+    --]]
 end
 function Building:touchesEnded(touches)
     if BattleLogic.inBattle then
@@ -407,7 +419,7 @@ function Building:finishBuild()
     local dust = CCParticleSystemQuad:create("dust.plist")
     dust:setPositionType(2)
     self.bg:addChild(dust, 1)
-
+    dust:runAction(sequence({delaytime(4), callfunc(nil, removeSelf, dust)}))
 end
 function Building:setZord()
     local zOrd = MAX_BUILD_ZORD-getPos(self.bg)[2]
@@ -636,4 +648,13 @@ function Building:doHarm(n)
         fire:setPositionType(1)
         self.bg:addChild(fire)
     end
+end
+function Building:doUpgrade()
+    self.level = self.level+1
+    self:setOffset()
+
+    local dust = CCParticleSystemQuad:create("dust.plist")
+    dust:setPositionType(2)
+    self.bg:addChild(dust, 1)
+    dust:runAction(sequence({delaytime(4), callfunc(nil, removeSelf, dust)}))
 end

@@ -7,6 +7,9 @@ end
 function MoveMap:exitScene()
 end
 function MoveMap:updateMapGrid()
+    if true then
+        return
+    end
     if DEBUG then
         removeSelf(self.gridLayer)
         self.gridLayer = CCSpriteBatchNode:create("white2.png")
@@ -41,6 +44,9 @@ function MoveMap:updateMapGrid()
 end
 --寻路算法的 node
 function MoveMap:updateCells(cells, bcells, predict)
+    if true then
+        return
+    end
     if DEBUG then
         removeSelf(self.cellLayer)
         self.cellLayer = CCSpriteBatchNode:create("white2.png")
@@ -71,6 +77,9 @@ function MoveMap:updateCells(cells, bcells, predict)
 end
 --normal 坐标
 function MoveMap:updatePath(path)
+    if true then
+        return
+    end
     if DEBUG then
         removeSelf(self.pathLayer)
         self.pathLayer = CCSpriteBatchNode:create("white2.png")

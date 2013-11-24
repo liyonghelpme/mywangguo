@@ -4,7 +4,7 @@ function GodBall:ctor(src, tar, start, over)
     self.bg = CCNode:create()
     setPos(self.bg, start)
     local function doHarm()
-        tar:doHarm(src.data.attack)
+        tar:doHarm(src.funcBuild:getHarm())
     end
     local par = CCParticleSystemQuad:create("god1.plist")
     par:setPositionType(1)
@@ -31,6 +31,7 @@ function GodBuild:initWorking(data)
         par:setPositionType(1)
         setPos(par, {37, 185})
         self.baseBuild.bg:addChild(par)
+
     end
     if BattleLogic.inBattle == true then
         self.bg = CCNode:create()
@@ -66,7 +67,7 @@ function GodBuild:update(diff)
                 end 
             end
             if minTar ~= nil then
-                if minDis < self.baseBuild.data.attackRange*self.baseBuild.data.attackRange then
+                if minDis < 220*220 then
                     self.attackTarget = minTar
                 end
             end
@@ -93,5 +94,8 @@ function GodBuild:update(diff)
             self.state = GOD_STATE.FREE
         end
     end
+end
+function GodBuild:whenFree()
+    global.director.curScene:showGlobalMenu(self.baseBuild, self.baseBuild.showGlobalMenu, self.baseBuild)
 end
 

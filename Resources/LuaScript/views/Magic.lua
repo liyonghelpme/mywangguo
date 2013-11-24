@@ -12,3 +12,6 @@ function Magic:doAttack()
     over[2] = over[2]+math.random(20)+20
     self.soldier.map.bg:addChild(Ball.new(self.soldier, self.soldier.attackTarget, start, over).bg, MAX_BUILD_ZORD)
 end
+function Magic:getRange()
+    return 150
+end

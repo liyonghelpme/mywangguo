@@ -7,7 +7,7 @@ WIND_STATE = {
 function Wind:ctor(b)
     self.baseBuild = b
 end
-local testRange = 150
+local testRange = 140
 local testHurt = 6
 function Wind:initWorking()
     if self.gear == nil then
@@ -77,7 +77,7 @@ function Wind:update(diff)
                     local kp = getPos(k.bg)
                     local dist = distance2(kp, bp)
                     if dist < attDist then
-                        k:doHarm(testHurt)
+                        k:doHarm(self:getHarm())
                     end
                 end 
             end
@@ -85,3 +85,6 @@ function Wind:update(diff)
     end
 end
 
+function Wind:getHarm()
+    return testHurt*(self.baseBuild.level+1)
+end

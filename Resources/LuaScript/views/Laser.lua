@@ -53,7 +53,7 @@ function Laser:update(diff)
                 end 
             end
             if minTar ~= nil then
-                if minDis < self.baseBuild.data.attackRange*self.baseBuild.data.attackRange then
+                if minDis < 220*220 then
                     self.attackTarget = minTar
                 end
             end
@@ -119,7 +119,7 @@ function Laser:update(diff)
             elseif self.totalTime >= 2 then
                 attack = 12.8
             end
-            self.attackTarget:doHarm(self.baseBuild.data.attack)
+            self.attackTarget:doHarm(self:getHarm())
         end
 
         if self.attackTarget.dead then

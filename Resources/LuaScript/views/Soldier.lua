@@ -551,7 +551,7 @@ function Soldier:doMove(diff)
             if BattleLogic.inBattle then
                 local curPos = getPos(self.bg)
                 local endPos = setBuildMap({1, 1, self.endPoint[1], self.endPoint[2]})
-                local attR = (self.data.range)*(self.data.range)*32*32 
+                local attR = self.funcSoldier:getRange()*self.funcSoldier:getRange() 
 
                 local stopNow = false
                 --如果行走到建筑物的边界上面则停止行走
