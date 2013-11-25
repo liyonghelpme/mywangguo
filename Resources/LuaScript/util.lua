@@ -1283,3 +1283,13 @@ function addCmd(c)
     print("addCmd", c)
     global.director.curScene.dialogController:addCmd(c)
 end
+function fixX(w, x)
+    return w-x
+end
+
+function jumpBy(t, x, y, hei, n)
+    return CCJumpBy:create(t, ccp(x, y), hei, n)
+end
+function jumpTo(t, x, y, hei, n)
+    return CCJumpTo:create(t, ccp(x, y), hei, n)
+end
