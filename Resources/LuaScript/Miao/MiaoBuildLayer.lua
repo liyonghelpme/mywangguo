@@ -102,6 +102,11 @@ function MiaoBuildLayer:initSlope()
 
 end
 function MiaoBuildLayer:initCat()
+    if Logic.inNew then
+        self:addPeople(3)
+        self:addPeople(4)
+        return
+    end
     local u = CCUserDefault:sharedUserDefault()
     local cat = u:getStringForKey("people")
     if cat ~= "" then
@@ -132,6 +137,30 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
+    if Logic.inNew then
+        local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
+        local p = normalizePos({1344, 384}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+        local b = MiaoBuild.new(self, {picName='build', id=2, bid=2})
+        local p = normalizePos({1472, 448}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+        local mbid = 0
+        mbid = math.max(2, mbid)
+        mbid = mbid+1
+        Logic.maxBid = mbid
+        return
+    end
+
     local u = CCUserDefault:sharedUserDefault()
     local build = u:getStringForKey("build")
     local mbid = 0

@@ -1293,3 +1293,91 @@ end
 function jumpTo(t, x, y, hei, n)
     return CCJumpTo:create(t, ccp(x, y), hei, n)
 end
+function setBatchColor(sp, col)
+    local ch = sp:getChildren()
+    local n = sp:getChildrenCount()
+    print("setBatchColor num!!!!!!!!!! ", n)
+    for i=0, n-1, 1 do
+        local c = ch:objectAtIndex(i)
+        setColor(c, col)
+    end
+end
+function hexToDec(h)
+    local r = tonumber(string.sub(h, 1, 2), 16)
+    local g = tonumber(string.sub(h, 3, 4), 16)
+    local b = tonumber(string.sub(h, 5, 6), 16)
+    return {r, g, b}
+end
+
+function colorWords(param)
+    local s = param.text
+    local col = param.color
+    local si = param.size
+    local n = CCNode:create()
+    local over = split(s, '>')
+    local curX = 0
+    local height = 0
+    local totalHeight = 0
+    local width = param.width
+    print("curWord", s)
+    for i=1, #over, 1 do
+        print("split", over[i])
+        print("word x y", curX, totalHeight)
+        if string.find(over[i], '<') ~= nil then
+            local p = split(over[i], '<')
+            if #p[1] > 0 then
+                local l = ui.newTTFLabel({text=p[1], color=col, size=si})
+                n:addChild(l)
+                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                local lSize = l:getContentSize()
+                height = lSize.height
+                curX = curX+lSize.width
+            end
+            if #p[2] > 0 then
+                local cv = string.sub(p[2], 1, 6)
+                local l = ui.newTTFLabel({text=string.sub(p[2], 7), color=hexToDec(cv), size=si})
+                n:addChild(l)
+                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                local lSize = l:getContentSize()
+                curX = curX+lSize.width
+                height = lSize.height
+            end
+        else
+            local l = ui.newTTFLabel({text=over[i], color=col, size=si})
+            n:addChild(l)
+            setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+            local lSize = l:getContentSize()
+            curX = curX+lSize.width
+            height = lSize.height
+        end
+        if curX >= width and i < #over then
+            totalHeight = totalHeight+height
+            curX = 0
+        end
+    end
+    totalHeight = totalHeight+height
+    n:setContentSize(CCSizeMake(curX, totalHeight))
+    return n
+end
+--anchor 0 1
+function colorLine(param)
+    local s = param.text
+    local col = param.color
+    local si = param.size
+    local words = split(s, '\n')
+    local n = CCNode:create()
+    local curHeight = 0
+    local curWidth = 0
+    for k, v in ipairs(words) do
+        print("colorLine", v)
+        local temp = colorWords({text=v, color=col, size=si, width=param.width})
+        n:addChild(temp)
+        setPos(setAnchor(temp, {0, 1}), {0, -curHeight})
+        local sz = temp:getContentSize()
+        curHeight = curHeight+sz.height
+        curWidth = math.max(curWidth, sz.width)
+    end
+    n:setContentSize(CCSizeMake(curWidth, curHeight))
+    return n
+end
+

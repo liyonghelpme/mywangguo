@@ -24,6 +24,7 @@ function MiaoPage:ctor(s)
 
     self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
     self.bg:addChild(self.tileMap)
+    self:initTiles()
     setPos(self.tileMap, {200, -100+FIX_HEIGHT})
 
     self.touchDelegate = StandardTouchHandler.new()
@@ -36,6 +37,29 @@ function MiaoPage:ctor(s)
     registerEnterOrExit(self)
     registerMultiTouch(self)
     self.touchDelegate:scaleToMax(1)
+end
+function MiaoPage:setPoint(x, y)
+    local wp = self.bg:convertToWorldSpace(ccp(x, y))
+    local sz = getVS()
+    local dx = sz[1]/2-wp.x
+    local dy = sz[2]/2-wp.y
+    local curPos = getPos(self.bg)
+    setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
+end
+function MiaoPage:initTiles()
+    self.allIsland = {}
+    self.allMask = {}
+    for k=1, 8, 1 do
+        local nlayer = self.tileMap:layerNamed("dirt"..k)
+        nlayer:setupTiles()
+        self.allIsland[k] = nlayer
+        if k > 1 then
+            local mask = self.tileMap:layerNamed("mask"..k)
+            --setBatchColor(nlayer, {128, 128, 128})
+            mask:setupTiles()
+            self.allMask[k] = mask
+        end
+    end
 end
 
 function MiaoPage:enterScene()
@@ -177,6 +201,7 @@ end
 
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
+        local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         if self.curBuild.picName == 'move' then
             if self.curBuild.moveTarget == nil then
@@ -247,7 +272,11 @@ function MiaoPage:finishBuild()
         else
             addBanner("和其它建筑物冲突啦！")
         end
-        Logic.paused = false
+        if oldBuild.picName == 't' then
+            self:beginBuild('build', 15)
+        else
+            Logic.paused = false
+        end
     end
 end
 

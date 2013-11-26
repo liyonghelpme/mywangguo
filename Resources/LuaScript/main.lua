@@ -23,8 +23,8 @@ local function main()
     require "Miao.TMXScene"
 
 
-    --global.director:runWithScene(TMXScene.new())
-    global.director:runWithScene(FightScene.new())
+    global.director:runWithScene(TMXScene.new())
+    --global.director:runWithScene(FightScene.new())
 end
 
 xpcall(main, __G__TRACKBACK__)

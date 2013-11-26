@@ -30,8 +30,8 @@ function MiaoLayer:ctor(s)
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate.bg = self.bg
 
-    --setPos(self.bg, {-2800, 0})
-    setPos(self.bg, {-2800, -1000})
+    setPos(self.bg, {-2800, 0})
+    --setPos(self.bg, {-1500, -1000})
 
     self.buildLayer = BigBuildLayer.new(self)
     self.bg:addChild(self.buildLayer.bg)
@@ -52,6 +52,15 @@ function MiaoLayer:ctor(s)
     setPos(sp, {700, 400})
     self.posw = sp
     --]]
+end
+--
+function MiaoLayer:moveToPoint(x, y)
+    local wp = self.bg:convertToWorldSpace(ccp(x, y))
+    local sz = getVS()
+    local dx = sz[1]/2-wp.x
+    local dy = sz[2]/2-wp.y
+    local curPos = getPos(self.bg)
+    setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
 end
 function MiaoLayer:onMb()
     self.moveBack = not self.moveBack

@@ -1,6 +1,11 @@
 require "Miao.MiaoPage"
 require "Miao.TMXMenu"
+require "Miao.NewGame"
 TMXScene = class()
+
+function TMXScene:initDataNow()
+    sendReq('login', dict(), self.initData, nil, self)
+end
 function TMXScene:ctor()
     self.bg = CCScene:create()
     self.page = MiaoPage.new(self)
@@ -9,7 +14,9 @@ function TMXScene:ctor()
     self.bg:addChild(self.menu.bg)
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
-    sendReq('login', dict(), self.initData, nil, self)
+
+    self.page:moveToPoint(1644, 384)
+    delayCall(0.3, self.initDataNow, self)
 end
 
 function TMXScene:initData(rep, param)
@@ -28,6 +35,8 @@ function TMXScene:initData(rep, param)
     self.menu:initDataOver()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
+
+    global.director:pushView(NewGame.new(), 1, 0)
 end
 function TMXScene:onBuild()
     self.page:addBuilding()

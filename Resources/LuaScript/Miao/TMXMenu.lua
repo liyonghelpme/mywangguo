@@ -36,6 +36,7 @@ function TMXMenu:ctor(s)
     local t = ui.newTTFLabel({text="0年0月0天", size=20, color={10, 10, 102}})
     setPos(t, {134, 20})
     year:addChild(t)
+    self.year = t
 
     local money = display.newScale9Sprite("numboard.jpg")
     setAnchor(setPos(setContentSize(money, {268, 39}), {vs.width-10, vs.height-10}), {1, 1})
@@ -57,7 +58,11 @@ function TMXMenu:ctor(s)
     info:addChild(iw)
     
     self.infoWord = iw
-
+    self.passTime = 0
+    registerEnterOrExit(self)
+end
+function TMXMenu:enterScene()
+    registerUpdate(self)
 end
 function TMXMenu:onBack()
     local mm = MiaoMap.new()
@@ -76,6 +81,18 @@ function TMXMenu:onMenu()
 end
 function TMXMenu:initDataOver()
     self:updateText()
+    self:updateYear()
+end
+function TMXMenu:update(diff)
+    self.passTime = self.passTime + diff
+    if self.passTime > 1 then
+        self.passTime = 0
+        self:updateYear()
+    end
+end
+function TMXMenu:updateYear()
+    local y, m, w = getDate()
+    self.year:setString(str(y).."年"..str(m).."月"..w..'周')
 end
 function TMXMenu:updateText()
     self.money:setString(Logic.resource.silver.."贯")

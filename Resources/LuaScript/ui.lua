@@ -1,14 +1,15 @@
 ui = {}
 function ui.newEditBox(params)
     local imageNormal = params.image
-    local imagePressed = params.imagePressed
-    local imageDisabled = params.imageDisabled
+    local imagePressed = params.imagePressed or params.image
+    local imageDisabled = params.imageDisabled or params.image
     local listener = params.listener
     local listenerType = type(listener)
     local tag = params.tag
     local x = params.x
     local y = params.y
     local size = params.size
+    local delegate = params.delegate
     if type(size) == "table" then
         size = CCSizeMake(size[1], size[2])
     end
@@ -39,7 +40,11 @@ function ui.newEditBox(params)
                     listener:onEditBoxChanged(object)
                 end
             elseif listenerType == "function" then
-                listener(event, object)
+                if delegate ~= nil then
+                    listener(delegate, event, object)
+                else
+                    listener(event, object)
+                end
             end
         end)
         if x and y then editbox:setPosition(x, y) end

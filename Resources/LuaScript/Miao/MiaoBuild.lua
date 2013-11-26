@@ -294,7 +294,8 @@ function MiaoBuild:touchesEnded(touches)
 end
 function MiaoBuild:update(diff)
     local map = getBuildMap(self)
-    self.posLabel:setString("     "..map[3].." "..map[4])
+    local p = getPos(self.bg)
+    self.posLabel:setString("     "..map[3].." "..map[4].." "..p[1].." "..p[2])
     self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
     local s = ''
     for k, v in ipairs(self.belong) do

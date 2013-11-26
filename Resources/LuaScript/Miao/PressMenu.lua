@@ -1,6 +1,7 @@
 require "Miao.Setting"
 require "Miao.NewBuildMenu"
 require "Miao.PeopleMenu"
+require "Miao.Welcome2"
 PressMenu = class()
 function PressMenu:ctor(s)
     self.scene = s
@@ -32,6 +33,11 @@ function PressMenu:ctor(s)
         dTime = dTime+0.1
     end
 end
+function PressMenu:onHouse()
+    --调整touch 优先级需要在touch处理结束之后 进行 touch中调整没有效果
+    self.scene.menu.menu = NewBuildMenu.new(self.scene) 
+    global.director:pushView(self.scene.menu.menu, 1, 0)
+end
 function PressMenu:onBut(p)
     local vs = getVS()
     local initX = 10+50
@@ -41,6 +47,13 @@ function PressMenu:onBut(p)
     if p == 1 then
         self.scene.menu.menu = nil
         global.director:popView()
+        if Logic.inNew then
+            local w = Welcome2.new(self.onHouse, self)
+            w:updateWord("首先从'环境'中选择<0000ff农家>吧")
+            global.director:pushView(w, 1, 0)
+            return
+        end
+
         --调整touch 优先级需要在touch处理结束之后 进行 touch中调整没有效果
         self.scene.menu.menu = NewBuildMenu.new(self.scene) 
         global.director:pushView(self.scene.menu.menu, 1, 0)
