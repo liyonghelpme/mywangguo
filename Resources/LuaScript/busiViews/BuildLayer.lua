@@ -39,29 +39,39 @@ function BuildLayer:ctor(scene)
     self:initGrassSprite()
     self:initMagic()
 end
+local initMagicYet = false
 --所有魔法特效图片
 function BuildLayer:initMagic()
-    local tex = CCTextureCache:sharedTextureCache():addImage("fig7.png")
-    local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
-    for i=0, 1 do
-        for j=0, 3 do
-            local r = CCRectMake(120*j, 120*i, 120, 120)
-            local sp = CCSpriteFrame:createWithTexture(tex, r)
-            ca:addSpriteFrame(sp, "ball"..i*10+j)
+    if not initMagicYet then
+        initMagicYet = true
+
+        local tex = CCTextureCache:sharedTextureCache():addImage("fig7.png")
+        local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
+        for i=0, 1 do
+            for j=0, 3 do
+                local r = CCRectMake(120*j, 120*i, 120, 120)
+                local sp = CCSpriteFrame:createWithTexture(tex, r)
+                ca:addSpriteFrame(sp, "ball"..i*10+j)
+            end
         end
+
+        local r = CCRectMake(0, 240, 240, 60)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        ca:addSpriteFrame(sp, "arrow0")
+
+        local r = CCRectMake(0, 300, 240, 60)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        ca:addSpriteFrame(sp, "arrow1")
+
+        local r = CCRectMake(0, 360, 240, 60)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        ca:addSpriteFrame(sp, "arrow2")
+
+        local r = CCRectMake(360, 240, 120, 120)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        ca:addSpriteFrame(sp, "bombCircle")
+        
     end
-
-    local r = CCRectMake(0, 240, 240, 60)
-    local sp = CCSpriteFrame:createWithTexture(tex, r)
-    ca:addSpriteFrame(sp, "arrow0")
-
-    local r = CCRectMake(0, 300, 240, 60)
-    local sp = CCSpriteFrame:createWithTexture(tex, r)
-    ca:addSpriteFrame(sp, "arrow1")
-
-    local r = CCRectMake(0, 360, 240, 60)
-    local sp = CCSpriteFrame:createWithTexture(tex, r)
-    ca:addSpriteFrame(sp, "arrow2")
 end
 function BuildLayer:initGrassSprite()
     --[[

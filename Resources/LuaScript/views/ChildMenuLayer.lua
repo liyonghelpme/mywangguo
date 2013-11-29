@@ -93,8 +93,36 @@ function ChildMenuLayer:ctor(index, funcs, s, otherFunc, menu)
         self.sp:addChild(button.bg)
         self.allButtons[self.functions[i]] = button
     end
+   
+    --提示用户去新的大地图进行游戏
+    local mb = self.allButtons['map']
+    if mb ~= nil then
+        if global.user:getValue("level") >= 4 then
+            local b = getBool("bigMapYet")
+            if not b then
+                self:showBlueArrow(mb)
+            end
+        end
+    end
+    local mb = self.allButtons['rank']
+    if mb ~= nil then
+        if global.user:getValue("level") >= 10 then
+            local b = getBool("rankYet")
+            if not b then
+                self:showBlueArrow(mb)
+            end
+        end
+    end
 
     registerEnterOrExit(self)
+end
+function ChildMenuLayer:showBlueArrow(mb)
+    self.blueArrow = CCSprite:create("blueArrow.png")
+    mb.bg:addChild(self.blueArrow)
+    setAnchor(setPos(self.blueArrow, {20, 0}), {0.5, 1})
+    self.blueArrow:setRotation(-90)
+    self.blueArrow:runAction(repeatForever(sequence({moveby(0.5, -10, 0), moveby(0.5, 10, 0)})))
+    self.blueArrow:runAction(repeatForever(sequence({scaleto(0.5, 1.2, 0.8), scaleto(0.5, 1, 1)})))
 end
 function ChildMenuLayer:enterScene()
     --生成时就开始接受消息
@@ -173,10 +201,12 @@ end
 function ChildMenuLayer:onMap()
     global.director.curScene:closeGlobalMenu(self)
     global.director:pushView(BigMap.new(), 1, 0)
+    setBool("bigMapYet", true)
 end
 function ChildMenuLayer:onRank()
     global.director.curScene:closeGlobalMenu(self)
     global.director:pushView(Rank.new(), 1, 0)
+    setBool("rankYet", true)
 end
 
 function ChildMenuLayer:onMail()

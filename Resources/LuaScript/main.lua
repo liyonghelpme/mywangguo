@@ -19,9 +19,18 @@ local function main()
     ---------------
     require "Global.INCLUDE"
 
+    --[[
+    require "views.TestBomb"
+    local ca = TestBomb.new()
+    local director = CCDirector:sharedDirector()
+    director:replaceScene(ca.bg)
+    global.director:onlyRun(ca)
+    --]]
+    
     local director = CCDirector:sharedDirector()
     local runscene = director:getRunningScene()
     if runscene == nil then
+        local ca = CastleScene.new()
         global.director:runWithScene(ca)
     else
         local ca = CastleScene.new()

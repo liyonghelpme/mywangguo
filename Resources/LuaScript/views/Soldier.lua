@@ -5,6 +5,7 @@ require "views.Archer"
 require "views.Warrior"
 require "views.Magic"
 require "views.BirdMan"
+require "views.Bomb"
 
 Soldier = class()
 SOLDIER_STATE = {
@@ -71,6 +72,8 @@ function Soldier:ctor(map, data, pd)
         self.funcSoldier = Magic.new(self)
     elseif self.kind == 1130 then
         self.funcSoldier = BirdMan.new(self)
+    elseif self.kind == 582 then
+        self.funcSoldier = Bomb.new(self)
     else
         self.funcSoldier = SoldierFunc.new(self)
     end
@@ -227,10 +230,10 @@ function Soldier:checkNeibor(x, y)
     --近的邻居先访问
     --不允许斜向走
     local neibors = {
-        --{x, y-2},
-        --{x+2, y},
-        --{x, y+2},
-        --{x-2, y},
+        {x, y-2},
+        {x+2, y},
+        {x, y+2},
+        {x-2, y},
         {x-1, y-1},
         {x+1, y-1},
         {x+1, y+1},

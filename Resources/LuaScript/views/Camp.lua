@@ -50,6 +50,21 @@ function CampWorkNode:update(diff)
             Event:sendMsg(EVENT_TYPE.HARVEST_SOLDIER, {self.func.baseBuild.bid, solId})
         end
     end
+    if #self.func.baseBuild.objectList == 0 then
+        if self.blueArrow == nil then
+            self.blueArrow = CCSprite:create("blueArrow.png")
+            self.func.baseBuild.bg:addChild(self.blueArrow)
+            setAnchor(setPos(self.blueArrow, {0, 150}), {0.5, 0})
+            self.blueArrow:setFlipY(true)
+            self.blueArrow:runAction(repeatForever(sequence({moveby(0.5, 0, -10), moveby(0.5, 0, 10)})))
+            self.blueArrow:runAction(repeatForever(sequence({scaleto(0.5, 1.2, 0.8), scaleto(0.5, 1, 1)})))
+        end
+    else
+        if self.blueArrow ~= nil then
+            removeSelf(self.blueArrow)
+            self.blueArrow = nil
+        end
+    end
 end
 
 

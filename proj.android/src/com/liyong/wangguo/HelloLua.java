@@ -29,11 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import net.youmi.android.AdManager;
-import net.youmi.android.offers.OffersManager;
-import net.youmi.android.offers.PointsChangeNotify;
-import net.youmi.android.offers.PointsManager;
-import net.youmi.android.spot.SpotManager;
+
 
 import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
@@ -69,7 +65,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.provider.Settings.Secure;
 
-public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
+public class HelloLua extends Cocos2dxActivity {
 	LinearLayout layout;
 	String appID = "wx883ea78bc363fc31";
 	String contentUrl = "http://www.appchina.com/app/com.liyong.wangguo/";
@@ -117,7 +113,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 		
 		//MobclickAgent.setDebugMode(true);
 		Log.v("Youmi", "initial You mi");
-		AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
+		//AdManager.getInstance(this).init("8039a682e6f38d19", "daa2af09d8664093", false);
 		
 		/*
 		try{
@@ -140,18 +136,20 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 			Log.e("Youmi", "initial points error", e);
 		}
 		*/
+		/*
 		mController.setShareContent("快来和我一起玩王国危机吧！一起称霸整个大陆！");
 		mController.setShareMedia(new UMImage(this, R.drawable.icon));
 		mController.getConfig().supportWXPlatform(this, appID, contentUrl);
 		mController.getConfig().supportWXCirclePlatform(this, appID, contentUrl) ;
-		SpotManager.getInstance(this).loadSpotAds();
+		*/
+		//SpotManager.getInstance(this).loadSpotAds();
 		
 	}
 	
 	public void onDestroy() {
-		OffersManager.getInstance(this).onAppExit();
+		//OffersManager.getInstance(this).onAppExit();
 		super.onDestroy();
-		PointsManager.getInstance(this).unRegisterNotify(this);
+		//PointsManager.getInstance(this).unRegisterNotify(this);
 	}
 	
 	@Override
@@ -186,6 +184,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 	static {
         System.loadLibrary("hellolua");
    }
+	/*
 	@Override
 	public void onPointBalanceChange(final int arg0) {
 		// TODO Auto-generated method stub
@@ -200,6 +199,7 @@ public class HelloLua extends Cocos2dxActivity implements PointsChangeNotify{
 			
 		});
 	}
+	*/
 	@Override 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);

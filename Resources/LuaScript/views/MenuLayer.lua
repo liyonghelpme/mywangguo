@@ -13,11 +13,33 @@ function MenuLayer:ctor(sc)
     self:initView()
     registerEnterOrExit(self)
 end
+function MenuLayer:showBlueArrow()
+    if self.blueArrow == nil then
+        self.blueArrow = CCSprite:create("blueArrow.png")
+        self.menuButton.bg:addChild(self.blueArrow)
+        setAnchor(setPos(self.blueArrow, {40, 40}), {0.5, 0})
+        self.blueArrow:setFlipY(true)
+        self.blueArrow:runAction(repeatForever(sequence({moveby(0.5, 0, -10), moveby(0.5, 0, 10)})))
+        self.blueArrow:runAction(repeatForever(sequence({scaleto(0.5, 1.2, 0.8), scaleto(0.5, 1, 1)})))
+    end
+end
 function MenuLayer:initDataOver()
     self:updateText()
     self:updateExp(0)
     self.name:setString(global.user:getValue("name"))
     MsgModel.initMsg()
+    if global.user:getValue("level") >= 4 then
+        local b = getBool("bigMapYet")
+        if not b then
+            self:showBlueArrow()
+        end
+    end
+    if global.user:getValue("level") >= 10 then
+        local b = getBool("rankYet")
+        if not b then
+            self:showBlueArrow()
+        end
+    end
 end
 function MenuLayer:enterScene()
     Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)

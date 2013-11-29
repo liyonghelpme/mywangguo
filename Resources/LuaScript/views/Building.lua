@@ -78,7 +78,12 @@ function Building:ctor(m, d, privateData)
     --调整建筑物 setPos 的时候就需要调整sp位置
     local sz = self.changeDirNode:getContentSize()
     setPos(setAnchor(setContentSize(self.bg, {sz.width, sz.height}), {0.5, 0}), {ZoneCenter[1][1], fixY(MapHeight, ZoneCenter[1][2])})
-    local sp = createSprite("grass3.png")
+    local sp
+    if createSprite ~= nil then
+        sp = createSprite("grass3.png")
+    else
+        sp = CCSprite:create("grass3.png")
+    end
     self.shadow = sp
     sp:setOpacity(200)
     --self.bg:addChild(sp, -1)
@@ -114,16 +119,18 @@ function Building:ctor(m, d, privateData)
         self.healthBar:setVisible(false)
     end
 
-    self:setOffset()
     --self:setGLProgram()
     registerEnterOrExit(self)
     --registerMultiTouch(self)
+    self:setOffset()
 end
 function Building:setGLProgram()
     --self.offset = setGLProgram(self.shadow)
 end
 function Building:setOffset()
-    setOffset(self.shadow, self.level*60)
+    if setOffset ~= nil then
+        setOffset(self.shadow, self.level*60)
+    end
 end
 function Building:setMap(m)
     self.map = m

@@ -28,11 +28,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.youmi.android.banner.AdSize;
-import net.youmi.android.banner.AdView;
-import net.youmi.android.offers.OffersManager;
-import net.youmi.android.offers.PointsManager;
-import net.youmi.android.spot.SpotManager;
+
 
 //import com.google.ads.*;
 //import com.google.ads.AdRequest.ErrorCode;
@@ -60,7 +56,7 @@ public class AdsAdmob implements InterfaceAds {
 	private static boolean bDebug = false;
 	private static AdsAdmob mAdapter = null;
 
-	private AdView adView = null;
+	//private AdView adView = null;
 	private String mPublishID = "";
 	private Set<String> mTestDevices = null;
 	private WindowManager mWm = null;
@@ -110,7 +106,7 @@ public class AdsAdmob implements InterfaceAds {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						PointsManager.getInstance(mContext).spendPoints(Integer.valueOf(gold));
+						//PointsManager.getInstance(mContext).spendPoints(Integer.valueOf(gold));
 					}
 					
 				});
@@ -124,8 +120,9 @@ public class AdsAdmob implements InterfaceAds {
 					LogD("init AppInfo : " + mPublishID);
 				}
 			
-			
+				
 				muid = devInfo.get("uid");
+				/*
 				if(muid != null) {
 					PluginWrapper.runOnMainThread(new Runnable() {
 						@Override
@@ -134,6 +131,7 @@ public class AdsAdmob implements InterfaceAds {
 						}
 					});
 				}
+				*/
 			LogD("youmi uid is "+muid);
 		}
 	}
@@ -216,7 +214,7 @@ public class AdsAdmob implements InterfaceAds {
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					SpotManager.getInstance(mContext).showSpotAds(mContext);
+					//SpotManager.getInstance(mContext).showSpotAds(mContext);
 				}
 				
 			});
@@ -238,6 +236,7 @@ public class AdsAdmob implements InterfaceAds {
 
 			@Override
 			public void run() {
+				/*
 				// TODO Auto-generated method stub
 				if(null != adView){
 					//adView.setVisibility(View.VISIBLE);
@@ -257,6 +256,8 @@ public class AdsAdmob implements InterfaceAds {
 				fl.addView(ll, lp);;
 				ll.addView(adView, layoutParams);
 				//fl.addView(adView, layoutParams);
+				 
+				 */
 			}
 			
 		});
@@ -266,10 +267,12 @@ public class AdsAdmob implements InterfaceAds {
 		PluginWrapper.runOnMainThread(new Runnable() {
 			@Override
 			public void run() {
+				/*
 				if (null != adView) {
 					Log.v("Youmi", "hideAds");
 					ll.setVisibility(View.INVISIBLE);
 				}
+				*/
 			}
 		});
 	}
