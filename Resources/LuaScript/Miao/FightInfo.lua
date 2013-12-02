@@ -1,7 +1,9 @@
 require "Miao.PeopleInfo"
 require "Miao.ConfigInfo"
 FightInfo = class()
-function FightInfo:ctor(s)
+function FightInfo:ctor(param)
+    self.callback = param.callback
+    self.delegate = param.delegate
     self.bg = CCNode:create()
     local vs = getVS()
     local temp = setPos(setContentSize(addChild(self.bg, display.newScale9Sprite("tabback.jpg")), {500, 325}), {vs.width/2, vs.height/2})
@@ -45,5 +47,9 @@ function FightInfo:onConfig()
 end
 function FightInfo:onAttack()
     global.director:popView()
-    global.director.curScene.layer.buildLayer:addPeople()  
+    if self.callback ~= nil then
+        self.callback(self.delegate)
+    else
+        global.director.curScene.layer.buildLayer:addPeople()  
+    end
 end

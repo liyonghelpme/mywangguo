@@ -28,14 +28,20 @@ end
 --12 month 1 year
 Logic.date = 720
 Logic.story = 1
-Logic.inNew = true
+Logic.inNew = false
+Logic.buyHouseYet = false
+Logic.gotoHouse = false
+Logic.checkFarm = false
+Logic.newBuildYet = false
+Logic.buyIt = false
+Logic.getNewRegion = false
 --s 秒
 --每周 1 分钟
 --每个月 4周
 --每年 12个月
 function getDate()
     local t = Logic.date
-    local w = math.floor(t/60)
+    local w = math.floor(t/10)
     local m = math.floor(w/4)
     w = w%4
     local y = math.floor(m/12)
@@ -43,7 +49,9 @@ function getDate()
     return y+1, m+1, w+1
 end
 local function yearUpdate(diff)
-    Logic.date = Logic.date+diff
+    if not Logic.paused then
+        Logic.date = Logic.date+diff
+    end
 end
 Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
 

@@ -96,7 +96,8 @@ function NewBuildMenu:touchEnded(x, y)
             global.director:popView() 
             self.scene.menu:clearMenu()
             self.btype = t            
-            if Logic.inNew then
+            if Logic.inNew and not Logic.newBuildYet then
+                Logic.newBuildYet = true
                 local w = Welcome2.new(self.onHouse, self)
                 w:updateWord("请拖拽画面选择建筑场所，点击建筑物可以进行微调。")
                 global.director:pushView(w, 1, 0)

@@ -11,6 +11,7 @@ function Welcome2:ctor(cb, del)
     local but = ui.newButton({image="tabbut.png", text="确定", size=15, color={0, 0, 0}, callback=self.onOk, delegate=self})
     setPos(but.bg, {203, fixY(240, 216)})
     temp:addChild(but.bg)
+    registerEnterOrExit(self)
 end
 function Welcome2:updateWord(w)
     if self.con ~= nil then
@@ -25,4 +26,10 @@ function Welcome2:onOk()
     if self.callback ~= nil then
         self.callback(self.delegate)
     end
+end
+function Welcome2:enterScene()
+    Logic.paused = true
+end
+function Welcome2:exitScene()
+    Logic.paused = false
 end

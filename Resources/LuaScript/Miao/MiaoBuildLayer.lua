@@ -457,7 +457,18 @@ function MiaoBuildLayer:initRoad()
             end
         end
     end
-    
+
+    local temp = {{24, 14}, {25, 13}, {26, 12}}
+    for k, v in ipairs(temp) do
+        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
+        local p = normalizePos(setBuildMap({1, 1, v[1], v[2]}), 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+    end
+     
     --[[
     for i=1, 24, 1 do
         local cx, cy = affineToCartesian(21, i)

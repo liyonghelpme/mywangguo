@@ -47,7 +47,8 @@ function PressMenu:onBut(p)
     if p == 1 then
         self.scene.menu.menu = nil
         global.director:popView()
-        if Logic.inNew then
+        if Logic.inNew and not Logic.buyHouseYet then
+            Logic.buyHouseYet = true
             local w = Welcome2.new(self.onHouse, self)
             w:updateWord("首先从'环境'中选择<0000ff农家>吧")
             global.director:pushView(w, 1, 0)

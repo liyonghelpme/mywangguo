@@ -192,6 +192,14 @@ function MiaoPeople:handleFarm()
             self.state = PEOPLE_STATE.FREE
             self.realTarget = nil
         else
+            local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+            sf:addSpriteFramesWithFile("cat_labor.plist")
+            local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
+            self.changeDirNode:stopAllActions()
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+            local sz = self.changeDirNode:getContentSize()
+            setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
+
             self.state = PEOPLE_STATE.IN_WORK
             self.workTime = 0
         end
@@ -344,6 +352,10 @@ function MiaoPeople:workInFarm()
             self.state = PEOPLE_STATE.FREE
             self.realTarget:setOwner(nil)
             self.realTarget = nil
+             
+            self:setDir(0, 0)
+            local sz = getContentSize(self.changeDirNode)
+            setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
             self.realTarget:changeWorkNum(1)
         end

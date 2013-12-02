@@ -98,7 +98,7 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
     elseif self.picName == 't' then
-        self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
+        self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
         self.funcBuild = Road.new(self)
     end
 

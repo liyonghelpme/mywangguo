@@ -36,7 +36,9 @@ function TMXScene:initData(rep, param)
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
 
-    global.director:pushView(NewGame.new(), 1, 0)
+    if Logic.inNew then
+        global.director:pushView(NewGame.new(), 1, 0)
+    end
 end
 function TMXScene:onBuild()
     self.page:addBuilding()

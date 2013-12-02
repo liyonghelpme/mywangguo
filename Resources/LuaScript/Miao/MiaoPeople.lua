@@ -164,7 +164,8 @@ function MiaoPeople:findHouse()
         self:showNoHome()
     else
         self:clearNoHome()
-        if Logic.inNew then
+        if Logic.inNew and Logic.gotoHouse then
+            Logic.gotoHouse = false
             local w = Welcome2.new(self.onSucFind, self)
             w:updateWord("太好啦！！新房子啊。\n一直在这里傻站着站的我脚都肿了...")
             global.director:pushView(w, 1, 0)
@@ -388,7 +389,8 @@ function MiaoPeople:findWorkBuilding()
             --去商店购买
             k:setOwner(self)
             self.predictTarget = k
-            if Logic.inNew then
+            if Logic.inNew and not Logic.checkFarm then
+                Logic.checkFarm = true
                 self.merch = 0
                 local w = Welcome2.new(self.onMerch, self)
                 w:updateWord("你好啊!!!没想到这里还会有村落。。。我正在行商途中，正好过来走一遭。")
@@ -397,13 +399,15 @@ function MiaoPeople:findWorkBuilding()
         end
     end 
 end
+
 function MiaoPeople:onMerch()
     if self.merch == 0 then
         local w = Welcome2.new(self.onMerch, self)
         w:updateWord("如果这里有食材的话，希望能够让我收购一些...")
         global.director:pushView(w, 1, 0)
         self.merch = 1
-    else
+    elseif self.merch == 1 then
+        self.merch = 2
         local w = Welcome2.new(self.onMerch, self)
         w:updateWord("真是求之不得的提议案。那么就让商人收购一些田地里生产的<0000ff食材吧>.")
         global.director:pushView(w, 1, 0)
@@ -711,7 +715,8 @@ function MiaoPeople:doMove(diff)
                             doGain({silver=self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)})
                             self.predictTarget.workNum = 0
                         end
-                        if Logic.inNew then
+                        if Logic.inNew and not Logic.buyIt then
+                            Logic.buyIt = true
                             local w = Welcome2.new(self.onBuy, self)
                             w:updateWord("好了，那么我就收购食材<0000ff"..getNum..">个，并付给你<0000ff"..getNum.."贯>")
                             global.director:pushView(w, 1, 0)

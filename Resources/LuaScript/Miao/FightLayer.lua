@@ -11,6 +11,8 @@ FIGHT_STATE = {
     WAIT = 7,
     FIGHT_OVER = 8,
     FIGHT_OVER2 = 9,
+
+    FIGHT_OVER3 = 10,
 }
 FightLayer = class()
 function FightLayer:ctor(s)
@@ -322,11 +324,22 @@ function FightLayer:update(diff)
         self:renderScene()
         self.passTime = self.passTime+diff
         if self.passTime >= 5 then
-            global.director:popScene()
+            if Logic.getNewRegion then
+                self.state = FIGHT_STATE.FIGHT_OVER3
+                Logic.getNewRegion = false
+                local w = Welcome2.new(self.onOver, self)
+                w:updateWord("共计给对手造成了<0000ff55>点伤害")
+                global.director:pushView(w, 1, 0)
+            else
+                global.director:popScene()
+            end
         end
     end
 end
-
+function FightLayer:onOver()
+    global.director:popScene()
+    global.director.curScene.page:regionOpen()
+end
 
 function FightLayer:touchesBegan(touches)
     --self.touchDelegate:tBegan(touches)
