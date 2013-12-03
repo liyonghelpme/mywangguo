@@ -570,7 +570,7 @@ function MiaoPeople:doFind(diff)
         --所有建筑物  水面 道路
         local buildCell = self.map.mapGridController.mapDict
         local staticObstacle = self.map.staticObstacle 
-        while n < 50 do
+        while n < 5 do
             if #self.openList == 0 then
                 break
             end

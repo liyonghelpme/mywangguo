@@ -50,7 +50,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        self:addPeople(2)
+        --self:addPeople(2)
     end
 end
 
@@ -431,9 +431,47 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initBuild()
     self:initBackPoint()
-    self:initCat()
+    --self:initCat()
     self.initYet = true
 end
+function MiaoBuildLayer:initRoad() 
+    local nlayer = self.scene.layerName['road']
+    local width = self.scene.width
+    local height = self.scene.height
+    for dk, dv in ipairs(nlayer.data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.buildingLayer:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+
+        end
+    end
+
+    --建筑物名称
+    local nlayer = self.scene.layerName['build']
+    for dk, dv in ipairs(nlayer.data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local pic = CCSprite:create(pname)
+            self.buildingLayer:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+
+        end
+    end
+end
+
+--[[
 function MiaoBuildLayer:initRoad()
     --不用调整road 的 方向信息的info
     local nlayer = self.scene.tileMap:layerNamed("road")
@@ -469,22 +507,8 @@ function MiaoBuildLayer:initRoad()
         b:finishBuild()
     end
      
-    --[[
-    for i=1, 24, 1 do
-        local cx, cy = affineToCartesian(21, i)
-        print("road x y", cx, cy)
-        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
-        local p = normalizePos({cx, cy}, 1, 1)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-    end
-    --]]
-
 end
-
+--]]
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
     local initX = 60
@@ -587,7 +611,10 @@ function MiaoBuildLayer:addPeople(param)
         pos = normalizePos({pos.x, pos.y}, 1, 1)
     --商人
     elseif data.kind == 2 then
-        local cx, cy = affineToCartesian(21, 24)
+        local width = self.scene.width
+        local height = self.scene.height
+        local cx, cy = newAffineToCartesian(10, 10, width, height, MapWidth/2, FIX_HEIGHT)
+        --local cx, cy = affineToCartesian(21, 24)
         pos = normalizePos({cx, cy}, 1, 1)
     end
     setPos(p.bg, pos)

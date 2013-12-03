@@ -228,35 +228,30 @@ function MiaoBuild:setColPos()
     self.otherBuild = nil
     self:setColor(0)
 
-    local ax, ay = self:calAff()
+    local pos = getPos(self.bg)
+    local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     
-    local layer = self.map.scene.tileMap:layerNamed("dirt1");
-    if ax < 0 or ay < 0 or ax >= MapGX or ay >= MapGY or ax >= 21 then
+    if ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= 11 then
         self.colNow = 1
         self:setColor(0)
         return
     end
-
-    --可以建造的位置 并且没有其它建筑物
-    local gid = layer:tileGIDAt(ccp(ax, ay))
-    local pro = self.map.scene.tileMap:propertiesForGID(gid)
-    if pro ~= nil then
-        local v = pro:valueForKey("b"):intValue()
-        print("tile gid", gid, v)
-        if v == 1 then
-
-            local other = self.map:checkCollision(self)
-            print("checkCollision result", other)
-            if other ~= nil then
-                self.colNow = 1
-                self.otherBuild = other
-                self:setColor(0)
-            else
-                self.colNow = 0
-                self:setColor(1)
-            end
+    local layer = self.map.scene.layerName['slop1']
+    local gid = layer.data[ay*self.map.scene.width+ax]
+    local name = self.map.scene.tileName[gid]
+    if name == 'tile0.png' then
+        local other = self.map:checkCollision(self)
+        print("checkCollision result", other)
+        if other ~= nil then
+            self.colNow = 1
+            self.otherBuild = other
+            self:setColor(0)
+        else
+            self.colNow = 0
+            self:setColor(1)
         end
     end
+
 end
 function MiaoBuild:touchesEnded(touches)
     if self.doMove then

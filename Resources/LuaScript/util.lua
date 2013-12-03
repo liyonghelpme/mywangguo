@@ -644,7 +644,7 @@ function normalizePos(p, sx, sy)
     
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
-    if (q1+sx)%2 ~= (q2+1)%2 then
+    if (q1+sx)%2 == (q2+1)%2 then
         q2 = q2+1
     end
     x = q1*SIZEX

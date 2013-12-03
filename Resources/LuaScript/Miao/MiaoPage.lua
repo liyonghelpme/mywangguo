@@ -25,10 +25,110 @@ function MiaoPage:ctor(s)
         end
     end
 
+    --[[
     self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
     self.bg:addChild(self.tileMap)
     self:initTiles()
     setPos(self.tileMap, {200, -100+FIX_HEIGHT})
+    --]]
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("myTile2.plist")
+    self.tileMap = CCSpriteBatchNode:create("myTile2.png")
+    self.bg:addChild(self.tileMap)
+
+    local mj = simple.decode(getFileData("newMap.json"))
+    self.mapInfo = mj
+    local width = mj.width
+    local height = mj.height
+    self.width = width
+    self.height = height
+    local tilesets = mj.tilesets
+    local tileName = {}
+    for k, v in ipairs(tilesets) do
+        tileName[v.firstgid] = v.image 
+    end
+    self.tileName = tileName
+
+    local layers = mj.layers
+    local layerName = {}
+    for k, v in ipairs(layers) do
+        layerName[v.name] = v
+    end
+    self.layerName = layerName
+
+    for dk, dv in ipairs(layerName['slop1'].data) do
+        if dv ~= 0 then
+            local pname = tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+        end
+    end
+    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+
+    for dk, dv in ipairs(layerName['slop2'].data) do
+        if dv ~= 0 then
+            local pname = tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+        end
+    end
+
+    for dk, dv in ipairs(layerName['ladder'].data) do
+        if dv ~= 0 then
+            local pname = tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local sz = pic:getContentSize()
+            setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
+        end
+    end
+
+    for dk, dv in ipairs(layerName['sea'].data) do
+        if dv ~= 0 then
+            local pname = tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local sz = pic:getContentSize()
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+        end
+    end
+
+    for dk, dv in ipairs(layerName['fence'].data) do
+        if dv ~= 0 then
+            local pname = tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local sz = pic:getContentSize()
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+        end
+    end
+
 
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate.bg = self.bg
@@ -49,6 +149,7 @@ function MiaoPage:setPoint(x, y)
     local curPos = getPos(self.bg)
     setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
 end
+--初始化地图遮罩部分 不用了 新的直接CCBatchNodeSprite 来绘制遮罩
 function MiaoPage:initTiles()
     self.allIsland = {}
     self.allMask = {}
