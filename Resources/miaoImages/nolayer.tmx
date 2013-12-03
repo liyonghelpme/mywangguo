@@ -18,9 +18,99 @@
    eJzt1EsKACAIBFDv4f3v2TZCakbGCkpwVb6kn5mZdxmFA3OimrG20kaSsVmftTP9sz1U2ow/2we070woz263jaxZaZ+4J4ytvv9ZexXZ93GLPVtLZSNj337XVv1DKhvJBjIdHmE=
   </data>
  </layer>
- <layer name="dirt1" width="23" height="26">
+ <layer name="dirt1" width="23" height="26" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztlesKgCAMhX0Cu9mF3v9BU2oQY2de0n45OBSIn9tps9kYs5o7Bq9ZUGwd7QnP3WtrxKZ367UIch/ZlLsWpWziT8oZxD5AfbxWzV8e9rVvfPJA2hLYiHFmeiKxczzmDK0vvrKRVzXYLT2JsdE81ehBza9YvJk0E9qMh3NjvS31N58ZxE75BrwHXWU2qg/duTls7c7u7M7+g63926U1l8EuiZS7MeRwAdA1Jd8=
+   eJxjYBgFo2AUjILhCQSAWJAAFiPTbH4gFiKARUfNHjV71OxhYzYfEAsTwCJADABp4Akl
+  </data>
+ </layer>
+ <layer name="mask1_1" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMApGLlDFgkfNHjWbXLMBH74FEA==
+  </data>
+ </layer>
+ <layer name="mask1_2" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjILhCVSx4FGzR80eBaOAlgAAYpUEVw==
+  </data>
+ </layer>
+ <layer name="mask1_3" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIKRA1Sx4FGzR80eBaOAWgAAC90EVw==
+  </data>
+ </layer>
+ <layer name="mask1" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjILhCVSJxKNmj5o9avao2dQyGwAsuhLL
+  </data>
+ </layer>
+ <layer name="dirt2" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjALaAwEgFkTDYlQymx+IhdCw6KjZo2aPmj1szeYDYmE0LEIlsykFAPKWBX0=
+  </data>
+ </layer>
+ <layer name="mask2" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjALaA1UceNTsUbNHzR41eziZDQD2ygwl
+  </data>
+ </layer>
+ <layer name="dirt3" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFIx0IALEgHixGgRlSQCyEB4sSYTY/ATNGzaau2XxALEwGFiHC7FEwCkbBKBjuAAAhTQcB
+  </data>
+ </layer>
+ <layer name="mask3" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFIx2oEoGpYcao2aNmj4JRMApGwXAHAEQQDlA=
+  </data>
+ </layer>
+ <layer name="dirt4" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAe8AOxEJFYlARzR83Gb7YEEAsTwCIkms1Hpr5RMApGwSgYBaNgFOAGAD8rBHs=
+  </data>
+ </layer>
+ <layer name="mask4" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAeqJKISQGjZg+c2aNgFIyCUTAKRsEooA4AAM3JCRw=
+  </data>
+ </layer>
+ <layer name="dirt5" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMBSBABALYsFiVDCbH4iFsGDRUbNHzaaT2XxALIwFi1DBbFoCAFa/BG8=
+  </data>
+ </layer>
+ <layer name="mask5" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMBSBKh48avao2aNmDwwAAD9pCRw=
+  </data>
+ </layer>
+ <layer name="dirt6" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUkAMEsWAxKpkthAWLjpoNxxJALAzEIjQwm1ruhQFhJEwt946CUTAKBi8AABdGAsY=
+  </data>
+ </layer>
+ <layer name="mask6" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUkANUceBRs4e+2dQEtDR7FIyCUTD4AAD/iQV/
+  </data>
+ </layer>
+ <layer name="dirt7" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJwTYmBgEGWgDRACYnEgFqOR2SBMC7fDzKaF24UYUM0XpKIdQlgwtcJnqJotjAWLUMnsUTAKRsEoGAWjAB0AAPHJAyU=
+  </data>
+ </layer>
+ <layer name="mask7" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxTZWBgUGWgDVBFwkPVbGqbj242Ne0YNZu+Zo+CUTAKRsEoGAXoAAAgrgYT
+  </data>
+ </layer>
+ <layer name="dirt8" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYEAAfiAWwoJFGSgHtDSbD4iFsWARKpg9CkbBKBgFo2AUjIJRQCwAAEODAX4=
+  </data>
+ </layer>
+ <layer name="mask8" width="23" height="26" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJxjYEAAVTyYUjBUzR4Fo2AUjIJRMApGwSggFgAABvEDCg==
   </data>
  </layer>
  <layer name="road" width="23" height="26" visible="0">
