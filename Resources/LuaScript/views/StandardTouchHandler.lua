@@ -111,12 +111,8 @@ function StandardTouchHandler:tMoved(touches)
         move = {midOld[1]-newInBg.x, midOld[2]-newInBg.y}
         self:MoveBack(move[1], move[2])
     elseif self.lastPos.count == 1 then
-<<<<<<< HEAD
-        if oldPos.count >= 1 then
-=======
         --上一次也只有一个手指
         if oldPos.count == 1 then
->>>>>>> mygit/tmx
             local difx = self.lastPos[0][1]-oldPos[0][1]
             local dify = self.lastPos[0][2]-oldPos[0][2]
             self:MoveBack(difx, dify)
