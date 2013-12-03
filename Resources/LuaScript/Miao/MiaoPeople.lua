@@ -85,6 +85,31 @@ function MiaoPeople:checkHealth()
         self.tired = true
     end
 end
+<<<<<<< HEAD
+=======
+function MiaoPeople:showNoHome()
+    if self.homeLabel == nil then
+        self.homeLabel = ui.newTTFLabel({text="无家可归", size=20, color={100, 10, 10}})
+        self.bg:addChild(self.homeLabel)
+        setPos(self.homeLabel, {0, 90})
+    end
+end
+function MiaoPeople:clearNoHome()
+    if self.homeLabel ~= nil then
+        removeSelf(self.homeLabel)
+        self.homeLabel = nil
+    end
+end
+
+function MiaoPeople:onOver()
+end
+function MiaoPeople:onSucFind()
+    local w = Welcome2.new(self.onOver, self)
+    w:updateWord("等我休息好了，我就在附近的田地里耕作好了。")
+    global.director:pushView(w, 1, 0)
+end
+
+>>>>>>> mygit/tmx
 --寻找我的住宅
 
 --在家也是工作的一种形式
@@ -138,6 +163,20 @@ function MiaoPeople:findHouse()
             end
         --end
     end
+<<<<<<< HEAD
+=======
+    if self.myHouse == nil then
+        self:showNoHome()
+    else
+        self:clearNoHome()
+        if Logic.inNew and Logic.gotoHouse then
+            Logic.gotoHouse = false
+            local w = Welcome2.new(self.onSucFind, self)
+            w:updateWord("太好啦！！新房子啊。\n一直在这里傻站着站的我脚都肿了...")
+            global.director:pushView(w, 1, 0)
+        end
+    end
+>>>>>>> mygit/tmx
     self.predictTarget = self.myHouse
 end
 function MiaoPeople:findAllNearBuilding(diff)
@@ -356,10 +395,37 @@ function MiaoPeople:findWorkBuilding()
             --去商店购买
             k:setOwner(self)
             self.predictTarget = k
+<<<<<<< HEAD
+=======
+            if Logic.inNew and not Logic.checkFarm then
+                Logic.checkFarm = true
+                self.merch = 0
+                local w = Welcome2.new(self.onMerch, self)
+                w:updateWord("你好啊!!!没想到这里还会有村落。。。我正在行商途中，正好过来走一遭。")
+                global.director:pushView(w, 1, 0)
+            end
+>>>>>>> mygit/tmx
         end
     end 
 end
 
+<<<<<<< HEAD
+=======
+function MiaoPeople:onMerch()
+    if self.merch == 0 then
+        local w = Welcome2.new(self.onMerch, self)
+        w:updateWord("如果这里有食材的话，希望能够让我收购一些...")
+        global.director:pushView(w, 1, 0)
+        self.merch = 1
+    elseif self.merch == 1 then
+        self.merch = 2
+        local w = Welcome2.new(self.onMerch, self)
+        w:updateWord("真是求之不得的提议案。那么就让商人收购一些田地里生产的<0000ff食材吧>.")
+        global.director:pushView(w, 1, 0)
+    end
+end
+
+>>>>>>> mygit/tmx
 function MiaoPeople:update(diff)
     if Logic.paused then
         return
@@ -606,6 +672,14 @@ function MiaoPeople:initMove(diff)
 
     end
 end
+<<<<<<< HEAD
+=======
+function MiaoPeople:onBuy()
+    local w = Welcome2.new(self.onOver, self)
+    w:updateWord("今后我打算定期前来采购，希望你能够增加田地")
+    global.director:pushView(w, 1, 0)
+end
+>>>>>>> mygit/tmx
 function MiaoPeople:doMove(diff)
     if self.state == PEOPLE_STATE.IN_MOVE then
         self.passTime = self.passTime+diff
@@ -625,6 +699,10 @@ function MiaoPeople:doMove(diff)
                         self.realTarget:setOwner(nil)
                         --开始交易 回家啦
                         --去采矿场
+<<<<<<< HEAD
+=======
+                        local getNum = 0
+>>>>>>> mygit/tmx
                         if self.predictTarget.stone > 0 then
                             local sp = CCSprite:create("silver.png")
                             local p = getPos(self.predictTarget.bg)
@@ -642,6 +720,10 @@ function MiaoPeople:doMove(diff)
                         --去商店
                         --去铁匠铺
                         elseif self.predictTarget.workNum > 0 then
+<<<<<<< HEAD
+=======
+                            getNum = self.predictTarget.workNum
+>>>>>>> mygit/tmx
                             local sp = CCSprite:create("silver.png")
                             local p = getPos(self.predictTarget.bg)
                             self.map.bg:addChild(sp)
@@ -654,6 +736,15 @@ function MiaoPeople:doMove(diff)
                             doGain({silver=self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)})
                             self.predictTarget.workNum = 0
                         end
+<<<<<<< HEAD
+=======
+                        if Logic.inNew and not Logic.buyIt then
+                            Logic.buyIt = true
+                            local w = Welcome2.new(self.onBuy, self)
+                            w:updateWord("好了，那么我就收购食材<0000ff"..getNum..">个，并付给你<0000ff"..getNum.."贯>")
+                            global.director:pushView(w, 1, 0)
+                        end
+>>>>>>> mygit/tmx
                     else
                         print("GO AWAY Now!")
                         self.state = PEOPLE_STATE.GO_AWAY
@@ -906,8 +997,15 @@ function MiaoPeople:getPath()
         
         --走到房间边缘消失掉
         if self.predictTarget.id == 1 then
+<<<<<<< HEAD
             local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
             table.insert(self.path, {mx, my})
+=======
+            if #self.path >= 2 then
+                local mx, my = (path[1][1]+path[2][1])/2, (path[1][2]+path[2][2])/2
+                table.insert(self.path, {mx, my})
+            end
+>>>>>>> mygit/tmx
             self.tempEndPoint = {path[1][1], path[1][2]}
         --进入工厂中工作
         elseif self.predictTarget.id == 5 then

@@ -23,7 +23,15 @@ local function main()
     require "Miao.TMXScene"
 
 
+<<<<<<< HEAD
     global.director:runWithScene(TMXScene.new())
+=======
+    --global.director:runWithScene(TMXScene.new())
+    --global.director:runWithScene(FightScene.new())
+
+    require "Menu.TestMenu"
+    global.director:runWithScene(TestMenu.new())
+>>>>>>> mygit/tmx
 end
 
 xpcall(main, __G__TRACKBACK__)

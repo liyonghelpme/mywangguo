@@ -52,6 +52,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCScriptEngineManager::sharedManager()->setScriptEngine(pEngine);
 
     //根据config.ini 配置UserDefault 
+	CCLog("hello wangguo");
     unsigned long fsize;
     unsigned char *data = CCFileUtils::sharedFileUtils()->getFileData("config.ini", "r", &fsize);
     map<string, string> *nm = handleIni((char*)data, fsize); 

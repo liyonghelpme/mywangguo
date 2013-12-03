@@ -98,7 +98,11 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
     elseif self.picName == 't' then
+<<<<<<< HEAD
         self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, 0})
+=======
+        self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
+>>>>>>> mygit/tmx
         self.funcBuild = Road.new(self)
     end
 
@@ -294,7 +298,12 @@ function MiaoBuild:touchesEnded(touches)
 end
 function MiaoBuild:update(diff)
     local map = getBuildMap(self)
+<<<<<<< HEAD
     self.posLabel:setString("     "..map[3].." "..map[4])
+=======
+    local p = getPos(self.bg)
+    self.posLabel:setString("     "..map[3].." "..map[4].." "..p[1].." "..p[2])
+>>>>>>> mygit/tmx
     self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
     local s = ''
     for k, v in ipairs(self.belong) do

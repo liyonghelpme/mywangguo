@@ -147,6 +147,11 @@ bool ImageUpdate::checkUpdate() {
     }
     delete temp;
 
+    //download(); 
+
+    //verfileData = (char*)data;
+    //verfileSize = fsize;
+
     CCLog("need Update Image %d", needUpdate.size());
     for(vector<string>::iterator it=needUpdate.begin(); it != needUpdate.end(); it++) {
 		CCLog("update %s ", (*it).c_str());

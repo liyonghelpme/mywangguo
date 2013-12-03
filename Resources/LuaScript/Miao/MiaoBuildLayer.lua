@@ -102,12 +102,24 @@ function MiaoBuildLayer:initSlope()
 
 end
 function MiaoBuildLayer:initCat()
+<<<<<<< HEAD
+=======
+    if Logic.inNew then
+        self:addPeople(3)
+        self:addPeople(4)
+        return
+    end
+>>>>>>> mygit/tmx
     local u = CCUserDefault:sharedUserDefault()
     local cat = u:getStringForKey("people")
     if cat ~= "" then
         cat = simple.decode(cat)
         for k, v in ipairs(cat) do
+<<<<<<< HEAD
             local p = MiaoPeople.new(self, {id=3})
+=======
+            local p = MiaoPeople.new(self, {id=v.id or 3})
+>>>>>>> mygit/tmx
             self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
             local pos = normalizePos({v.px, v.py}, 1, 1)
             setPos(p.bg, pos)
@@ -132,6 +144,33 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
+<<<<<<< HEAD
+=======
+    if Logic.inNew then
+        local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
+        local p = normalizePos({1344, 384}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+        local b = MiaoBuild.new(self, {picName='build', id=2, bid=2})
+        local p = normalizePos({1472, 448}, 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+
+        local mbid = 0
+        mbid = math.max(2, mbid)
+        mbid = mbid+1
+        Logic.maxBid = mbid
+        return
+    end
+
+>>>>>>> mygit/tmx
     local u = CCUserDefault:sharedUserDefault()
     local build = u:getStringForKey("build")
     local mbid = 0
@@ -429,6 +468,20 @@ function MiaoBuildLayer:initRoad()
         end
     end
     
+<<<<<<< HEAD
+=======
+    local temp = {{24, 14}, {25, 13}, {26, 12}}
+    for k, v in ipairs(temp) do
+        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
+        local p = normalizePos(setBuildMap({1, 1, v[1], v[2]}), 1, 1)
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        b:finishBuild()
+    end
+     
+>>>>>>> mygit/tmx
     --[[
     for i=1, 24, 1 do
         local cx, cy = affineToCartesian(21, i)

@@ -138,6 +138,10 @@ function TestPeople:doAttack()
         --self.changeDirNode:stopAllActions()
         self.changeDirNode:runAction(sequence({fadeout(2), callfunc(nil, removeSelf, self.bg)}))
         self.state = BIG_STATE.OVER
+<<<<<<< HEAD
+=======
+        addCmd({cmd="fightNow"})
+>>>>>>> mygit/tmx
     end
 end
 function TestPeople:setZord()

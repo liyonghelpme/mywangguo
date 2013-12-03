@@ -1,6 +1,10 @@
 MapWidth=3136
+<<<<<<< HEAD
 FIX_HEIGHT=128
 
+=======
+FIX_HEIGHT = 128
+>>>>>>> mygit/tmx
 MapHeight=1700+FIX_HEIGHT
 SIZEX=64
 SIZEY=32

@@ -23,19 +23,52 @@ function getBid()
     return Logic.maxBid
 end
 
+<<<<<<< HEAD
 Logic.date = 0
+=======
+--60s 1 week
+--4 week 1 month
+--12 month 1 year
+Logic.date = 720
+Logic.story = 1
+Logic.inNew = false
+Logic.buyHouseYet = false
+Logic.gotoHouse = false
+Logic.checkFarm = false
+Logic.newBuildYet = false
+Logic.buyIt = false
+Logic.getNewRegion = false
+>>>>>>> mygit/tmx
 --s 秒
 --每周 1 分钟
 --每个月 4周
 --每年 12个月
+<<<<<<< HEAD
 function getDate(t)
     local w = math.floor(t/60)
+=======
+function getDate()
+    local t = Logic.date
+    local w = math.floor(t/10)
+>>>>>>> mygit/tmx
     local m = math.floor(w/4)
     w = w%4
     local y = math.floor(m/12)
     m = m%12
+<<<<<<< HEAD
     return y, m, w
 end
+=======
+    return y+1, m+1, w+1
+end
+local function yearUpdate(diff)
+    if not Logic.paused then
+        Logic.date = Logic.date+diff
+    end
+end
+Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
+
+>>>>>>> mygit/tmx
 function checkCost(c)
 end
 function doCost(c)
@@ -43,5 +76,17 @@ end
 function doGain(g)
 end
 
+<<<<<<< HEAD
+=======
+--增加多彩文字支持
+StoryWord = {
+"服部家 参谋\n小明拜见!!",
+"此地<0000ff雪隐之村>被数个的郡县分裂，互相争夺土地",
+"服部家虽然刚刚成立，领地微小，但让我们以统一村落为目标努力吧！",
+"有什么不明白的请随时从菜单中的<0000ff系统>里面选择<0000ff游戏方法>查看说明哦。",
+"让我们先为追随你而来的村民建造住所吧。\n请选择菜单中的<0000ff建筑>!!",
+}
+
+>>>>>>> mygit/tmx
 
 

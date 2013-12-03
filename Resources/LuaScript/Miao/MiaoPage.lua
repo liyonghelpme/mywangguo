@@ -1,11 +1,20 @@
 require "Miao.MiaoBuild"
 require "Miao.MiaoBuildLayer"
+<<<<<<< HEAD
+=======
+require "Miao.RegionDialog"
+>>>>>>> mygit/tmx
 MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
     setContentSize(self.bg, {MapWidth, MapHeight})
 
+<<<<<<< HEAD
+=======
+    self.oldBuildPos = {}
+
+>>>>>>> mygit/tmx
     self.backpg = CCSpriteBatchNode:create("sea.png")
     self.bg:addChild(self.backpg)
     local col = math.ceil(MapWidth/64)
@@ -24,6 +33,10 @@ function MiaoPage:ctor(s)
 
     self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
     self.bg:addChild(self.tileMap)
+<<<<<<< HEAD
+=======
+    self:initTiles()
+>>>>>>> mygit/tmx
     setPos(self.tileMap, {200, -100+FIX_HEIGHT})
 
     self.touchDelegate = StandardTouchHandler.new()
@@ -37,6 +50,38 @@ function MiaoPage:ctor(s)
     registerMultiTouch(self)
     self.touchDelegate:scaleToMax(1)
 end
+<<<<<<< HEAD
+=======
+function MiaoPage:setPoint(x, y)
+    local wp = self.bg:convertToWorldSpace(ccp(x, y))
+    local sz = getVS()
+    local dx = sz[1]/2-wp.x
+    local dy = sz[2]/2-wp.y
+    local curPos = getPos(self.bg)
+    setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
+end
+function MiaoPage:initTiles()
+    self.allIsland = {}
+    self.allMask = {}
+    for k=1, 8, 1 do
+        local nlayer = self.tileMap:layerNamed("dirt"..k)
+        nlayer:setupTiles()
+        self.allIsland[k] = nlayer
+        if k > 1 then
+            local mask = self.tileMap:layerNamed("mask"..k)
+            --setBatchColor(nlayer, {128, 128, 128})
+            mask:setupTiles()
+            self.allMask[k] = mask
+        end
+    end
+    self.smallMask = {}
+    for k=1, 3, 1 do
+        local sm = self.tileMap:layerNamed("mask1_"..k)
+        sm:setupTiles()
+        self.smallMask[k] = sm
+    end
+end
+>>>>>>> mygit/tmx
 
 function MiaoPage:enterScene()
     Event:registerEvent(EVENT_TYPE.DO_MOVE, self)
@@ -152,12 +197,26 @@ function MiaoPage:touchesEnded(touches)
         self.touchBuild:touchesEnded(touches)
     end
 end
+<<<<<<< HEAD
 function MiaoPage:beginBuild(kind, id)
+=======
+function MiaoPage:beginBuild(kind, id, px, py)
+>>>>>>> mygit/tmx
     if self.curBuild == nil then
         local vs = getVS()
         --先确定位置 再加入到 buildLayer里面
         self.curBuild = MiaoBuild.new(self.buildLayer, {picName=kind, id=id, bid=getBid()}) 
+<<<<<<< HEAD
         local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+=======
+        local p
+        if px == nil or py == nil then
+            p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+        else
+            p = {x=px, y=py}
+        end
+        
+>>>>>>> mygit/tmx
         p = normalizePos({p.x, p.y}, 1, 1)
         self.curBuild:setPos(p)
         self.curBuild:setColPos()
@@ -168,15 +227,66 @@ function MiaoPage:beginBuild(kind, id)
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         
         Logic.paused = true
+<<<<<<< HEAD
+=======
+        global.director.curScene.menu:beginBuild()
+>>>>>>> mygit/tmx
     end
     return self.curBuild
 end
 function MiaoPage:addPeople(param)
     self.buildLayer:addPeople(param)
 end
+<<<<<<< HEAD
 
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
+=======
+function MiaoPage:showNewPeople()
+end
+
+function MiaoPage:onLight()
+    global.director:pushView(RegionDialog.new(), 1, 0)
+end
+function MiaoPage:enableRegion()
+    self:moveToPoint(1216, 448)
+    
+    local w = Welcome2.new(self.showNewPeople, self)
+    w:updateWord("领地<0000ff一滤波地区>可以进行攻略了!")
+    global.director:pushView(w, 1, 0)
+
+    local sp = ui.newButton({image="lightTower.png", callback=self.onLight, delegate=self})
+    sp:setAnchor(0.5, 0)
+    setPos(sp.bg, {1216, 448})
+    self.bg:addChild(sp.bg)
+    self.attackTarget = sp
+end
+function MiaoPage:regionOpen()
+    self:moveToPoint(1216, 448)
+     
+    removeSelf(self.smallMask[1])
+    removeSelf(self.attackTarget.bg)
+    self.smallMask[1] = nil
+    self.attackTarget = nil
+end
+function MiaoPage:cancelBuild()
+    if self.curBuild ~= nil then
+        self.curBuild:removeSelf()
+        self.curBuild = nil
+        Logic.paused = false
+        global.director.curScene.menu:finishBuild()
+    end
+end
+function MiaoPage:finishBuild()
+    if self.curBuild ~= nil then
+        if self.curBuild.picName == 't' then
+            table.insert(self.oldBuildPos, getPos(self.curBuild.bg))
+            if #self.oldBuildPos >= 3 then
+                table.remove(self.oldBuildPos, 1)
+            end
+        end
+        local oldBuild = self.curBuild
+>>>>>>> mygit/tmx
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         if self.curBuild.picName == 'move' then
             if self.curBuild.moveTarget == nil then
@@ -247,7 +357,26 @@ function MiaoPage:finishBuild()
         else
             addBanner("和其它建筑物冲突啦！")
         end
+<<<<<<< HEAD
         Logic.paused = false
+=======
+        --根据当前的位置 调整一个新位置
+        if oldBuild.picName == 't' then
+            if #self.oldBuildPos == 1 then
+                self:beginBuild('build', 15, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
+            else
+                local dx = self.oldBuildPos[2][1]-self.oldBuildPos[1][1]
+                local dy = self.oldBuildPos[2][2]-self.oldBuildPos[1][2]
+                local sx = Sign(dx)*SIZEX
+                local sy = Sign(dy)*SIZEY
+                self:beginBuild('build', 15, self.oldBuildPos[2][1]+sx, self.oldBuildPos[2][2]+sy)
+            end
+        else
+            Logic.paused = false
+            global.director.curScene.menu:finishBuild()
+        end
+        Logic.gotoHouse = true
+>>>>>>> mygit/tmx
     end
 end
 

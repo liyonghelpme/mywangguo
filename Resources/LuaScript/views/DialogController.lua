@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+require "Miao.FightHint"
+>>>>>>> mygit/tmx
 DialogController = class()
 function DialogController:ctor(sc)
     self.scene = sc
@@ -23,9 +27,18 @@ function DialogController:update(diff)
     if #global.director.stack == 0 then
         if #self.cmds > 0 then
             local curCmd = table.remove(self.cmds, 1)
+<<<<<<< HEAD
             if curCmd['cmd'] == "login" then
             elseif curCmd['cmd'] == "roleName" then
                 global.director:pushView(RoleName.new(), 1, 0)
+=======
+            print("cmd is ", curCmd)
+            if curCmd['cmd'] == "login" then
+            elseif curCmd['cmd'] == "roleName" then
+                global.director:pushView(RoleName.new(), 1, 0)
+            elseif curCmd['cmd'] == 'fightNow' then
+                global.director:pushView(FightHint.new(), 1, 0)
+>>>>>>> mygit/tmx
             end
         end
     end

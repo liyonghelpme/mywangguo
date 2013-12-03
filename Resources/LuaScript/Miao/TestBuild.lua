@@ -82,7 +82,12 @@ function TestBuild:touchesEnded(touches)
     self:setColPos()
     self.map.mapGridController:updateMap(self)
     if self.state == BUILD_STATE.FREE and self.accMove < 20 then
+<<<<<<< HEAD
         self.map:addPeople(self) 
+=======
+        --self.map:addPeople(self) 
+        self.map:startBattle(self)
+>>>>>>> mygit/tmx
     end
     if self.colNow == 0 and self.accMove < 20 and self.state == BUILD_STATE.MOVE then
         self:setState(BUILD_STATE.FREE)

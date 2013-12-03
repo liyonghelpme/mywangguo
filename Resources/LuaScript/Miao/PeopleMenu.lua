@@ -1,5 +1,10 @@
 require "Miao.AllPeople"
 require "Miao.FindPeople"
+<<<<<<< HEAD
+=======
+require "Menu.EquipMenu"
+require "Menu.TrainMenu"
+>>>>>>> mygit/tmx
 PeopleMenu = class()
 function PeopleMenu:ctor(p)
     self.parent = p
@@ -36,6 +41,19 @@ function PeopleMenu:onBut(p)
         self.parent.scene.menu.menu = ap
         global.director:popView()
         global.director:pushView(ap, 1, 0)
+<<<<<<< HEAD
+=======
+    elseif p == 2 then
+        local em = EquipMenu.new()
+        self.parent.scene.menu.menu = em
+        global.director:popView()
+        global.director:pushView(em, 1, 0)
+    elseif p == 3 then
+        local em = TrainMenu.new()
+        self.parent.scene.menu.menu = em
+        global.director:popView()
+        global.director:pushView(em, 1, 0)
+>>>>>>> mygit/tmx
     elseif p==4 then
         local fp = FindPeople.new(self.parent.scene)
         global.director:popView()

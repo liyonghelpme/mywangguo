@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+require "Miao.BigInfo"
+>>>>>>> mygit/tmx
 require "Miao.TestPeople"
 require "Miao.TestBuild"
 BigBuildLayer = class(MoveMap)
@@ -85,9 +89,21 @@ function BigBuildLayer:initCastle()
         end
     end
 end
+<<<<<<< HEAD
 function BigBuildLayer:addPeople(build)
     local p = TestPeople.new(self)
     p:setTarget(build)
+=======
+function BigBuildLayer:startBattle(b)
+    self.targetBuild = b
+    local m = BigInfo.new(self)
+    self.scene.scene.menu.menu = m 
+    global.director:pushView(m, 1, 0)
+end
+function BigBuildLayer:addPeople()
+    local p = TestPeople.new(self)
+    p:setTarget(self.targetBuild)
+>>>>>>> mygit/tmx
     local bp = getPos(self.homeTile.bg)
     setPos(p.bg, bp)
     p:setZord()
