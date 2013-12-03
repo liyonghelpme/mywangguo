@@ -23,9 +23,6 @@ function getBid()
     return Logic.maxBid
 end
 
-<<<<<<< HEAD
-Logic.date = 0
-=======
 --60s 1 week
 --4 week 1 month
 --12 month 1 year
@@ -38,27 +35,17 @@ Logic.checkFarm = false
 Logic.newBuildYet = false
 Logic.buyIt = false
 Logic.getNewRegion = false
->>>>>>> mygit/tmx
 --s 秒
 --每周 1 分钟
 --每个月 4周
 --每年 12个月
-<<<<<<< HEAD
-function getDate(t)
-    local w = math.floor(t/60)
-=======
 function getDate()
     local t = Logic.date
     local w = math.floor(t/10)
->>>>>>> mygit/tmx
     local m = math.floor(w/4)
     w = w%4
     local y = math.floor(m/12)
     m = m%12
-<<<<<<< HEAD
-    return y, m, w
-end
-=======
     return y+1, m+1, w+1
 end
 local function yearUpdate(diff)
@@ -68,7 +55,6 @@ local function yearUpdate(diff)
 end
 Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
 
->>>>>>> mygit/tmx
 function checkCost(c)
 end
 function doCost(c)
@@ -76,8 +62,6 @@ end
 function doGain(g)
 end
 
-<<<<<<< HEAD
-=======
 --增加多彩文字支持
 StoryWord = {
 "服部家 参谋\n小明拜见!!",
@@ -87,6 +71,5 @@ StoryWord = {
 "让我们先为追随你而来的村民建造住所吧。\n请选择菜单中的<0000ff建筑>!!",
 }
 
->>>>>>> mygit/tmx
 
 

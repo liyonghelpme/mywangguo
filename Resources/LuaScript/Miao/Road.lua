@@ -66,12 +66,9 @@ function Road:adjustRoad()
     end
 end
 function Road:removeSelf()
-<<<<<<< HEAD
-=======
     if self.baseBuild.state == BUILD_STATE.MOVE then
         return
     end
->>>>>>> mygit/tmx
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态

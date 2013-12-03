@@ -83,12 +83,9 @@ function NewBuildMenu:touchMoved(x, y)
     self.accMove = self.accMove+math.abs(dify)
     self:moveBack(dify)
 end
-<<<<<<< HEAD
-=======
 function NewBuildMenu:onHouse()
     self.scene.page:beginBuild('build', self.btype)
 end
->>>>>>> mygit/tmx
 function NewBuildMenu:touchEnded(x, y)
     local newPos = {x, y}
     if self.accMove < 10 then
@@ -98,8 +95,6 @@ function NewBuildMenu:touchEnded(x, y)
             local t = child:getTag()
             global.director:popView() 
             self.scene.menu:clearMenu()
-<<<<<<< HEAD
-=======
             self.btype = t            
             if Logic.inNew and not Logic.newBuildYet then
                 Logic.newBuildYet = true
@@ -109,7 +104,6 @@ function NewBuildMenu:touchEnded(x, y)
                 return
             end
 
->>>>>>> mygit/tmx
             self.scene.page:beginBuild('build', t)
             return 
         end

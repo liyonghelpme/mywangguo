@@ -36,10 +36,7 @@ function TMXMenu:ctor(s)
     local t = ui.newTTFLabel({text="0年0月0天", size=20, color={10, 10, 102}})
     setPos(t, {134, 20})
     year:addChild(t)
-<<<<<<< HEAD
-=======
     self.year = t
->>>>>>> mygit/tmx
 
     local money = display.newScale9Sprite("numboard.jpg")
     setAnchor(setPos(setContentSize(money, {268, 39}), {vs.width-10, vs.height-10}), {1, 1})
@@ -61,29 +58,21 @@ function TMXMenu:ctor(s)
     info:addChild(iw)
     
     self.infoWord = iw
-<<<<<<< HEAD
-
-=======
     self.passTime = 0
     registerEnterOrExit(self)
     self.lastDaily = 0
 end
 function TMXMenu:enterScene()
     registerUpdate(self)
->>>>>>> mygit/tmx
 end
 function TMXMenu:onBack()
     local mm = MiaoMap.new()
     global.director:pushScene(mm)
 end
 function TMXMenu:onMenu()
-<<<<<<< HEAD
-    if self.menu == nil then
-=======
     if self.inBuild then
         global.director.curScene.page:cancelBuild()
     elseif self.menu == nil then
->>>>>>> mygit/tmx
         self.menu = PressMenu.new(self.scene)
         global.director:pushView(self.menu, 1, 0)
         self.mbut.text:setString("返回")
@@ -93,10 +82,6 @@ function TMXMenu:onMenu()
         self.mbut.text:setString("菜单")
     end
 end
-<<<<<<< HEAD
-function TMXMenu:initDataOver()
-    self:updateText()
-=======
 function TMXMenu:beginBuild()
     self.mbut.text:setString("返回")
     self.inBuild = true
@@ -136,7 +121,6 @@ function TMXMenu:updateYear()
         w:updateWord("大人我派出去的小明回来啦!可以进攻新的区域啦!")
         global.director:pushView(w, 1, 0)
     end
->>>>>>> mygit/tmx
 end
 function TMXMenu:updateText()
     self.money:setString(Logic.resource.silver.."贯")

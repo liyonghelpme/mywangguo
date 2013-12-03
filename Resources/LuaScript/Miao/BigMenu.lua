@@ -81,13 +81,6 @@ function BigMenu:ctor(s)
     
 
     local but = ui.newButton({image="tabbut.png", text="返回", size=15, color={10, 10, 10}, callback=self.onBack, delegate=self})
-<<<<<<< HEAD
-    self.bg:addChild(but.bg)
-    setPos(but.bg, {140, fixY(480, 453)})
-end
-function BigMenu:onBack()
-    global.director:popScene()
-=======
     setScriptTouchPriority(but.bg, -256)
     self.bg:addChild(but.bg)
     setPos(but.bg, {140, fixY(480, 453)})
@@ -106,5 +99,4 @@ function BigMenu:onBack()
     else
         global.director:popScene()
     end
->>>>>>> mygit/tmx
 end

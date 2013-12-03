@@ -1,15 +1,11 @@
 require "Miao.MiaoPage"
 require "Miao.TMXMenu"
-<<<<<<< HEAD
-TMXScene = class()
-=======
 require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
     sendReq('login', dict(), self.initData, nil, self)
 end
->>>>>>> mygit/tmx
 function TMXScene:ctor()
     self.bg = CCScene:create()
     self.page = MiaoPage.new(self)
@@ -18,13 +14,9 @@ function TMXScene:ctor()
     self.bg:addChild(self.menu.bg)
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
-<<<<<<< HEAD
-    sendReq('login', dict(), self.initData, nil, self)
-=======
 
     self.page:moveToPoint(1644, 384)
     delayCall(0.3, self.initDataNow, self)
->>>>>>> mygit/tmx
 end
 
 function TMXScene:initData(rep, param)
@@ -43,13 +35,10 @@ function TMXScene:initData(rep, param)
     self.menu:initDataOver()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
-<<<<<<< HEAD
-=======
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
->>>>>>> mygit/tmx
 end
 function TMXScene:onBuild()
     self.page:addBuilding()
@@ -78,11 +67,7 @@ function TMXScene:saveGame()
             if k.myHouse ~= nil  then
                 hid = k.myHouse.bid
             end
-<<<<<<< HEAD
-            table.insert(allPeople, {px=p[1], py=p[2], hid=hid})
-=======
             table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id})
->>>>>>> mygit/tmx
         end
     end
     local p = simple.encode(allPeople)

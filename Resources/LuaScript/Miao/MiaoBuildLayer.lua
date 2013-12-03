@@ -434,7 +434,7 @@ function MiaoBuildLayer:initDataOver()
     --self:initCat()
     self.initYet = true
 end
-function MiaoBuildLayer:initRoad()
+function MiaoBuildLayer:initRoad() 
     local nlayer = self.scene.layerName['road']
     local width = self.scene.width
     local height = self.scene.height
@@ -495,7 +495,7 @@ function MiaoBuildLayer:initRoad()
             end
         end
     end
-    
+
     local temp = {{24, 14}, {25, 13}, {26, 12}}
     for k, v in ipairs(temp) do
         local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
@@ -507,22 +507,6 @@ function MiaoBuildLayer:initRoad()
         b:finishBuild()
     end
      
-    --[[
-    for i=1, 24, 1 do
-        local cx, cy = affineToCartesian(21, i)
-        print("road x y", cx, cy)
-        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
-        local p = normalizePos({cx, cy}, 1, 1)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-    end
-    --]]
-
-=======
->>>>>>> mygit/tmx
 end
 --]]
 function MiaoBuildLayer:initData()
