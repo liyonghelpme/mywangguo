@@ -1406,6 +1406,31 @@ tolua_lerror:
 }
 #endif //#ifndef TOLUA_DISABLE
 
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_getFileData00
+static int tolua_Cocos2d_getFileData00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isstring(tolua_S,1,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,2,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+		const char* fname = ((const char*) tolua_tostring(tolua_S,1,0));
+        std::string str = getFileData(fname);
+        tolua_pushcppstring(tolua_S, (const char*)str);
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'getFileData'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
 
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_Scissor_create00
 static int tolua_Cocos2d_Scissor_create00(lua_State* tolua_S)
@@ -1462,6 +1487,7 @@ TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
   tolua_function(tolua_S,"setScriptTouchPriority", tolua_Cocos2d_setScriptTouchPriority00);
+  tolua_function(tolua_S,"getFileData", tolua_Cocos2d_getFileData00);
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);
   tolua_beginmodule(tolua_S,"CCExtendNode");
    tolua_function(tolua_S, "create", tolua_Cocos2d_CCExtendNode_create00);

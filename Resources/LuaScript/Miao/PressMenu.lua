@@ -1,10 +1,10 @@
 require "Miao.Setting"
 require "Miao.NewBuildMenu"
 require "Miao.PeopleMenu"
-<<<<<<< HEAD
-=======
 require "Miao.Welcome2"
->>>>>>> mygit/tmx
+require "Menu.ResearchMenu"
+require "Menu.StoreMenu"
+require "Menu.IncreasePower"
 PressMenu = class()
 function PressMenu:ctor(s)
     self.scene = s
@@ -36,14 +36,11 @@ function PressMenu:ctor(s)
         dTime = dTime+0.1
     end
 end
-<<<<<<< HEAD
-=======
 function PressMenu:onHouse()
     --调整touch 优先级需要在touch处理结束之后 进行 touch中调整没有效果
     self.scene.menu.menu = NewBuildMenu.new(self.scene) 
     global.director:pushView(self.scene.menu.menu, 1, 0)
 end
->>>>>>> mygit/tmx
 function PressMenu:onBut(p)
     local vs = getVS()
     local initX = 10+50
@@ -53,8 +50,6 @@ function PressMenu:onBut(p)
     if p == 1 then
         self.scene.menu.menu = nil
         global.director:popView()
-<<<<<<< HEAD
-=======
         if Logic.inNew and not Logic.buyHouseYet then
             Logic.buyHouseYet = true
             local w = Welcome2.new(self.onHouse, self)
@@ -63,7 +58,6 @@ function PressMenu:onBut(p)
             return
         end
 
->>>>>>> mygit/tmx
         --调整touch 优先级需要在touch处理结束之后 进行 touch中调整没有效果
         self.scene.menu.menu = NewBuildMenu.new(self.scene) 
         global.director:pushView(self.scene.menu.menu, 1, 0)
@@ -73,6 +67,16 @@ function PressMenu:onBut(p)
         local pm = PeopleMenu.new(self)
         self.bg:addChild(pm.bg)
         setPos(pm.bg, {10+100+50, vs.height-10-45-20})
+    elseif p == 3 then
+        global.director:popView()
+        local rm = ResearchMenu.new()
+        global.director:pushView(rm, 1, 0)
+    elseif p == 4 then
+        global.director:popView()
+        global.director:pushView(StoreMenu.new(), 1, 0)
+    elseif p == 5 then
+        global.director:popView()
+        global.director:pushView(IncreasePower.new(), 1, 0)
     elseif p == 7 then
         local set = Setting.new(self)
         self.bg:addChild(set.bg)

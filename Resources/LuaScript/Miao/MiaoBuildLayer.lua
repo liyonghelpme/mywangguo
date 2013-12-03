@@ -50,7 +50,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        self:addPeople(2)
+        --self:addPeople(2)
     end
 end
 
@@ -102,24 +102,17 @@ function MiaoBuildLayer:initSlope()
 
 end
 function MiaoBuildLayer:initCat()
-<<<<<<< HEAD
-=======
     if Logic.inNew then
         self:addPeople(3)
         self:addPeople(4)
         return
     end
->>>>>>> mygit/tmx
     local u = CCUserDefault:sharedUserDefault()
     local cat = u:getStringForKey("people")
     if cat ~= "" then
         cat = simple.decode(cat)
         for k, v in ipairs(cat) do
-<<<<<<< HEAD
-            local p = MiaoPeople.new(self, {id=3})
-=======
             local p = MiaoPeople.new(self, {id=v.id or 3})
->>>>>>> mygit/tmx
             self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
             local pos = normalizePos({v.px, v.py}, 1, 1)
             setPos(p.bg, pos)
@@ -144,8 +137,6 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
-<<<<<<< HEAD
-=======
     if Logic.inNew then
         local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
         local p = normalizePos({1344, 384}, 1, 1)
@@ -170,7 +161,6 @@ function MiaoBuildLayer:initBuild()
         return
     end
 
->>>>>>> mygit/tmx
     local u = CCUserDefault:sharedUserDefault()
     local build = u:getStringForKey("build")
     local mbid = 0
@@ -441,9 +431,47 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initBuild()
     self:initBackPoint()
-    self:initCat()
+    --self:initCat()
     self.initYet = true
 end
+function MiaoBuildLayer:initRoad()
+    local nlayer = self.scene.layerName['road']
+    local width = self.scene.width
+    local height = self.scene.height
+    for dk, dv in ipairs(nlayer.data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.buildingLayer:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+
+        end
+    end
+
+    --建筑物名称
+    local nlayer = self.scene.layerName['build']
+    for dk, dv in ipairs(nlayer.data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local pic = CCSprite:create(pname)
+            self.buildingLayer:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+
+        end
+    end
+end
+
+--[[
 function MiaoBuildLayer:initRoad()
     --不用调整road 的 方向信息的info
     local nlayer = self.scene.tileMap:layerNamed("road")
@@ -468,8 +496,6 @@ function MiaoBuildLayer:initRoad()
         end
     end
     
-<<<<<<< HEAD
-=======
     local temp = {{24, 14}, {25, 13}, {26, 12}}
     for k, v in ipairs(temp) do
         local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
@@ -481,7 +507,6 @@ function MiaoBuildLayer:initRoad()
         b:finishBuild()
     end
      
->>>>>>> mygit/tmx
     --[[
     for i=1, 24, 1 do
         local cx, cy = affineToCartesian(21, i)
@@ -496,8 +521,10 @@ function MiaoBuildLayer:initRoad()
     end
     --]]
 
+=======
+>>>>>>> mygit/tmx
 end
-
+--]]
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
     local initX = 60
@@ -600,7 +627,10 @@ function MiaoBuildLayer:addPeople(param)
         pos = normalizePos({pos.x, pos.y}, 1, 1)
     --商人
     elseif data.kind == 2 then
-        local cx, cy = affineToCartesian(21, 24)
+        local width = self.scene.width
+        local height = self.scene.height
+        local cx, cy = newAffineToCartesian(10, 10, width, height, MapWidth/2, FIX_HEIGHT)
+        --local cx, cy = affineToCartesian(21, 24)
         pos = normalizePos({cx, cy}, 1, 1)
     end
     setPos(p.bg, pos)
