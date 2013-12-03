@@ -545,7 +545,7 @@ function getPosMap(sx, sy, px, py)
     return {sx, sy, px+sx, py+1}
 end
 
-
+--得到位置对应的 坐标
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]
@@ -644,7 +644,7 @@ function normalizePos(p, sx, sy)
     
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
-    if (q1+sx)%2 ~= (q2+1)%2 then
+    if (q1+sx)%2 == (q2+1)%2 then
         q2 = q2+1
     end
     x = q1*SIZEX
@@ -1270,8 +1270,6 @@ function addCLayer(b)
     b:addChild(l)
     return l
 end
-<<<<<<< HEAD
-=======
 function addChild(p, c)
     p:addChild(c)
     return c
@@ -1382,5 +1380,4 @@ function colorLine(param)
     n:setContentSize(CCSizeMake(curWidth, curHeight))
     return n
 end
->>>>>>> mygit/tmx
 
