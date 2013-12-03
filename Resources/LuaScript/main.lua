@@ -22,12 +22,15 @@ local function main()
     --require "Miao.MiaoScene"
     require "Miao.TMXScene"
 
+    require "myMap.MapScene"
+
 
     --global.director:runWithScene(TMXScene.new())
     --global.director:runWithScene(FightScene.new())
+    --require "Menu.TestMenu"
+    --global.director:runWithScene(TestMenu.new())
+    global.director:runWithScene(MapScene.new())
 
-    require "Menu.TestMenu"
-    global.director:runWithScene(TestMenu.new())
 end
 
 xpcall(main, __G__TRACKBACK__)

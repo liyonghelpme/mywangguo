@@ -2,6 +2,9 @@ require "Miao.Setting"
 require "Miao.NewBuildMenu"
 require "Miao.PeopleMenu"
 require "Miao.Welcome2"
+require "Menu.ResearchMenu"
+require "Menu.StoreMenu"
+require "Menu.IncreasePower"
 PressMenu = class()
 function PressMenu:ctor(s)
     self.scene = s
@@ -64,6 +67,16 @@ function PressMenu:onBut(p)
         local pm = PeopleMenu.new(self)
         self.bg:addChild(pm.bg)
         setPos(pm.bg, {10+100+50, vs.height-10-45-20})
+    elseif p == 3 then
+        global.director:popView()
+        local rm = ResearchMenu.new()
+        global.director:pushView(rm, 1, 0)
+    elseif p == 4 then
+        global.director:popView()
+        global.director:pushView(StoreMenu.new(), 1, 0)
+    elseif p == 5 then
+        global.director:popView()
+        global.director:pushView(IncreasePower.new(), 1, 0)
     elseif p == 7 then
         local set = Setting.new(self)
         self.bg:addChild(set.bg)

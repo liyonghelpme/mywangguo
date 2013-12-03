@@ -545,7 +545,7 @@ function getPosMap(sx, sy, px, py)
     return {sx, sy, px+sx, py+1}
 end
 
-
+--得到位置对应的 坐标
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]

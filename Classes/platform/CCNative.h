@@ -28,5 +28,5 @@ private:
 NS_CC_EXT_END
 
 void setScriptTouchPriority(CCLayer *lay, int pri);
-
+std::string getFileData(const char *fname);
 #endif // __CC_EXTENSION_CCNATIVE_H_

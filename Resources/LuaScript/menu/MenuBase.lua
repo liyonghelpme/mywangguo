@@ -22,7 +22,7 @@ function MenuBase:ctor()
     self:setItemList()
 
     self.HEIGHT = 247
-    self.touch = ui.newTouchLayer({size={500, self.HEIGHT}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
+    self.touch = ui.newTouchLayer({size={500, self.HEIGHT+43}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     temp:addChild(self.touch.bg)
     setPos(self.touch.bg, {0, 0})
 
