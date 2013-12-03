@@ -45,7 +45,7 @@ void CCNative::clearLocalNotification()
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 }
-
+/*
 void CCNative::buyProductIdentifier(const char *productId)
 {
 	if(!CCUserDefault::sharedUserDefault()->getBoolForKey("pay"))
@@ -91,5 +91,5 @@ void CCNative::showAlert(const char* title, const char* content, int button1, co
     }
     [[[CSAlertView alloc] initWithTitle:nsTitle content:nsContent button1:button1 button1Text:nsButton1Text button2:button2 button2Text:nsButton2Text] autorelease];
 }
-
+*/
 NS_CC_EXT_END

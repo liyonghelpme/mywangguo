@@ -53,6 +53,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     //根据config.ini 配置UserDefault 
 	CCLog("hello wangguo");
+    /*
     unsigned long fsize;
     unsigned char *data = CCFileUtils::sharedFileUtils()->getFileData("config.ini", "r", &fsize);
     map<string, string> *nm = handleIni((char*)data, fsize); 
@@ -62,6 +63,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 		def->setStringForKey(it->first.c_str(), it->second);
     }
     delete nm;
+    */
 
     //搜索文件路径
     CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
@@ -69,8 +71,10 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
     CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");
+    /*
 	if(def->getStringForKey("update") != "0")
 		updateFiles();
+    */
 
     
     CCLog("finish update read main.lua");
