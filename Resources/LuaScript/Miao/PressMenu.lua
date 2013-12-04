@@ -2,9 +2,9 @@ require "Miao.Setting"
 require "Miao.NewBuildMenu"
 require "Miao.PeopleMenu"
 require "Miao.Welcome2"
-require "Menu.ResearchMenu"
-require "Menu.StoreMenu"
-require "Menu.IncreasePower"
+require "menu.ResearchMenu"
+require "menu.StoreMenu"
+require "menu.IncreasePower"
 PressMenu = class()
 function PressMenu:ctor(s)
     self.scene = s
