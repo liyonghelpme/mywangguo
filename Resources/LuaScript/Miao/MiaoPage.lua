@@ -1,6 +1,7 @@
 require "Miao.MiaoBuild"
 require "Miao.MiaoBuildLayer"
 require "Miao.RegionDialog"
+require "myMap.NewUtil"
 MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s

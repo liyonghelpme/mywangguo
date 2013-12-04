@@ -1,4 +1,4 @@
-require "Menu.EquipChange"
+require "menu.EquipChange"
 EquipMenu = class()
 function EquipMenu:ctor()
     local vs = getVS()

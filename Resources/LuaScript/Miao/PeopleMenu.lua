@@ -1,7 +1,7 @@
 require "Miao.AllPeople"
 require "Miao.FindPeople"
-require "Menu.EquipMenu"
-require "Menu.TrainMenu"
+require "menu.EquipMenu"
+require "menu.TrainMenu"
 PeopleMenu = class()
 function PeopleMenu:ctor(p)
     self.parent = p
