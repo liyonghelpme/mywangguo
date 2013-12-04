@@ -1,6 +1,9 @@
 --道路或者河流
 Road = class(FuncBuild)
 function Road:adjustRoad()
+    if true then
+        return
+    end
     print("MiaoBuild")
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
@@ -66,6 +69,10 @@ function Road:adjustRoad()
     end
 end
 function Road:removeSelf()
+    if true then
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        return
+    end
     if self.baseBuild.state == BUILD_STATE.MOVE then
         return
     end
@@ -117,4 +124,59 @@ function Road:removeSelf()
         end
     end
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+end
+--当和斜坡冲突的时候变换路块类型
+function Road:whenColNow()
+    local setYet = false
+    if self.baseBuild.colNow == 1 then
+        if self.baseBuild.otherBuild ~= nil then
+            if self.baseBuild.otherBuild.picName == 'slope' then
+                if self.baseBuild.otherBuild.dir == 0 then
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile6.png")
+                    self.baseBuild.changeDirNode:setDisplayFrame(tex)
+                    local sz = self.baseBuild.changeDirNode:getContentSize()
+                    setAnchor(self.baseBuild.changeDirNode, {(64-20)/sz.width, 20/sz.height})
+                    setYet = true
+                elseif self.baseBuild.otherBuild.dir == 1 then
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile7.png")
+                    self.baseBuild.changeDirNode:setDisplayFrame(tex)
+                    local sz = self.baseBuild.changeDirNode:getContentSize()
+                    setAnchor(self.baseBuild.changeDirNode, {(64)/sz.width, 20/sz.height})
+                    --setAnchor(self.baseBuild.changeDirNode, {})
+                    setYet = true
+                end
+            end
+        end
+    end
+    --没有斜坡
+    if not setYet then
+        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile4.png")
+        self.baseBuild.changeDirNode:setDisplayFrame(tex)
+        setAnchor(self.baseBuild.changeDirNode, {0.5, 0})
+    end
+end
+
+--斜坡上面 可以建造道路
+function Road:setColor()
+    if self.baseBuild.colNow == 1 then
+        if self.baseBuild.otherBuild ~= nil then
+            local dir = self.baseBuild.otherBuild.dir
+            print("road setColor", self.baseBuild.colNow, self.baseBuild.otherBuild.picName, dir)
+            if self.baseBuild.otherBuild.picName == 'slope' and (dir ==0 or dir == 1) then
+                print("setColor")
+                setColor(self.baseBuild.bottom, {0, 255, 0})
+            end
+        end
+    end
+end
+--斜坡上面完成建造
+function Road:checkFinish()
+    if self.baseBuild.colNow == 1 then
+        if self.baseBuild.otherBuild ~= nil then
+            local dir = self.baseBuild.otherBuild.dir
+            if self.baseBuild.otherBuild.picName == 'slope' and (dir ==0 or dir == 1) then
+                self.baseBuild.map.scene:finishBuild() 
+            end
+        end
+    end
 end

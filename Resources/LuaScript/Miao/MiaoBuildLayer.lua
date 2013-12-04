@@ -446,10 +446,19 @@ function MiaoBuildLayer:initRoad()
 
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            --[[
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.buildingLayer:addChild(pic)
             setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            --]]
 
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
         end
     end
 
@@ -467,6 +476,64 @@ function MiaoBuildLayer:initRoad()
             self.buildingLayer:addChild(pic)
             setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
 
+        end
+    end
+
+
+    for dk, dv in ipairs(self.scene.layerName['slop2'].data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local dir = 0
+            if pname == 'tile2.png' then
+                dir = 0
+            elseif pname == 'tile3.png' then
+                dir = 1
+            else
+                dir = 2
+            end
+            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+            --[[
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            --]]
+        end
+    end
+
+    --临时斜坡显示一下 和斜坡的方向 0 1 
+    for dk, dv in ipairs(self.scene.layerName['ladder'].data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+            --[[
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local sz = pic:getContentSize()
+            setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
+            --]]
         end
     end
 end

@@ -74,10 +74,13 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
             self.funcBuild:initView()
+        --斜坡建筑物
+        --[[
         elseif self.id == 7 or self.id == 8 or self.id == 9 or self.id == 10 then
             self.changeDirNode = setAnchor(CCSprite:create("slope"..(self.id-6)..".png"), {0.5, 0})
             self.funcBuild = Slope.new(self)
             self.funcBuild:initView()
+        --]]
         elseif self.id == 5 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
@@ -98,8 +101,21 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
     elseif self.picName == 't' then
-        self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
+        if data.ladder == true then
+            self.changeDirNode = CCSprite:createWithSpriteFrameName("tile6.png")
+            local sz = self.changeDirNode:getContentSize()
+            setAnchor(self.changeDirNode, {(64-20)/sz.width, 20/sz.height})
+        else
+            self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile4.png"), {0.5, 0})
+        end
+        --self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
         self.funcBuild = Road.new(self)
+    --包括斜坡方向属性
+    --dir == 0 1 可以建造道路 其它的不能建造道路 dir = 2
+    elseif self.picName == 'slope' then
+        self.dir = data.dir
+        self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
+        self.funcBuild = Slope.new(self)
     end
 
     self.bg:addChild(self.changeDirNode)
@@ -206,6 +222,7 @@ function MiaoBuild:setColor(c)
         else
             setColor(self.bottom, {0, 255, 0})
         end
+        self.funcBuild:setColor()
     end
 end
 
@@ -256,6 +273,7 @@ end
 function MiaoBuild:touchesEnded(touches)
     if self.doMove then
         self:setColPos()
+        self.funcBuild:whenColNow()
         local p = getPos(self.bg)
         self:setPos(p)
         self.map.mapGridController:updateMap(self)
@@ -284,6 +302,9 @@ function MiaoBuild:touchesEnded(touches)
             if self.picName == 'move' then
                 self.funcBuild:handleFinMove()
             end
+        end
+        if self.accMove < 20 and self.state == BUILD_STATE.MOVE then
+            self.funcBuild:checkFinish()
         end
     end
 end
@@ -437,7 +458,7 @@ function MiaoBuild:setState(s)
     self.state = s
     print("MiaoBuild setState", s, self.state)
     if self.state == BUILD_STATE.MOVE and self.bottom == nil then
-        self.bottom = setSize(setAnchor(setPos(CCSprite:create("green2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
+        self.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
         self.bg:addChild(self.bottom, 1)
     end
 end

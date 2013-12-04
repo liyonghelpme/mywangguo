@@ -31,3 +31,9 @@ function FuncBuild:clearWorker(b)
 end
 function FuncBuild:initWork()
 end
+function FuncBuild:whenColNow()
+end
+function FuncBuild:setColor()
+end
+function FuncBuild:checkFinish()
+end

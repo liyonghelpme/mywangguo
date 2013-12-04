@@ -70,34 +70,7 @@ function MiaoPage:ctor(s)
     end
     setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
-    for dk, dv in ipairs(layerName['slop2'].data) do
-        if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
 
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-        end
-    end
-
-    for dk, dv in ipairs(layerName['ladder'].data) do
-        if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
-        end
-    end
 
     for dk, dv in ipairs(layerName['sea'].data) do
         if dv ~= 0 then
@@ -370,6 +343,7 @@ function MiaoPage:finishBuild()
                 self.curBuild = nil
             end
         --道路和 斜坡冲突 斜坡不能移动
+        --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
         elseif self.curBuild.picName == 't' then
             if self.curBuild.colNow == 0 then
                 self.curBuild:finishBuild()
@@ -378,7 +352,7 @@ function MiaoPage:finishBuild()
                 if type(self.curBuild.otherBuild) == 'table' then
                     local ob = self.curBuild.otherBuild
                     --斜坡
-                    if ob.picName == 'build' and ob.data.kind == 1 then
+                    if ob.picName == 'slope' then
                         self.curBuild:finishBuild()
                         self.curBuild = nil
                     else
