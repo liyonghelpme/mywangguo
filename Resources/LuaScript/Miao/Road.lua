@@ -137,6 +137,7 @@ function Road:whenColNow()
                     local sz = self.baseBuild.changeDirNode:getContentSize()
                     setAnchor(self.baseBuild.changeDirNode, {(64-20)/sz.width, 20/sz.height})
                     setYet = true
+                    self.baseBuild.onSlope = true
                 elseif self.baseBuild.otherBuild.dir == 1 then
                     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile7.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
@@ -144,6 +145,7 @@ function Road:whenColNow()
                     setAnchor(self.baseBuild.changeDirNode, {(64)/sz.width, 20/sz.height})
                     --setAnchor(self.baseBuild.changeDirNode, {})
                     setYet = true
+                    self.baseBuild.onSlope = true
                 end
             end
         end
@@ -153,6 +155,7 @@ function Road:whenColNow()
         local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile4.png")
         self.baseBuild.changeDirNode:setDisplayFrame(tex)
         setAnchor(self.baseBuild.changeDirNode, {0.5, 0})
+        self.baseBuild.onSlope = false
     end
 end
 

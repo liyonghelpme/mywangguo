@@ -22,3 +22,7 @@ end
 function FuncPeople:checkWork(k)
     return false
 end
+--必须使用 road来寻路
+function FuncPeople:mustRoad()
+    return true
+end

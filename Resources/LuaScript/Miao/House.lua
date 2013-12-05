@@ -46,3 +46,9 @@ function House:finishMove()
         self.owner = nil
     end
 end
+function House:showInfo()
+    local bi
+    bi = HouseInfo.new(self)
+    global.director:pushView(bi, 1, 0)
+    global.director.curScene.menu:setMenu(bi)
+end

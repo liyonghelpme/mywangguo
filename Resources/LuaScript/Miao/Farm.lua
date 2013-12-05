@@ -97,7 +97,7 @@ function MoveBuild:handleTouchEnded()
         --print("move collide ", self.baseBuild.otherBuild.picName, self.baseBuild.lastColBuild.picName, self.baseBuild.moveTarget)
         print("move Collide")
         --确认移动建筑物了
-        if self.baseBuild.lastColBuild == self.baseBuild.otherBuild and self.baseBuild.otherBuild.picName == 'build' then
+        if self.baseBuild.otherBuild ~= nil and self.baseBuild.lastColBuild == self.baseBuild.otherBuild and self.baseBuild.otherBuild.picName == 'build' then
             local tex = self.baseBuild.otherBuild.changeDirNode:getTexture()
             --确认当前移动的建筑物
             self.baseBuild.changeDirNode:setTexture(tex)
@@ -119,7 +119,7 @@ function MoveBuild:handleTouchEnded()
                 self.baseBuild.moveTarget:doEffect()
                 self.baseBuild.moveTarget:doMyEffect()
 
-                self.baseBuild:clearMoveState()
+                self:clearMoveState()
             else
                 addBanner("不能在这里建造！")
             end
@@ -137,7 +137,7 @@ function MoveBuild:handleFinMove()
             --新的位置新建一个新的建筑物
             
             print("add NewBuilding")
-            local nb = MiaoBuild.new(self.baseBuild.map, {picName='build', id=self.baseBuild.moveTarget.id})
+            local nb = MiaoBuild.new(self.baseBuild.map, {picName='build', id=self.baseBuild.moveTarget.id, bid=getBid()})
             local p = normalizePos(np, 1, 1)
             nb:setPos(p)
             nb:setColPos()
@@ -145,9 +145,21 @@ function MoveBuild:handleFinMove()
             nb:setPos(p)
             nb:finishBuild()
 
-            self.baseBuild:clearMoveState()
+            self:clearMoveState()
         end
     end
+end
+function MoveBuild:canFinish()
+    return false
+end
+
+function MoveBuild:clearMoveState()
+    print("clearMoveState")
+    self.baseBuild.lastColBuild = nil
+    self.baseBuild.otherBuild = nil
+    self.baseBuild.moveTarget = nil
+    local tex = CCTextureCache:sharedTextureCache():addImage("build21.png")
+    self.baseBuild.changeDirNode:setTexture(tex)
 end
 
 

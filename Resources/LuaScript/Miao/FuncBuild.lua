@@ -37,3 +37,23 @@ function FuncBuild:setColor()
 end
 function FuncBuild:checkFinish()
 end
+function FuncBuild:canFinish()
+    return true
+end
+function FuncBuild:showInfo()
+    local bi
+    bi = BuildInfo.new(self)
+    global.director:pushView(bi, 1, 0)
+    global.director.curScene.menu:setMenu(bi)
+end
+function FuncBuild:initBottom()
+    self.baseBuild.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY}), {0.5, 0.5}), {(self.baseBuild.sx+self.baseBuild.sy)*SIZEX+20, (self.baseBuild.sx+self.baseBuild.sy)*SIZEY+10})
+    self.baseBuild.bg:addChild(self.baseBuild.bottom, 1)
+end
+function FuncBuild:setBottomColor(c)
+    if c == 0 then
+        setColor(self.baseBuild.bottom, {255, 0, 0})
+    else
+        setColor(self.baseBuild.bottom, {0, 255, 0})
+    end
+end

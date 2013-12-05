@@ -39,6 +39,7 @@ function MiaoPeople:ctor(m, data)
     self.data = Logic.people[self.id]
     self.miaoPath = MiaoPath.new(self)
     self.stateStack = {}
+    self.waitTime = 1
 
 
     print("init MiaoPeople", self.id)
@@ -668,7 +669,7 @@ end
 function MiaoPeople:doMove(diff)
     if self.state == PEOPLE_STATE.IN_MOVE then
         self.passTime = self.passTime+diff
-        if self.passTime > 1 then
+        if self.passTime >= self.waitTime then
             self.passTime = 0
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
@@ -756,16 +757,57 @@ function MiaoPeople:doMove(diff)
                 end
                 self:setZord()
             else
+                --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                 local np = self.path[nextPoint]
-                local cxy = setBuildMap({1, 1, np[1], np[2]})
-                self.bg:runAction(moveto(1, cxy[1], cxy[2]))    
-                self:setDir(cxy[1], cxy[2])
-                self:setZord()
-                self.curPoint = self.curPoint+1
+                local buildCell = self.map.mapGridController.mapDict
+                local key = getMapKey(np[1], np[2])
+                local bv = buildCell[key]
+
+
+                local cp = self.path[self.curPoint]
+                local key = getMapKey(cp[1], cp[2])
+                local cv = buildCell[key]
+
+                --行走在有可能是斜坡的道路上面
+                local goYet = false
+                if bv ~= nil then
+                    local ons = bv[#bv][1].onSlope
+                    if ons then
+                        goYet = true
+                        local cxy = setBuildMap({1, 1, np[1], np[2]})
+                        self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        self:setDir(cxy[1], cxy[2])
+                        self:setZord()
+                        self.waitTime = 2
+                        self.curPoint = self.curPoint+1
+                    end
+                end
+                if not goYet and cv ~= nil then
+                    local ons = cv[#cv][1].onSlope
+                    if ons then
+                        goYet = true
+                        local cxy = setBuildMap({1, 1, np[1], np[2]})
+                        self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        self:setDir(cxy[1], cxy[2])
+                        self:setZord()
+                        self.waitTime = 2
+                        self.curPoint = self.curPoint+1
+                    end
+                end
+
+                if not goYet then
+                    local cxy = setBuildMap({1, 1, np[1], np[2]})
+                    self.bg:runAction(moveto(1, cxy[1], cxy[2]))    
+                    self:setDir(cxy[1], cxy[2])
+                    self:setZord()
+                    self.waitTime = 1
+                    self.curPoint = self.curPoint+1
+                end
                 --是否在运送货物
                 if self.food > 0 or self.stone > 0 or self.product > 0 then
                     self.health = self.health-1
                 end
+
             end
         end
     end
@@ -813,12 +855,18 @@ function MiaoPeople:calcG(x, y)
     --是建筑物 不能穿过
     if buildCell[key] ~= nil then
         local n = buildCell[key][#buildCell[key]][1]
+        --不是道路
+        if n.picName ~= 't' then
+            dist = 100
+        end
+        --[[
         --普通建筑物 斜坡 樱花树
         if n.picName == 'build' and (n.data.kind == 0 or n.data.kind == 1 or n.data.kind == 3) then
             dist = 100
         end
+        --]]
     else
-        --没有道路 河流 或者 草地
+        --没有道路 河流 或者 草地 建筑物
         dist = 50
     end
 

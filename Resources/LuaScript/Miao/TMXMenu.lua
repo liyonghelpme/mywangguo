@@ -82,6 +82,10 @@ function TMXMenu:onMenu()
         self.mbut.text:setString("菜单")
     end
 end
+function TMXMenu:setMenu(m)
+    self.menu = m
+    self.mbut.text:setString("返回")
+end
 function TMXMenu:beginBuild()
     self.mbut.text:setString("返回")
     self.inBuild = true

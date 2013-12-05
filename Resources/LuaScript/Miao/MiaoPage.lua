@@ -87,20 +87,6 @@ function MiaoPage:ctor(s)
         end
     end
 
-    for dk, dv in ipairs(layerName['fence'].data) do
-        if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-        end
-    end
 
 
     self.touchDelegate = StandardTouchHandler.new()

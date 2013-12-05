@@ -6,6 +6,9 @@ require "Miao.Farm"
 require "Miao.Road"
 require "Miao.Factory"
 require "Miao.Slope"
+require "menu.BuildInfo"
+require "menu.HouseInfo"
+require "Miao.MineStore"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -25,6 +28,13 @@ function MiaoBuild:ctor(m, data)
         data.picName = 't'
         --data.id = nil
     end
+    if data.picName == 'build' and data.id == 20 then
+        data.picName = 'remove'
+    end
+    if data.picName  == 'build' and data.id == 21 then
+        data.picName = 'move'
+    end
+
     self.picName = data.picName
     self.id = data.id
     self.owner = nil
@@ -35,6 +45,12 @@ function MiaoBuild:ctor(m, data)
     self.moveTarget = nil
     self.rate = 0
     self.data = Logic.buildings[self.id]
+    --篱笆数据
+    print("buildkind", self.id)
+    if self.data ~= nil then
+        self.sx = self.data.sx
+        self.sy = self.data.sy
+    end
     self.belong = {}
 
 
@@ -85,26 +101,34 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
             self.funcBuild:initView()
+        --采矿场
+        elseif self.id == 12 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = MineStore.new(self)
+            self.funcBuild:initView()
+        --其它建筑物
         else
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = FuncBuild.new(self)
             self.funcBuild:initView()
         end
     elseif self.picName == 'move' then
-        self.changeDirNode = setPos(setRotation(CCSprite:create("move.png"), 45), {0, SIZEY})
+        self.changeDirNode = setPos(CCSprite:create("build21.png"), {0, SIZEY})
         self.funcBuild = MoveBuild.new(self) 
     elseif self.picName == 'backPoint' then
         self.changeDirNode = setColor(setSize(setAnchor(CCSprite:create("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
         self.funcBuild = FuncBuild.new(self) 
     elseif self.picName == 'remove' then
-        self.changeDirNode = setPos(setRotation(CCSprite:create("hammer.png"), 45), {0, SIZEY})
+        self.changeDirNode = setPos(CCSprite:create("build20.png"), {0, SIZEY})
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
     elseif self.picName == 't' then
+        --调整 ladder的方向 
         if data.ladder == true then
             self.changeDirNode = CCSprite:createWithSpriteFrameName("tile6.png")
             local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {(64-20)/sz.width, 20/sz.height})
+            self.onSlope = true
         else
             self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile4.png"), {0.5, 0})
         end
@@ -116,30 +140,36 @@ function MiaoBuild:ctor(m, data)
         self.dir = data.dir
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
         self.funcBuild = Slope.new(self)
+    elseif self.picName == 'fence' then
+        self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {0.5, 0})
+        self.funcBuild = FuncBuild.new(self)
     end
 
     self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
+    local allLabel = addNode(self.bg)
+    allLabel:setVisible(false)
+
     self.nameLabel = ui.newBMFontLabel({text="", size=21})
     setPos(self.nameLabel, {0, 100})
-    self.bg:addChild(self.nameLabel)
+    addChild(allLabel, self.nameLabel)
 
     self.posLabel = ui.newBMFontLabel({text="", size=15})
     setPos(self.posLabel, {0, 50})
-    self.bg:addChild(self.posLabel)
+    addChild(allLabel, self.posLabel)
 
     self.stateLabel = ui.newBMFontLabel({text="", size=15})
     setPos(self.stateLabel, {0, 70})
-    self.bg:addChild(self.stateLabel)
+    addChild(allLabel, self.stateLabel)
 
     self.inRangeLabel = ui.newBMFontLabel({text="", size=15, color={102, 0, 0}})
     setPos(self.inRangeLabel, {0, 120})
-    self.bg:addChild(self.inRangeLabel)
+    addChild(allLabel, self.inRangeLabel)
     
     self.possibleLabel = ui.newBMFontLabel({text="", size=15, color={0, 102, 0}})
     setPos(self.possibleLabel, {0, 130})
-    self.bg:addChild(self.possibleLabel)
+    addChild(allLabel, self.possibleLabel)
 
     self.funcBuild:initWork()
     --看一下 CCNode 0 0 位置 和 一半位置
@@ -217,11 +247,7 @@ end
 
 function MiaoBuild:setColor(c)
     if self.bottom ~= nil then
-        if c == 0 then
-            setColor(self.bottom, {255, 0, 0})
-        else
-            setColor(self.bottom, {0, 255, 0})
-        end
+        self.funcBuild:setBottomColor(c)
         self.funcBuild:setColor()
     end
 end
@@ -271,6 +297,14 @@ function MiaoBuild:setColPos()
 
 end
 function MiaoBuild:touchesEnded(touches)
+    --没有建造状态
+    if self.inSelf then
+        if not self.doMove and self.map.scene.curBuild == nil then
+            if self.accMove < 20 then
+                self.funcBuild:showInfo()
+            end
+        end
+    end
     if self.doMove then
         self:setColPos()
         self.funcBuild:whenColNow()
@@ -295,7 +329,7 @@ function MiaoBuild:touchesEnded(touches)
                 end
             end
         else
-            if self.accMove < 20 and self.state == BUILD_STATE.MOVE then
+            if self.accMove < 20 and self.state == BUILD_STATE.MOVE and self.funcBuild:canFinish() then
                 self.map.scene:finishBuild() 
             end
             --没有冲突 顺利移动建筑物
@@ -458,15 +492,17 @@ function MiaoBuild:setState(s)
     self.state = s
     print("MiaoBuild setState", s, self.state)
     if self.state == BUILD_STATE.MOVE and self.bottom == nil then
-        self.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10})
-        self.bg:addChild(self.bottom, 1)
+        self.funcBuild:initBottom()
     end
 end
 
 function MiaoBuild:showBottom()
     if self.bottom == nil then
+        self.funcBuild:initBottom()
+        --[[
         self.bottom = setColor(setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10}),  {0, 255, 0})
         self.bg:addChild(self.bottom, -1)
+        --]]
     end
 end
 function MiaoBuild:finishBottom()
@@ -512,14 +548,6 @@ function MiaoBuild:runMoveAction(px, py)
     self.map.mapGridController:clearMap(self)
     self.moveAct = sequence({moveto(0.3, np[1], np[2]), callfunc(nil, finishMove)})
     self.bg:runAction(self.moveAct)
-end
-function MiaoBuild:clearMoveState()
-    print("clearMoveState")
-    self.lastColBuild = nil
-    self.otherBuild = nil
-    self.moveTarget = nil
-    local tex = CCTextureCache:sharedTextureCache():addImage("move.png")
-    self.changeDirNode:setTexture(tex)
 end
 function MiaoBuild:moveToPos(p)
     print("moveToPos", simple.encode(p))

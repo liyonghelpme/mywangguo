@@ -127,7 +127,10 @@ function MiaoBuildLayer:initCat()
 end
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint'})
-    local cx, cy = affineToCartesian(21, 0)
+    local width = self.scene.width
+    local height = self.scene.height
+    local cx, cy = newAffineToCartesian(10, 0, width, height, MapWidth/2, FIX_HEIGHT)
+    --local cx, cy = affineToCartesian(21, 0)
     local p = normalizePos({cx, cy}, 1, 1)
     b:setPos(p)
     b:setColPos()
@@ -463,6 +466,7 @@ function MiaoBuildLayer:initRoad()
     end
 
     --建筑物名称
+    --[[
     local nlayer = self.scene.layerName['build']
     for dk, dv in ipairs(nlayer.data) do
         if dv ~= 0 then
@@ -478,7 +482,7 @@ function MiaoBuildLayer:initRoad()
 
         end
     end
-
+    --]]
 
     for dk, dv in ipairs(self.scene.layerName['slop2'].data) do
         if dv ~= 0 then
@@ -533,6 +537,32 @@ function MiaoBuildLayer:initRoad()
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
             setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
+            --]]
+        end
+    end
+
+    for dk, dv in ipairs(self.scene.layerName['fence'].data) do
+        if dv ~= 0 then
+            local pname = self.scene.tileName[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+
+            local b = MiaoBuild.new(self, {picName='fence', id=22, dir=dir, tileName=pname})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+            
+            --[[
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local sz = pic:getContentSize()
+            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
             --]]
         end
     end
