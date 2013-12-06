@@ -20,6 +20,12 @@ PEOPLE_STATE = {
     APPEAR = 10,
     --只搜索房屋一次
     FIND_NEAR_BUILDING=11,
+
+    GO_STORE=12,
+    PRODUCT = 13,
+    GO_FACTORY = 14,
+    GO_FARM = 15,
+    GO_QUARRY = 16,
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
@@ -40,6 +46,9 @@ function MiaoPeople:ctor(m, data)
     self.miaoPath = MiaoPath.new(self)
     self.stateStack = {}
     self.waitTime = 1
+    --操作上下文
+    self.actionContext = nil
+
 
 
     print("init MiaoPeople", self.id)
@@ -53,6 +62,8 @@ function MiaoPeople:ctor(m, data)
         self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
+    self.statePic = CCSprite:create()
+    addChild(self.bg, self.statePic)
 
     registerEnterOrExit(self)
 end
@@ -126,32 +137,20 @@ function MiaoPeople:findHouse()
         --找房子 不用miaoPath
         --回到房子之后 才能搜索 miaoPath
         --暂时测试用
-        --[[
-        if self.miaoPath.allBuilding == nil then
-            local p = getPos(self.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING 
-            --self.miaoPath:update()
-        else
-        --]]
             --local allBuild = self.miaoPath.allBuilding
             local minHouse = nil
             local minDist = 999999
             local allBuild = self.map.mapGridController.allBuildings
+            local p = getPos(self.bg)
             for k, v in pairs(allBuild) do
                 --找house
                 if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 and k.deleted == false then
-                    minHouse = k
-                    break
-                    --[[
-                    if v < minDist then
+                    local hp = getPos(k.bg)
+                    local dist = math.abs(hp[1]-p[1])+math.abs(hp[2]-p[2]) 
+                    if dist < minDist then
                         minHouse = k
-                        minDist = v
+                        minDist = dist
                     end
-                    --]]
                 end
             end
             if minHouse ~= nil then
@@ -185,6 +184,11 @@ end
 
 --只在home的时候 调用 初始化miaoPath
 function MiaoPeople:findWorkBuilding()
+    self.funcPeople:findTarget()
+    if true then
+        return
+    end
+
     local allPossible = {}
     local allFreeFactory = {}
     local allFreeStore = {}
@@ -241,13 +245,11 @@ function MiaoPeople:findWorkBuilding()
                 print("build kind ", k.id, k.food, k.owner, k.workNum)
                 ret = self.funcPeople:checkWork(k)
                 --空闲工厂 没有生产产品
-                --工厂就只管生产产品就得了
                 if k.id == 5 and k.owner == nil then
                     print("free factory")
                     table.insert(allFreeFactory, k)
                 end
-
-                --按照大区块划分的AI 区域
+                --普通商店
                 if k.id == 6 and k.workNum < 10 and k.owner == nil then
                     table.insert(allFreeStore, k)
                 end
@@ -255,8 +257,8 @@ function MiaoPeople:findWorkBuilding()
                 if k.id == 11 and k.owner == nil then
                     table.insert(allFreeMine, k)
                 end
-                --铁匠铺 卖出武器
-                if k.id == 13 and k.workNum < 10 and k.owner == nil then
+                --铁匠铺 测试酒水 
+                if k.id == 13 and k.workNum < k.maxNum and k.owner == nil then
                     table.insert(allFreeSmith, k)
                 end
 
@@ -298,16 +300,18 @@ function MiaoPeople:findWorkBuilding()
         local r = math.random(#allPossible)
         local k = allPossible[r]
         print("do what??", k.id)
-        --[[
-        for k, v in ipairs(allPossible) do
-            print("allBuild  distance", v.id, allBuild[v], minDist)
-            if allBuild[v] < minDist then
-                minDist = allBuild[v]
-                minb = v
-            end
+        --筛选 所有可能中 距离最近的 真正可能的建筑物
+        --按照建筑物的距离排序
+        local myp = getPos(self.bg)
+        local function cmp(a, b)
+            local ap = getPos(a.bg)
+            local bp = getPos(b.bg)
+            local ad = mdist(myp, ap) 
+            local bd = mdist(myp, bp)
+            return ad < bd
         end
-        local k = minb
-        --]]
+        table.sort(allPossible, cmp)
+        --self.funcPeople:findTarget(allPossible)
         --基本潜质
         --工作种类
         if self.data.kind == 1 then
@@ -419,7 +423,7 @@ function MiaoPeople:update(diff)
     if Logic.paused then
         return
     end
-
+    self:showState()
     self:checkHealth()
     self:doAppear(diff)
     self:findPath(diff)

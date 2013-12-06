@@ -57,3 +57,15 @@ function FuncBuild:setBottomColor(c)
         setColor(self.baseBuild.bottom, {0, 255, 0})
     end
 end
+function FuncBuild:doSwitch()
+end
+function FuncBuild:checkBuildable()
+    return true
+end
+function FuncBuild:takeTool()
+end
+function FuncBuild:putTool()
+end
+function FuncBuild:updateState()
+end
+

@@ -26,3 +26,5 @@ end
 function FuncPeople:mustRoad()
     return true
 end
+function FuncPeople:findTarget()
+end

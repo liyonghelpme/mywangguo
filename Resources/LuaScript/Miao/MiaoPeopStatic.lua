@@ -62,7 +62,7 @@ function MiaoPeople:handleStore()
 end
 function MiaoPeople:handleQuarry()
     if self.stone == 0 then
-        --获取工具去采矿 需要矿石
+        --从矿场运送矿石到工厂
         if self.tempFactory ~= nil then
             if self.realTarget.deleted then
                 self.realTarget:setOwner(nil)
@@ -82,6 +82,7 @@ function MiaoPeople:handleQuarry()
                 self.goFactory = true
                 self.state = PEOPLE_STATE.FREE
             end
+        --获取工具去采矿 需要矿石
         elseif self.predictMine ~= nil then
             --矿场被拆除了
             if self.realTarget.deleted then
@@ -94,6 +95,7 @@ function MiaoPeople:handleQuarry()
                 --owner 还是 该用户 直到回家休息才放弃owner权限
                 --self.predictQuarry = self.realTarget
                 self.tempQuarry = self.realTarget
+                self.realTarget.funcBuild:takeTool()
                 self.tempMine = self.predictMine
                 self.goMine = true
                 self.state = PEOPLE_STATE.FREE
@@ -124,6 +126,8 @@ function MiaoPeople:handleQuarry()
         self.stone = 0
         --不要占用采矿场了
         self.realTarget:setOwner(nil)
+        self.realTarget.funcBuild:putTool()
+        self.realTarget.funcBuild:updateState()
         self.realTarget = nil
         self.state = PEOPLE_STATE.FREE
     end
@@ -354,7 +358,7 @@ function MiaoPeople:workInFarm()
             self.realTarget = nil
              
             self:setDir(0, 0)
-            local sz = getContentSize(self.changeDirNode)
+            local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
             self.realTarget:changeWorkNum(1)
@@ -388,6 +392,14 @@ function MiaoPeople:workInHome(diff)
         self.lastEndPoint = self.tempEndPoint
         self.state = PEOPLE_STATE.FREE
         --self.bg:setVisible(true)
+    end
+end
+function MiaoPeople:showState()
+    --拿到矿刀
+    if self.tempMine ~= nil then
+        setTexture(self.statePic, "equip70.png")
+    elseif self.stone > 0 then
+        setTexture(self.statePic, "herb109.png")
     end
 end
 

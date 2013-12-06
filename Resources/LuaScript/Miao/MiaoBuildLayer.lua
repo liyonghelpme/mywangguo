@@ -437,6 +437,7 @@ function MiaoBuildLayer:initDataOver()
     --self:initCat()
     self.initYet = true
 end
+--road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
 function MiaoBuildLayer:initRoad() 
     local nlayer = self.scene.layerName['road']
     local width = self.scene.width

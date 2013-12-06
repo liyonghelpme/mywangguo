@@ -71,5 +71,9 @@ StoryWord = {
 "让我们先为追随你而来的村民建造住所吧。\n请选择菜单中的<0000ff建筑>!!",
 }
 
-
+GoodsName = {
+    [1]={name="浊酒", food=1, price=6},
+    [2]={name="白酒", food=2, price=13},
+    [3]={name="素酒", food=2, stone=1, price=37},
+}
 

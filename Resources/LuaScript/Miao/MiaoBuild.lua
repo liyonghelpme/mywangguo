@@ -9,6 +9,8 @@ require "Miao.Slope"
 require "menu.BuildInfo"
 require "menu.HouseInfo"
 require "Miao.MineStore"
+require "Miao.Mine"
+require "Miao.Store"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -60,6 +62,8 @@ function MiaoBuild:ctor(m, data)
     --id --> num
     self.product = {}
 
+    self.goodsKind = 1
+    self.maxNum = 10
 
     self.bg = CCLayer:create()
     if self.picName == 'build' then
@@ -105,6 +109,14 @@ function MiaoBuild:ctor(m, data)
         elseif self.id == 12 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = MineStore.new(self)
+            self.funcBuild:initView()
+        elseif self.id == 11 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Mine.new(self)
+            self.funcBuild:initView()
+        elseif self.id == 13 then
+            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Store.new(self)
             self.funcBuild:initView()
         --其它建筑物
         else
@@ -165,7 +177,8 @@ function MiaoBuild:ctor(m, data)
 
     self.inRangeLabel = ui.newBMFontLabel({text="", size=15, color={102, 0, 0}})
     setPos(self.inRangeLabel, {0, 120})
-    addChild(allLabel, self.inRangeLabel)
+    addChild(self.bg, self.inRangeLabel)
+    
     
     self.possibleLabel = ui.newBMFontLabel({text="", size=15, color={0, 102, 0}})
     setPos(self.possibleLabel, {0, 130})
@@ -180,6 +193,29 @@ function MiaoBuild:ctor(m, data)
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
 end
+
+function MiaoBuild:doSwitch()
+    self.map.mapGridController:clearMap(self)
+    self.dir = 1-self.dir
+    if self.dir == 0 then
+        self.changeDirNode:setFlipX(false)
+    else
+        self.changeDirNode:setFlipX(true)
+    end
+    self.sy, self.sx = self.sx, self.sy
+
+    local sz = self.changeDirNode:getContentSize()
+    if self.dir == 0 then
+        setPos(setAnchor(self.changeDirNode, {(self.data.ax)/sz.width, (sz.height-self.data.ay)/sz.height}), {0, SIZEY})
+    else
+        setPos(setAnchor(self.changeDirNode, {(sz.width-self.data.ax)/sz.width, (sz.height-self.data.ay)/sz.height}), {0, SIZEY})
+    end
+    self.funcBuild:doSwitch()
+
+    self.map.mapGridController:updateMap(self)
+end
+
+
 function MiaoBuild:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
     self.doMove = false
@@ -260,9 +296,8 @@ function MiaoBuild:calNormal()
 end
 --修正一下坐标
 function MiaoBuild:calAff()
-    local nx, ny = self:calNormal()
-    local ax, ay = normalToAffine(nx, ny)
-    local ax, ay = MapGX-1-ax, MapGY-1-ay
+    local pos = getPos(self.bg)
+    local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     return ax, ay
 end
 function MiaoBuild:setColPos()
@@ -275,13 +310,16 @@ function MiaoBuild:setColPos()
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     
     if ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= 11 then
+        print("out of range")
         self.colNow = 1
         self:setColor(0)
         return
     end
     local layer = self.map.scene.layerName['slop1']
-    local gid = layer.data[ay*self.map.scene.width+ax]
+    local gid = layer.data[ay*self.map.scene.width+ax+1]
+    print("slop1 gid type ax, ay ", ax, ay, gid)
     local name = self.map.scene.tileName[gid]
+    --草地才检测 是否可以建造建筑物
     if name == 'tile0.png' then
         local other = self.map:checkCollision(self)
         print("checkCollision result", other)
@@ -316,6 +354,7 @@ function MiaoBuild:touchesEnded(touches)
         --self:doMyEffect()
         --self:doEffect()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
+        local ba = self.funcBuild:checkBuildable()
         if self.colNow == 1 then
             if self.picName == 'move' then
                 self.funcBuild:handleTouchEnded()
@@ -328,7 +367,7 @@ function MiaoBuild:touchesEnded(touches)
 
                 end
             end
-        else
+        elseif ba then
             if self.accMove < 20 and self.state == BUILD_STATE.MOVE and self.funcBuild:canFinish() then
                 self.map.scene:finishBuild() 
             end
@@ -345,7 +384,8 @@ end
 function MiaoBuild:update(diff)
     local map = getBuildMap(self)
     local p = getPos(self.bg)
-    self.posLabel:setString("     "..map[3].." "..map[4].." "..p[1].." "..p[2])
+    local ax, ay = self:calAff()
+    self.posLabel:setString("     "..map[3].." "..map[4].." "..p[1].." "..p[2].." "..ax.." "..ay)
     self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
     local s = ''
     for k, v in ipairs(self.belong) do

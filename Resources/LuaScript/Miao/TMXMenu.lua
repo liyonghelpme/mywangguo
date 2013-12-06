@@ -13,6 +13,7 @@ function TMXMenu:ctor(s)
     local backbut = ui.newButton({image="tabbut.png", conSize={108, 36}, text="地图", size=20, callback=self.onBack, delegate=self})
     setPos(backbut.bg, {135, 45})
     temp:addChild(backbut.bg)
+    self.leftBut = backbut
 
     local vs = getVS()
     local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
@@ -66,8 +67,12 @@ function TMXMenu:enterScene()
     registerUpdate(self)
 end
 function TMXMenu:onBack()
-    local mm = MiaoMap.new()
-    global.director:pushScene(mm)
+    if self.inBuild then
+        global.director.curScene.page.curBuild:doSwitch()
+    else
+        local mm = MiaoMap.new()
+        global.director:pushScene(mm)
+    end
 end
 function TMXMenu:onMenu()
     if self.inBuild then
@@ -88,10 +93,12 @@ function TMXMenu:setMenu(m)
 end
 function TMXMenu:beginBuild()
     self.mbut.text:setString("返回")
+    self.leftBut.text:setString("旋转")
     self.inBuild = true
 end
 function TMXMenu:finishBuild()
     self.mbut.text:setString("菜单")
+    self.leftBut.text:setString("地图")
     self.inBuild = false
 end
 

@@ -173,6 +173,9 @@ function distance(a, b)
     local dx, dy = a[1]-b[1], a[2]-b[2]
     return math.sqrt(dx*dx+dy*dy)
 end
+function mdist(a, b)
+    return math.abs(a[1]-b[1])+math.abs(a[2]-b[2])
+end
 function scaleBy(v, s)
     return {v[1]*s, v[2]*s}
 end
@@ -638,6 +641,7 @@ end
 --Cartesian to Cartesian 
 --getBuildMap ----> setBuildMap
 --根据 nx = 0 ny = 0 的位置放置的网格 
+--使用 0 0 网格的左下角作为对齐的标准
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]
@@ -645,7 +649,7 @@ function normalizePos(p, sx, sy)
     
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
-    if (q1+sx)%2 == (q2+1)%2 then
+    if (q1+1)%2 == (q2+1)%2 then
         q2 = q2+1
     end
     x = q1*SIZEX
@@ -1382,3 +1386,12 @@ function colorLine(param)
     return n
 end
 
+function setProNum(banner, n, max)
+    if n == 0 then
+        banner:setVisible(false)
+    else
+        banner:setVisible(true)
+        local wid = (n/max)*339
+        setContentSize(banner, {wid, 29})
+    end
+end

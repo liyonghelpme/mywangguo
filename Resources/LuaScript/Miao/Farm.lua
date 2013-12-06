@@ -20,8 +20,7 @@ function Farm:update(diff)
                 self.baseBuild.bg:addChild(self.fn)
                 setPos(self.fn, {0, 40})
             else
-                local tex = CCTextureCache:sharedTextureCache():addImage("p0.png")
-                self.fn:setTexture(tex)
+                setTexture(self.fn, "p0.png")
             end
         end
     elseif self.baseBuild.workNum >= 4 and self.baseBuild.workNum < 7 then
@@ -32,8 +31,7 @@ function Farm:update(diff)
                 self.baseBuild.bg:addChild(self.fn)
                 setPos(self.fn, {0, 40})
             else
-                local tex = CCTextureCache:sharedTextureCache():addImage("p1.png")
-                self.fn:setTexture(tex)
+                setTexture(self.fn, "p1.png")
             end
         end
     elseif self.baseBuild.workNum >= 7 then
@@ -44,8 +42,7 @@ function Farm:update(diff)
                 self.baseBuild.bg:addChild(self.fn)
                 setPos(self.fn, {0, 40})
             else
-                local tex = CCTextureCache:sharedTextureCache():addImage("p2.png")
-                self.fn:setTexture(tex)
+                setTexture(self.fn, "p2.png")
             end
         end
     elseif self.baseBuild.workNum == 0 then

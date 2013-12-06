@@ -348,21 +348,11 @@ function MiaoPage:finishBuild()
             end
         --矿坑
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 11 then
-            if self.curBuild.colNow == 0 then
-                addBanner("必须建造到斜坡上面！")
+            if self.curBuild.funcBuild:checkSlope() then
+                self.curBuild:finishBuild()
+                self.curBuild = nil
             else
-                local ret = false
-                if type(self.curBuild.otherBuild) == 'table' then
-                    local ob = self.curBuild.otherBuild
-                    if ob.picName == 'build' and ob.data.kind == 1 then
-                        ret = true
-                        self.curBuild:finishBuild()
-                        self.curBuild = nil
-                    end
-                end
-                if not ret then
-                    addBanner("必须建造到斜坡上面！")
-                end
+                addBanner("必须建造到斜坡上面！")
             end
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
