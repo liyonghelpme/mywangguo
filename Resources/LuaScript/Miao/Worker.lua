@@ -42,28 +42,3 @@ function Worker:checkWork(k)
     return ret
 end
 
-
-Merchant = class(FuncPeople)
-function Merchant:checkWork(k)
-    local ret
-    ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    --去商店
-    if not ret then
-        ret = (k.picName == 'build' and k.id == 6 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    --采矿场
-    if not ret then
-        print("stone ", k.stone)
-        ret = (k.picName == 'build' and k.id == 12 and k.state == BUILD_STATE.FREE and k.stone > 0 and k.owner == nil)
-    end
-    --铁匠铺
-    if not ret then
-        ret = (k.picName == 'build' and k.id == 13 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    --塔
-    if not ret then
-        print("try tower goods")
-        ret = (k.picName == 'build' and k.id == 14 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    return ret
-end

@@ -135,7 +135,7 @@ function MiaoPath:update()
     local buildCell = self.target.map.mapGridController.mapDict
     local staticObstacle = self.target.map.staticObstacle 
     print("MiaoPath update")
-    while n < 50 do
+    while n < 10 do
         if #self.openList == 0 then
             break
         end

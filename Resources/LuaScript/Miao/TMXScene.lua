@@ -50,7 +50,7 @@ function TMXScene:saveGame()
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
-            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid})
+            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
         end
     end
     local b = simple.encode(allBuild)

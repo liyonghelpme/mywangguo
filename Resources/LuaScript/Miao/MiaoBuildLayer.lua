@@ -171,6 +171,7 @@ function MiaoBuildLayer:initBuild()
         build = simple.decode(build)
         for k, v in ipairs(build) do
             local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
             b:setColPos()

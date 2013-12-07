@@ -1,6 +1,18 @@
 CAT_ACTION = {
     TAKE_STONE=0,
     TAKE_FOOD=1,
+    PUT_FOOD=2,
+    PRODUCT=3,
+    PUT_PRODUCT=4,
+    PLANT_FARM=5,
+    PUT_STONE=6,
+    
+    PUT_STONE_QUARRY=7,
+    MINE_STONE=8,
+    TAKE_MINE_TOOL=9,
+
+    MER_BACK=10,
+    BUG_GOODS=11,
 }
 
 Cat2 = class(FuncPeople)
@@ -156,7 +168,7 @@ function Cat2:findTarget()
         end
     end
 
-    print("people kind", self.data.kind)
+    print("people kind", self.people.data.kind)
     if allBuild ~= nil then
         print("allBuildNum", getLen(allBuild))
     end
@@ -172,7 +184,7 @@ function Cat2:findTarget()
 
     if #allPossible > 0 then
         --按照建筑物的距离排序
-        local myp = getPos(self.bg)
+        local myp = getPos(self.people.bg)
         local function cmp(a, b)
             local ap = getPos(a.bg)
             local bp = getPos(b.bg)
@@ -226,33 +238,37 @@ function Cat2:checkAllPossible()
                     self.people.predictTarget = self.allStoneQuarry[1]
                     self.people.predictTarget:setOwner(self.people)
 
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.predictSmith})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.predictFactory})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.predictFactory})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FARM, self.predictFarm})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.predictFactory})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictSmith, CAT_ACTION.PUT_PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FARM, self.people.predictFarm, CAT_ACTION.TAKE_FOOD})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE})
                     self.people.actionContext= CAT_ACTION.TAKE_STONE
+                    self.people.goodsKind = k.goodsKind
                 elseif food > 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.predictSmith})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.predictFactory})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.predictFactory})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictSmith, CAT_ACTION.PUT_PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD})
                     self.people.predictTarget = self.allFoodFarm[1]
                     self.people.predictTarget:setOwner(self.people)
                     self.people.actionContext= CAT_ACTION.TAKE_FOOD
+                    self.people.goodsKind = k.goodsKind
                 elseif stone > 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.predictSmith})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.predictFactory})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.predictFactory})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictSmith, CAT_ACTION.PUT_PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE})
                     self.people.predictTarget = self.allStoneQuarry[1]
                     self.people.predictTarget:setOwner(self.people)
                     self.people.actionContext= CAT_ACTION.TAKE_STONE
+                    self.people.goodsKind = k.goodsKind
                 end
                 return
             end
             --种地去
-        elseif k.id == 2 and k.workNum < 10 then
-            k:setOwner(self.people)
+        elseif k.id == 2 and k.workNum < k.maxNum then
             self.people.predictTarget = k
+            k:setOwner(self.people)
+            self.people.actionContext = CAT_ACTION.PLANT_FARM
             return
         elseif k.id == 5 then
             --开始生产了
@@ -280,6 +296,10 @@ function Cat2:checkAllPossible()
                 self.people.predictMine:setOwner(self.people)
                 self.people.predictTarget = k
                 k:setOwner(self.people)
+
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.predictTarget, CAT_ACTION.PUT_STONE_QUARRY})
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.predictMine, CAT_ACTION.MINE_STONE})
+                self.people.actionContext = CAT_ACTION.TAKE_MINE_TOOL
                 return
             end
         elseif k.id == 14 then

@@ -33,11 +33,11 @@ function StoreInfo:ctor(b)
 
     setProNum(pro, self.build.workNum, self.build.maxNum)
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="0 个", size=18, color={1, 1, 1}})), {0.5, 0.5}), {340, fixY(sz.height, 83)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.workNum.."个", size=18, color={1, 1, 1}})), {0.5, 0.5}), {340, fixY(sz.height, 83)})
     local but = ui.newButton({image="tabbut.png", text="更改商品", size=15, color={10, 10, 10}, callback=self.onChange, delegate=self})
     setPos(addChild(temp, but.bg), {209, fixY(sz.height, 247)})
 end
 function StoreInfo:onChange()
     global.director:popView()
-    global.director:pushView(GoodsInfo.new(), 1, 0)
+    global.director:pushView(GoodsInfo.new(self.build), 1, 0)
 end

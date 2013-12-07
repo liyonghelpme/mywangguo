@@ -61,7 +61,36 @@ function MiaoPeople:handleStore()
     self.state = PEOPLE_STATE.FREE
 end
 function MiaoPeople:handleQuarry()
-    if self.stone == 0 then
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.TAKE_MINE_TOOL then
+            print("TAKE_MINE_TOOL")
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.funcBuild:takeTool()
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PUT_STONE_QUARRY then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.stone = self.realTarget.stone+self.stone
+                self.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.TAKE_STONE then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.stone = self.predictTarget.stone
+                self.realTarget.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        end
+    elseif self.stone == 0 then
         --从矿场运送矿石到工厂
         if self.tempFactory ~= nil then
             if self.realTarget.deleted then
@@ -134,20 +163,72 @@ function MiaoPeople:handleQuarry()
 end
 
 function MiaoPeople:handleMine()
-    self.state = PEOPLE_STATE.IN_WORK
-    self.workTime = 0
+    if self.actionContext == CAT_ACTION.MINE_STONE then
+        self.state = PEOPLE_STATE.IN_WORK
+        self.workTime = 0
+    end
 end
 function MiaoPeople:handleSmith()
-    self.realTarget.workNum = self.realTarget.workNum +self.product
-    self.realTarget:setOwner(nil)
-    self.realTarget = nil
-    self.product = 0
-    self.state = PEOPLE_STATE.FREE
+    if self.actionContext == CAT_ACTION.PUT_PRODUCT then
+        if self.realTarget.goodsKind == self.goodsKind then
+            self.realTarget.workNum = self.realTarget.workNum+self.workNum
+            self.realTarget.funcBuild:updateGoods()
+        end
+        self.workNum = 0
+        self:popState()
+        self:resetState()
+    else
+        self.realTarget.workNum = self.realTarget.workNum +self.product
+        self.realTarget:setOwner(nil)
+        self.realTarget = nil
+        self.product = 0
+        self.state = PEOPLE_STATE.FREE
+    end
 end
 
+function MiaoPeople:refreshOwner()
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            v[2]:setOwner(self)
+        end
+    end
+end
+function MiaoPeople:finishHandle()
+    self:refreshOwner()
+end
 function MiaoPeople:handleFarm()
+    --新系统  
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.TAKE_FOOD then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                --同一个对象身上可能 会 有多重的
+                self.food = self.realTarget.workNum
+                self.realTarget.workNum = 0
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PLANT_FARM then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+                self:resetState()
+            else
+                local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+                sf:addSpriteFramesWithFile("cat_labor.plist")
+                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
+                self.changeDirNode:stopAllActions()
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                local sz = self.changeDirNode:getContentSize()
+                setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
+
+                self.state = PEOPLE_STATE.IN_WORK
+                self.workTime = 0
+            end
+        end
+
     --销售塔的商品 
-    if self.predictTower ~= nil then
+    elseif self.predictTower ~= nil then
         if self.realTarget.deleted then
             self.state = PEOPLE_STATE.FREE
             self.predictFactory:setOwner(nil)
@@ -210,7 +291,58 @@ function MiaoPeople:handleFarm()
     end
 end
 
+function MiaoPeople:popState()
+    if #self.stateStack > 0 then
+        for k, v in ipairs(self.stateStack) do
+            print("state", k, v[1])
+        end
+        local stop = self.stateStack[#self.stateStack]
+        self.stateContext = stop
+        table.remove(self.stateStack)
+        self.stateContext[2]:setOwner(self)
+    else
+        self.stateContext = nil
+    end
+end
+function MiaoPeople:beforeHandle()
+end
+function MiaoPeople:resetState()
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.state = PEOPLE_STATE.FREE
+end
 function MiaoPeople:handleFactory()
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.PUT_FOOD then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.food = self.realTarget.food + self.food
+                self.food = 0
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PRODUCT then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.goodsKind = self.goodsKind
+                self.state = PEOPLE_STATE.IN_WORK
+                self.workTime = 0
+                self.realTarget.funcBuild:startWork()
+            end
+        elseif self.actionContext == CAT_ACTION.PUT_STONE then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.stone = self.realTarget.stone + self.stone
+                self.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        end
+        return 
+    end
     --运送粮食
     if self.food ~= nil then
         self.realTarget.food = self.realTarget.food + self.food
@@ -273,9 +405,27 @@ function MiaoPeople:workInFactory()
     if self.workTime > 1 then
         self.workTime = 0
         self.health = self.health -1
+        print("product what??", self.realTarget.goodsKind)
+
+        if self.actionContext ~= nil then
+            local gn = GoodsName[self.realTarget.goodsKind]
+            print("gname", simple.encode(gn))
+            local enough = true
+            if self.realTarget.food >= gn.food and self.realTarget.stone >= gn.stone and self.realTarget.wood >= gn.wood then
+                self.realTarget:doProduct() 
+            else
+                enough = false
+            end
+            if self.realTarget.workNum >= self.realTarget.maxNum or not enough then
+                self.realTarget.funcBuild:stopWork()
+                self.workNum = self.realTarget.workNum
+                self.realTarget.workNum = 0
+                self.goodsKind = self.realTarget.goodsKind
+                self:popState()
+                self:resetState()
+            end
         --生产混合原材料物品
-        print("product what??", self.realTarget.productKind)
-        if self.realTarget.productKind ~= nil then
+        elseif self.realTarget.productKind ~= nil then
             print("product kind 3")
             if self.realTarget.food > 0 and self.realTarget.stone > 0 then
                 self.realTarget.food = self.realTarget.food - 1
@@ -336,14 +486,11 @@ function MiaoPeople:workInMine()
         --如果工厂生产数量超过上限 就不要生产了
         --离开矿坑 但是predictQuarry 不会消除
         print("workInMine", self.goQuarry)
-        if self.realTarget.stone >= 10 then
-            self.state = PEOPLE_STATE.FREE
+        if self.realTarget.stone >= self.realTarget.maxNum then
             self.stone = self.realTarget.stone
             self.realTarget.stone = 0
-
-            self.realTarget:setOwner(nil)
-            self.realTarget = nil
-            self.goQuarry = true
+            self:popState()
+            self:resetState()
             return
         end
     end
@@ -403,3 +550,13 @@ function MiaoPeople:showState()
     end
 end
 
+function MiaoPeople:clearStateStack()
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            v[2]:setOwner(nil)
+        end
+    end
+    self.stateStack = {}
+    self.stateContext = nil
+    self.actionContext = nil
+end

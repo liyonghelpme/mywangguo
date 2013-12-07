@@ -17,6 +17,10 @@ BUILD_STATE = {
     FREE = 0,
     MOVE = 1,
 }
+function MiaoBuild:setWork(wd)
+    self.goodsKind = wd.goodsKind or 1
+    self.workNum = wd.workNum or 0
+end
 function MiaoBuild:ctor(m, data)
     self.map = m
     self.sx = 1
@@ -40,6 +44,7 @@ function MiaoBuild:ctor(m, data)
     self.picName = data.picName
     self.id = data.id
     self.owner = nil
+    self.ownerNum = 0
     self.workNum = 0
     self.lastColBuild = nil
     self.dir = 0
@@ -114,6 +119,7 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Mine.new(self)
             self.funcBuild:initView()
+        --铁匠铺
         elseif self.id == 13 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
@@ -554,10 +560,12 @@ end
 
 function MiaoBuild:setOwner(s)
     self.owner = s
-    if s == nil then
-        self.nameLabel:setString("")
-    else
-        self.nameLabel:setString(s.name)    
+    if not self.deleted then
+        if s == nil then
+            self.nameLabel:setString("")
+        else
+            self.nameLabel:setString(s.name)    
+        end
     end
 end
 
@@ -602,4 +610,17 @@ function MiaoBuild:setMenuWord()
         local ax, ay = self:calAff()
         self.map.scene.scene.menu.infoWord:setString(Logic.buildings[self.id].name..'('..ax..","..ay..")")
     end
+end
+function MiaoBuild:doProduct()
+    local gn = GoodsName[self.goodsKind]
+    self.food = self.food - gn.food
+    self.wood = self.wood - gn.wood
+    self.stone = self.stone - gn.stone
+    self.workNum = self.workNum+1
+end
+function MiaoBuild:setGoodsKind(k)
+    print("setGoodsKind", k)
+    self.goodsKind = k
+    self.workNum = 0
+    self.funcBuild:updateGoods()
 end

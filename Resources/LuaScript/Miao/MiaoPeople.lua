@@ -4,6 +4,7 @@ require "Miao.Worker"
 require "Miao.MiaoPath"
 require "Miao.TestCat"
 require "Miao.TestCat2"
+require "Miao.Merchant"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -26,6 +27,8 @@ PEOPLE_STATE = {
     GO_FACTORY = 14,
     GO_FARM = 15,
     GO_QUARRY = 16,
+
+    GO_TARGET = 17,
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
@@ -48,6 +51,7 @@ function MiaoPeople:ctor(m, data)
     self.waitTime = 1
     --操作上下文
     self.actionContext = nil
+    self.stateContext = nil
 
 
 
@@ -435,7 +439,7 @@ function MiaoPeople:update(diff)
     self:doWork(diff)
     self:doPaused(diff)
     if self.predictTarget ~= nil then
-        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health)
+        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
     else
         self.stateLabel:setString(str(self.state).." hea "..self.health)
     end
@@ -476,7 +480,16 @@ function MiaoPeople:initFind(diff)
         --寻找最近的建筑物 去工作 使用简单的洪水查找法 不要使用最近建筑物查找法 人物多思考一会即可
         --只在有路的块上面行走 picName == 't'
         --tired 不能中断操作
-        if self.goSmith then
+        --新系统 stateContext actionContext
+        if self.stateContext ~= nil then
+            self.predictTarget = self.stateContext[2]
+            self.actionContext = self.stateContext[3] 
+            self.stateContext = nil
+            if self.predictTarget.deleted then
+                self.predictTarget = nil
+                self:clearStateStack()
+            end
+        elseif self.goSmith then
             self.predictTarget = self.tempSmith
             self.tempSmith = nil
             self.goSmith = false
@@ -733,6 +746,7 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
+                    self:beforeHandle()
                     --运送物资到工厂 带走农田产量
                     --之前的是农田 并且 农田已经 种植好了 则 走向 工厂
                     if self.realTarget.id == 2 then
@@ -758,6 +772,7 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.id == 14 then
                         self:handleTower()
                     end
+                    self:finishHandle()
                 end
                 self:setZord()
             else

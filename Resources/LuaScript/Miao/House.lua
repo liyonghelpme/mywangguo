@@ -5,7 +5,7 @@ end
 function House:initWork()
     self.bg = CCNode:create()
     local banner = setSize(CCSprite:create("probg.png"), {100, 19})
-    local pro = display.newScale9Sprite("pro.png")
+    local pro = display.newScale9Sprite("pro1.png")
     banner:addChild(pro)
     setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
     self.pro = pro

@@ -68,4 +68,6 @@ function FuncBuild:putTool()
 end
 function FuncBuild:updateState()
 end
+function FuncBuild:updateGoods()
+end
 
