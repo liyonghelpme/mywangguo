@@ -59,19 +59,19 @@ function Merchant:findTarget()
             table.sort(allPossible, cmp)
             self:checkAllPossible() 
         end
-        if self.predictTarget == nil then
-            self.predictTarget = self.map.backPoint
-            self.actionContext = CAT_ACTION.MER_BACK 
+        if self.people.predictTarget == nil then
+            self.people.predictTarget = self.people.map.backPoint
+            self.people.actionContext = CAT_ACTION.MER_BACK 
         end
     end
 end
 
 function Merchant:checkAllPossible()
     for _, k in ipairs(self.allPossible) do
-        table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.map.backPoint, CAT_ACTION.MER_BACK})
+        table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
         k:setOwner(self)
-        self.predictTarget = k
-        self.actionContext = CAT_ACTION.BUY_GOODS
+        self.people.predictTarget = k
+        self.people.actionContext = CAT_ACTION.BUY_GOODS
         if Logic.inNew and not Logic.checkFarm then
             Logic.checkFarm = true
             self.people.merch = 0
@@ -80,6 +80,73 @@ function Merchant:checkAllPossible()
             global.director:pushView(w, 1, 0)
         end
         break
+    end
+end
+function Merchant:handleAction()
+    if self.people.actionContext == CAT_ACTION.MER_BACK then
+        self.people.state = PEOPLE_STATE.GO_AWAY
+        self.people.changeDirNode:runAction(sequence({fadeout(1), callfunc(nil, removeSelf, self.people.bg)}))
+        self.people.map.mapGridController:removeSoldier(self.people)
+    elseif self.people.actionContext == CAT_ACTION.BUY_GOODS then
+        print("BUY_GOODS", self.people.predictTarget.id)
+        if self.people.predictTarget.stone > 0 then
+            local sp = CCSprite:create("silver.png")
+            local p = getPos(self.people.predictTarget.bg)
+            self.people.map.bg:addChild(sp)
+            setPos(sp, p)
+            local rx = math.random(20)-10
+            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+            local pay = self.people.predictTarget.stone*math.floor(self.people.predictTarget.rate+1)
+            local num = ui.newBMFontLabel({text=str(pay), font="bound.fnt", size=30})
+            sp:addChild(num)
+            setPos(num, {50, 0})
+            doGain({silver=pay})
+            self.people.predictTarget.stone = 0
+        elseif self.people.predictTarget.id == 13 then
+            getNum = self.people.predictTarget.workNum
+            local sp = CCSprite:create("silver.png")
+            local p = getPos(self.people.predictTarget.bg)
+            self.people.map.bg:addChild(sp)
+            setPos(sp, p)
+            local rx = math.random(20)-10
+            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+            
+            local bn = math.min(2, self.people.predictTarget.workNum) 
+            local wn = self.people.predictTarget.workNum
+            self.people.predictTarget.workNum = wn-bn
+            self.people.predictTarget.funcBuild:updateGoods()
+
+            local val = GameNames[self.predictTarget.goodsKind].price*bn
+            local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
+            sp:addChild(num)
+            setPos(num, {50, 0})
+            --+商店的贩卖能力
+            doGain({silver=val})
+        --去农田
+        --去商店
+        --去铁匠铺
+        elseif self.people.predictTarget.workNum > 0 then
+            getNum = self.people.predictTarget.workNum
+            local sp = CCSprite:create("silver.png")
+            local p = getPos(self.people.predictTarget.bg)
+            self.people.map.bg:addChild(sp)
+            setPos(sp, p)
+            local rx = math.random(20)-10
+            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+            local num = ui.newBMFontLabel({text=str(self.people.predictTarget.workNum*math.floor(self.people.predictTarget.rate+1)), font="bound.fnt", size=30})
+            sp:addChild(num)
+            setPos(num, {50, 0})
+            doGain({silver=self.people.predictTarget.workNum*math.floor(self.people.predictTarget.rate+1)})
+            self.people.predictTarget.workNum = 0
+        end
+        if Logic.inNew and not Logic.buyIt then
+            Logic.buyIt = true
+            local w = Welcome2.new(self.people.onBuy, self.people)
+            w:updateWord("好了，那么我就收购食材<0000ff"..getNum..">个，并付给你<0000ff"..getNum.."贯>")
+            global.director:pushView(w, 1, 0)
+        end
+        self.people:popState()
+        self.people:resetState()
     end
 end
 

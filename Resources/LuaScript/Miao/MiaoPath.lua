@@ -85,6 +85,9 @@ function MiaoPath:checkNeibor(x, y)
                     local oldDist = self.allBuilding[bb] or 999999
                     self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
                     table.insert(bb.belong, self.target.name)
+                    if #bb.belong > 3 then
+                        table.remove(bb.belong, 1)
+                    end
                     print("add Building ", bb.id, bb.picName)
                 else
                     print("no road")

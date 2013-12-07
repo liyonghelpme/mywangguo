@@ -176,6 +176,7 @@ function MiaoPeople:findHouse()
         end
     end
     self.predictTarget = self.myHouse
+    self.actionContext = CAT_ACTION.GO_HOME
 end
 function MiaoPeople:findAllNearBuilding(diff)
     if self.state == PEOPLE_STATE.FIND_NEAR_BUILDING then
@@ -189,224 +190,6 @@ end
 --只在home的时候 调用 初始化miaoPath
 function MiaoPeople:findWorkBuilding()
     self.funcPeople:findTarget()
-    if true then
-        return
-    end
-
-    local allPossible = {}
-    local allFreeFactory = {}
-    local allFreeStore = {}
-    local allFreeMine = {}
-    local allFreeSmith = {}
-    local allFreeQuarry = {}
-    local allBuild
-    --有粮食的 农田 有石材的采石场
-    local allFoodFarm = {}
-    local allStoneQuarry = {}
-    --拆除了最近的工作建筑物之后
-    --当所有的工作地点都ko的时候 就要findHouse
-    --self.myHouse == nil? self.myHouse.deleted == true? 
-    --农民才从房屋附近寻路
-    if self.miaoPath.allBuilding == nil or self.dirty == true then
-        self.dirty = false
-        --从房子寻找
-        if self.data.kind == 1 then
-            print("miao Path init find!!!!!!!!!!!!")
-            local p = getPos(self.myHouse.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING
-        else
-            --商人从本身位置出发寻路
-            --没有深度限制
-            local p = getPos(self.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING
-        end
-    else
-        --TODO!! 猫使用的是Cat
-        allBuild = self.miaoPath.allBuilding
-        --v 是到这个建筑物的距离
-        for k, v in pairs(allBuild) do
-            --休息结束
-            --找农田
-            local ret = false
-            --商人 不需要 占用 建筑物
-
-            if self.data.kind == 2 and k.deleted == false then
-                ret = self.funcPeople:checkWork(k)
-                --农田没有购买者 走到后发现目标被移除了就取消工作 
-                --移动建筑物相当于新建一个建筑物 broken = true
-                --避免抢占 owner == nil
-                --去农田
-            --农民要占用建筑物
-            elseif self.data.kind == 1 and k.deleted == false then
-                print("build kind ", k.id, k.food, k.owner, k.workNum)
-                ret = self.funcPeople:checkWork(k)
-                --空闲工厂 没有生产产品
-                if k.id == 5 and k.owner == nil then
-                    print("free factory")
-                    table.insert(allFreeFactory, k)
-                end
-                --普通商店
-                if k.id == 6 and k.workNum < 10 and k.owner == nil then
-                    table.insert(allFreeStore, k)
-                end
-                --矿坑
-                if k.id == 11 and k.owner == nil then
-                    table.insert(allFreeMine, k)
-                end
-                --铁匠铺 测试酒水 
-                if k.id == 13 and k.workNum < k.maxNum and k.owner == nil then
-                    table.insert(allFreeSmith, k)
-                end
-
-                --可以收集的 农田和矿市场 
-                if k.id == 2 and k.workNum > 0 then
-                    table.insert(allFoodFarm, k)
-                end
-                if k.id == 12 and k.stone > 0 then
-                    table.insert(allStoneQuarry, k)
-                end
-                if k.id == 12 and k.owner == nil then
-                    table.insert(allFreeQuarry, k)
-                end
-            end
-
-            --print("building state", ret)
-            if ret then
-                table.insert(allPossible, k)
-            end
-        end
-    end
-    print("people kind", self.data.kind)
-    if allBuild ~= nil then
-        print("allBuildNum", getLen(allBuild))
-    end
-    print("allPossible", #allPossible)
-    print("allFreeFactory num", #allFreeFactory)
-    print("allFreeStore num", #allFreeStore)
-    print("allFreeSmith num", #allFreeSmith)
-    print("allFreeMine num", #allFreeMine)
-    print("allFoodFarm num", #allFoodFarm)
-    print("allStoneQuarry num", #allStoneQuarry)
-    print("allFreeQuarry num", #allFreeQuarry)
-    global.director.curScene.menu.stateLabel:setString(string.format("allFoodFarm %d\nallStoneQuarry %d\n", #allFoodFarm, #allStoneQuarry))
-    if #allPossible > 0 then
-        local minb = nil
-        local minDist = 99999
-        --但是最近的possible 的 条件不成熟 不能选择啊~~
-        local r = math.random(#allPossible)
-        local k = allPossible[r]
-        print("do what??", k.id)
-        --筛选 所有可能中 距离最近的 真正可能的建筑物
-        --按照建筑物的距离排序
-        local myp = getPos(self.bg)
-        local function cmp(a, b)
-            local ap = getPos(a.bg)
-            local bp = getPos(b.bg)
-            local ad = mdist(myp, ap) 
-            local bd = mdist(myp, bp)
-            return ad < bd
-        end
-        table.sort(allPossible, cmp)
-        --self.funcPeople:findTarget(allPossible)
-        --基本潜质
-        --工作种类
-        if self.data.kind == 1 then
-            --寻找空闲的工厂 运送物资过去
-            --寻找最近的工厂运送过去  行为转变了
-            --去食品商店 
-            --Planning
-            if k.id == 6 then
-                if #allFoodFarm > 0 and #allFreeFactory > 0 then
-                    self.stateLabel:setString("findFactory!!!")
-                    self.predictFactory = allFreeFactory[1]
-                    self.predictFactory:setOwner(self) 
-                    self.predictStore = k 
-                    self.predictStore:setOwner(self)
-
-                    self.predictTarget = allFoodFarm[1]
-                    self.predictTarget:setOwner(self)
-                    print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.predictFactory)
-                end
-            elseif k.id == 13 then
-                if #allStoneQuarry > 0 and #allFreeFactory > 0 then
-                    self.predictFactory = allFreeFactory[1] 
-                    self.predictFactory:setOwner(self)
-                    self.predictSmith = k
-                    self.predictSmith:setOwner(self)
-
-                    self.predictTarget = allStoneQuarry[1]
-                    self.predictTarget:setOwner(self)
-                end
-                --种地去
-            elseif k.id == 2 and k.workNum < 10 then
-                k:setOwner(self)
-                self.predictTarget = k
-            elseif k.id == 5 then
-                --开始生产了
-                --还有剩余粮食
-                if k.food > 0 then
-                    k:setOwner(self)
-                    self.predictTarget = k
-                --只有生产好的商品
-                else
-                    if #allFreeStore > 0 then
-                        self.predictStore = allFreeStore[1]
-                        self.predictStore:setOwner(self)
-                        k:setOwner(self)
-                        self.predictTarget = k
-                    end
-                end
-            --采矿场
-            elseif k.id == 12 then
-                print("try to collect stone")
-                --还可以采集石头
-                if #allFreeMine > 0 then
-                    self.predictMine = allFreeMine[1]
-                    self.predictMine:setOwner(self)
-                    self.predictTarget = k
-                    k:setOwner(self)
-                end
-            elseif k.id == 14 then
-                --很难攒够原材料
-                print("goto Tower")
-                if #allFoodFarm > 0 and #allStoneQuarry > 0 and #allFreeFactory > 0 then
-                    self.predictTower = k
-                    k:setOwner(self)
-                    self.predictFactory = allFreeFactory[1]
-                    self.predictFactory:setOwner(self)
-                    self.predictQuarry = allStoneQuarry[1]
-                    self.predictQuarry:setOwner(self)
-                    self.predictTarget = allFoodFarm[1]
-                    self.predictTarget:setOwner(self)
-                end
-            end
-        --购买粮食
-        --去商店
-        --去矿石头场
-        elseif self.id == 2 then
-            --一块农田只有一个购买者
-            --购买结束需要clearBuyer
-            --一次购买不成功 还会尝试去购买别的
-            --去商店购买
-            k:setOwner(self)
-            self.predictTarget = k
-            if Logic.inNew and not Logic.checkFarm then
-                Logic.checkFarm = true
-                self.merch = 0
-                local w = Welcome2.new(self.onMerch, self)
-                w:updateWord("你好啊!!!没想到这里还会有村落。。。我正在行商途中，正好过来走一遭。")
-                global.director:pushView(w, 1, 0)
-            end
-        end
-    end 
 end
 
 function MiaoPeople:onMerch()
@@ -695,8 +478,10 @@ function MiaoPeople:doMove(diff)
                     self:handleHome()
                 --商人 工作移动到了目的点 开始 往回走了
                 elseif self.id == 2 then
+                    if self.actionContext ~= nil then
+                        self.funcPeople:handleAction()
                     --收获农作物 商店资源
-                    if self.goBack == nil then
+                    elseif self.goBack == nil then
                         self.state = PEOPLE_STATE.FREE
                         self.goBack = true
                         self.realTarget:setOwner(nil)
@@ -950,6 +735,7 @@ function MiaoPeople:checkNeibor(x, y)
             --同一个位置 图层逐渐加上去的 所以检测最后一个层是什么类型即可
             --TODO 只有是ROAD 才能走过
             local hasRoad = false
+            local isTarget = false
             if buildCell[key] ~= nil then
                 local bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
@@ -957,6 +743,9 @@ function MiaoPeople:checkNeibor(x, y)
                     hasRoad = true
                     print("buildCell Kind Road")
                 else
+                    if bb == self.predictTarget then
+                        isTarget = true
+                    end
                     print("no road")
                 end
             else
@@ -981,7 +770,8 @@ function MiaoPeople:checkNeibor(x, y)
             --end
             --使用最短路径 更新parent信息  
             --没有建筑物 和 道路的值 = 50
-            if staticObstacle[key] == nil and self.closedList[key] == nil then
+
+            if self.closedList[key] == nil and (hasRoad or isTarget or self.actionContext == CAT_ACTION.GO_HOME) then
                 if self.cells[key] == nil then
                     self.cells[key] = {}
                     self.cells[key].parent = curKey

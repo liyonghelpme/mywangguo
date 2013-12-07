@@ -50,7 +50,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        --self:addPeople(2)
+        self:addPeople(2)
     end
 end
 

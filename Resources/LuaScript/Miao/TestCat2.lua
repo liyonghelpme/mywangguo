@@ -12,7 +12,8 @@ CAT_ACTION = {
     TAKE_MINE_TOOL=9,
 
     MER_BACK=10,
-    BUG_GOODS=11,
+    BUY_GOODS=11,
+    GO_HOME = 12,
 }
 
 Cat2 = class(FuncPeople)

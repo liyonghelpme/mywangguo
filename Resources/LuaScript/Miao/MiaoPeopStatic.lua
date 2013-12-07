@@ -499,7 +499,7 @@ function MiaoPeople:workInFarm()
     if self.workTime > 1 then
         self.workTime = 0
         self.health = self.health-1
-        if self.realTarget.workNum >= 10 then
+        if self.realTarget.workNum >= self.realTarget.maxNum then
             self.state = PEOPLE_STATE.FREE
             self.realTarget:setOwner(nil)
             self.realTarget = nil
