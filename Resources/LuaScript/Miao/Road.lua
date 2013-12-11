@@ -132,14 +132,14 @@ function Road:whenColNow()
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
                 if self.baseBuild.otherBuild.dir == 0 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile6.png")
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile26.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
                     local sz = self.baseBuild.changeDirNode:getContentSize()
                     setAnchor(self.baseBuild.changeDirNode, {(64-20)/sz.width, 20/sz.height})
                     setYet = true
                     self.baseBuild.onSlope = true
                 elseif self.baseBuild.otherBuild.dir == 1 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile7.png")
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile27.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
                     local sz = self.baseBuild.changeDirNode:getContentSize()
                     setAnchor(self.baseBuild.changeDirNode, {(64)/sz.width, 20/sz.height})
@@ -152,7 +152,7 @@ function Road:whenColNow()
     end
     --没有斜坡
     if not setYet then
-        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile4.png")
+        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile29.png")
         self.baseBuild.changeDirNode:setDisplayFrame(tex)
         setAnchor(self.baseBuild.changeDirNode, {0.5, 0})
         self.baseBuild.onSlope = false
@@ -181,5 +181,29 @@ function Road:checkFinish()
                 self.baseBuild.map.scene:finishBuild() 
             end
         end
+    end
+end
+function Road:initView()
+    if self.baseBuild.privData.ladder == true then
+        self.baseBuild.changeDirNode = CCSprite:createWithSpriteFrameName("tile26.png")
+        local sz = self.baseBuild.changeDirNode:getContentSize()
+        setAnchor(self.baseBuild.changeDirNode, {170/sz.width, (170)/sz.height})
+        self.baseBuild.onSlope = true
+    else
+        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile29.png"), {0.5, 0})
+        local sz = self.baseBuild.changeDirNode:getContentSize()
+        setAnchor(self.baseBuild.changeDirNode, {170/sz.width, (sz.height-170)/sz.height})
+    end
+end
+
+function Road:setPos()
+    local p = getPos(self.baseBuild.bg)
+    local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
+    if ad then
+        setPos(self.baseBuild.changeDirNode, {0, 90})
+    else
+        setPos(self.baseBuild.changeDirNode, {0, 0})
     end
 end

@@ -31,22 +31,28 @@ function MiaoPage:ctor(s)
     self:initTiles()
     setPos(self.tileMap, {200, -100+FIX_HEIGHT})
     --]]
-    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("myTile2.plist")
-    self.tileMap = CCSpriteBatchNode:create("myTile2.png")
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
+    self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
+    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
-    local mj = simple.decode(getFileData("newMap.json"))
+    local mj = simple.decode(getFileData("big512.json"))
     self.mapInfo = mj
     local width = mj.width
     local height = mj.height
     self.width = width
     self.height = height
     local tilesets = mj.tilesets
+    --1-64   --> tile0 tile63
+    --65-128 ---> tile0 tile63
+    --tid tileNames 
+    --[[
     local tileName = {}
     for k, v in ipairs(tilesets) do
         tileName[v.firstgid] = v.image 
     end
     self.tileName = tileName
+    --]]
 
     local layers = mj.layers
     local layerName = {}
@@ -55,26 +61,19 @@ function MiaoPage:ctor(s)
     end
     self.layerName = layerName
 
-    for dk, dv in ipairs(layerName['slop1'].data) do
+    --affine 坐标计算mask2
+    local mask2 = {}
+    for dk, dv in ipairs(layerName.mask2.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            mask2[dk] = true
         end
     end
-    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+    self.mask2 = mask2
 
-
-
-    for dk, dv in ipairs(layerName['sea'].data) do
+    for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
+            local pname = tidToTile(dv)
+            --print("pname is what?", pname)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -83,7 +82,44 @@ function MiaoPage:ctor(s)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+            pic:setScale(1.05)
+            --[[
+            if w%2 ~= h%2 then
+                pic:setFlipX(true)
+                pic:setFlipY(true)
+            end
+            --]]
+        end
+    end
+
+    for dk, dv in ipairs(layerName.slop1.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
+    for dk, dv in ipairs(layerName.sea.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            --local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            --local sz = pic:getContentSize()
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, mask2)
+            --print("cx cy", cx, cy)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
         end
     end
 

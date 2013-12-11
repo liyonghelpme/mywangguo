@@ -30,6 +30,7 @@ local function main()
     --global.director:runWithScene(FightScene.new())
     --require "Menu.TestMenu"
     --global.director:runWithScene(TestMenu.new())
+    
     --global.director:runWithScene(MapScene.new())
 
 end

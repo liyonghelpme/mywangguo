@@ -23,6 +23,7 @@ function MiaoBuild:setWork(wd)
 end
 function MiaoBuild:ctor(m, data)
     self.map = m
+    self.privData = data
     self.sx = 1
     self.sy = 1
     self.bid = data.bid
@@ -141,22 +142,17 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild = RemoveBuild.new(self) 
     --道路 或者 河流
     elseif self.picName == 't' then
-        --调整 ladder的方向 
-        if data.ladder == true then
-            self.changeDirNode = CCSprite:createWithSpriteFrameName("tile6.png")
-            local sz = self.changeDirNode:getContentSize()
-            setAnchor(self.changeDirNode, {(64-20)/sz.width, 20/sz.height})
-            self.onSlope = true
-        else
-            self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile4.png"), {0.5, 0})
-        end
-        --self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
         self.funcBuild = Road.new(self)
+        self.funcBuild:initView()
+
+        --self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
     --包括斜坡方向属性
     --dir == 0 1 可以建造道路 其它的不能建造道路 dir = 2
     elseif self.picName == 'slope' then
         self.dir = data.dir
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
+        local sz = self.changeDirNode:getContentSize()
+        setAnchor(self.changeDirNode, {170/sz.width, 170/sz.height})
         self.funcBuild = Slope.new(self)
     elseif self.picName == 'fence' then
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {0.5, 0})
@@ -167,7 +163,7 @@ function MiaoBuild:ctor(m, data)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     local allLabel = addNode(self.bg)
-    allLabel:setVisible(false)
+    allLabel:setVisible(true)
 
     self.nameLabel = ui.newBMFontLabel({text="", size=21})
     setPos(self.nameLabel, {0, 100})
@@ -388,16 +384,18 @@ function MiaoBuild:touchesEnded(touches)
     end
 end
 function MiaoBuild:update(diff)
-    local map = getBuildMap(self)
-    local p = getPos(self.bg)
-    local ax, ay = self:calAff()
-    self.posLabel:setString("     "..map[3].." "..map[4].." "..p[1].." "..p[2].." "..ax.." "..ay)
-    self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
-    local s = ''
-    for k, v in ipairs(self.belong) do
-        s = s..v.." "
+    if self.id ~= -1 then
+        local map = getBuildMap(self)
+        local p = getPos(self.bg)
+        local ax, ay = self:calAff()
+        self.posLabel:setString(self.id.." "..ax.." "..ay)
+        self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
+        local s = ''
+        for k, v in ipairs(self.belong) do
+            s = s..v.." "
+        end
+        self.inRangeLabel:setString(s)
     end
-    self.inRangeLabel:setString(s)
 end
 function MiaoBuild:enterScene()
     registerUpdate(self)
@@ -415,6 +413,8 @@ function MiaoBuild:setPos(p)
         return
     end
     self.bg:setZOrder(zord)
+    self.funcBuild:setPos()
+    --self:adjustHeight()
 end
 function MiaoBuild:adjustRoad()
     self.funcBuild:adjustRoad()
@@ -545,10 +545,6 @@ end
 function MiaoBuild:showBottom()
     if self.bottom == nil then
         self.funcBuild:initBottom()
-        --[[
-        self.bottom = setColor(setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.sx+self.sy)/2*SIZEY}), {0.5, 0.5}), {(self.sx+self.sy)*SIZEX+20, (self.sx+self.sy)*SIZEY+10}),  {0, 255, 0})
-        self.bg:addChild(self.bottom, -1)
-        --]]
     end
 end
 function MiaoBuild:finishBottom()
@@ -623,4 +619,23 @@ function MiaoBuild:setGoodsKind(k)
     self.goodsKind = k
     self.workNum = 0
     self.funcBuild:updateGoods()
+end
+function MiaoBuild:adjustHeight()
+    local p = getPos(self.bg)
+    local ax, ay = newCartesianToAffine(p[1], p[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+    local ad = adjustNewHeight(self.map.scene.mask2, self.map.scene.width, ax, ay)
+    if ad then
+        setPos(self.changeDirNode, {0, SIZEY+90})
+    else
+        setPos(self.changeDirNode, {0, SIZEY})
+    end
+    if self.bottom then
+        local oy = (self.sx+self.sy)/2*SIZEY
+        if ad then
+            setPos(self.bottom, {0, 90+oy})
+        else
+            setPos(self.bottom, {0, oy})
+        end
+    end
 end

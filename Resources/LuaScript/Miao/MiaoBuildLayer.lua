@@ -50,7 +50,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        self:addPeople(2)
+        --self:addPeople(2)
     end
 end
 
@@ -432,10 +432,12 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initMerchantRoad()
     --]]
+    --[[
     self:initRoad()
     self:initBuild()
     self:initBackPoint()
     --self:initCat()
+    --]]
     self.initYet = true
 end
 --road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
@@ -495,9 +497,9 @@ function MiaoBuildLayer:initRoad()
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             local dir = 0
-            if pname == 'tile2.png' then
+            if pname == 'tile22.png' then
                 dir = 0
-            elseif pname == 'tile3.png' then
+            elseif pname == 'tile24.png' then
                 dir = 1
             else
                 dir = 2
@@ -509,11 +511,6 @@ function MiaoBuildLayer:initRoad()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
             b:finishBuild()
-            --[[
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-            --]]
         end
     end
 
@@ -534,15 +531,11 @@ function MiaoBuildLayer:initRoad()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
             b:finishBuild()
-            --[[
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
-            --]]
         end
     end
 
+    --篱笆 
+    --[[
     for dk, dv in ipairs(self.scene.layerName['fence'].data) do
         if dv ~= 0 then
             local pname = self.scene.tileName[dv]
@@ -560,14 +553,9 @@ function MiaoBuildLayer:initRoad()
             b:setPos(p)
             b:finishBuild()
             
-            --[[
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-            --]]
         end
     end
+    --]]
 end
 
 --[[

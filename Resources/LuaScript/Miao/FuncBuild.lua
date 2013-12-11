@@ -70,4 +70,24 @@ function FuncBuild:updateState()
 end
 function FuncBuild:updateGoods()
 end
+function FuncBuild:setPos()
+    local p = getPos(self.baseBuild.bg)
+    local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
+    if ad then
+        setPos(self.baseBuild.changeDirNode, {0, SIZEY+90})
+    else
+        setPos(self.baseBuild.changeDirNode, {0, SIZEY})
+    end
+    if self.baseBuild.bottom then
+        local oy = (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY
+        if ad then
+            setPos(self.baseBuild.bottom, {0, 90+oy})
+        else
+            setPos(self.baseBuild.bottom, {0, oy})
+        end
+    end
+end
+
 
