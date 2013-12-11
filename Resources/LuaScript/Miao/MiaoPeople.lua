@@ -54,7 +54,8 @@ function MiaoPeople:ctor(m, data)
     self.stateContext = nil
 
 
-
+    self.bg = CCNode:create()
+    self.heightNode = addNode(self.bg)
     print("init MiaoPeople", self.id)
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
@@ -66,6 +67,7 @@ function MiaoPeople:ctor(m, data)
         self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
+    self.heightNode:addChild(self.changeDirNode)
     self.statePic = CCSprite:create()
     addChild(self.bg, self.statePic)
 
@@ -573,6 +575,8 @@ function MiaoPeople:doMove(diff)
                 local cv = buildCell[key]
 
                 --行走在有可能是斜坡的道路上面
+                --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
+                --根据normal 得到上坡 还是下坡
                 local goYet = false
                 if bv ~= nil then
                     local ons = bv[#bv][1].onSlope
@@ -580,7 +584,9 @@ function MiaoPeople:doMove(diff)
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
                         self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
+                        self:moveSlope(dx, dy)
                         self:setZord()
                         self.waitTime = 2
                         self.curPoint = self.curPoint+1
@@ -592,7 +598,9 @@ function MiaoPeople:doMove(diff)
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
                         self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
+                        self:moveSlope(dx, dy)
                         self:setZord()
                         self.waitTime = 2
                         self.curPoint = self.curPoint+1

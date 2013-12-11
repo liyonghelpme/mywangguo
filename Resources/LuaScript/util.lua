@@ -1395,3 +1395,8 @@ function setProNum(banner, n, max)
         setContentSize(banner, {wid, 29})
     end
 end
+function setDisplayFrame(sp, n)
+    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
+    sp:setDisplayFrame(tex)
+    return sp
+end

@@ -34,8 +34,13 @@ end
 --点击时使用 点击坐标 到 网格坐标转化
 --裂缝区域属于 斜坡区域 属于下一个层的区域 因此 裂缝区域属于下一个层
 --第三个返回值 当前点是否在裂缝里面
---4 5 返回值 表明 相夹的裂缝另一个块
+--4是否在高地上面 如果在高地上面
+--5 6 返回值 表明 相夹的裂缝另一个块
 --在裂缝里面就属于
+--
+--#   #
+-- # #
+--  #  
 function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
     local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     local dk = ay*width+ax+1
@@ -45,11 +50,11 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
         local nax, nay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
         local dk = nay*width+nax+1
         if mask[dk] then
-            return nax, nay, false
+            return nax, nay, false, true
         end
-        return ax, ay, true, nax, nay
+        return ax, ay, true, false, nax, nay
     end
-    return ax, ay, false
+    return ax, ay, false, false
 end
 
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)

@@ -8,14 +8,12 @@ CAT_STATE = {
 }
 
 function Cat:initView()
-    self.people.bg = CCNode:create()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("cat_jump.plist")
     local ani = createAnimation("cat_jump", "cat_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName("cat_jump_0.png"))
     local sz = self.people.changeDirNode:getContentSize()
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.3), {0, SIZEY})
-    self.people.bg:addChild(self.people.changeDirNode)
     
     self.people.changeDirNode:runAction(CCAnimate:create(ani))
 

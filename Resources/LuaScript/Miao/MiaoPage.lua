@@ -128,6 +128,7 @@ function MiaoPage:ctor(s)
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate.bg = self.bg
     self.blockMove = false
+    self.bg:setScale(0.5)
     
     self.buildLayer = MiaoBuildLayer.new(self)
     self.bg:addChild(self.buildLayer.bg)
@@ -195,20 +196,29 @@ function MiaoPage:touchesBegan(touches)
     if self.lastPos.count == 1 then
         local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         tp.y = tp.y-SIZEY
-        local allCell = self.buildLayer.mapGridController.mapDict
-        local map = getPosMap(1, 1, tp.x, tp.y)
-        local key = getMapKey(map[3], map[4])
-        --点击到某个建筑物
-        if allCell[key] ~= nil then
-            --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
-            --移动地图 和 单纯的点击 地图
-            --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
-            --    self.touchBuild = self.curBuild
-            --    self.touchBuild:touchesBegan(touches)
-            --else
-            self.touchBuild = allCell[key][#allCell[key]][1]
-            self.touchBuild:touchesBegan(touches)
-            --end
+        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask2)
+        print("touchesBegan", ax, ay, inClip, inHeight)
+        if not inClip then
+            --实际对应的建筑物块 向下偏移103个像素
+            if inHeight then
+                tp.y = tp.y-103
+            end
+
+            local allCell = self.buildLayer.mapGridController.mapDict
+            local map = getPosMap(1, 1, tp.x, tp.y)
+            local key = getMapKey(map[3], map[4])
+            --点击到某个建筑物
+            if allCell[key] ~= nil then
+                --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
+                --移动地图 和 单纯的点击 地图
+                --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
+                --    self.touchBuild = self.curBuild
+                --    self.touchBuild:touchesBegan(touches)
+                --else
+                self.touchBuild = allCell[key][#allCell[key]][1]
+                self.touchBuild:touchesBegan(touches)
+                --end
+            end
         end
     end
 
@@ -298,6 +308,8 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        --调整建筑物高度
+        self.curBuild:setPos(p)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))

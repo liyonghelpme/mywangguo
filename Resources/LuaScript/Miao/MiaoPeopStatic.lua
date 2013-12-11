@@ -560,3 +560,16 @@ function MiaoPeople:clearStateStack()
     self.stateContext = nil
     self.actionContext = nil
 end
+function MiaoPeople:setPos(p)
+    setPos(self.bg, p)
+    self.funcPeople:setPos()
+end
+function MiaoPeople:moveSlope(dx, dy)
+    if dy < 0 then
+        self.slopeAct = moveto(2, 0, SIZEY)
+        self.heightNode:runAction(self.slopeAct)
+    else 
+        self.slopeAct = moveto(2, 0, SIZEY+103)
+        self.heightNode:runAction(self.slopeAct)
+    end
+end

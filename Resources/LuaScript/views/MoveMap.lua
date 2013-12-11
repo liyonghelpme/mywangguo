@@ -139,7 +139,7 @@ function MoveMap:checkCollision(build)
 end
 function MoveMap:addBuilding(chd, z)
     print('MoveMap addBuilding', chd, z)
-    if chd.picName == 'build' then
+    if chd.picName == 'build' or chd.picName == 'fence' then
         if chd.id == 2 then
             self.farmLayer:addChild(chd.bg, z)
         --斜坡

@@ -1,22 +1,31 @@
 --道路或者河流
 Road = class(FuncBuild)
+
+function Road:adjustValue()
+    if not self.baseBuild.onSlope then
+        setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+    end
+end
+
 function Road:adjustRoad()
+    --[[
     if true then
         return
     end
     print("MiaoBuild")
+    --]]
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态
     local nei = {
         {bm[3]-1, bm[4]+1},
-        {bm[3], bm[4]+2},
+        --{bm[3], bm[4]+2},
         {bm[3]+1, bm[4]+1},
-        {bm[3]+2, bm[4]},
+        --{bm[3]+2, bm[4]},
         {bm[3]+1, bm[4]-1},
-        {bm[3], bm[4]-2},
+        --{bm[3], bm[4]-2},
         {bm[3]-1, bm[4]-1},
-        {bm[3]-2, bm[4]},
+        --{bm[3]-2, bm[4]},
     }
     local neiState = {
     }
@@ -34,21 +43,24 @@ function Road:adjustRoad()
             table.insert(neiborNode, false)
         end
     end
-    print("neiState", simple.encode(neiState))
+    --print("neiState", simple.encode(neiState))
     local num = {1, 3, 5, 7}
     local val = 0
     local wei = 1
     for i=1, #num, 1 do
-        if neiState[num[i]] then
+        if neiState[(num[i]+1)/2] then
             val = val+wei
         end
         wei = wei*2
     end
     print("check Value", val, wei)
     --adjust neibor state
+    --[[
     local tex = CCTextureCache:sharedTextureCache():addImage(self.baseBuild.picName..val..".png") 
     --if wei == 0 then
     self.baseBuild.changeDirNode:setTexture(tex)
+    --]]
+    --setDisplayFrame(self.baseBuild.changeDirNode, "t"..val..".png")
     --end
     --调整邻居的状态
     self.baseBuild.value = val
@@ -61,18 +73,22 @@ function Road:adjustRoad()
     if val ~= 0 then
         for k, v in ipairs(num) do
             --邻居点存在
-            if neiborNode[v] ~= false then
-                neiborNode[v].value = neiborNode[v].value+addVal[v]
-                neiborNode[v]:adjustValue()
+            local nv = (v+1)/2
+            if neiborNode[nv] ~= false then
+                neiborNode[nv].value = neiborNode[nv].value+addVal[v]
+                neiborNode[nv].funcBuild:adjustValue()
             end
         end
     end
+    self:adjustValue()
 end
 function Road:removeSelf()
+    --[[
     if true then
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
         return
     end
+    --]]
     if self.baseBuild.state == BUILD_STATE.MOVE then
         return
     end
@@ -81,13 +97,13 @@ function Road:removeSelf()
     --判定周围八个map状态
     local nei = {
         {bm[3]-1, bm[4]+1},
-        {bm[3], bm[4]+2},
+        --{bm[3], bm[4]+2},
         {bm[3]+1, bm[4]+1},
-        {bm[3]+2, bm[4]},
+        --{bm[3]+2, bm[4]},
         {bm[3]+1, bm[4]-1},
-        {bm[3], bm[4]-2},
+        --{bm[3], bm[4]-2},
         {bm[3]-1, bm[4]-1},
-        {bm[3]-2, bm[4]},
+        --{bm[3]-2, bm[4]},
     }
     local neiState = {
     }
@@ -117,9 +133,10 @@ function Road:removeSelf()
     if val ~= 0 then
         for k, v in ipairs(num) do
             --邻居点存在
-            if neiborNode[v] ~= false then
-                neiborNode[v].value = neiborNode[v].value-addVal[v]
-                neiborNode[v]:adjustValue()
+            local nv = (v+1)/2
+            if neiborNode[nv] ~= false then
+                neiborNode[nv].value = neiborNode[nv].value-addVal[v]
+                neiborNode[nv].funcBuild:adjustValue()
             end
         end
     end
@@ -185,14 +202,12 @@ function Road:checkFinish()
 end
 function Road:initView()
     if self.baseBuild.privData.ladder == true then
-        self.baseBuild.changeDirNode = CCSprite:createWithSpriteFrameName("tile26.png")
-        local sz = self.baseBuild.changeDirNode:getContentSize()
-        setAnchor(self.baseBuild.changeDirNode, {170/sz.width, (170)/sz.height})
+        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile36.png"), {170/512, 0})
         self.baseBuild.onSlope = true
     else
-        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile29.png"), {0.5, 0})
-        local sz = self.baseBuild.changeDirNode:getContentSize()
-        setAnchor(self.baseBuild.changeDirNode, {170/sz.width, (sz.height-170)/sz.height})
+        local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+        sf:addSpriteFramesWithFile("road.plist")
+        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("t0.png"), {170/512, 0})
     end
 end
 

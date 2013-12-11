@@ -5,7 +5,8 @@ end
 function FuncBuild:initView()
     local bd = Logic.buildings[self.baseBuild.id]
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    setPos(setAnchor(self.baseBuild.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height}), {0, SIZEY})
+    --setPos(setAnchor(self.baseBuild.changeDirNode, {170/512, (sz.height-bd.ay)/sz.height}), {0, SIZEY})
+    setAnchor(self.baseBuild.changeDirNode, {170/sz.width, 0})
 end
 function FuncBuild:handleTouchEnded()
 end
@@ -48,7 +49,7 @@ function FuncBuild:showInfo()
 end
 function FuncBuild:initBottom()
     self.baseBuild.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY}), {0.5, 0.5}), {(self.baseBuild.sx+self.baseBuild.sy)*SIZEX+20, (self.baseBuild.sx+self.baseBuild.sy)*SIZEY+10})
-    self.baseBuild.bg:addChild(self.baseBuild.bottom, 1)
+    self.baseBuild.heightNode:addChild(self.baseBuild.bottom, 1)
 end
 function FuncBuild:setBottomColor(c)
     if c == 0 then
@@ -71,23 +72,37 @@ end
 function FuncBuild:updateGoods()
 end
 function FuncBuild:setPos()
+    --[[
     local p = getPos(self.baseBuild.bg)
     local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
     print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
     local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
     if ad then
-        setPos(self.baseBuild.changeDirNode, {0, SIZEY+90})
+        setPos(self.baseBuild.changeDirNode, {0, 103})
     else
-        setPos(self.baseBuild.changeDirNode, {0, SIZEY})
+        setPos(self.baseBuild.changeDirNode, {0, 0})
     end
     if self.baseBuild.bottom then
         local oy = (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY
         if ad then
-            setPos(self.baseBuild.bottom, {0, 90+oy})
+            setPos(self.baseBuild.bottom, {0, 103+oy})
         else
             setPos(self.baseBuild.bottom, {0, oy})
         end
     end
+    --]]
+    self:adjustHeight()
 end
 
+function FuncBuild:adjustHeight()
+    local p = getPos(self.baseBuild.bg)
+    local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
+    if ad then
+        setPos(self.baseBuild.heightNode, {0, 103})
+    else
+        setPos(self.baseBuild.heightNode, {0, 0})
+    end
+end
 

@@ -60,6 +60,8 @@ function NewBuildMenu:updateTab()
         local build = CCSprite:create("build"..v.id..".png")
         sp:addChild(build)
         setPos(build, {55, 55})
+        local sca = getSca(build, {100, 100})
+        setScale(build, sca)
     end
     local row = math.floor((#Logic.buildList-1)/3)+1
     self.flowHeight = self.flowHeight+offY*row

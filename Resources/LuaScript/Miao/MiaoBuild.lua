@@ -11,6 +11,7 @@ require "menu.HouseInfo"
 require "Miao.MineStore"
 require "Miao.Mine"
 require "Miao.Store"
+require "Miao.Fence"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -72,6 +73,7 @@ function MiaoBuild:ctor(m, data)
     self.maxNum = 10
 
     self.bg = CCLayer:create()
+    self.heightNode = addNode(self.bg)
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
@@ -152,14 +154,15 @@ function MiaoBuild:ctor(m, data)
         self.dir = data.dir
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
         local sz = self.changeDirNode:getContentSize()
-        setAnchor(self.changeDirNode, {170/sz.width, 170/sz.height})
+        setAnchor(self.changeDirNode, {170/512, 0})
         self.funcBuild = Slope.new(self)
     elseif self.picName == 'fence' then
-        self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {0.5, 0})
-        self.funcBuild = FuncBuild.new(self)
+        self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {170/512, 0})
+        self.funcBuild = Fence.new(self)
     end
 
-    self.bg:addChild(self.changeDirNode)
+    self.heightNode:addChild(self.changeDirNode)
+    --self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     local allLabel = addNode(self.bg)
@@ -269,16 +272,26 @@ function MiaoBuild:touchesMoved(touches)
     if self.doMove then
         local offY = (self.sx+self.sy)*SIZEY/2
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-offY))
-        local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
-        --先判定是否冲突 再 设置位置
-        local curPos = self.lastPos[0]
-        local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
-        if dx+dy > 20 then
-            self.moveStart = self.lastPos[0]
-            self:setColPos()
+        
+        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask2)
+        --移动不在裂缝里面
+        if not inClip then
+            --在高地上面 修正位置
+            if inHeight then
+                parPos.y = parPos.y-103
+            end
+
+            local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+            --先判定是否冲突 再 设置位置
+            local curPos = self.lastPos[0]
+            local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
+            if dx+dy > 20 then
+                self.moveStart = self.lastPos[0]
+                self:setColPos()
+            end
+            self:setPos(newPos)
+            self:setMenuWord()
         end
-        self:setPos(newPos)
-        self:setMenuWord()
     end
     self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
 end
@@ -317,10 +330,12 @@ function MiaoBuild:setColPos()
         self:setColor(0)
         return
     end
-    local layer = self.map.scene.layerName['slop1']
+    local layer = self.map.scene.layerName.grass
     local gid = layer.data[ay*self.map.scene.width+ax+1]
     print("slop1 gid type ax, ay ", ax, ay, gid)
-    local name = self.map.scene.tileName[gid]
+    --local name = self.map.scene.tileName[gid]
+    --基本上全部是草地
+    local name = tidToTile(gid)
     --草地才检测 是否可以建造建筑物
     if name == 'tile0.png' then
         local other = self.map:checkCollision(self)
@@ -368,6 +383,8 @@ function MiaoBuild:touchesEnded(touches)
                 if type(self.otherBuild) == 'table' then
 
                 end
+            else
+                addBanner("该位置有冲突")
             end
         elseif ba then
             if self.accMove < 20 and self.state == BUILD_STATE.MOVE and self.funcBuild:canFinish() then
@@ -384,7 +401,7 @@ function MiaoBuild:touchesEnded(touches)
     end
 end
 function MiaoBuild:update(diff)
-    if self.id ~= -1 then
+    if self.id ~= -1 and self.id ~= nil then
         local map = getBuildMap(self)
         local p = getPos(self.bg)
         local ax, ay = self:calAff()
@@ -530,10 +547,6 @@ function MiaoBuild:finishBuild()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 
-function MiaoBuild:adjustValue()
-    local tex = CCTextureCache:sharedTextureCache():addImage(self.picName..self.value..".png") 
-    self.changeDirNode:setTexture(tex)
-end
 function MiaoBuild:setState(s)
     self.state = s
     print("MiaoBuild setState", s, self.state)

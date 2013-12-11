@@ -18,14 +18,12 @@ CAT_ACTION = {
 
 Cat2 = class(FuncPeople)
 function Cat2:initView()
-    self.people.bg = CCNode:create()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile(string.format("cat_%d_jump.plist", self.people.id))
     local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.3), {0, SIZEY})
-    self.people.bg:addChild(self.people.changeDirNode)
     
     self.people.changeDirNode:runAction(CCAnimate:create(ani))
 
@@ -45,7 +43,8 @@ function Cat2:initView()
     self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_lt_%d.png", 0, 9, 1, 1, true)
 
     self.people.shadow = CCSprite:create("roleShadow.png")
-    self.people.bg:addChild(self.people.shadow, -1)
+    self.people.heightNode:addChild(self.people.shadow, -1)
+
     setScale(setPos(self.people.shadow, {0, SIZEY}), 1.5)
     self.people.shadow:runAction(sequence({scaleto(1, 1.2, 1.2), scaleto(1, 1.5, 1.5)}))
 
