@@ -1391,7 +1391,8 @@ function setProNum(banner, n, max)
         banner:setVisible(false)
     else
         banner:setVisible(true)
-        local wid = (n/max)*339
+        local wid = math.floor((n/max)*339)
+        wid = math.max(0, wid)
         setContentSize(banner, {wid, 29})
     end
 end
@@ -1399,4 +1400,11 @@ function setDisplayFrame(sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
     sp:setDisplayFrame(tex)
     return sp
+end
+function setFlipX(sp, f)
+    sp:setFlipX(f)
+    return sp
+end
+function getScaleY(sp)
+    return sp:getScaleY()
 end

@@ -3,6 +3,7 @@ Road = class(FuncBuild)
 
 function Road:adjustValue()
     if not self.baseBuild.onSlope then
+        print("adjust Value", self.baseBuild.value)
         setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
     end
 end
@@ -55,12 +56,6 @@ function Road:adjustRoad()
     end
     print("check Value", val, wei)
     --adjust neibor state
-    --[[
-    local tex = CCTextureCache:sharedTextureCache():addImage(self.baseBuild.picName..val..".png") 
-    --if wei == 0 then
-    self.baseBuild.changeDirNode:setTexture(tex)
-    --]]
-    --setDisplayFrame(self.baseBuild.changeDirNode, "t"..val..".png")
     --end
     --调整邻居的状态
     self.baseBuild.value = val
@@ -151,16 +146,11 @@ function Road:whenColNow()
                 if self.baseBuild.otherBuild.dir == 0 then
                     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile26.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
-                    local sz = self.baseBuild.changeDirNode:getContentSize()
-                    setAnchor(self.baseBuild.changeDirNode, {(64-20)/sz.width, 20/sz.height})
                     setYet = true
                     self.baseBuild.onSlope = true
                 elseif self.baseBuild.otherBuild.dir == 1 then
                     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile27.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
-                    local sz = self.baseBuild.changeDirNode:getContentSize()
-                    setAnchor(self.baseBuild.changeDirNode, {(64)/sz.width, 20/sz.height})
-                    --setAnchor(self.baseBuild.changeDirNode, {})
                     setYet = true
                     self.baseBuild.onSlope = true
                 end
@@ -169,9 +159,7 @@ function Road:whenColNow()
     end
     --没有斜坡
     if not setYet then
-        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile29.png")
-        self.baseBuild.changeDirNode:setDisplayFrame(tex)
-        setAnchor(self.baseBuild.changeDirNode, {0.5, 0})
+        setDisplayFrame(self.baseBuild.changeDirNode, "t0.png")
         self.baseBuild.onSlope = false
     end
 end
@@ -211,14 +199,3 @@ function Road:initView()
     end
 end
 
-function Road:setPos()
-    local p = getPos(self.baseBuild.bg)
-    local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
-    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
-    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
-    if ad then
-        setPos(self.baseBuild.changeDirNode, {0, 90})
-    else
-        setPos(self.baseBuild.changeDirNode, {0, 0})
-    end
-end

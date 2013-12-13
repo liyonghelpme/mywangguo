@@ -21,16 +21,10 @@ function MiaoPage:ctor(s)
         for j=0, col-1, 1 do
             local s = CCSprite:create("sea.png")
             self.backpg:addChild(s)
-            setPos(s, {j*64+initx, i*32})
+            setScale(setPos(s, {j*128+initx, i*32}), 1)
         end
     end
 
-    --[[
-    self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
-    self.bg:addChild(self.tileMap)
-    self:initTiles()
-    setPos(self.tileMap, {200, -100+FIX_HEIGHT})
-    --]]
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
     self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
@@ -46,13 +40,6 @@ function MiaoPage:ctor(s)
     --1-64   --> tile0 tile63
     --65-128 ---> tile0 tile63
     --tid tileNames 
-    --[[
-    local tileName = {}
-    for k, v in ipairs(tilesets) do
-        tileName[v.firstgid] = v.image 
-    end
-    self.tileName = tileName
-    --]]
 
     local layers = mj.layers
     local layerName = {}
@@ -103,7 +90,7 @@ function MiaoPage:ctor(s)
             local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.05)
         end
     end
     for dk, dv in ipairs(layerName.sea.data) do
@@ -119,7 +106,7 @@ function MiaoPage:ctor(s)
             --local sz = pic:getContentSize()
             local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, mask2)
             --print("cx cy", cx, cy)
-            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
         end
     end
 
@@ -128,14 +115,13 @@ function MiaoPage:ctor(s)
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate.bg = self.bg
     self.blockMove = false
-    self.bg:setScale(0.5)
     
     self.buildLayer = MiaoBuildLayer.new(self)
     self.bg:addChild(self.buildLayer.bg)
 
     registerEnterOrExit(self)
     registerMultiTouch(self)
-    self.touchDelegate:scaleToMax(1)
+    self.touchDelegate:scaleToMax(0.5)
 end
 function MiaoPage:setPoint(x, y)
     local wp = self.bg:convertToWorldSpace(ccp(x, y))
@@ -359,6 +345,8 @@ function MiaoPage:cancelBuild()
 end
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
+        local c = Logic.buildings[self.curBuild.id].silver
+        doCost(c)
         if self.curBuild.picName == 't' then
             table.insert(self.oldBuildPos, getPos(self.curBuild.bg))
             if #self.oldBuildPos >= 3 then
@@ -427,8 +415,9 @@ function MiaoPage:finishBuild()
         else
             addBanner("和其它建筑物冲突啦！")
         end
+
         --根据当前的位置 调整一个新位置
-        if oldBuild.picName == 't' then
+        if oldBuild.picName == 't' and Logic.resource.silver >= Logic.buildings[15].silver then
             if #self.oldBuildPos == 1 then
                 self:beginBuild('build', 15, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
             else

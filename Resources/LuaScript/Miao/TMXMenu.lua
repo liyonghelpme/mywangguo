@@ -51,7 +51,7 @@ function TMXMenu:ctor(s)
     local season = setSize(setPos(addSprite(self.bg, "spring.png"), {19, fixY(vs.height, 27)}), {30, 30})
 
     local info = display.newScale9Sprite("info.jpg")
-    setAnchor(setPos(setContentSize(info, {vs.width-10, 30}), {vs.width/2, 110}), {0.5, 0.5})
+    setAnchor(setPos(setContentSize(info, {vs.width-100, 30}), {vs.width/2, 20}), {0.5, 0.5})
     self.bg:addChild(info)
 
     local iw = ui.newTTFLabel({text="建筑物", size=20, color={240, 240, 230}})
@@ -65,6 +65,15 @@ function TMXMenu:ctor(s)
 end
 function TMXMenu:enterScene()
     registerUpdate(self)
+    Event:registerEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
+end
+function TMXMenu:receiveMsg(name)
+    if name == EVENT_TYPE.UPDATE_RESOURCE then
+        self:updateText()
+    end
+end
+function TMXMenu:exitScene()
+    Event:unregisterEvent(EVENT_TYPE.UPDATE_RESOURCE, self)
 end
 function TMXMenu:onBack()
     if self.inBuild then
@@ -121,6 +130,7 @@ end
 function TMXMenu:updateYear()
     local y, m, w = getDate()
     self.year:setString(str(y).."年"..str(m).."月"..w..'周')
+    --[[
     if w >= 2 and y >= 1 and m >= 4 and self.lastDaily == 0 and #global.director.stack == 0 and not global.director.curScene.curBuild then
         self.lastDaily = 1
         local w = Welcome2.new(self.dailyReport, self)
@@ -132,6 +142,7 @@ function TMXMenu:updateYear()
         w:updateWord("大人我派出去的小明回来啦!可以进攻新的区域啦!")
         global.director:pushView(w, 1, 0)
     end
+    --]]
 end
 function TMXMenu:updateText()
     self.money:setString(Logic.resource.silver.."贯")

@@ -1,6 +1,8 @@
+--显示农田的信息
 require "menu.MatInfo"
 BuildInfo = class()
-function BuildInfo:ctor()
+function BuildInfo:ctor(b)
+    self.build = b
     local vs = getVS()
 
     self.bg = CCNode:create()
@@ -35,26 +37,27 @@ function BuildInfo:ctor()
     setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
     setPos(banner, {271, fixY(280, 91)})
     temp:addChild(banner)
+    setProNum(pro, self.build.workNum, self.build.maxNum)
     
-    local w = ui.newTTFLabel({text="0个", color={0, 0, 0}, size=14})
+    local w = ui.newTTFLabel({text=self.build.workNum.."个", color={0, 0, 0}, size=14})
     setAnchor(setPos(addChild(temp, w), {366, fixY(280, 91)}), {1, 0.5})
     
     local w = ui.newTTFLabel({text="生产", color={10, 20, 176}, size=14})
     setAnchor(setPos(addChild(temp, w), {215, fixY(280, 126)}), {0, 0.5})
 
-    local w = ui.newTTFLabel({text="食材", color={0, 0, 0}, size=14})
+    local w = ui.newTTFLabel({text=self.build.funcBuild:getProductName(), color={0, 0, 0}, size=14})
     setAnchor(setPos(addChild(temp, w), {215, fixY(280, 152)}), {0, 0.5})
 
     local w = ui.newTTFLabel({text="价格", color={10, 20, 176}, size=14})
     setAnchor(setPos(addChild(temp, w), {315, fixY(280, 126)}), {0, 0.5})
 
-    local w = ui.newTTFLabel({text="3贯", color={0, 0, 0}, size=14})
+    local w = ui.newTTFLabel({text=self.build.funcBuild:getProductPrice(), color={0, 0, 0}, size=14})
     setAnchor(setPos(addChild(temp, w), {315, fixY(280, 152)}), {0, 0.5})
 
     local w = ui.newTTFLabel({text="生产力", color={10, 20, 176}, size=14})
     setAnchor(setPos(addChild(temp, w), {224, fixY(280, 195)}), {0.5, 0.5})
 
-    local w = ui.newTTFLabel({text="8", color={0, 0, 0}, size=14})
+    local w = ui.newTTFLabel({text=self.build.productNum, color={0, 0, 0}, size=14})
     setAnchor(setPos(addChild(temp, w), {327, fixY(280, 195)}), {0.5, 0.5})
 
     local but = ui.newButton({image="tabbut.png", text="查看材料情报", callback=self.onView, delegate=self, color={0, 0, 0}, size=14})

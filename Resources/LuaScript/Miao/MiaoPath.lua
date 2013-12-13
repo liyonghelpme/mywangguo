@@ -5,6 +5,8 @@ MiaoPath = class()
 function MiaoPath:ctor(tar)
     self.target = tar
     self.map = self.target.map
+    --public 设置为dirty
+    self.dirty = false
 end
 
 --保证所有计算之前先给cells 赋值
@@ -128,6 +130,7 @@ function MiaoPath:init(mx, my)
     self:pushQueue(mx, my)
 
     self.searchYet = false
+    self.inSearch = true
 end
 
 
@@ -155,8 +158,11 @@ function MiaoPath:update()
 
     if #self.openList == 0 then
         self.searchYet = true
+        self.inSearch = false
     end
     print("miaoPath find over", getLen(self.allBuilding))
 
     self.map:updateCells(self.cells, self.map.cells)
 end
+
+publicMiaoPath = nil  

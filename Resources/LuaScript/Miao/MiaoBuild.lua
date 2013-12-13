@@ -12,6 +12,7 @@ require "Miao.MineStore"
 require "Miao.Mine"
 require "Miao.Store"
 require "Miao.Fence"
+require "Miao.MiaoPath"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -48,6 +49,8 @@ function MiaoBuild:ctor(m, data)
     self.owner = nil
     self.ownerNum = 0
     self.workNum = 0
+    --农田生产力 20 -- 1
+    self.productNum = 20
     self.lastColBuild = nil
     self.dir = 0
     self.deleted = false
@@ -83,7 +86,7 @@ function MiaoBuild:ctor(m, data)
         --樱花树
         elseif self.id == 4 then
             self.funcBuild = Tree.new(self)
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
         --民居 农田
         elseif self.id == 1 then
@@ -165,11 +168,11 @@ function MiaoBuild:ctor(m, data)
     --self.bg:addChild(self.changeDirNode)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
-    local allLabel = addNode(self.bg)
+    local allLabel = addNode(self.heightNode)
     allLabel:setVisible(true)
 
-    self.nameLabel = ui.newBMFontLabel({text="", size=21})
-    setPos(self.nameLabel, {0, 100})
+    self.nameLabel = ui.newBMFontLabel({text="", size=21, color={8, 20, 176}})
+    setPos(self.nameLabel, {0, 250})
     addChild(allLabel, self.nameLabel)
 
     self.posLabel = ui.newBMFontLabel({text="", size=15})
@@ -437,12 +440,16 @@ function MiaoBuild:adjustRoad()
     self.funcBuild:adjustRoad()
 end
 --建造花坛 拆除花坛影响周围建筑属性 
+--增加的量 根据 对象 以及距离 决定
 function MiaoBuild:showIncrease(n)
+    self.funcBuild:showIncrease(n)
+    --[[
     local sp = ui.newBMFontLabel({text=str(n)..'%', font="bound.fnt", size=30})
     self.bg:addChild(sp)
     setPos(sp, {0, 40})
     sp:runAction(sequence({fadein(1), fadeout(1), callfunc(nil, removeSelf, sp)}))
     self.rate = self.rate+n/100
+    --]]
 end
 function MiaoBuild:showDecrease(n)
     local sp = ui.newBMFontLabel({text='-'..str(n)..'%', font="bound.fnt", size=30, color={102, 0, 0}})
@@ -488,40 +495,6 @@ function MiaoBuild:clearMyEffect()
         end
     end
 end
-function MiaoBuild:doMyEffect()
-    if self.id ~= 1 and self.id ~= 2 then
-        return
-    end
-
-    local map = getBuildMap(self) 
-    local initX = 0
-    local initY = -4
-    local offX = 1
-    local offY = 1
-    local mapDict = self.map.mapGridController.mapDict
-    for i =0, 4, 1 do
-        local curX = initX-i
-        local curY = initY+i
-        for j = 0, 4, 1 do
-            local key = getMapKey(curX+map[3], curY+map[4])
-            if mapDict[key] ~= nil then
-                local ob = mapDict[key][#mapDict[key]][1]
-                local dist = math.abs(curX)+math.abs(curY)
-                --周围要是匹配的建筑物才行 农田等
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showIncrease(10)
-                    elseif dist == 4 then
-                        self:showIncrease(5)
-                    end
-                end
-            end
-
-            curX = curX+1
-            curY = curY+1
-        end
-    end
-end
 
 --樱花树的移动和放下
 function MiaoBuild:clearEffect()
@@ -530,7 +503,7 @@ function MiaoBuild:clearEffect()
 end
 function MiaoBuild:doEffect()
     --不是樱花树 不对周围产生效果
-    self.funcBuild:doEffect()
+    --self.funcBuild:doEffect()
 end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
@@ -545,6 +518,9 @@ function MiaoBuild:finishBuild()
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+    if publicMiaoPath ~= nil then
+        publicMiaoPath.dirty = true
+    end
 end
 
 function MiaoBuild:setState(s)

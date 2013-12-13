@@ -23,7 +23,7 @@ function Farm:update(diff)
             if self.fn == nil then
                 self.fn = CCSprite:create("p0.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 40})
+                setPos(self.fn, {0, 79})
             else
                 setTexture(self.fn, "p0.png")
             end
@@ -34,7 +34,7 @@ function Farm:update(diff)
             if self.fn == nil then
                 self.fn = CCSprite:create("p1.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 40})
+                setPos(self.fn, {0, 79})
             else
                 setTexture(self.fn, "p1.png")
             end
@@ -45,7 +45,7 @@ function Farm:update(diff)
             if self.fn == nil then
                 self.fn = CCSprite:create("p2.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 40})
+                setPos(self.fn, {0, 79})
             else
                 setTexture(self.fn, "p2.png")
             end
@@ -56,7 +56,7 @@ function Farm:update(diff)
             if self.fn == nil then
                 self.fn = CCSprite:create("p3.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 40})
+                setPos(self.fn, {0, 79})
             else
                 setTexture(self.fn, "p3.png")
             end
@@ -76,7 +76,8 @@ end
 function Farm:initState()
 end
 function Farm:finishBuild()
-    self.baseBuild:doMyEffect()
+    --self.baseBuild:doMyEffect()
+    self:doMyEffect()
 end
 function Farm:removeSelf()
     if self.baseBuild.owner ~= nil then
@@ -103,5 +104,20 @@ function Farm:checkBuyer()
 end
 
 
+function Farm:showIncrease(n)
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text="生产 +"..n, color={0, 0, 0}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+    sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum+n
+end
 
 
+function Farm:getProductName()
+    return "食材"
+end
+function Farm:getProductPrice()
+    return "3贯"
+end

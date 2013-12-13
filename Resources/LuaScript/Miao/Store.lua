@@ -11,10 +11,22 @@ function Store:updateGoods()
         removeSelf(self.goods)
     end
     self.goods = CCNode:create()
-    self.baseBuild.bg:addChild(self.goods)
-    local initX = -40
-    for k=1, self.baseBuild.workNum,1 do
-        local sp = CCSprite:create("drug0.png")
-        setPos(addChild(self.goods, sp), {initX+(k-1)*30, 30})
+    self.baseBuild.changeDirNode:addChild(self.goods)
+    local show = math.floor(6*self.baseBuild.workNum/self.baseBuild.maxNum)
+    local showPos = {
+        {263, 212},
+        {245, 220},
+        {228, 231},
+        {263, 185},
+        {245, 198},
+        {228, 209},
+    }
+    local sz = self.baseBuild.changeDirNode:getContentSize()
+    local wt = 0
+    for k=1, show, 1 do
+        local sp = CCSprite:create("goods6.png")
+        setPos(addChild(self.goods, sp), {showPos[k][1], sz.height-showPos[k][2]})
+        sp:runAction(sequence({fadeout(0), delaytime(wt), fadein(0.5)}))
+        wt = wt+0.2
     end
 end

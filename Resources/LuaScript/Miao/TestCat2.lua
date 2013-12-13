@@ -23,7 +23,7 @@ function Cat2:initView()
     local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
-    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.3), {0, SIZEY})
+    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.7), {0, SIZEY})
     
     self.people.changeDirNode:runAction(CCAnimate:create(ani))
 
@@ -31,7 +31,7 @@ function Cat2:initView()
     local ani = createAnimation("cat_smoke", "cat_smoke_%d.png", 0, 12, 1, 2, true)
     self.people.smoke = CCSprite:createWithSpriteFrame(sf:spriteFrameByName("cat_smoke_0.png"))
     local sz = self.people.smoke:getContentSize()
-    setPos(setScale(setAnchor(self.people.smoke, {147/sz.width, (sz.height-208)/sz.height}), 0.6), {0, SIZEY})
+    setPos(setScale(setAnchor(self.people.smoke, {147/sz.width, (sz.height-208)/sz.height}), 1.4), {0, SIZEY})
     self.people.bg:addChild(self.people.smoke)
     
     self.people.smoke:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeSelf, self.people.smoke)}))
@@ -45,8 +45,8 @@ function Cat2:initView()
     self.people.shadow = CCSprite:create("roleShadow.png")
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 1.5)
-    self.people.shadow:runAction(sequence({scaleto(1, 1.2, 1.2), scaleto(1, 1.5, 1.5)}))
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 3.5)
+    self.people.shadow:runAction(sequence({scaleto(1, 2.8, 2.8), scaleto(1, 3.5, 3.5)}))
 
     --self.passTime = 0
     --registerEnterOrExit(self)
@@ -54,6 +54,12 @@ function Cat2:initView()
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=20})
     setPos(self.people.stateLabel, {0, 100})
     self.people.bg:addChild(self.people.stateLabel)
+
+
+    sf:addSpriteFramesWithFile("car.plist")
+    self.carlbMove = createAnimation("car_lb", "car_lb_%d.png", 0, 9, 1, 1, true)
+    self.carltMove = createAnimation("car_lt", "car_lt_%d.png", 0, 9, 1, 1, true)
+
 end
 
 function Cat2:checkWork(k)
@@ -62,19 +68,15 @@ function Cat2:checkWork(k)
     --生产农作物
     --先不允许并行处理
     if k.picName == 'build' and k.owner == nil then
+        --farm
         if k.id == 2 then
-            ret = (k.state == BUILD_STATE.FREE and k.workNum < 10)
-        --去工厂生产产品 运送粮食到工厂 或者 到工厂生产产品
-        --运送物资到工厂 如果工厂 的 stone > 0 就可以开始生产了  
-        --或者将生产好的产品运送到 商店
-        --没有直接去工厂的说法
-        --采矿场
+            ret = (k.state == BUILD_STATE.FREE and k.workNum < k.maxNum)
         elseif k.id == 6 then
-            print('try goto store')
-            ret = k.state == BUILD_STATE.FREE and k.workNum == 0
+            --print('try goto store')
+            ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
         elseif k.id == 12 then
-            print("mine stone", k.stone)
-            ret = k.stone < 10 
+            --print("mine stone", k.stone)
+            ret = k.stone < k.maxNum 
         --铁匠铺可以生产物品
         elseif k.id == 13 then
             ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
@@ -82,7 +84,7 @@ function Cat2:checkWork(k)
             --ret = k.stone ~= nil and k.stone > 0 
         --灯塔可以生产
         elseif k.id == 14 then
-            ret = k.workNum < 10
+            ret = k.workNum < k.maxNum
         end
         --工厂 空闲状态 没有粮食储备 且没有其它用户 
     end
@@ -118,6 +120,7 @@ function Cat2:findTarget()
         local mxy = getPosMapFloat(1, 1, p[1], p[2])
         local mx, my = mxy[3], mxy[4]
         self.people.miaoPath:init(mx, my)
+        --寻找目标开始 miaoPath 未初始化
         table.insert(self.people.stateStack, self.people.state)
         self.people.state = PEOPLE_STATE.FIND_NEAR_BUILDING
     --寻找房屋
@@ -130,7 +133,7 @@ function Cat2:findTarget()
             --商人 不需要 占用 建筑物
             if k.deleted == false then
                 print("build kind ", k.id, k.food, k.owner, k.workNum)
-                ret = self.people.funcPeople:checkWork(k)
+                ret = self:checkWork(k)
                 --空闲工厂 没有生产产品
                 if k.id == 5 and k.owner == nil then
                     print("free factory")
@@ -199,16 +202,32 @@ end
 function Cat2:checkAllPossible()
     --按照距离排序的建筑物
     for _, k in ipairs(self.allPossible) do
+        --新商店只有 粮食物品
         if k.id == 6 then
-            if #self.allFoodFarm > 0 and #self.allFreeFactory > 0 then
-                self.people.stateLabel:setString("findFactory!!!")
-                self.people.predictFactory = self.allFreeFactory[1]
-                self.people.predictFactory:setOwner(self.people) 
-                self.people.predictStore = k 
+            local food = GoodsName[k.goodsKind].food
+            local wood = GoodsName[k.goodsKind].wood
+            local stone = GoodsName[k.goodsKind].stone
+            local checkRes = true
+            if food > 0 and #self.allFoodFarm == 0 then
+                checkRes = false
+            end
+            if stone > 0 and #self.allStoneQuarry == 0 then
+                checkRes = false
+            end
+            if checkRes and #self.allFreeFactory > 0 then
+                self.people.predictFactory = self.allFreeFactory[1] 
+                self.people.predictFactory:setOwner(self.people)
+                self.people.predictStore = k
                 self.people.predictStore:setOwner(self.people)
-
-                self.people.predictTarget = self.allFoodFarm[1]
-                self.people.predictTarget:setOwner(self.people)
+                if food > 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD})
+                    self.people.predictTarget = self.allFoodFarm[1]
+                    self.people.predictTarget:setOwner(self.people)
+                    self.people.actionContext= CAT_ACTION.TAKE_FOOD
+                    self.people.goodsKind = k.goodsKind
+                end
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
                 return
             end

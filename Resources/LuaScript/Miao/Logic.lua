@@ -1,10 +1,11 @@
 Logic = {}
 Logic.name = "liyong"
 Logic.uid = nil
-Logic.resource = {silver=0, food=0, wood=0, stone=0}
+Logic.resource = {silver=1000, food=0, wood=0, stone=0}
 Logic.battleTime = nil
 Logic.battleSoldier = nil
 Logic.buildings = {}
+Logic.buildList = {}
 Logic.people = {}
 Logic.allPeople = {}
 
@@ -58,8 +59,12 @@ Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFun
 function checkCost(c)
 end
 function doCost(c)
+    Logic.resource.silver = Logic.resource.silver-c
+    Event:sendMsg(EVENT_TYPE.UPDATE_RESOURCE) 
 end
 function doGain(g)
+    Logic.resource.silver = Logic.resource.silver+g
+    Event:sendMsg(EVENT_TYPE.UPDATE_RESOURCE) 
 end
 
 --增加多彩文字支持

@@ -46,7 +46,10 @@ function MiaoPeople:ctor(m, data)
     self.stone = 0
     self.product = 0
     self.data = Logic.people[self.id]
-    self.miaoPath = MiaoPath.new(self)
+    --普通猫咪 才会有私有的miaoPath
+    if self.data.kind == 1 then
+        self.miaoPath = MiaoPath.new(self)
+    end
     self.stateStack = {}
     self.waitTime = 1
     --操作上下文
@@ -59,11 +62,11 @@ function MiaoPeople:ctor(m, data)
     print("init MiaoPeople", self.id)
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
-    elseif self.id == 2 then
+    elseif self.data.kind == 2 then
         self.funcPeople = Merchant.new(self) 
     elseif self.id == 3 then
         self.funcPeople = Cat.new(self)
-    elseif self.id >= 4 then
+    elseif self.data.kind == 1 then
         self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
@@ -359,10 +362,6 @@ function MiaoPeople:initFind(diff)
             else
 
             end
-            --[[
-            --没找到可以工作的目标 则回去休息
-            --暂停寻路 再去寻找回去的路 id == 1  
-            --]]
         end
     end
 end
@@ -395,15 +394,21 @@ function MiaoPeople:doFind(diff)
                 --不是上次的目标
                 --走到一个建筑物附近了
                 --道路 和 建筑物 都在cell 里面
+                --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
+                --local findTarget = false
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
-                --if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] ~= self.oldPredictTarget and buildCell[key][#buildCell[key]][1].picName == 'build' then
+                    --到此建筑物距离100 则是相邻的格子不可以直接行走上去 必须经过道路才行
+                    --findTarget = true
+                    --if self.actionContext ~= CAT_ACTION.GO_HOME and self.cells[point].gScore == 100 then
+                    --else
                     self.endPoint = {x, y} 
                     self.realTarget = buildCell[key][#buildCell[key]][1]
                     print("findTarget", self.predictTarget.picName, self.realTarget.picName)
                     break
+                    --end
                 end
-
-                if self.endPoint == nil then
+                --避免将目标点 加入到closedList 里面去
+                if self.endPoint == nil and not findTarget then
                     self:checkNeibor(x, y)
                 end
             end
@@ -479,7 +484,7 @@ function MiaoPeople:doMove(diff)
                 if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
                     self:handleHome()
                 --商人 工作移动到了目的点 开始 往回走了
-                elseif self.id == 2 then
+                elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction()
                     --收获农作物 商店资源
@@ -576,43 +581,45 @@ function MiaoPeople:doMove(diff)
 
                 --行走在有可能是斜坡的道路上面
                 --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
-                --根据normal 得到上坡 还是下坡
+                --根据normal 得到上坡 还是下坡'
+                --下个点在石头路上
                 local goYet = false
                 if bv ~= nil then
                     local ons = bv[#bv][1].onSlope
                     if ons then
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        self.waitTime = 4
+                        self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
-                        self:moveSlope(dx, dy)
                         self:setZord()
-                        self.waitTime = 2
+                        self:moveSlope(dx, dy, 0)
                         self.curPoint = self.curPoint+1
                     end
                 end
+                --当前点在 石头路上
                 if not goYet and cv ~= nil then
                     local ons = cv[#cv][1].onSlope
                     if ons then
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.bg:runAction(moveto(2, cxy[1], cxy[2]))    
+                        self.waitTime = 4
+                        self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
-                        self:moveSlope(dx, dy)
                         self:setZord()
-                        self.waitTime = 2
+                        self:moveSlope(dx, dy, 1)
                         self.curPoint = self.curPoint+1
                     end
                 end
 
                 if not goYet then
                     local cxy = setBuildMap({1, 1, np[1], np[2]})
-                    self.bg:runAction(moveto(1, cxy[1], cxy[2]))    
+                    self.waitTime = 2
+                    self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                     self:setDir(cxy[1], cxy[2])
                     self:setZord()
-                    self.waitTime = 1
                     self.curPoint = self.curPoint+1
                 end
                 --是否在运送货物
@@ -719,6 +726,10 @@ function MiaoPeople:checkNeibor(x, y)
         {x+1, y+1},
         {x-1, y+1},
     }
+    local isStart = false
+    if x == self.startPoint[1] and y == self.startPoint[2] then
+        isStart = true
+    end
     local curKey = getMapKey(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
@@ -754,10 +765,10 @@ function MiaoPeople:checkNeibor(x, y)
                     if bb == self.predictTarget then
                         isTarget = true
                     end
-                    print("no road")
+                    --print("no road")
                 end
             else
-                print("not Road")
+                --print("not Road")
             end
             --未遍历过 这个邻居 
             --没有 硬性阻碍
@@ -779,7 +790,10 @@ function MiaoPeople:checkNeibor(x, y)
             --使用最短路径 更新parent信息  
             --没有建筑物 和 道路的值 = 50
 
-            if self.closedList[key] == nil and (hasRoad or isTarget or self.actionContext == CAT_ACTION.GO_HOME) then
+            --target 点不能和目标点紧邻 除了回家之外
+            --isTarget isStart 不能即是目标 也是 开始点 
+            if self.closedList[key] == nil and not (isTarget and isStart) and (hasRoad or isTarget or self.actionContext == CAT_ACTION.GO_HOME) then
+                --没有加入过openList
                 if self.cells[key] == nil then
                     self.cells[key] = {}
                     self.cells[key].parent = curKey
@@ -787,6 +801,7 @@ function MiaoPeople:checkNeibor(x, y)
                     self:calcH(nv[1], nv[2])
                     self:calcF(nv[1], nv[2])
                     self:pushQueue(nv[1], nv[2])
+                --加入过openList
                 else
                     local oldParent = self.cells[key]['parent']
                     local oldGScore = self.cells[key]['gScore']

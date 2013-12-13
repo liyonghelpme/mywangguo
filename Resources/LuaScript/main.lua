@@ -24,8 +24,10 @@ local function main()
 
     require "myMap.MapScene"
 
-
     global.director:runWithScene(TMXScene.new())
+
+    --require "Miao.TestScene"
+    --global.director:runWithScene(TestScene.new())
     
     --global.director:runWithScene(FightScene.new())
     --require "Menu.TestMenu"

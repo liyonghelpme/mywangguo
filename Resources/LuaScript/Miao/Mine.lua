@@ -1,4 +1,7 @@
 Mine = class(FuncBuild)
+function Mine:ctor(b)
+    self.maxNum = 15
+end
 function Mine:setColor()
     local s = self:checkSlope()
     if s then

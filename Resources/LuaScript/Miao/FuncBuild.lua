@@ -43,7 +43,7 @@ function FuncBuild:canFinish()
 end
 function FuncBuild:showInfo()
     local bi
-    bi = BuildInfo.new(self)
+    bi = BuildInfo.new(self.baseBuild)
     global.director:pushView(bi, 1, 0)
     global.director.curScene.menu:setMenu(bi)
 end
@@ -72,25 +72,6 @@ end
 function FuncBuild:updateGoods()
 end
 function FuncBuild:setPos()
-    --[[
-    local p = getPos(self.baseBuild.bg)
-    local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
-    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
-    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
-    if ad then
-        setPos(self.baseBuild.changeDirNode, {0, 103})
-    else
-        setPos(self.baseBuild.changeDirNode, {0, 0})
-    end
-    if self.baseBuild.bottom then
-        local oy = (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY
-        if ad then
-            setPos(self.baseBuild.bottom, {0, 103+oy})
-        else
-            setPos(self.baseBuild.bottom, {0, oy})
-        end
-    end
-    --]]
     self:adjustHeight()
 end
 
@@ -106,3 +87,43 @@ function FuncBuild:adjustHeight()
     end
 end
 
+function FuncBuild:showIncrease(n)
+end
+--调用公有代码
+function FuncBuild:doMyEffect()
+    local map = getBuildMap(self.baseBuild) 
+    local initX = 0
+    local initY = -4
+    local offX = 1
+    local offY = 1
+    local mapDict = self.baseBuild.map.mapGridController.mapDict
+    for i =0, 4, 1 do
+        local curX = initX-i
+        local curY = initY+i
+        for j = 0, 4, 1 do
+            local key = getMapKey(curX+map[3], curY+map[4])
+            if mapDict[key] ~= nil then
+                local ob = mapDict[key][#mapDict[key]][1]
+                local dist = math.abs(curX)+math.abs(curY)
+                --周围要是匹配的建筑物才行 农田等
+                --樱花树建筑物
+                if ob.id == 4 then
+                    if dist == 2 then
+                        self:showIncrease(2)
+                    elseif dist == 4 then
+                        self:showIncrease(1)
+                    end
+                end
+            end
+
+            curX = curX+1
+            curY = curY+1
+        end
+    end
+end
+function FuncBuild:getProductName()
+    return "--"
+end
+function FuncBuild:getProductPrice()
+    return "--"
+end

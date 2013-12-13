@@ -40,6 +40,9 @@ function MiaoBuildLayer:ctor(s)
     self.cells = {}
     self.passTime = 10
     registerEnterOrExit(self)
+    self:initCar()
+end
+function MiaoBuildLayer:initCar()
 end
 function MiaoBuildLayer:enterScene()
     registerUpdate(self)
@@ -50,7 +53,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        --self:addPeople(2)
+        self:addPeople(6)
     end
 end
 
@@ -288,8 +291,8 @@ function MiaoBuildLayer:initDataOver()
     --]]
     self:initRoad()
     self:initBackPoint()
-    --[[
     self:initBuild()
+    --[[
     --self:initCat()
     --]]
     self.initYet = true

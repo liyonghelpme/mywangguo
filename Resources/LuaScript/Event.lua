@@ -9,6 +9,7 @@ EVENT_TYPE = {
     FINISH_INIT_BUILD=18,
     CHANGE_NAME=19,
     ROAD_CHANGED=20, --建筑替换道路 道路铺设 道路拆除 桥梁铺设 桥梁拆除
+
 }
 Event = {}
 Event.callbacks = {}

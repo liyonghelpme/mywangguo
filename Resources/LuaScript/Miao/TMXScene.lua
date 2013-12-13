@@ -45,6 +45,7 @@ function TMXScene:onBuild()
 end
 
 --普通建筑物 和 环境
+--保存道路
 function TMXScene:saveGame()
     local allBuild = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do
