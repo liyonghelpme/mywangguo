@@ -3,9 +3,8 @@ function FuncPeople:ctor(s)
     self.people = s
 end
 function FuncPeople:initView()
-    self.people.bg = CCNode:create()
     --不同人物动画的角度也有可能不同
-    self.people.changeDirNode = addSprite(self.people.bg, "people"..self.people.id.."_lb_0.png")
+    self.people.changeDirNode = CCSprite:create("people"..self.people.id.."_lb_0.png")
     local sz = self.people.changeDirNode:getContentSize()
     --人物图像向上偏移一半高度 到达块中心位置
     setAnchor(self.people.changeDirNode, {Logic.people[1].ax/sz.width, (sz.height-Logic.people[1].ay-SIZEY)/sz.height})
@@ -21,4 +20,21 @@ function FuncPeople:initView()
 end
 function FuncPeople:checkWork(k)
     return false
+end
+--必须使用 road来寻路
+function FuncPeople:mustRoad()
+    return true
+end
+function FuncPeople:findTarget()
+end
+function FuncPeople:setPos()
+    local p = getPos(self.people.bg)
+    local ax, ay = newCartesianToAffine(p[1], p[2], self.people.map.scene.width, self.people.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    local ad = adjustNewHeight(self.people.map.scene.mask2, self.people.map.scene.width, ax, ay)
+    print("adjust People Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay, ad)
+    if ad then
+        setPos(self.people.heightNode, {0, 103})
+    else
+        setPos(self.people.heightNode, {0, 0})
+    end
 end

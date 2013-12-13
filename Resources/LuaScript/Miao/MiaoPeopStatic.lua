@@ -8,25 +8,65 @@ function MiaoPeople:setDir(x, y)
     local p = getPos(self.bg)
     local dx = x-p[1]
     local dy = y-p[2]
-    if dx > 0 then
-        if dy > 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rt")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        elseif dy < 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rb")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+    if self.send then
+        if dx > 0 then
+            if dy > 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lt")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "a3.png")
+                end
+            elseif dy < 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lb")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "b3.png")
+                end
+            end
+            local sca = getScaleY(self.changeDirNode)
+            setScaleX(self.changeDirNode, -sca)
+        elseif dx < 0 then
+            if dy > 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lt")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "a3.png")
+                end
+            elseif dy < 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lb")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "b3.png")
+                end
+            end
+            local sca = getScaleY(self.changeDirNode)
+            setScaleX(self.changeDirNode, sca)
         end
-    elseif dx < 0 then
-        if dy > 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lt")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-        elseif dy < 0 then
-            self.changeDirNode:stopAllActions()
-            local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lb")
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+    else
+        if dx > 0 then
+            if dy > 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rt")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+            elseif dy < 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rb")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+            end
+        elseif dx < 0 then
+            if dy > 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lt")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+            elseif dy < 0 then
+                self.changeDirNode:stopAllActions()
+                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lb")
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+            end
         end
     end
 end
@@ -54,15 +94,57 @@ function MiaoPeople:handleHome()
     setPos(self.bg, np)
 end
 function MiaoPeople:handleStore()
-    --即便商店deleted 掉了 也不用考虑了
-    self.realTarget.workNum = self.realTarget.workNum +self.product
-    self.realTarget:setOwner(nil)
-    self.realTarget = nil
-    self.state = PEOPLE_STATE.FREE
+    if self.actionContext == CAT_ACTION.PUT_PRODUCT then
+        if self.realTarget.goodsKind == self.goodsKind then
+            self.realTarget.workNum = self.realTarget.workNum+self.workNum
+            self.realTarget.workNum = math.min(self.realTarget.workNum, self.realTarget.maxNum)
+            self.realTarget.funcBuild:updateGoods()
+        end
+        self.workNum = 0
+        self:putGoods()
+        self:setDir(1, -1)
+        self:popState()
+        self:resetState()
+    else
+        --即便商店deleted 掉了 也不用考虑了
+        self.realTarget.workNum = self.realTarget.workNum +self.product
+        self.realTarget:setOwner(nil)
+        self.realTarget = nil
+        self.state = PEOPLE_STATE.FREE
+    end
 end
 function MiaoPeople:handleQuarry()
-    if self.stone == 0 then
-        --获取工具去采矿 需要矿石
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.TAKE_MINE_TOOL then
+            print("TAKE_MINE_TOOL")
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.funcBuild:takeTool()
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PUT_STONE_QUARRY then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.stone = self.realTarget.stone+self.stone
+                self.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.TAKE_STONE then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.stone = self.predictTarget.stone
+                self.realTarget.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        end
+    elseif self.stone == 0 then
+        --从矿场运送矿石到工厂
         if self.tempFactory ~= nil then
             if self.realTarget.deleted then
                 self.realTarget:setOwner(nil)
@@ -82,6 +164,7 @@ function MiaoPeople:handleQuarry()
                 self.goFactory = true
                 self.state = PEOPLE_STATE.FREE
             end
+        --获取工具去采矿 需要矿石
         elseif self.predictMine ~= nil then
             --矿场被拆除了
             if self.realTarget.deleted then
@@ -94,6 +177,7 @@ function MiaoPeople:handleQuarry()
                 --owner 还是 该用户 直到回家休息才放弃owner权限
                 --self.predictQuarry = self.realTarget
                 self.tempQuarry = self.realTarget
+                self.realTarget.funcBuild:takeTool()
                 self.tempMine = self.predictMine
                 self.goMine = true
                 self.state = PEOPLE_STATE.FREE
@@ -124,26 +208,107 @@ function MiaoPeople:handleQuarry()
         self.stone = 0
         --不要占用采矿场了
         self.realTarget:setOwner(nil)
+        self.realTarget.funcBuild:putTool()
+        self.realTarget.funcBuild:updateState()
         self.realTarget = nil
         self.state = PEOPLE_STATE.FREE
     end
 end
 
 function MiaoPeople:handleMine()
-    self.state = PEOPLE_STATE.IN_WORK
-    self.workTime = 0
+    if self.actionContext == CAT_ACTION.MINE_STONE then
+        self.state = PEOPLE_STATE.IN_WORK
+        self.workTime = 0
+    end
 end
 function MiaoPeople:handleSmith()
-    self.realTarget.workNum = self.realTarget.workNum +self.product
-    self.realTarget:setOwner(nil)
-    self.realTarget = nil
-    self.product = 0
-    self.state = PEOPLE_STATE.FREE
+    if self.actionContext == CAT_ACTION.PUT_PRODUCT then
+        if self.realTarget.goodsKind == self.goodsKind then
+            self.realTarget.workNum = self.realTarget.workNum+self.workNum
+            self.realTarget.funcBuild:updateGoods()
+        end
+        self.workNum = 0
+        self:popState()
+        self:resetState()
+    else
+        self.realTarget.workNum = self.realTarget.workNum +self.product
+        self.realTarget:setOwner(nil)
+        self.realTarget = nil
+        self.product = 0
+        self.state = PEOPLE_STATE.FREE
+    end
+end
+
+function MiaoPeople:refreshOwner()
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            v[2]:setOwner(self)
+        end
+    end
+end
+function MiaoPeople:finishHandle()
+    self:refreshOwner()
+end
+
+--清理每个状态的时候 self.food 也要清理一下 根据不同状态类型 调用状态的清理代码
+function MiaoPeople:sendGoods()
+    self.send = true
+    setDisplayFrame(self.changeDirNode, "car_lb_0.png")
+    local sca = getScaleY(self.changeDirNode)
+    if self.food > 0 then
+        local sp = setDisplayFrame(CCSprite:create(), "b3.png")
+        self.changeDirNode:addChild(sp)
+        setPos(setAnchor(sp, {0.5, 0.5}), {256, 256})
+        self.carGoods = sp
+    end
+    setScaleX(self.changeDirNode, -sca)
+end
+function MiaoPeople:putGoods()
+    self.send = false
+    setDisplayFrame(self.changeDirNode, "cat_"..self.id.."_rb_0.png")
+    local sca = getScaleY(self.changeDirNode)
+    setScaleX(self.changeDirNode, sca)
+    if self.carGoods ~= nil then
+        removeSelf(self.carGoods)
+        self.carGoods = nil
+    end
 end
 
 function MiaoPeople:handleFarm()
+    --新系统  
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.TAKE_FOOD then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                --同一个对象身上可能 会 有多重的
+                self.food = self.realTarget.workNum
+                self.realTarget.workNum = 0
+                self:sendGoods()
+                self:setDir(1, -1)
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PLANT_FARM then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+                self:resetState()
+            else
+                local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+                sf:addSpriteFramesWithFile("cat_labor.plist")
+                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
+                self.changeDirNode:stopAllActions()
+                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                local sz = self.changeDirNode:getContentSize()
+                setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
+
+                self.state = PEOPLE_STATE.IN_WORK
+                self.workTime = 0
+            end
+        end
+
     --销售塔的商品 
-    if self.predictTower ~= nil then
+    elseif self.predictTower ~= nil then
         if self.realTarget.deleted then
             self.state = PEOPLE_STATE.FREE
             self.predictFactory:setOwner(nil)
@@ -206,7 +371,60 @@ function MiaoPeople:handleFarm()
     end
 end
 
+function MiaoPeople:popState()
+    if #self.stateStack > 0 then
+        for k, v in ipairs(self.stateStack) do
+            print("state", k, v[1])
+        end
+        local stop = self.stateStack[#self.stateStack]
+        self.stateContext = stop
+        table.remove(self.stateStack)
+        self.stateContext[2]:setOwner(self)
+    else
+        self.stateContext = nil
+    end
+end
+function MiaoPeople:beforeHandle()
+end
+function MiaoPeople:resetState()
+    self.realTarget:setOwner(nil)
+    self.realTarget = nil
+    self.state = PEOPLE_STATE.FREE
+end
 function MiaoPeople:handleFactory()
+    if self.actionContext ~= nil then
+        if self.actionContext == CAT_ACTION.PUT_FOOD then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.food = self.realTarget.food + self.food
+                self.food = 0
+                self:putGoods()
+                self:setDir(1, -1)
+                self:popState()
+            end
+            self:resetState()
+        elseif self.actionContext == CAT_ACTION.PRODUCT then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.goodsKind = self.goodsKind
+                self.state = PEOPLE_STATE.IN_WORK
+                self.workTime = 0
+                self.realTarget.funcBuild:startWork()
+            end
+        elseif self.actionContext == CAT_ACTION.PUT_STONE then
+            if self.realTarget.deleted then
+                self:clearStateStack()
+            else
+                self.realTarget.stone = self.realTarget.stone + self.stone
+                self.stone = 0
+                self:popState()
+            end
+            self:resetState()
+        end
+        return 
+    end
     --运送粮食
     if self.food ~= nil then
         self.realTarget.food = self.realTarget.food + self.food
@@ -269,9 +487,30 @@ function MiaoPeople:workInFactory()
     if self.workTime > 1 then
         self.workTime = 0
         self.health = self.health -1
+        print("product what??", self.realTarget.goodsKind)
+
+        if self.actionContext ~= nil then
+            local gn = GoodsName[self.realTarget.goodsKind]
+            print("gname", simple.encode(gn))
+            local enough = true
+            if self.realTarget.food >= gn.food and self.realTarget.stone >= gn.stone and self.realTarget.wood >= gn.wood then
+                self.realTarget:doProduct() 
+            else
+                enough = false
+            end
+            --走向商店 popState --->进入寻路状态 moveto 的过程中使用某个状态动画
+            if self.realTarget.workNum >= self.realTarget.maxNum or not enough then
+                self.realTarget.funcBuild:stopWork()
+                self.workNum = self.realTarget.workNum
+                self.realTarget.workNum = 0
+                self.goodsKind = self.realTarget.goodsKind
+                self:popState()
+                self:sendGoods()
+                self:setDir(1, -1)
+                self:resetState()
+            end
         --生产混合原材料物品
-        print("product what??", self.realTarget.productKind)
-        if self.realTarget.productKind ~= nil then
+        elseif self.realTarget.productKind ~= nil then
             print("product kind 3")
             if self.realTarget.food > 0 and self.realTarget.stone > 0 then
                 self.realTarget.food = self.realTarget.food - 1
@@ -332,14 +571,11 @@ function MiaoPeople:workInMine()
         --如果工厂生产数量超过上限 就不要生产了
         --离开矿坑 但是predictQuarry 不会消除
         print("workInMine", self.goQuarry)
-        if self.realTarget.stone >= 10 then
-            self.state = PEOPLE_STATE.FREE
+        if self.realTarget.stone >= self.realTarget.maxNum then
             self.stone = self.realTarget.stone
             self.realTarget.stone = 0
-
-            self.realTarget:setOwner(nil)
-            self.realTarget = nil
-            self.goQuarry = true
+            self:popState()
+            self:resetState()
             return
         end
     end
@@ -348,13 +584,13 @@ function MiaoPeople:workInFarm()
     if self.workTime > 1 then
         self.workTime = 0
         self.health = self.health-1
-        if self.realTarget.workNum >= 10 then
+        if self.realTarget.workNum >= self.realTarget.maxNum then
             self.state = PEOPLE_STATE.FREE
             self.realTarget:setOwner(nil)
             self.realTarget = nil
              
             self:setDir(0, 0)
-            local sz = getContentSize(self.changeDirNode)
+            local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
             self.realTarget:changeWorkNum(1)
@@ -390,4 +626,43 @@ function MiaoPeople:workInHome(diff)
         --self.bg:setVisible(true)
     end
 end
+function MiaoPeople:showState()
+    --拿到矿刀
+    if self.tempMine ~= nil then
+        setTexture(self.statePic, "equip70.png")
+    elseif self.stone > 0 then
+        setTexture(self.statePic, "herb109.png")
+    end
+end
 
+function MiaoPeople:clearStateStack()
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            v[2]:setOwner(nil)
+        end
+    end
+    self.stateStack = {}
+    self.stateContext = nil
+    self.actionContext = nil
+end
+function MiaoPeople:setPos(p)
+    setPos(self.bg, p)
+    self.funcPeople:setPos()
+end
+function MiaoPeople:moveSlope(dx, dy, val)
+    if dy < 0 then
+        if val == 0 then
+            self.slopeAct = moveto(self.waitTime, 0, 51)
+        else
+            self.slopeAct = moveto(self.waitTime, 0, 0)
+        end
+        self.heightNode:runAction(self.slopeAct)
+    else 
+        if val == 0 then
+            self.slopeAct = moveto(self.waitTime, 0, 51)
+        else
+            self.slopeAct = moveto(self.waitTime, 0, 103)
+        end
+        self.heightNode:runAction(self.slopeAct)
+    end
+end

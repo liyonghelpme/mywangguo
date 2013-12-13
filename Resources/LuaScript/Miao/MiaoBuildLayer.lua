@@ -40,6 +40,9 @@ function MiaoBuildLayer:ctor(s)
     self.cells = {}
     self.passTime = 10
     registerEnterOrExit(self)
+    self:initCar()
+end
+function MiaoBuildLayer:initCar()
 end
 function MiaoBuildLayer:enterScene()
     registerUpdate(self)
@@ -50,7 +53,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        --self:addPeople(2)
+        self:addPeople(6)
     end
 end
 
@@ -126,8 +129,11 @@ function MiaoBuildLayer:initCat()
     end
 end
 function MiaoBuildLayer:initBackPoint()
-    local b = MiaoBuild.new(self, {picName='backPoint'})
-    local cx, cy = affineToCartesian(21, 0)
+    local b = MiaoBuild.new(self, {picName='backPoint', id=23})
+    local width = self.scene.width
+    local height = self.scene.height
+    local cx, cy = newAffineToCartesian(10, 0, width, height, MapWidth/2, FIX_HEIGHT)
+    --local cx, cy = affineToCartesian(21, 0)
     local p = normalizePos({cx, cy}, 1, 1)
     b:setPos(p)
     b:setColPos()
@@ -168,6 +174,7 @@ function MiaoBuildLayer:initBuild()
         build = simple.decode(build)
         for k, v in ipairs(build) do
             local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
             b:setColPos()
@@ -180,63 +187,6 @@ function MiaoBuildLayer:initBuild()
         Logic.maxBid = mbid
     end
 end
---[[
-function MiaoBuildLayer:initBuild()
-    local b = MiaoBuild.new(self, {picName='build', id=1})
-    local p = normalizePos({200, 200}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-
-    local b = MiaoBuild.new(self, {picName='build', id=1})
-    local p = normalizePos({500, 500}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-    --每个农田只能有一个人去工作
-    local b = MiaoBuild.new(self, {picName='build', id=2})
-    local p = normalizePos({300, 500}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-
-    local b = MiaoBuild.new(self, {picName='backPoint'})
-    local p = normalizePos({900, 400}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-    self.backPoint = b
-
-    --矿坑
-    local b = MiaoBuild.new(self, {picName='build', id=11})
-    local p = normalizePos({17*SIZEX, 13*SIZEY-SIZEY}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-    --采矿营地
-    local b = MiaoBuild.new(self, {picName='build', id=12})
-    local p = normalizePos({13*SIZEX, 13*SIZEY-SIZEY}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-end
---]]
 function MiaoBuildLayer:initSea()
     local initX = -128
     local initY = 500
@@ -331,95 +281,6 @@ function MiaoBuildLayer:initMerchantRoad()
         end
     end
 end
---[[
-function MiaoBuildLayer:initRoad()
-    local initX = 60
-    local initY = 60
-    local offX = 64
-    local offY = 47
-    local row = 5
-    local col = 8
-    for i=0, col, 1 do
-        local b = MiaoBuild.new(self, {picName='t'})
-        local p = {initX+i*offX, initY+i*offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-
-        local rd = math.random(2)
-        if rd == 1 then
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = {initX+(i+1)*offX, initY+(i-1)*offY} 
-            p = normalizePos(p, b.sx, b.sy)
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            b:setPos(p)
-            b:finishBuild()
-        end
-    end
-
-    --id = nil picName 决定地形块类型
-    local b = MiaoBuild.new(self, {picName='t'})
-    local p = {300+offX, 500-offY} 
-    p = normalizePos(p, b.sx, b.sy)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-    local b = MiaoBuild.new(self, {picName='t'})
-    local p = {300+offX+offX, 500-offY-offY} 
-    p = normalizePos(p, b.sx, b.sy)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-    local b = MiaoBuild.new(self, {picName='t'})
-    local p = {300+offX+offX+offX, 500-offY} 
-    p = normalizePos(p, b.sx, b.sy)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-
-    local b = MiaoBuild.new(self, {picName='t'})
-    local p = normalizePos({300-offX, 500+offY}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-    --连接到河流
-    local b = MiaoBuild.new(self, {picName='t'})
-    local p = normalizePos({300-offX, 500+offY}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-    --绕开那个 breakpoint
-    for i=0, 5, 1 do
-        local b = MiaoBuild.new(self, {picName='t'})
-        local p = normalizePos({(14+i)*SIZEX, (12+i)*SIZEY-SIZEY}, 1, 1)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-    end
-end
---]]
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     --[[
@@ -429,31 +290,41 @@ function MiaoBuildLayer:initDataOver()
     self:initMerchantRoad()
     --]]
     self:initRoad()
-    self:initBuild()
     self:initBackPoint()
+    self:initBuild()
+    --[[
     --self:initCat()
+    --]]
     self.initYet = true
 end
+--road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
 function MiaoBuildLayer:initRoad() 
     local nlayer = self.scene.layerName['road']
     local width = self.scene.width
     local height = self.scene.height
+    local mask2 = self.scene.mask2
     for dk, dv in ipairs(nlayer.data) do
         if dv ~= 0 then
-            local pname = self.scene.tileName[dv]
+            local pname = tidToTile(dv)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.buildingLayer:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            --local cx, cy = axyToCxyWithDepth(w, h, width, height, MapWidth/2, FIX_HEIGHT, mask2)
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, pname=pname})
+            local p = normalizePos({cx, cy}, 1, 1)
 
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
         end
     end
 
     --建筑物名称
+    --[[
     local nlayer = self.scene.layerName['build']
     for dk, dv in ipairs(nlayer.data) do
         if dv ~= 0 then
@@ -467,6 +338,74 @@ function MiaoBuildLayer:initRoad()
             self.buildingLayer:addChild(pic)
             setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
 
+        end
+    end
+    --]]
+
+    for dk, dv in ipairs(self.scene.layerName['slop2'].data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local dir = 0
+            if pname == 'tile18.png' then
+                dir = 0
+            elseif pname == 'tile16.png' then
+                dir = 1
+            else
+                dir = 2
+            end
+            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+        end
+    end
+
+    --临时斜坡显示一下 和斜坡的方向 0 1 
+    for dk, dv in ipairs(self.scene.layerName.ladder.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+        end
+    end
+
+    --篱笆 
+    for dk, dv in ipairs(self.scene.layerName.fence.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+
+            local b = MiaoBuild.new(self, {picName='fence', id=22, dir=dir, tileName=pname})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b:finishBuild()
+            
         end
     end
 end
@@ -617,7 +556,8 @@ function MiaoBuildLayer:addPeople(param)
         --local cx, cy = affineToCartesian(21, 24)
         pos = normalizePos({cx, cy}, 1, 1)
     end
-    setPos(p.bg, pos)
+    --setPos(p.bg, pos)
+    p:setPos(pos)
     p:setZord()
     self.mapGridController:addSoldier(p)
 end

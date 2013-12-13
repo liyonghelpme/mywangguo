@@ -5,6 +5,8 @@ MiaoPath = class()
 function MiaoPath:ctor(tar)
     self.target = tar
     self.map = self.target.map
+    --public 设置为dirty
+    self.dirty = false
 end
 
 --保证所有计算之前先给cells 赋值
@@ -85,6 +87,9 @@ function MiaoPath:checkNeibor(x, y)
                     local oldDist = self.allBuilding[bb] or 999999
                     self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
                     table.insert(bb.belong, self.target.name)
+                    if #bb.belong > 3 then
+                        table.remove(bb.belong, 1)
+                    end
                     print("add Building ", bb.id, bb.picName)
                 else
                     print("no road")
@@ -125,6 +130,7 @@ function MiaoPath:init(mx, my)
     self:pushQueue(mx, my)
 
     self.searchYet = false
+    self.inSearch = true
 end
 
 
@@ -135,7 +141,7 @@ function MiaoPath:update()
     local buildCell = self.target.map.mapGridController.mapDict
     local staticObstacle = self.target.map.staticObstacle 
     print("MiaoPath update")
-    while n < 50 do
+    while n < 10 do
         if #self.openList == 0 then
             break
         end
@@ -152,8 +158,11 @@ function MiaoPath:update()
 
     if #self.openList == 0 then
         self.searchYet = true
+        self.inSearch = false
     end
     print("miaoPath find over", getLen(self.allBuilding))
 
     self.map:updateCells(self.cells, self.map.cells)
 end
+
+publicMiaoPath = nil  

@@ -4,6 +4,7 @@ require "Miao.Worker"
 require "Miao.MiaoPath"
 require "Miao.TestCat"
 require "Miao.TestCat2"
+require "Miao.Merchant"
 
 MiaoPeople = class()
 PEOPLE_STATE = {
@@ -20,6 +21,14 @@ PEOPLE_STATE = {
     APPEAR = 10,
     --只搜索房屋一次
     FIND_NEAR_BUILDING=11,
+
+    GO_STORE=12,
+    PRODUCT = 13,
+    GO_FACTORY = 14,
+    GO_FARM = 15,
+    GO_QUARRY = 16,
+
+    GO_TARGET = 17,
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
@@ -37,21 +46,33 @@ function MiaoPeople:ctor(m, data)
     self.stone = 0
     self.product = 0
     self.data = Logic.people[self.id]
-    self.miaoPath = MiaoPath.new(self)
+    --普通猫咪 才会有私有的miaoPath
+    if self.data.kind == 1 then
+        self.miaoPath = MiaoPath.new(self)
+    end
     self.stateStack = {}
+    self.waitTime = 1
+    --操作上下文
+    self.actionContext = nil
+    self.stateContext = nil
 
 
+    self.bg = CCNode:create()
+    self.heightNode = addNode(self.bg)
     print("init MiaoPeople", self.id)
     if self.id == 1 then
         self.funcPeople = Worker.new(self)
-    elseif self.id == 2 then
+    elseif self.data.kind == 2 then
         self.funcPeople = Merchant.new(self) 
     elseif self.id == 3 then
         self.funcPeople = Cat.new(self)
-    elseif self.id >= 4 then
+    elseif self.data.kind == 1 then
         self.funcPeople = Cat2.new(self)
     end
     self.funcPeople:initView()
+    self.heightNode:addChild(self.changeDirNode)
+    self.statePic = CCSprite:create()
+    addChild(self.bg, self.statePic)
 
     registerEnterOrExit(self)
 end
@@ -125,32 +146,20 @@ function MiaoPeople:findHouse()
         --找房子 不用miaoPath
         --回到房子之后 才能搜索 miaoPath
         --暂时测试用
-        --[[
-        if self.miaoPath.allBuilding == nil then
-            local p = getPos(self.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING 
-            --self.miaoPath:update()
-        else
-        --]]
             --local allBuild = self.miaoPath.allBuilding
             local minHouse = nil
             local minDist = 999999
             local allBuild = self.map.mapGridController.allBuildings
+            local p = getPos(self.bg)
             for k, v in pairs(allBuild) do
                 --找house
                 if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 and k.deleted == false then
-                    minHouse = k
-                    break
-                    --[[
-                    if v < minDist then
+                    local hp = getPos(k.bg)
+                    local dist = math.abs(hp[1]-p[1])+math.abs(hp[2]-p[2]) 
+                    if dist < minDist then
                         minHouse = k
-                        minDist = v
+                        minDist = dist
                     end
-                    --]]
                 end
             end
             if minHouse ~= nil then
@@ -172,6 +181,7 @@ function MiaoPeople:findHouse()
         end
     end
     self.predictTarget = self.myHouse
+    self.actionContext = CAT_ACTION.GO_HOME
 end
 function MiaoPeople:findAllNearBuilding(diff)
     if self.state == PEOPLE_STATE.FIND_NEAR_BUILDING then
@@ -184,220 +194,7 @@ end
 
 --只在home的时候 调用 初始化miaoPath
 function MiaoPeople:findWorkBuilding()
-    local allPossible = {}
-    local allFreeFactory = {}
-    local allFreeStore = {}
-    local allFreeMine = {}
-    local allFreeSmith = {}
-    local allFreeQuarry = {}
-    local allBuild
-    --有粮食的 农田 有石材的采石场
-    local allFoodFarm = {}
-    local allStoneQuarry = {}
-    --拆除了最近的工作建筑物之后
-    --当所有的工作地点都ko的时候 就要findHouse
-    --self.myHouse == nil? self.myHouse.deleted == true? 
-    --农民才从房屋附近寻路
-    if self.miaoPath.allBuilding == nil or self.dirty == true then
-        self.dirty = false
-        --从房子寻找
-        if self.data.kind == 1 then
-            print("miao Path init find!!!!!!!!!!!!")
-            local p = getPos(self.myHouse.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING
-        else
-            --商人从本身位置出发寻路
-            --没有深度限制
-            local p = getPos(self.bg)
-            local mxy = getPosMapFloat(1, 1, p[1], p[2])
-            local mx, my = mxy[3], mxy[4]
-            self.miaoPath:init(mx, my)
-            table.insert(self.stateStack, self.state)
-            self.state = PEOPLE_STATE.FIND_NEAR_BUILDING
-        end
-    else
-        --TODO!! 猫使用的是Cat
-        allBuild = self.miaoPath.allBuilding
-        --v 是到这个建筑物的距离
-        for k, v in pairs(allBuild) do
-            --休息结束
-            --找农田
-            local ret = false
-            --商人 不需要 占用 建筑物
-
-            if self.data.kind == 2 and k.deleted == false then
-                ret = self.funcPeople:checkWork(k)
-                --农田没有购买者 走到后发现目标被移除了就取消工作 
-                --移动建筑物相当于新建一个建筑物 broken = true
-                --避免抢占 owner == nil
-                --去农田
-            --农民要占用建筑物
-            elseif self.data.kind == 1 and k.deleted == false then
-                print("build kind ", k.id, k.food, k.owner, k.workNum)
-                ret = self.funcPeople:checkWork(k)
-                --空闲工厂 没有生产产品
-                --工厂就只管生产产品就得了
-                if k.id == 5 and k.owner == nil then
-                    print("free factory")
-                    table.insert(allFreeFactory, k)
-                end
-
-                --按照大区块划分的AI 区域
-                if k.id == 6 and k.workNum < 10 and k.owner == nil then
-                    table.insert(allFreeStore, k)
-                end
-                --矿坑
-                if k.id == 11 and k.owner == nil then
-                    table.insert(allFreeMine, k)
-                end
-                --铁匠铺 卖出武器
-                if k.id == 13 and k.workNum < 10 and k.owner == nil then
-                    table.insert(allFreeSmith, k)
-                end
-
-                --可以收集的 农田和矿市场 
-                if k.id == 2 and k.workNum > 0 then
-                    table.insert(allFoodFarm, k)
-                end
-                if k.id == 12 and k.stone > 0 then
-                    table.insert(allStoneQuarry, k)
-                end
-                if k.id == 12 and k.owner == nil then
-                    table.insert(allFreeQuarry, k)
-                end
-            end
-
-            --print("building state", ret)
-            if ret then
-                table.insert(allPossible, k)
-            end
-        end
-    end
-    print("people kind", self.data.kind)
-    if allBuild ~= nil then
-        print("allBuildNum", getLen(allBuild))
-    end
-    print("allPossible", #allPossible)
-    print("allFreeFactory num", #allFreeFactory)
-    print("allFreeStore num", #allFreeStore)
-    print("allFreeSmith num", #allFreeSmith)
-    print("allFreeMine num", #allFreeMine)
-    print("allFoodFarm num", #allFoodFarm)
-    print("allStoneQuarry num", #allStoneQuarry)
-    print("allFreeQuarry num", #allFreeQuarry)
-    global.director.curScene.menu.stateLabel:setString(string.format("allFoodFarm %d\nallStoneQuarry %d\n", #allFoodFarm, #allStoneQuarry))
-    if #allPossible > 0 then
-        local minb = nil
-        local minDist = 99999
-        --但是最近的possible 的 条件不成熟 不能选择啊~~
-        local r = math.random(#allPossible)
-        local k = allPossible[r]
-        print("do what??", k.id)
-        --[[
-        for k, v in ipairs(allPossible) do
-            print("allBuild  distance", v.id, allBuild[v], minDist)
-            if allBuild[v] < minDist then
-                minDist = allBuild[v]
-                minb = v
-            end
-        end
-        local k = minb
-        --]]
-        --基本潜质
-        --工作种类
-        if self.data.kind == 1 then
-            --寻找空闲的工厂 运送物资过去
-            --寻找最近的工厂运送过去  行为转变了
-            --去食品商店 
-            --Planning
-            if k.id == 6 then
-                if #allFoodFarm > 0 and #allFreeFactory > 0 then
-                    self.stateLabel:setString("findFactory!!!")
-                    self.predictFactory = allFreeFactory[1]
-                    self.predictFactory:setOwner(self) 
-                    self.predictStore = k 
-                    self.predictStore:setOwner(self)
-
-                    self.predictTarget = allFoodFarm[1]
-                    self.predictTarget:setOwner(self)
-                    print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.predictFactory)
-                end
-            elseif k.id == 13 then
-                if #allStoneQuarry > 0 and #allFreeFactory > 0 then
-                    self.predictFactory = allFreeFactory[1] 
-                    self.predictFactory:setOwner(self)
-                    self.predictSmith = k
-                    self.predictSmith:setOwner(self)
-
-                    self.predictTarget = allStoneQuarry[1]
-                    self.predictTarget:setOwner(self)
-                end
-                --种地去
-            elseif k.id == 2 and k.workNum < 10 then
-                k:setOwner(self)
-                self.predictTarget = k
-            elseif k.id == 5 then
-                --开始生产了
-                --还有剩余粮食
-                if k.food > 0 then
-                    k:setOwner(self)
-                    self.predictTarget = k
-                --只有生产好的商品
-                else
-                    if #allFreeStore > 0 then
-                        self.predictStore = allFreeStore[1]
-                        self.predictStore:setOwner(self)
-                        k:setOwner(self)
-                        self.predictTarget = k
-                    end
-                end
-            --采矿场
-            elseif k.id == 12 then
-                print("try to collect stone")
-                --还可以采集石头
-                if #allFreeMine > 0 then
-                    self.predictMine = allFreeMine[1]
-                    self.predictMine:setOwner(self)
-                    self.predictTarget = k
-                    k:setOwner(self)
-                end
-            elseif k.id == 14 then
-                --很难攒够原材料
-                print("goto Tower")
-                if #allFoodFarm > 0 and #allStoneQuarry > 0 and #allFreeFactory > 0 then
-                    self.predictTower = k
-                    k:setOwner(self)
-                    self.predictFactory = allFreeFactory[1]
-                    self.predictFactory:setOwner(self)
-                    self.predictQuarry = allStoneQuarry[1]
-                    self.predictQuarry:setOwner(self)
-                    self.predictTarget = allFoodFarm[1]
-                    self.predictTarget:setOwner(self)
-                end
-            end
-        --购买粮食
-        --去商店
-        --去矿石头场
-        elseif self.id == 2 then
-            --一块农田只有一个购买者
-            --购买结束需要clearBuyer
-            --一次购买不成功 还会尝试去购买别的
-            --去商店购买
-            k:setOwner(self)
-            self.predictTarget = k
-            if Logic.inNew and not Logic.checkFarm then
-                Logic.checkFarm = true
-                self.merch = 0
-                local w = Welcome2.new(self.onMerch, self)
-                w:updateWord("你好啊!!!没想到这里还会有村落。。。我正在行商途中，正好过来走一遭。")
-                global.director:pushView(w, 1, 0)
-            end
-        end
-    end 
+    self.funcPeople:findTarget()
 end
 
 function MiaoPeople:onMerch()
@@ -418,7 +215,7 @@ function MiaoPeople:update(diff)
     if Logic.paused then
         return
     end
-
+    self:showState()
     self:checkHealth()
     self:doAppear(diff)
     self:findPath(diff)
@@ -430,7 +227,7 @@ function MiaoPeople:update(diff)
     self:doWork(diff)
     self:doPaused(diff)
     if self.predictTarget ~= nil then
-        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health)
+        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
     else
         self.stateLabel:setString(str(self.state).." hea "..self.health)
     end
@@ -471,7 +268,16 @@ function MiaoPeople:initFind(diff)
         --寻找最近的建筑物 去工作 使用简单的洪水查找法 不要使用最近建筑物查找法 人物多思考一会即可
         --只在有路的块上面行走 picName == 't'
         --tired 不能中断操作
-        if self.goSmith then
+        --新系统 stateContext actionContext
+        if self.stateContext ~= nil then
+            self.predictTarget = self.stateContext[2]
+            self.actionContext = self.stateContext[3] 
+            self.stateContext = nil
+            if self.predictTarget.deleted then
+                self.predictTarget = nil
+                self:clearStateStack()
+            end
+        elseif self.goSmith then
             self.predictTarget = self.tempSmith
             self.tempSmith = nil
             self.goSmith = false
@@ -556,10 +362,6 @@ function MiaoPeople:initFind(diff)
             else
 
             end
-            --[[
-            --没找到可以工作的目标 则回去休息
-            --暂停寻路 再去寻找回去的路 id == 1  
-            --]]
         end
     end
 end
@@ -592,15 +394,21 @@ function MiaoPeople:doFind(diff)
                 --不是上次的目标
                 --走到一个建筑物附近了
                 --道路 和 建筑物 都在cell 里面
+                --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
+                --local findTarget = false
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
-                --if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] ~= self.oldPredictTarget and buildCell[key][#buildCell[key]][1].picName == 'build' then
+                    --到此建筑物距离100 则是相邻的格子不可以直接行走上去 必须经过道路才行
+                    --findTarget = true
+                    --if self.actionContext ~= CAT_ACTION.GO_HOME and self.cells[point].gScore == 100 then
+                    --else
                     self.endPoint = {x, y} 
                     self.realTarget = buildCell[key][#buildCell[key]][1]
                     print("findTarget", self.predictTarget.picName, self.realTarget.picName)
                     break
+                    --end
                 end
-
-                if self.endPoint == nil then
+                --避免将目标点 加入到closedList 里面去
+                if self.endPoint == nil and not findTarget then
                     self:checkNeibor(x, y)
                 end
             end
@@ -668,7 +476,7 @@ end
 function MiaoPeople:doMove(diff)
     if self.state == PEOPLE_STATE.IN_MOVE then
         self.passTime = self.passTime+diff
-        if self.passTime > 1 then
+        if self.passTime >= self.waitTime then
             self.passTime = 0
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
@@ -676,9 +484,11 @@ function MiaoPeople:doMove(diff)
                 if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
                     self:handleHome()
                 --商人 工作移动到了目的点 开始 往回走了
-                elseif self.id == 2 then
+                elseif self.data.kind == 2 then
+                    if self.actionContext ~= nil then
+                        self.funcPeople:handleAction()
                     --收获农作物 商店资源
-                    if self.goBack == nil then
+                    elseif self.goBack == nil then
                         self.state = PEOPLE_STATE.FREE
                         self.goBack = true
                         self.realTarget:setOwner(nil)
@@ -728,6 +538,7 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
+                    self:beforeHandle()
                     --运送物资到工厂 带走农田产量
                     --之前的是农田 并且 农田已经 种植好了 则 走向 工厂
                     if self.realTarget.id == 2 then
@@ -753,19 +564,69 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.id == 14 then
                         self:handleTower()
                     end
+                    self:finishHandle()
                 end
                 self:setZord()
             else
+                --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                 local np = self.path[nextPoint]
-                local cxy = setBuildMap({1, 1, np[1], np[2]})
-                self.bg:runAction(moveto(1, cxy[1], cxy[2]))    
-                self:setDir(cxy[1], cxy[2])
-                self:setZord()
-                self.curPoint = self.curPoint+1
+                local buildCell = self.map.mapGridController.mapDict
+                local key = getMapKey(np[1], np[2])
+                local bv = buildCell[key]
+
+
+                local cp = self.path[self.curPoint]
+                local key = getMapKey(cp[1], cp[2])
+                local cv = buildCell[key]
+
+                --行走在有可能是斜坡的道路上面
+                --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
+                --根据normal 得到上坡 还是下坡'
+                --下个点在石头路上
+                local goYet = false
+                if bv ~= nil then
+                    local ons = bv[#bv][1].onSlope
+                    if ons then
+                        goYet = true
+                        local cxy = setBuildMap({1, 1, np[1], np[2]})
+                        self.waitTime = 4
+                        self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
+                        self:setDir(cxy[1], cxy[2])
+                        self:setZord()
+                        self:moveSlope(dx, dy, 0)
+                        self.curPoint = self.curPoint+1
+                    end
+                end
+                --当前点在 石头路上
+                if not goYet and cv ~= nil then
+                    local ons = cv[#cv][1].onSlope
+                    if ons then
+                        goYet = true
+                        local cxy = setBuildMap({1, 1, np[1], np[2]})
+                        self.waitTime = 4
+                        self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
+                        self:setDir(cxy[1], cxy[2])
+                        self:setZord()
+                        self:moveSlope(dx, dy, 1)
+                        self.curPoint = self.curPoint+1
+                    end
+                end
+
+                if not goYet then
+                    local cxy = setBuildMap({1, 1, np[1], np[2]})
+                    self.waitTime = 2
+                    self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                    self:setDir(cxy[1], cxy[2])
+                    self:setZord()
+                    self.curPoint = self.curPoint+1
+                end
                 --是否在运送货物
                 if self.food > 0 or self.stone > 0 or self.product > 0 then
                     self.health = self.health-1
                 end
+
             end
         end
     end
@@ -813,12 +674,18 @@ function MiaoPeople:calcG(x, y)
     --是建筑物 不能穿过
     if buildCell[key] ~= nil then
         local n = buildCell[key][#buildCell[key]][1]
+        --不是道路
+        if n.picName ~= 't' then
+            dist = 100
+        end
+        --[[
         --普通建筑物 斜坡 樱花树
         if n.picName == 'build' and (n.data.kind == 0 or n.data.kind == 1 or n.data.kind == 3) then
             dist = 100
         end
+        --]]
     else
-        --没有道路 河流 或者 草地
+        --没有道路 河流 或者 草地 建筑物
         dist = 50
     end
 
@@ -859,6 +726,10 @@ function MiaoPeople:checkNeibor(x, y)
         {x+1, y+1},
         {x-1, y+1},
     }
+    local isStart = false
+    if x == self.startPoint[1] and y == self.startPoint[2] then
+        isStart = true
+    end
     local curKey = getMapKey(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
@@ -883,6 +754,7 @@ function MiaoPeople:checkNeibor(x, y)
             --同一个位置 图层逐渐加上去的 所以检测最后一个层是什么类型即可
             --TODO 只有是ROAD 才能走过
             local hasRoad = false
+            local isTarget = false
             if buildCell[key] ~= nil then
                 local bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
@@ -890,10 +762,13 @@ function MiaoPeople:checkNeibor(x, y)
                     hasRoad = true
                     print("buildCell Kind Road")
                 else
-                    print("no road")
+                    if bb == self.predictTarget then
+                        isTarget = true
+                    end
+                    --print("no road")
                 end
             else
-                print("not Road")
+                --print("not Road")
             end
             --未遍历过 这个邻居 
             --没有 硬性阻碍
@@ -914,7 +789,11 @@ function MiaoPeople:checkNeibor(x, y)
             --end
             --使用最短路径 更新parent信息  
             --没有建筑物 和 道路的值 = 50
-            if staticObstacle[key] == nil and self.closedList[key] == nil then
+
+            --target 点不能和目标点紧邻 除了回家之外
+            --isTarget isStart 不能即是目标 也是 开始点 
+            if self.closedList[key] == nil and not (isTarget and isStart) and (hasRoad or isTarget or self.actionContext == CAT_ACTION.GO_HOME) then
+                --没有加入过openList
                 if self.cells[key] == nil then
                     self.cells[key] = {}
                     self.cells[key].parent = curKey
@@ -922,6 +801,7 @@ function MiaoPeople:checkNeibor(x, y)
                     self:calcH(nv[1], nv[2])
                     self:calcF(nv[1], nv[2])
                     self:pushQueue(nv[1], nv[2])
+                --加入过openList
                 else
                     local oldParent = self.cells[key]['parent']
                     local oldGScore = self.cells[key]['gScore']

@@ -22,32 +22,25 @@ function MiaoPage:ctor(s)
         for j=0, col-1, 1 do
             local s = CCSprite:create("sea.png")
             self.backpg:addChild(s)
-            setPos(s, {j*64+initx, i*32})
+            setScale(setPos(s, {j*128+initx, i*32}), 1)
         end
     end
 
-    --[[
-    self.tileMap = CCTMXTiledMap:create("nolayer.tmx")
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
+    self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
-    self:initTiles()
-    setPos(self.tileMap, {200, -100+FIX_HEIGHT})
-    --]]
-    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("myTile2.plist")
-    self.tileMap = CCSpriteBatchNode:create("myTile2.png")
-    self.bg:addChild(self.tileMap)
+    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
-    local mj = simple.decode(getFileData("newMap.json"))
+    local mj = simple.decode(getFileData("big512.json"))
     self.mapInfo = mj
     local width = mj.width
     local height = mj.height
     self.width = width
     self.height = height
     local tilesets = mj.tilesets
-    local tileName = {}
-    for k, v in ipairs(tilesets) do
-        tileName[v.firstgid] = v.image 
-    end
-    self.tileName = tileName
+    --1-64   --> tile0 tile63
+    --65-128 ---> tile0 tile63
+    --tid tileNames 
 
     local layers = mj.layers
     local layerName = {}
@@ -56,38 +49,19 @@ function MiaoPage:ctor(s)
     end
     self.layerName = layerName
 
-    for dk, dv in ipairs(layerName['slop1'].data) do
+    --affine 坐标计算mask2
+    local mask2 = {}
+    for dk, dv in ipairs(layerName.mask2.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            mask2[dk] = true
         end
     end
-    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+    self.mask2 = mask2
 
-    for dk, dv in ipairs(layerName['slop2'].data) do
+    for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-        end
-    end
-
-    for dk, dv in ipairs(layerName['ladder'].data) do
-        if dv ~= 0 then
-            local pname = tileName[dv]
+            local pname = tidToTile(dv)
+            --print("pname is what?", pname)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -96,13 +70,20 @@ function MiaoPage:ctor(s)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {(64-20)/sz.width, 20/sz.height})
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+            pic:setScale(1.05)
+            --[[
+            if w%2 ~= h%2 then
+                pic:setFlipX(true)
+                pic:setFlipY(true)
+            end
+            --]]
         end
     end
 
-    for dk, dv in ipairs(layerName['sea'].data) do
+    for dk, dv in ipairs(layerName.slop1.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
+            local pname = tidToTile(dv)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -110,25 +91,26 @@ function MiaoPage:ctor(s)
             local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.05)
         end
     end
-
-    for dk, dv in ipairs(layerName['fence'].data) do
+    for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
-            local pname = tileName[dv]
+            local pname = tidToTile(dv)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
             --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            --local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
-            local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
+            --local sz = pic:getContentSize()
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, mask2)
+            --print("cx cy", cx, cy)
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
         end
     end
+
 
 
     self.touchDelegate = StandardTouchHandler.new()
@@ -140,7 +122,7 @@ function MiaoPage:ctor(s)
 
     registerEnterOrExit(self)
     registerMultiTouch(self)
-    self.touchDelegate:scaleToMax(1)
+    self.touchDelegate:scaleToMax(0.5)
 end
 function MiaoPage:setPoint(x, y)
     local wp = self.bg:convertToWorldSpace(ccp(x, y))
@@ -201,20 +183,29 @@ function MiaoPage:touchesBegan(touches)
     if self.lastPos.count == 1 then
         local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         tp.y = tp.y-SIZEY
-        local allCell = self.buildLayer.mapGridController.mapDict
-        local map = getPosMap(1, 1, tp.x, tp.y)
-        local key = getMapKey(map[3], map[4])
-        --点击到某个建筑物
-        if allCell[key] ~= nil then
-            --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
-            --移动地图 和 单纯的点击 地图
-            --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
-            --    self.touchBuild = self.curBuild
-            --    self.touchBuild:touchesBegan(touches)
-            --else
-            self.touchBuild = allCell[key][#allCell[key]][1]
-            self.touchBuild:touchesBegan(touches)
-            --end
+        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask2)
+        print("touchesBegan", ax, ay, inClip, inHeight)
+        if not inClip then
+            --实际对应的建筑物块 向下偏移103个像素
+            if inHeight then
+                tp.y = tp.y-103
+            end
+
+            local allCell = self.buildLayer.mapGridController.mapDict
+            local map = getPosMap(1, 1, tp.x, tp.y)
+            local key = getMapKey(map[3], map[4])
+            --点击到某个建筑物
+            if allCell[key] ~= nil then
+                --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
+                --移动地图 和 单纯的点击 地图
+                --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
+                --    self.touchBuild = self.curBuild
+                --    self.touchBuild:touchesBegan(touches)
+                --else
+                self.touchBuild = allCell[key][#allCell[key]][1]
+                self.touchBuild:touchesBegan(touches)
+                --end
+            end
         end
     end
 
@@ -304,6 +295,8 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        --调整建筑物高度
+        self.curBuild:setPos(p)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
@@ -353,6 +346,8 @@ function MiaoPage:cancelBuild()
 end
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
+        local c = Logic.buildings[self.curBuild.id].silver
+        doCost(c)
         if self.curBuild.picName == 't' then
             table.insert(self.oldBuildPos, getPos(self.curBuild.bg))
             if #self.oldBuildPos >= 3 then
@@ -371,6 +366,7 @@ function MiaoPage:finishBuild()
                 self.curBuild = nil
             end
         --道路和 斜坡冲突 斜坡不能移动
+        --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
         elseif self.curBuild.picName == 't' then
             if self.curBuild.colNow == 0 then
                 self.curBuild:finishBuild()
@@ -379,7 +375,7 @@ function MiaoPage:finishBuild()
                 if type(self.curBuild.otherBuild) == 'table' then
                     local ob = self.curBuild.otherBuild
                     --斜坡
-                    if ob.picName == 'build' and ob.data.kind == 1 then
+                    if ob.picName == 'slope' then
                         self.curBuild:finishBuild()
                         self.curBuild = nil
                     else
@@ -389,21 +385,11 @@ function MiaoPage:finishBuild()
             end
         --矿坑
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 11 then
-            if self.curBuild.colNow == 0 then
-                addBanner("必须建造到斜坡上面！")
+            if self.curBuild.funcBuild:checkSlope() then
+                self.curBuild:finishBuild()
+                self.curBuild = nil
             else
-                local ret = false
-                if type(self.curBuild.otherBuild) == 'table' then
-                    local ob = self.curBuild.otherBuild
-                    if ob.picName == 'build' and ob.data.kind == 1 then
-                        ret = true
-                        self.curBuild:finishBuild()
-                        self.curBuild = nil
-                    end
-                end
-                if not ret then
-                    addBanner("必须建造到斜坡上面！")
-                end
+                addBanner("必须建造到斜坡上面！")
             end
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
@@ -430,8 +416,9 @@ function MiaoPage:finishBuild()
         else
             addBanner("和其它建筑物冲突啦！")
         end
+
         --根据当前的位置 调整一个新位置
-        if oldBuild.picName == 't' then
+        if oldBuild.picName == 't' and Logic.resource.silver >= Logic.buildings[15].silver then
             if #self.oldBuildPos == 1 then
                 self:beginBuild('build', 15, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
             else
