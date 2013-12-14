@@ -49,13 +49,47 @@ function MiaoPage:ctor(s)
     self.layerName = layerName
 
     --affine 坐标计算mask2
-    local mask2 = {}
-    for dk, dv in ipairs(layerName.mask2.data) do
-        if dv ~= 0 then
-            mask2[dk] = true
+    local mask2 = layerName.mask2.data
+    local mask3 = layerName.mask3.data
+    self.mask = {}
+    for i=1, #mask2, 1 do
+        if mask2[i] ~= 0 then
+            self.mask[i] = 1
+        elseif mask3[i] ~= 0 then
+            self.mask[i] = 2
+        else
+            self.mask[i] = 0
         end
     end
-    self.mask2 = mask2
+
+    --屏幕点 范围 到 axy的一个映射范围
+    --调整高度值
+    --检查一个小范围的 ax ay 即可 确定属于哪个ax ay
+    self.cxyToAxyMap = {}
+    for dk=1, #mask2, 1 do
+        local w = (dk-1)%width
+        local h = math.floor((dk-1)/width)
+        --affine to normal
+        local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+        --屏幕坐标 计算 mapDict 里面使用的坐标系统
+        --使用菱形的 中下点 对齐的
+        local left = cx-SIZEX+1
+        local right = cx+SIZEX-1
+        local bottom = cy+self.mask[dk]*103
+        local top = cy+SIZEY*2-1+self.mask[dk]*103
+        
+        left = round(left/SIZEX)
+        right = round(right/SIZEX)
+        bottom = round(bottom/SIZEY)
+        top = round(top/SIZEY)
+        --将该区域 插入到 对应的 cxy区域中
+        for i = left, right, 1 do
+            for j=bottom, top, 1 do
+                local v = getDefault(self.cxyToAxyMap, getMapKey(i, j), {})
+                table.insert(v, {w, h})
+            end
+        end
+    end
 
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
@@ -104,7 +138,7 @@ function MiaoPage:ctor(s)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             --local sz = pic:getContentSize()
-            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, mask2)
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             --print("cx cy", cx, cy)
             setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
         end
@@ -182,9 +216,10 @@ function MiaoPage:touchesBegan(touches)
     if self.lastPos.count == 1 then
         local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         tp.y = tp.y-SIZEY
-        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask2)
+        local ax, ay, height = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask, self.cxyToAxyMap)
         print("touchesBegan", ax, ay, inClip, inHeight)
-        if not inClip then
+        --没在裂缝里面
+        if ax ~= nil and ay ~= nil then
             --实际对应的建筑物块 向下偏移103个像素
             if inHeight then
                 tp.y = tp.y-103

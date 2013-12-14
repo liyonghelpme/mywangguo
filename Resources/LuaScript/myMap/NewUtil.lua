@@ -41,7 +41,26 @@ end
 --#   #
 -- # #
 --  #  
-function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
+--4 高度值
+function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
+    local nx = math.floor(cx/SIZEX)
+    local ny = math.floor(cy/SIZEY)
+
+    local allV = cxyToAxyMap(getMapKey(nx,ny))
+    if allV ~= nil then
+        for k, v in ipairs(allV) do
+            local hei = mask[v[2]*width+v[1]+1]
+            local ncy = cy-hei*103
+            local ax, ay = newCartesianToAffine(cx, ncy, width, height, fixX, fixY)
+            if ax == v[1] and ay == v[2] then
+                return ax, ay, hei
+            end
+        end
+    end
+    --没有找到包含的 菱形网格 在裂缝里面
+    return nil 
+
+    --[[
     local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     local dk = ay*width+ax+1
     if mask[dk] then
@@ -55,15 +74,14 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
         return ax, ay, true, false, nax, nay
     end
     return ax, ay, false, false
+    --]]
 end
 
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     --print("axyToCxyWithDepth", ax, ay, cx, cy)
-    if mask[dk] then
-        cy = cy+103
-    end
+    cy = cy+103*mask[dk]
     return cx, cy
 end
 
