@@ -79,12 +79,8 @@ function FuncBuild:adjustHeight()
     local p = getPos(self.baseBuild.bg)
     local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
     print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
-    local ad = adjustNewHeight(self.baseBuild.map.scene.mask2, self.baseBuild.map.scene.width, ax, ay)
-    if ad then
-        setPos(self.baseBuild.heightNode, {0, 103})
-    else
-        setPos(self.baseBuild.heightNode, {0, 0})
-    end
+    local hei = adjustNewHeight(self.baseBuild.map.scene.mask, self.baseBuild.map.scene.width, ax, ay)
+    setPos(self.baseBuild.heightNode, {0, hei*103})
 end
 
 function FuncBuild:showIncrease(n)

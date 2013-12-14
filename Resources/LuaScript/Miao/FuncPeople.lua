@@ -30,11 +30,7 @@ end
 function FuncPeople:setPos()
     local p = getPos(self.people.bg)
     local ax, ay = newCartesianToAffine(p[1], p[2], self.people.map.scene.width, self.people.map.scene.height, MapWidth/2, FIX_HEIGHT)
-    local ad = adjustNewHeight(self.people.map.scene.mask2, self.people.map.scene.width, ax, ay)
-    print("adjust People Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay, ad)
-    if ad then
-        setPos(self.people.heightNode, {0, 103})
-    else
-        setPos(self.people.heightNode, {0, 0})
-    end
+    local hei = adjustNewHeight(self.people.map.scene.mask, self.people.map.scene.width, ax, ay)
+    print("adjust People Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay, hei)
+    setPos(self.people.heightNode, {0, 103*hei})
 end

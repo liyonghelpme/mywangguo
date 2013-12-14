@@ -8,6 +8,7 @@ function newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     return cx, cy
 end
 
+--计算点击位置的中点对应的
 function newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     cx = cx-fixX
     cy = cy-fixY
@@ -42,16 +43,26 @@ end
 -- # #
 --  #  
 --4 高度值
+
+--得到当前点击网格 对应的地图网格 列表  
+--根据高度值 修正坐标Y值
+--根据修正后的 坐标计算 是否和该网格的地面网格相交 如果相交则点击的是该位置
 function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     local nx = math.floor(cx/SIZEX)
     local ny = math.floor(cy/SIZEY)
 
-    local allV = cxyToAxyMap(getMapKey(nx,ny))
+    local allV = cxyToAxyMap[getMapKey(nx,ny)]
+    print("check nx ny", nx, ny)
     if allV ~= nil then
+        print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
             local hei = mask[v[2]*width+v[1]+1]
             local ncy = cy-hei*103
-            local ax, ay = newCartesianToAffine(cx, ncy, width, height, fixX, fixY)
+            print("cx, ncy ", cx, ncy, cy)
+            --点击的位置向下偏移半个网格
+            --因为cartesianToNormal 使用的是菱形0.5 0 位置的点来计算normal的
+            local ax, ay = newCartesianToAffine(cx, ncy-SIZEY, width, height, fixX, fixY)
+            print("ax ay is", ax, ay)
             if ax == v[1] and ay == v[2] then
                 return ax, ay, hei
             end

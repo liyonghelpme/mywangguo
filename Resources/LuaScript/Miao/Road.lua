@@ -5,16 +5,12 @@ function Road:adjustValue()
     if not self.baseBuild.onSlope then
         print("adjust Value", self.baseBuild.value)
         setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+    else
+        self:whenColNow()
     end
 end
 
 function Road:adjustRoad()
-    --[[
-    if true then
-        return
-    end
-    print("MiaoBuild")
-    --]]
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态
@@ -144,12 +140,12 @@ function Road:whenColNow()
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
                 if self.baseBuild.otherBuild.dir == 0 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile26.png")
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
                     setYet = true
                     self.baseBuild.onSlope = true
                 elseif self.baseBuild.otherBuild.dir == 1 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile27.png")
+                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile37.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
                     setYet = true
                     self.baseBuild.onSlope = true
@@ -189,12 +185,12 @@ function Road:checkFinish()
     end
 end
 function Road:initView()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("road.plist")
     if self.baseBuild.privData.ladder == true then
         self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile36.png"), {170/512, 0})
         self.baseBuild.onSlope = true
     else
-        local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-        sf:addSpriteFramesWithFile("road.plist")
         self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("t0.png"), {170/512, 0})
     end
 end

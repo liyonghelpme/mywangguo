@@ -274,16 +274,17 @@ function MiaoBuild:touchesMoved(touches)
     local dify = self.lastPos[0][2]-oldPos[0][2]
     if self.doMove then
         local offY = (self.sx+self.sy)*SIZEY/2
-        local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-offY))
+        local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         
-        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask2)
+        local ax, ay, height = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask, self.map.scene.cxyToAxyMap)
+        print("touchMoved  !!", ax, ay, height)
         --移动不在裂缝里面
-        if not inClip then
-            --在高地上面 修正位置
-            if inHeight then
-                parPos.y = parPos.y-103
-            end
-
+        if ax ~= nil and ay ~= nil then
+            --在高地上面 修正位置 屏幕映射到 3D世界坐标
+            --cartesianToNormal 使用菱形 0.5 0 位置来计算normalPos位置点 所以要减去SIZEY
+            --参照MiaoPage 中touchesBegan的处理方法
+            parPos.y = parPos.y-103*height-SIZEY
+            
             local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
             --先判定是否冲突 再 设置位置
             local curPos = self.lastPos[0]
