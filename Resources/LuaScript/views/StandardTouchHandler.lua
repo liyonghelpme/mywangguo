@@ -10,8 +10,9 @@ function StandardTouchHandler:ctor()
     self.bg = nil
     self.targetMove = nil
     self.targetScale = nil
+    self.targetAnchor = nil
     --追踪所有的touch对象
-    self.touchValue = {}
+    self.touchValue = {count=0}
 end
 --调整状态的函数
 function StandardTouchHandler:update(diff)
@@ -23,41 +24,87 @@ function StandardTouchHandler:update(diff)
         local py = pos[2]*(1-smooth)+self.targetMove[2]*smooth
         setPos(self.bg, {px, py})
     end
+    if self.targetScale ~= nil then
+        local sca = getScale(self.bg)
+        local smooth = diff*5
+        smooth = math.min(smooth, 1)
+        local ns = sca*(1-smooth)+self.targetScale*smooth
+        setScale(self.bg, ns)
+    end
 end
 --world Points 世界坐标的点
 --x y id
 function StandardTouchHandler:tBegan(touches)
-    print("tBegan", sim:encode(touches))
+    --print("tBegan", sim:encode(touches))
     self.accMove = 0
     local temp1, temp2 = convertMultiToArr(touches)
     updateTouchTable(self.touchValue, temp2)
 end
 
-function StandardTouchHandler:fastScale(sca)
-    local oldScale = self.bg:getScale()
-    if oldScale+sca >= self.scaMax or oldScale+sca <= self.scaMin then
-        return 0
+function StandardTouchHandler:fastScale(sca, midOld)
+    --print("fastScale", sca, sim:encode(midOld))
+    if self.targetScale == nil then
+        self.targetScale = self.bg:getScale()
     end
-    self.bg:setScale(oldScale+sca)
-    return sca
+    local newScale = self.targetScale*sca
+    
+    if newScale >= self.scaMax and sca > 1 then
+        newScale = self.targetScale
+    end
+    if newScale <= self.scaMin and sca < 1 then
+        newScale = self.targetScale
+    end
+    local sz = self.bg:getContentSize() 
+    local wid = newScale*sz.width
+    local hei = newScale*sz.height
+    local vs = getVS()
+    local tm = self.targetMove or getPos(self.bg)
+
+    if tm[1]+wid <= vs.width+5 and sca < 1 then
+        newScale = self.targetScale 
+    end
+    if tm[2]+hei <= vs.height+5 and sca < 1 then
+        newScale = self.targetScale
+    end
+
+    --oldScale oldPos
+    local scale = getScale(self.bg)
+    local wid, hei = scale*sz.width, scale*sz.height
+    local pos = getPos(self.bg)
+    local ax, ay = (midOld[1]-pos[1])/wid, (midOld[2]-pos[2])/hei
+
+    local wid, hei = newScale*sz.width, newScale*sz.height
+    local px, py = midOld[1]-wid*ax, midOld[2]-hei*ay
+
+    self.targetScale = newScale
+    --midOld scale 再加上平移
+
+    --平移anchor点到 newScale 下相同的位置
+    if self.targetMove == nil then
+        self.targetMove = getPos(self.bg)
+    end
+    self:MoveBack(px-self.targetMove[1], py-self.targetMove[2])
 end
+
 function StandardTouchHandler:setBg(b)
     self.bg = b
 end
 function StandardTouchHandler:MoveBack(difx, dify)
+
     if self.targetMove == nil then
         self.targetMove = getPos(self.bg)
     end
     self.targetMove = {self.targetMove[1]+difx, self.targetMove[2]+dify}
     local sz = self.bg:getContentSize() 
     --要使用目标scale
-    local sca = self.bg:getScale()
+    --local sca = self.bg:getScale()
+    local sca = self.targetScale or self.bg:getScale()
     local wid = sca*sz.width
     local hei = sca*sz.height
     local vs = getVS()
     local tm = self.targetMove
     --保护边界
-    print("target Move is ", sim:encode(tm))
+    --print("target Move is ", sim:encode(tm))
     if tm[1] >= 5 and difx > 0 then
         self.targetMove[1] = tm[1]-difx
     end
@@ -152,7 +199,7 @@ function StandardTouchHandler:adjustMove()
 end
 
 function StandardTouchHandler:tMoved(touches)
-    print("tMoved", sim:encode(touches))
+    --print("tMoved", sim:encode(touches))
     local oldPos = copyTouchTable(self.touchValue)
     --local oldPos = self.lastPos
     --self.lastPos = convertMultiToArr(touches)
@@ -167,15 +214,15 @@ function StandardTouchHandler:tMoved(touches)
 
     --加入惯性支持 move惯性运动 设定移动目标 检测移动是否越界 可以保守估计范围
     --MapWdith - 20 MapHeight - 20
-    if self.lastPos.count == 2 then
+    if self.touchValue.count == 2 and self.touchValue[0] ~= nil and self.touchValue[1] ~= nil then
         --不足两个点
-        if oldPos.count < 2 or oldPos.count > 2 then
+        if oldPos.count < 2 or oldPos.count > 2 or oldPos[0] == nil or oldPos[1] == nil then
             self.targetMove = getPos(self.bg)
             return
         end
         local oldDis = distance(oldPos[0], oldPos[1])
-        local newDis = distance(self.lastPos[0], self.lastPos[1])
-        --print("oldDis newDis", oldDis, newDis)
+        local newDis = distance(self.touchValue[0], self.touchValue[1])
+        ----print("oldDis newDis", oldDis, newDis)
         --[[
         local sca = (newDis-oldDis)/100
         if math.abs(sca) < 0.03 then
@@ -183,18 +230,20 @@ function StandardTouchHandler:tMoved(touches)
         end
         --]]
 
-        --print("sca", sca)
+        ----print("sca", sca)
         local difx = oldPos[1][1]-oldPos[0][1]
         local dify = oldPos[1][2]-oldPos[0][2]
         --旧的顶点
         local midOld = {(oldPos[0][1]+oldPos[1][1])/2, (oldPos[0][2]+oldPos[1][2])/2}
-        local midNew = {(self.lastPos[0][1]+self.lastPos[1][1])/2, (self.lastPos[1][1]+self.lastPos[1][2])/2}
+        local midNew = {(self.touchValue[0][1]+self.touchValue[1][1])/2, (self.touchValue[0][2]+self.touchValue[1][2])/2}
         
+        local sca = newDis/oldDis
+        self:fastScale(sca, midOld)
         --local oldInBg = self.bg:convertToNodeSpace(ccp(midOld[1], midOld[2]))
         --local oldScale = self.bg:getScale()
         --sca = self:fastScale(sca)
         local move = {midNew[1]-midOld[1], midNew[2]-midOld[2]}
-        print("touch just Move ok?", sim:encode(move))
+        --print("touch just Move ok?", sim:encode(move))
         self:MoveBack(move[1], move[2])
 
         --local newInBg = self.bg:convertToWorldSpace(oldInBg)
@@ -207,23 +256,23 @@ function StandardTouchHandler:tMoved(touches)
         self:adjustMove()
         --]]
         
-    elseif self.lastPos.count == 1 then
-        if oldPos.count == 1 then
-            local difx = self.lastPos[0][1]-oldPos[0][1]
-            local dify = self.lastPos[0][2]-oldPos[0][2]
-            if math.abs(difx)+math.abs(dify) < 200 then
+    elseif self.touchValue.count == 1 and self.touchValue[0] ~= nil then
+        if oldPos.count == 1 and oldPos[0] ~= nil then
+            local difx = self.touchValue[0][1]-oldPos[0][1]
+            local dify = self.touchValue[0][2]-oldPos[0][2]
+            --if math.abs(difx)+math.abs(dify) < 200 then
                 self:MoveBack(difx, dify)
-            end
+            --end
         end
     end
 end
 function StandardTouchHandler:tEnded(touches)
-    print("tEnded", sim:encode(touches))
+    --print("tEnded", sim:encode(touches))
     local _, temp = convertMultiToArr(touches)
     clearTouchTable(self.touchValue, temp)    
 end
 function StandardTouchHandler:tCanceled(touches)
-    print("tCanceled", sim:encode(touches))
+    --print("tCanceled", sim:encode(touches))
 end
 
 function StandardTouchHandler:scaleToMax(sm)

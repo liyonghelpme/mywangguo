@@ -1414,6 +1414,9 @@ end
 function getScaleY(sp)
     return sp:getScaleY()
 end
+function getScale(s)
+    return s:getScale()
+end
 
 function updateTouchTable(a, b)
     for k, v in pairs(b) do
