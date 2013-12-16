@@ -152,8 +152,10 @@ function MoveMap:addBuilding(chd, z)
         self.removeLayer:addChild(chd.bg, z)
     elseif chd.picName == 'move' then
         self.removeLayer:addChild(chd.bg, z)
-    else
+    elseif chd.picName == 't' then
         self.roadLayer:addChild(chd.bg, z)
+    else
+        self.terrian:addChild(chd.bg, z)
     end
     self.mapGridController:addBuilding(chd)
 end

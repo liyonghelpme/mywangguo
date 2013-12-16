@@ -8,6 +8,13 @@ function newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     return cx, cy
 end
 
+--屏幕坐标空间的 normal到游戏世界坐标空间的 affine 坐标
+function newNormalToAffine(nx, ny, width, height, fixX, fixY)
+    local cx, cy = nx*SIZEX, ny*SIZEY
+    local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
+    return ax, ay
+end
+
 --计算点击位置的中点对应的
 function newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     cx = cx-fixX
@@ -21,15 +28,8 @@ end
 function adjustNewHeight(mask2, width, ax, ay)
     local dk = ay*width+ax+1
     --数组从1开始编号
-    print("ax ay obj offY !!!!!!!", ax, ay, offY, width, mask2[dk], dk)
-    --[[
-    if mask2[dk] then
-        setPos(obj, {0, offY})
-    else
-        setPos(obj, {0, 0})
-    end
-    --]]
-    return mask2[dk]
+    print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
+    return mask2[dk] or 0
 end
 
 --点击时使用 点击坐标 到 网格坐标转化

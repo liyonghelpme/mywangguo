@@ -13,6 +13,8 @@ require "Miao.Mine"
 require "Miao.Store"
 require "Miao.Fence"
 require "Miao.MiaoPath"
+require "Miao.RemoveBuild"
+require "Miao.MoveBuild"
 
 MiaoBuild = class()
 BUILD_STATE = {

@@ -158,11 +158,13 @@ function MiaoPage:ctor(s)
 
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
-            pic:setScale(1.05)
+            setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
+            pic:setScale(1.01)
+            
             --[[
             if w%2 ~= h%2 then
                 pic:setFlipX(true)

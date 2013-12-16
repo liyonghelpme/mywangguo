@@ -51,9 +51,9 @@ function Cat2:initView()
     --self.passTime = 0
     --registerEnterOrExit(self)
 
-    self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=20})
+    self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=30})
     setPos(self.people.stateLabel, {0, 100})
-    self.people.bg:addChild(self.people.stateLabel)
+    self.people.heightNode:addChild(self.people.stateLabel, 10)
 
 
     sf:addSpriteFramesWithFile("car.plist")
@@ -111,7 +111,8 @@ function Cat2:findTarget()
     self.allFoodFarm = allFoodFarm
     self.allStoneQuarry = allStoneQuarry
 
-
+    --规划一个 附近可能建筑物的列表 和 附近建筑物的寻路方法10*10 的格子
+    print("path dirty ", self.people.dirty)
     --初始化路径信息
     if self.people.miaoPath.allBuilding == nil or self.people.dirty == true then
         self.people.dirty = false

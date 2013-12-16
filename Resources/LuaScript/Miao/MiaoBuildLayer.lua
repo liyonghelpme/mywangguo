@@ -14,6 +14,7 @@ function MiaoBuildLayer:ctor(s)
     
     self.bg = CCLayer:create()
     self.mapGridController = MapGridController.new(self)
+    self.terrian = addCLayer(self.bg)
     self.roadLayer = CCLayer:create()
     self.bg:addChild(self.roadLayer)
     self.farmLayer = CCLayer:create()
@@ -358,7 +359,7 @@ function MiaoBuildLayer:initRoad()
             else
                 dir = 2
             end
-            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname})
+            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname, ax=w, ay=h})
             local p = normalizePos({cx, cy}, 1, 1)
             b:setPos(p)
             b:setColPos()
