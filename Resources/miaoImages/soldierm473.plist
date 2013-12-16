@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>ss473m0.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m1.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{170,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m2.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{340,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m3.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{510,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m4.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{680,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m5.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{850,0},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+		<key>ss473m6.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,114},{170,114}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {170,114}}</string>
+			<key>sourceSize</key>
+			<string>{170,114}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>2</integer>
+		<key>realTextureFileName</key>
+		<string>soldierm473.png</string>
+		<key>size</key>
+		<string>{1024,256}</string>
+		<key>textureFileName</key>
+		<string>soldierm473.png</string>
+	</dict>
+</dict>
+</plist>

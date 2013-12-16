@@ -25,6 +25,9 @@ function registerMultiTouch(obj)
         elseif eventType == "ended" then
             return obj:touchesEnded(touches)
         elseif eventType == "cancelled" then
+            if obj.touchesCanceled ~= nil then
+                return obj:touchesCanceled(touches)
+            end
         end
     end
     --single Touch
@@ -459,13 +462,15 @@ function convertMultiToArr(touches)
     local ids = {}
     local x, y
     local count = 0
+    --x y id
     for i, v in ipairs(touches) do
         if (i-1) % 3 == 0 then
             x = v
         elseif (i-1) % 3 == 1 then
             y = v
+        --x y id
         else 
-            lastPos[v] = {x, y}
+            lastPos[v] = {x, y, v}
             count = count+1
             table.insert(ids, v)
         end
@@ -477,7 +482,8 @@ function convertMultiToArr(touches)
         temp[k-1] = lastPos[v]
     end
     temp.count = count
-    return temp
+    --id map--->xy
+    return temp, lastPos
 end
 
 function setDesignScale(sp)
@@ -1407,4 +1413,26 @@ function setFlipX(sp, f)
 end
 function getScaleY(sp)
     return sp:getScaleY()
+end
+
+function updateTouchTable(a, b)
+    for k, v in pairs(b) do
+        if a[k] == nil then
+            a.count = a.count+1
+        end
+        a[k] = v
+    end
+end
+function clearTouchTable(a, b)
+    for k, v in pairs(b) do
+        a[k] = nil
+        a.count = a.count-1
+    end
+end
+function copyTouchTable(a)
+    local temp = {}
+    for k, v in pairs(a) do
+        temp[k] = v
+    end
+    return temp
 end

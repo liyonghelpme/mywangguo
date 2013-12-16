@@ -7,6 +7,7 @@ function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
     setContentSize(self.bg, {MapWidth, MapHeight})
+    setAnchor(self.bg, {0, 0})
 
     self.oldBuildPos = {}
 
@@ -208,7 +209,7 @@ function MiaoPage:ctor(s)
 
 
     self.touchDelegate = StandardTouchHandler.new()
-    self.touchDelegate.bg = self.bg
+    self.touchDelegate:setBg(self.bg)
     self.blockMove = false
     
     self.buildLayer = MiaoBuildLayer.new(self)
@@ -225,6 +226,9 @@ function MiaoPage:setPoint(x, y)
     local dy = sz[2]/2-wp.y
     local curPos = getPos(self.bg)
     setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
+end
+function MiaoPage:touchesCanceled(touches)
+    self.touchDelegate:tCanceled(touches)
 end
 --初始化地图遮罩部分 不用了 新的直接CCBatchNodeSprite 来绘制遮罩
 function MiaoPage:initTiles()
@@ -252,6 +256,10 @@ end
 function MiaoPage:enterScene()
     Event:registerEvent(EVENT_TYPE.DO_MOVE, self)
     Event:registerEvent(EVENT_TYPE.FINISH_MOVE, self)
+    registerUpdate(self)
+end
+function MiaoPage:update(diff)
+    self.touchDelegate:update(diff)
 end
 function MiaoPage:exitScene()
     Event:unregisterEvent(EVENT_TYPE.DO_MOVE, self)

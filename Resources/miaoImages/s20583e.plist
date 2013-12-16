@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>s20583e0.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,0},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e1.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{289,0},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e2.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{578,0},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e3.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,214},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e4.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{289,214},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e5.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{578,214},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+		<key>s20583e6.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,428},{289,214}}</string>
+			<key>offset</key>
+			<string>{0, 0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0, 0}, {289,214}}</string>
+			<key>sourceSize</key>
+			<string>{289,214}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>2</integer>
+		<key>realTextureFileName</key>
+		<string>s20583e.png</string>
+		<key>size</key>
+		<string>{1024,1024}</string>
+		<key>textureFileName</key>
+		<string>s20583e.png</string>
+	</dict>
+</dict>
+</plist>
