@@ -1,8 +1,11 @@
 local sim = require "SimpleJson"
 StandardTouchHandler = class()
 function StandardTouchHandler:ctor()
+    local vs = getVS()
     self.scaMax = 1.50
-    self.scaMin = 0.5
+    --确保最小比例 比屏幕大
+    self.scaMin = math.max(0.5, math.max(vs.width/MapWidth, vs.height/MapHeight))
+    --self.scaMin = 0.5
     self.bg = nil
 end
 --world Points 世界坐标的点
@@ -75,6 +78,30 @@ function StandardTouchHandler:ScaleBack(sca)
     self.bg:setScale(oldScale+sca)
     return sca
 end
+function StandardTouchHandler:adjustMove()
+    local leftTop = self.bg:convertToWorldSpace(ccp(0, 0))
+    local sz = self.bg:getContentSize()
+    local rightBottom = self.bg:convertToWorldSpace(ccp(sz.width, sz.height))
+    local difX = 0;
+    local difY = 0;
+    if leftTop.x > 0 then
+        difX = -leftTop.x
+    end
+    if leftTop.y > 0 then
+        difY = -leftTop.y
+    end
+
+    local disSize = global.director.disSize
+    if rightBottom.x < disSize[1] then
+        difX = disSize[1]-rightBottom.x
+    end
+    if rightBottom.y < disSize[2] then
+        difY = disSize[2]-rightBottom.y
+    end
+    local oldPos = getPos(self.bg)
+    setPos(self.bg, {oldPos[1]+difX, oldPos[2]+difY})
+end
+
 function StandardTouchHandler:tMoved(touches)
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
@@ -92,6 +119,10 @@ function StandardTouchHandler:tMoved(touches)
         local newDis = distance(self.lastPos[0], self.lastPos[1])
         --print("oldDis newDis", oldDis, newDis)
         local sca = (newDis-oldDis)/100
+        if math.abs(sca) < 0.03 then
+            return
+        end
+
         --print("sca", sca)
         local difx = oldPos[1][1]-oldPos[0][1]
         local dify = oldPos[1][2]-oldPos[0][2]
@@ -103,15 +134,12 @@ function StandardTouchHandler:tMoved(touches)
         sca = self:fastScale(sca)
         local newInBg = self.bg:convertToWorldSpace(oldInBg)
         local move = {midOld[1]-newInBg.x, midOld[2]-newInBg.y}
-        self:MoveBack(move[1], move[2])
-        self.bg:setScale(oldScale)
-        sca = self:ScaleBack(sca)
-
-        newInBg = self.bg:convertToWorldSpace(oldInBg)
-        move = {midOld[1]-newInBg.x, midOld[2]-newInBg.y}
-        self:MoveBack(move[1], move[2])
+        if math.abs(move[1]) > 3 or math.abs(move[2]) > 3 then
+            self:MoveBack(move[1], move[2])
+        end
+        self:adjustMove()
+        
     elseif self.lastPos.count == 1 then
-        --上一次也只有一个手指
         if oldPos.count == 1 then
             local difx = self.lastPos[0][1]-oldPos[0][1]
             local dify = self.lastPos[0][2]-oldPos[0][2]
