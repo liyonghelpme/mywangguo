@@ -50,13 +50,105 @@ function MiaoPage:ctor(s)
     self.layerName = layerName
 
     --affine 坐标计算mask2
-    local mask2 = {}
-    for dk, dv in ipairs(layerName.mask2.data) do
-        if dv ~= 0 then
-            mask2[dk] = true
+    local mask2 = layerName.mask2.data
+    local mask3 = layerName.mask3.data
+    self.mask = {}
+    for i=1, #mask2, 1 do
+        if mask2[i] ~= 0 then
+            self.mask[i] = 1
+        elseif mask3[i] ~= 0 then
+            self.mask[i] = 2
+        else
+            self.mask[i] = 0
         end
     end
-    self.mask2 = mask2
+
+    --[[
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("whiteGeo.plist")
+    local debug = CCSpriteBatchNode:create("whiteGeo.png")
+    self.bg:addChild(debug, 10)
+    --]]
+
+    --屏幕点 范围 到 axy的一个映射范围
+    --调整高度值
+    --检查一个小范围的 ax ay 即可 确定属于哪个ax ay
+    self.cxyToAxyMap = {}
+    for dk=1, #mask2, 1 do
+        --if dk <= 10 and dk >= 1 and dk%2 == 1 then
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            --affine to normal
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            --屏幕坐标 计算 mapDict 里面使用的坐标系统
+            --使用菱形的 中下点 对齐的
+            local left = cx-SIZEX
+            local right = cx+SIZEX
+            local bottom = cy+self.mask[dk]*103
+            local top = cy+SIZEY*2+self.mask[dk]*103
+            
+            left = math.floor(left/SIZEX)
+            right = math.ceil(right/SIZEX)
+            bottom = math.floor(bottom/SIZEY)
+            top = math.ceil(top/SIZEY)
+            --[[
+            print("left right", cx, cy, left, right, bottom, top)
+            local c = {255, 0, 0}
+            local wid = (right-left)*SIZEX
+            local hei = (top-bottom)*SIZEY
+            for i=left,right-1,1 do
+                for j=bottom,top-1,1 do
+                    local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whitebox.png"), c), {SIZEX, SIZEY})
+                    debug:addChild(sp)
+                    setAnchor(setPos(sp, {i*SIZEX, j*SIZEY}), {0, 0})
+                end
+            end
+
+            local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whiteArrow.png"), c), {SIZEX*2, SIZEY*2})
+            debug:addChild(sp)
+            local cx, cy = newAffineToCartesian(w, h, self.width, self.height, MapWidth/2, FIX_HEIGHT)
+            setAnchor(setPos(sp, {cx, cy}), {0.5, 0})
+            --]]
+
+            --将该区域 插入到 对应的 cxy区域中
+            for i = left, right-1, 1 do
+                for j=bottom, top-1, 1 do
+                    --print("i j is", i, j, w, h)
+                    local v = getDefault(self.cxyToAxyMap, getMapKey(i, j), {})
+                    table.insert(v, {w, h})
+                end
+            end
+       -- end
+    end
+    
+    --[[
+    local n = 0
+    for k, v in pairs(self.cxyToAxyMap) do
+        if n == 0  or n == 1 then
+            local x, y = getXY(k)
+            local md =  (x+y)%3
+            local c
+            if md == 0 then
+                c = {255, 0, 0, 128}
+            elseif md == 1 then
+                c = {0, 255, 0, 128}
+            else
+                c = {0, 0, 255, 128}
+            end
+            local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whitebox.png"), c), {SIZEX, SIZEY})
+            debug:addChild(sp)
+            setAnchor(setPos(sp, {x*SIZEX, y*SIZEY}), {0, 0})
+            for _, dv in ipairs(v) do
+                local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whiteArrow.png"), c), {SIZEX*2, SIZEY*2})
+                debug:addChild(sp)
+                local cx, cy = newAffineToCartesian(dv[1], dv[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
+                setAnchor(setPos(sp, {cx, cy}), {0.5, 0})
+            end
+        else
+        end
+        n = n +1
+    end
+    --]]
 
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
@@ -67,11 +159,13 @@ function MiaoPage:ctor(s)
 
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
-            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
-            pic:setScale(1.05)
+            setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
+            pic:setScale(1.01)
+            
             --[[
             if w%2 ~= h%2 then
                 pic:setFlipX(true)
@@ -105,7 +199,7 @@ function MiaoPage:ctor(s)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             --local sz = pic:getContentSize()
-            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, mask2)
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             --print("cx cy", cx, cy)
             setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
         end
@@ -182,14 +276,14 @@ function MiaoPage:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
     if self.lastPos.count == 1 then
         local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
-        tp.y = tp.y-SIZEY
-        local ax, ay, inClip, inHeight = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask2)
-        print("touchesBegan", ax, ay, inClip, inHeight)
-        if not inClip then
+        --tp.y = tp.y-SIZEY
+        local ax, ay, height = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask, self.cxyToAxyMap)
+        print("touchesBegan", ax, ay, height)
+        --没在裂缝里面
+        if ax ~= nil and ay ~= nil then
             --实际对应的建筑物块 向下偏移103个像素
-            if inHeight then
-                tp.y = tp.y-103
-            end
+            --偏移计算建筑物的位置
+            tp.y = tp.y-103*height-SIZEY
 
             local allCell = self.buildLayer.mapGridController.mapDict
             local map = getPosMap(1, 1, tp.x, tp.y)

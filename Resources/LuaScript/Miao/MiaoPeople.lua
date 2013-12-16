@@ -226,11 +226,22 @@ function MiaoPeople:update(diff)
     self:doMove(diff)
     self:doWork(diff)
     self:doPaused(diff)
+    local s = ''
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            s = s..v[1]..'\n'
+        else
+            s = s..v..'\n'
+        end
+    end
+    self.stateLabel:setString(s)
+    --[[
     if self.predictTarget ~= nil then
         self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
     else
         self.stateLabel:setString(str(self.state).." hea "..self.health)
     end
+    --]]
 end
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
@@ -583,7 +594,10 @@ function MiaoPeople:doMove(diff)
                 --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
                 --根据normal 得到上坡 还是下坡'
                 --下个点在石头路上
+                --下一个点是斜坡 下下一个点的高度值 和当前点高度值 平均值 
                 local goYet = false
+                --道路是onSlope 
+                --道路下面的斜坡才是真正的地形高度
                 if bv ~= nil then
                     local ons = bv[#bv][1].onSlope
                     if ons then
@@ -594,11 +608,14 @@ function MiaoPeople:doMove(diff)
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
                         self:setZord()
-                        self:moveSlope(dx, dy, 0)
+                        --local nnp = self.path[nextPoint+1]
+                        --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
+                        --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
+                        self:moveSlope(dx, dy, 0, bv[#bv-1][1].height)
                         self.curPoint = self.curPoint+1
                     end
                 end
-                --当前点在 石头路上
+                --当前点在 斜坡上 下一个点的高度值
                 if not goYet and cv ~= nil then
                     local ons = cv[#cv][1].onSlope
                     if ons then
@@ -609,7 +626,7 @@ function MiaoPeople:doMove(diff)
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
                         self:setZord()
-                        self:moveSlope(dx, dy, 1)
+                        self:moveSlope(dx, dy, 1, np)
                         self.curPoint = self.curPoint+1
                     end
                 end
@@ -638,16 +655,21 @@ end
 --人物播放劳作动画
 function MiaoPeople:doWork(diff)
     if self.state == PEOPLE_STATE.IN_WORK then
-        self.workTime = self.workTime+diff
-        --工厂工作
-        if self.realTarget.id == 5 then
-            self:workInFactory()
-        --在采石场工作
-        elseif self.realTarget.id == 11 then
-            self:workInMine()
-        --农田工作 
-        elseif self.realTarget.id == 2 then
-            self:workInFarm()
+        if self.realTarget.deleted then
+            self:clearStateStack()
+            self:resetState()
+        else
+            self.workTime = self.workTime+diff
+            --工厂工作
+            if self.realTarget.id == 5 then
+                self:workInFactory()
+            --在采石场工作
+            elseif self.realTarget.id == 11 then
+                self:workInMine()
+            --农田工作 
+            elseif self.realTarget.id == 2 then
+                self:workInFarm()
+            end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
         self:workInHome(diff)

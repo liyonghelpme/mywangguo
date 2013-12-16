@@ -8,6 +8,14 @@ function newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     return cx, cy
 end
 
+--屏幕坐标空间的 normal到游戏世界坐标空间的 affine 坐标
+function newNormalToAffine(nx, ny, width, height, fixX, fixY)
+    local cx, cy = nx*SIZEX, ny*SIZEY
+    local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
+    return ax, ay
+end
+
+--计算点击位置的中点对应的
 function newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     cx = cx-fixX
     cy = cy-fixY
@@ -20,15 +28,8 @@ end
 function adjustNewHeight(mask2, width, ax, ay)
     local dk = ay*width+ax+1
     --数组从1开始编号
-    print("ax ay obj offY !!!!!!!", ax, ay, offY, width, mask2[dk], dk)
-    --[[
-    if mask2[dk] then
-        setPos(obj, {0, offY})
-    else
-        setPos(obj, {0, 0})
-    end
-    --]]
-    return mask2[dk]
+    print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
+    return mask2[dk] or 0
 end
 
 --点击时使用 点击坐标 到 网格坐标转化
@@ -41,7 +42,36 @@ end
 --#   #
 -- # #
 --  #  
-function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
+--4 高度值
+
+--得到当前点击网格 对应的地图网格 列表  
+--根据高度值 修正坐标Y值
+--根据修正后的 坐标计算 是否和该网格的地面网格相交 如果相交则点击的是该位置
+function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
+    local nx = math.floor(cx/SIZEX)
+    local ny = math.floor(cy/SIZEY)
+
+    local allV = cxyToAxyMap[getMapKey(nx,ny)]
+    print("check nx ny", nx, ny)
+    if allV ~= nil then
+        print("allV ", #allV, simple.encode(allV))
+        for k, v in ipairs(allV) do
+            local hei = mask[v[2]*width+v[1]+1]
+            local ncy = cy-hei*103
+            print("cx, ncy ", cx, ncy, cy)
+            --点击的位置向下偏移半个网格
+            --因为cartesianToNormal 使用的是菱形0.5 0 位置的点来计算normal的
+            local ax, ay = newCartesianToAffine(cx, ncy-SIZEY, width, height, fixX, fixY)
+            print("ax ay is", ax, ay)
+            if ax == v[1] and ay == v[2] then
+                return ax, ay, hei
+            end
+        end
+    end
+    --没有找到包含的 菱形网格 在裂缝里面
+    return nil 
+
+    --[[
     local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     local dk = ay*width+ax+1
     if mask[dk] then
@@ -55,15 +85,14 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask)
         return ax, ay, true, false, nax, nay
     end
     return ax, ay, false, false
+    --]]
 end
 
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     --print("axyToCxyWithDepth", ax, ay, cx, cy)
-    if mask[dk] then
-        cy = cy+103
-    end
+    cy = cy+103*mask[dk]
     return cx, cy
 end
 

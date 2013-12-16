@@ -14,6 +14,7 @@ function MiaoBuildLayer:ctor(s)
     
     self.bg = CCLayer:create()
     self.mapGridController = MapGridController.new(self)
+    self.terrian = addCLayer(self.bg)
     self.roadLayer = CCLayer:create()
     self.bg:addChild(self.roadLayer)
     self.farmLayer = CCLayer:create()
@@ -53,7 +54,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        self:addPeople(6)
+        --self:addPeople(6)
     end
 end
 
@@ -342,7 +343,7 @@ function MiaoBuildLayer:initRoad()
     end
     --]]
 
-    for dk, dv in ipairs(self.scene.layerName['slop2'].data) do
+    for dk, dv in ipairs(self.scene.layerName.slop2.data) do
         if dv ~= 0 then
             local pname = tidToTile(dv)
             local w = (dk-1)%width
@@ -358,7 +359,7 @@ function MiaoBuildLayer:initRoad()
             else
                 dir = 2
             end
-            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname})
+            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname, ax=w, ay=h})
             local p = normalizePos({cx, cy}, 1, 1)
             b:setPos(p)
             b:setColPos()
@@ -377,7 +378,6 @@ function MiaoBuildLayer:initRoad()
 
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            
             local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0})
             local p = normalizePos({cx, cy}, 1, 1)
             b:setPos(p)
@@ -410,44 +410,6 @@ function MiaoBuildLayer:initRoad()
     end
 end
 
---[[
-function MiaoBuildLayer:initRoad()
-    --不用调整road 的 方向信息的info
-    local nlayer = self.scene.tileMap:layerNamed("road")
-    print("init road now", nlayer)
-    if nlayer ~= nil then
-        for i = 0, MapGX-1, 1 do
-            for j=0, MapGY-1, 1 do
-                --28 ~ 36
-                local gid = nlayer:tileGIDAt(ccp(i, j))
-                if gid ~= 0 then
-                    local cx, cy = affineToCartesian(i, j)
-                    print("road x y", cx, cy)
-                    local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
-                    local p = normalizePos({cx, cy}, 1, 1)
-                    b:setPos(p)
-                    b:setColPos()
-                    self:addBuilding(b, MAX_BUILD_ZORD)
-                    b:setPos(p)
-                    b:finishBuild()
-                end
-            end
-        end
-    end
-
-    local temp = {{24, 14}, {25, 13}, {26, 12}}
-    for k, v in ipairs(temp) do
-        local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false})
-        local p = normalizePos(setBuildMap({1, 1, v[1], v[2]}), 1, 1)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-    end
-     
-end
---]]
 function MiaoBuildLayer:initData()
     --构造16种 类型的 道路连接方式
     local initX = 60

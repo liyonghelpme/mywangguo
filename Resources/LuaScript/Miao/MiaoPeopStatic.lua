@@ -264,13 +264,15 @@ function MiaoPeople:sendGoods()
     setScaleX(self.changeDirNode, -sca)
 end
 function MiaoPeople:putGoods()
-    self.send = false
-    setDisplayFrame(self.changeDirNode, "cat_"..self.id.."_rb_0.png")
-    local sca = getScaleY(self.changeDirNode)
-    setScaleX(self.changeDirNode, sca)
-    if self.carGoods ~= nil then
-        removeSelf(self.carGoods)
-        self.carGoods = nil
+    if self.send then
+        self.send = false
+        setDisplayFrame(self.changeDirNode, "cat_"..self.id.."_rb_0.png")
+        local sca = getScaleY(self.changeDirNode)
+        setScaleX(self.changeDirNode, sca)
+        if self.carGoods ~= nil then
+            removeSelf(self.carGoods)
+            self.carGoods = nil
+        end
     end
 end
 
@@ -374,7 +376,11 @@ end
 function MiaoPeople:popState()
     if #self.stateStack > 0 then
         for k, v in ipairs(self.stateStack) do
-            print("state", k, v[1])
+            if type(v) == 'table' then
+                print("state", k, v[1])
+            else
+                print('state', k, v)
+            end
         end
         local stop = self.stateStack[#self.stateStack]
         self.stateContext = stop
@@ -644,25 +650,32 @@ function MiaoPeople:clearStateStack()
     self.stateStack = {}
     self.stateContext = nil
     self.actionContext = nil
+    
+    --清理运输状态
+    self:putGoods()
+    self:setDir(1, -1)
 end
 function MiaoPeople:setPos(p)
     setPos(self.bg, p)
     self.funcPeople:setPos()
 end
-function MiaoPeople:moveSlope(dx, dy, val)
-    if dy < 0 then
-        if val == 0 then
-            self.slopeAct = moveto(self.waitTime, 0, 51)
-        else
-            self.slopeAct = moveto(self.waitTime, 0, 0)
-        end
-        self.heightNode:runAction(self.slopeAct)
-    else 
-        if val == 0 then
-            self.slopeAct = moveto(self.waitTime, 0, 51)
-        else
-            self.slopeAct = moveto(self.waitTime, 0, 103)
-        end
-        self.heightNode:runAction(self.slopeAct)
+function MiaoPeople:moveSlope(dx, dy, val, cp, nnp)
+    --就要上坡 下下个目标点高度
+    if val == 0 then
+        --[[
+        local cax, cay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+        local chei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, cax, cay) 
+
+        local nax, nay = newNormalToAffine(nnp[1], nnp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+        local nhei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, nax, nay) 
+        local mid = (chei+nhei)/2*103
+        --]]
+        self.slopeAct = moveto(self.waitTime, 0, cp)
+    --当前斜坡 目标点高度
+    else
+        local cax, cay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+        local chei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, cax, cay) 
+        self.slopeAct = moveto(self.waitTime, 0, chei*103)
     end
+    self.heightNode:runAction(self.slopeAct)
 end
