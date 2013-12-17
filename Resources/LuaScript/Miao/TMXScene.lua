@@ -1,5 +1,6 @@
 require "Miao.MiaoPage"
-require "Miao.TMXMenu"
+--require "Miao.TMXMenu"
+require "Miao.TMXMenu2"
 require "Miao.NewGame"
 TMXScene = class()
 
@@ -10,7 +11,7 @@ function TMXScene:ctor()
     self.bg = CCScene:create()
     self.page = MiaoPage.new(self)
     self.bg:addChild(self.page.bg)
-    self.menu = TMXMenu.new(self)
+    self.menu = TMXMenu2.new(self)
     self.bg:addChild(self.menu.bg)
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)

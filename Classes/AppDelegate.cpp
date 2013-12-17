@@ -64,7 +64,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     delete nm;
 	//searchPath 都在一个位置设置
 	CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
-    CCFileUtils::sharedFileUtils()->addSearchPath("images");
+    CCFileUtils::sharedFileUtils()->addSearchPath("image2");
+	CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 	//updateFiles();

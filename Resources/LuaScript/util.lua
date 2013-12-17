@@ -1323,22 +1323,29 @@ function colorWords(param)
     local curX = 0
     local height = 0
     local totalHeight = 0
-    local width = param.width
+    local width = param.width or 999999
     print("curWord", s)
     for i=1, #over, 1 do
         print("split", over[i])
         print("word x y", curX, totalHeight)
         if string.find(over[i], '<') ~= nil then
             local p = split(over[i], '<')
-            if #p[1] > 0 then
+            if #p == 1 then
+                local cv = string.sub(p[1], 1, 6)
+                local l = ui.newTTFLabel({text=string.sub(p[1], 7), color=hexToDec(cv), size=si})
+                n:addChild(l)
+                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                local lSize = l:getContentSize()
+                curX = curX+lSize.width
+                height = lSize.height
+            elseif #p[1] > 0 then
                 local l = ui.newTTFLabel({text=p[1], color=col, size=si})
                 n:addChild(l)
                 setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
                 local lSize = l:getContentSize()
                 height = lSize.height
                 curX = curX+lSize.width
-            end
-            if #p[2] > 0 then
+            elseif p[2] ~= nil and #p[2] > 0 then
                 local cv = string.sub(p[2], 1, 6)
                 local l = ui.newTTFLabel({text=string.sub(p[2], 7), color=hexToDec(cv), size=si})
                 n:addChild(l)
