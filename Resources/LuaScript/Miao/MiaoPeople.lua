@@ -45,6 +45,8 @@ function MiaoPeople:ctor(m, data)
     self.food = 0
     self.stone = 0
     self.product = 0
+    --修习之后就升级
+    self.level = 0
     self.data = Logic.people[self.id]
     --普通猫咪 才会有私有的miaoPath
     if self.data.kind == 1 then
