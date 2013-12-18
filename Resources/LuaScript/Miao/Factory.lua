@@ -6,12 +6,14 @@ end
 function Factory:clearWorker(b)
     self.worker = nil
 end
+--[[
 function Factory:showInfo()
     local bi
     bi = FactoryInfo.new(self.baseBuild)
     global.director:pushView(bi, 1, 0)
     global.director.curScene.menu:setMenu(bi)
 end
+--]]
 function Factory:startWork()
     if self.banner == nil then
         local banner = setSize(CCSprite:create("probg.png"), {200, 38})

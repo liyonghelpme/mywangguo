@@ -163,7 +163,6 @@ function NewBuildMenu2:touchEnded(x, y)
                     addBanner("金钱不足!")
                 else
                     global.director:popView() 
-                    self.scene.menu:clearMenu()
                     self.btype = t            
                     if Logic.inNew and not Logic.newBuildYet then
                         Logic.newBuildYet = true
@@ -173,7 +172,7 @@ function NewBuildMenu2:touchEnded(x, y)
                         return
                     end
 
-                    self.scene.page:beginBuild('build', t)
+                    global.director.curScene.page:beginBuild('build', t)
                     return 
                 end
             end

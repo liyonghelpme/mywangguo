@@ -25,6 +25,9 @@ function registerMultiTouch(obj)
         elseif eventType == "ended" then
             return obj:touchesEnded(touches)
         elseif eventType == "cancelled" then
+            if obj.touchesCanceled ~= nil then
+                return obj:touchesCanceled(touches)
+            end
         end
     end
     --single Touch
@@ -65,10 +68,12 @@ function registerEnterOrExit(obj)
             if obj.enterScene ~= nil then
                 obj:enterScene()
             end
+            regEvent(obj)
         elseif tag == 'exit' then
             if obj.updateFunc ~= nil then
                 CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(obj.updateFunc)
             end
+            clearEvent(obj)
             if obj.exitScene ~= nil then
                 obj:exitScene()
             end
@@ -465,7 +470,7 @@ function convertMultiToArr(touches)
         elseif (i-1) % 3 == 1 then
             y = v
         else 
-            lastPos[v] = {x, y}
+            lastPos[v] = {x, y, v}
             count = count+1
             table.insert(ids, v)
         end
@@ -477,7 +482,7 @@ function convertMultiToArr(touches)
         temp[k-1] = lastPos[v]
     end
     temp.count = count
-    return temp
+    return temp, lastPos
 end
 
 function setDesignScale(sp)
@@ -1414,4 +1419,45 @@ function setFlipX(sp, f)
 end
 function getScaleY(sp)
     return sp:getScaleY()
+end
+
+function getScale(s)
+    return s:getScale()
+end
+
+function updateTouchTable(a, b)
+    for k, v in pairs(b) do
+        if a[k] == nil then
+            a.count = a.count+1
+        end
+        a[k] = v
+    end
+end
+function clearTouchTable(a, b)
+    for k, v in pairs(b) do
+        a[k] = nil
+        a.count = a.count-1
+    end
+end
+function copyTouchTable(a)
+    local temp = {}
+    for k, v in pairs(a) do
+        temp[k] = v
+    end
+    return temp
+end
+
+function regEvent(s)
+    if s.events ~= nil then
+        for k, v in ipairs(s.events) do
+            Event:registerEvent(v, s)
+        end
+    end
+end
+function clearEvent(s)
+    if s.events ~= nil then
+        for k, v in ipairs(s.events) do
+            Event:unregisterEvent(v, s)
+        end
+    end
 end

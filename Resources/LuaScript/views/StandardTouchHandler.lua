@@ -236,6 +236,7 @@ function StandardTouchHandler:tMoved(touches)
         if oldPos.count == 1 and oldPos[0] ~= nil then
             local difx = self.touchValue[0][1]-oldPos[0][1]
             local dify = self.touchValue[0][2]-oldPos[0][2]
+            self.accMove = self.accMove+ math.abs(difx)+math.abs(dify)
             --if math.abs(difx)+math.abs(dify) < 200 then
                 self:MoveBack(difx, dify)
             --end

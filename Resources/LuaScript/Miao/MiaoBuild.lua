@@ -201,8 +201,16 @@ function MiaoBuild:ctor(m, data)
     --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
     self:setState(BUILD_STATE.FREE)
 
+    self.events = {EVENT_TYPE.SELECT_ME}
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
+end
+function MiaoBuild:receiveMsg(msg, param)
+    if msg == EVENT_TYPE.SELECT_ME then
+        if param ~= self then
+            self.funcBuild:clearMenu()
+        end
+    end
 end
 
 function MiaoBuild:doSwitch()
@@ -231,6 +239,7 @@ function MiaoBuild:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
     self.doMove = false
     self.inSelf = false
+    self.moveYet = false
 
     print("build touch began")
     if self.lastPos.count == 1 then
@@ -249,7 +258,9 @@ function MiaoBuild:touchesBegan(touches)
                 setSuc = self.map.scene:setBuilding(self)
             end
             --print("touchesBegan", setSuc, self.state, self.Planing)
-            if setSuc == 1 then
+            --if setSuc == 1 then
+            --选中建筑物成功了 正在建造的时候 就不能选中建筑物
+            if self.funcBuild.selGrid ~= nil then
                 self.dirty = 1
                 self.map.mapGridController:clearMap(self)
                 --正在建造当中 touch 过程不调整 属性只在确认之后调整属性
@@ -272,10 +283,14 @@ function MiaoBuild:touchesMoved(touches)
     if oldPos == nil then
         return
     end
-    
     local difx = self.lastPos[0][1]-oldPos[0][1]
     local dify = self.lastPos[0][2]-oldPos[0][2]
+    --if self.funcBuild.selfGrid ~= nil then
     if self.doMove then
+        if not self.moveYet then
+            self.moveYet = true
+            self.funcBuild:beginMove()
+        end
         local offY = (self.sx+self.sy)*SIZEY/2
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         
@@ -304,7 +319,7 @@ function MiaoBuild:touchesMoved(touches)
 end
 
 function MiaoBuild:setColor(c)
-    if self.bottom ~= nil then
+    if self.funcBuild.selGrid ~= nil then
         self.funcBuild:setBottomColor(c)
         self.funcBuild:setColor()
     end
@@ -373,12 +388,17 @@ function MiaoBuild:touchesEnded(touches)
         local p = getPos(self.bg)
         self:setPos(p)
         self.map.mapGridController:updateMap(self)
+
+        self.funcBuild:finishMove()
         
         --建造建筑物在finish的时候 生效
         --self:doMyEffect()
         --self:doEffect()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         local ba = self.funcBuild:checkBuildable()
+        if self.colNow == 0 then
+            self.oldPos = getPos(self.bg)
+        end
         if self.colNow == 1 then
             if self.picName == 'move' then
                 self.funcBuild:handleTouchEnded()
@@ -541,10 +561,13 @@ function MiaoBuild:showBottom()
     end
 end
 function MiaoBuild:finishBottom()
+    self.funcBuild:finishBottom()
+    --[[
     if self.bottom ~= nil then
         self.bottom:removeFromParentAndCleanup(true)
         self.bottom = nil
     end
+    --]]
 end
 
 function MiaoBuild:setOwner(s)
@@ -597,7 +620,7 @@ end
 function MiaoBuild:setMenuWord()
     if self.state == BUILD_STATE.MOVE then
         local ax, ay = self:calAff()
-        self.map.scene.scene.menu.infoWord:setString(Logic.buildings[self.id].name..'('..ax..","..ay..")")
+        --self.map.scene.scene.menu.infoWord:setString(Logic.buildings[self.id].name..'('..ax..","..ay..")")
     end
 end
 function MiaoBuild:doProduct()

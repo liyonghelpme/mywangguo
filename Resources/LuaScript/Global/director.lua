@@ -40,13 +40,15 @@ function Director:pushView(view, dark, autoPop, showDark)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
+    Event:sendMsg(EVENT_TYPE.SHOW_DIALOG)
 end
 
 function Director:popView()
     local v = self.stack[#self.stack]
+    table.remove(self.stack, #self.stack)
     print('popView', #self.stack, v, v.bg)
     v.bg:removeFromParentAndCleanup(true)
-    table.remove(self.stack, #self.stack)
+    Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
 end
 --上一个场景没有对话框
 function Director:popTransfer()
