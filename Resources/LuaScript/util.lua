@@ -68,10 +68,12 @@ function registerEnterOrExit(obj)
             if obj.enterScene ~= nil then
                 obj:enterScene()
             end
+            regEvent(obj)
         elseif tag == 'exit' then
             if obj.updateFunc ~= nil then
                 CCDirector:sharedDirector():getScheduler():unscheduleScriptEntry(obj.updateFunc)
             end
+            clearEvent(obj)
             if obj.exitScene ~= nil then
                 obj:exitScene()
             end
@@ -482,7 +484,6 @@ function convertMultiToArr(touches)
         temp[k-1] = lastPos[v]
     end
     temp.count = count
-    --id map--->xy
     return temp, lastPos
 end
 
@@ -1329,22 +1330,29 @@ function colorWords(param)
     local curX = 0
     local height = 0
     local totalHeight = 0
-    local width = param.width
+    local width = param.width or 999999
     print("curWord", s)
     for i=1, #over, 1 do
         print("split", over[i])
         print("word x y", curX, totalHeight)
         if string.find(over[i], '<') ~= nil then
             local p = split(over[i], '<')
-            if #p[1] > 0 then
+            if #p == 1 then
+                local cv = string.sub(p[1], 1, 6)
+                local l = ui.newTTFLabel({text=string.sub(p[1], 7), color=hexToDec(cv), size=si})
+                n:addChild(l)
+                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                local lSize = l:getContentSize()
+                curX = curX+lSize.width
+                height = lSize.height
+            elseif #p[1] > 0 then
                 local l = ui.newTTFLabel({text=p[1], color=col, size=si})
                 n:addChild(l)
                 setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
                 local lSize = l:getContentSize()
                 height = lSize.height
                 curX = curX+lSize.width
-            end
-            if #p[2] > 0 then
+            elseif p[2] ~= nil and #p[2] > 0 then
                 local cv = string.sub(p[2], 1, 6)
                 local l = ui.newTTFLabel({text=string.sub(p[2], 7), color=hexToDec(cv), size=si})
                 n:addChild(l)
@@ -1414,28 +1422,44 @@ end
 function getScaleY(sp)
     return sp:getScaleY()
 end
-function getScale(s)
-    return s:getScale()
-end
 
-function updateTouchTable(a, b)
-    for k, v in pairs(b) do
-        if a[k] == nil then
-            a.count = a.count+1
+function getScale(s)
+    return s:getScale()
+end
+
+function updateTouchTable(a, b)
+    for k, v in pairs(b) do
+        if a[k] == nil then
+            a.count = a.count+1
+        end
+        a[k] = v
+    end
+end
+function clearTouchTable(a, b)
+    for k, v in pairs(b) do
+        a[k] = nil
+        a.count = a.count-1
+    end
+end
+function copyTouchTable(a)
+    local temp = {}
+    for k, v in pairs(a) do
+        temp[k] = v
+    end
+    return temp
+end
+
+function regEvent(s)
+    if s.events ~= nil then
+        for k, v in ipairs(s.events) do
+            Event:registerEvent(v, s)
         end
-        a[k] = v
     end
 end
-function clearTouchTable(a, b)
-    for k, v in pairs(b) do
-        a[k] = nil
-        a.count = a.count-1
+function clearEvent(s)
+    if s.events ~= nil then
+        for k, v in ipairs(s.events) do
+            Event:unregisterEvent(v, s)
+        end
     end
-end
-function copyTouchTable(a)
-    local temp = {}
-    for k, v in pairs(a) do
-        temp[k] = v
-    end
-    return temp
 end

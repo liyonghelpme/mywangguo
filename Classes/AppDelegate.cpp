@@ -63,18 +63,18 @@ bool AppDelegate::applicationDidFinishLaunching()
 		def->setStringForKey(it->first.c_str(), it->second);
     }
     delete nm;
-    */
+	//searchPath 都在一个位置设置
 
-    //搜索文件路径
-    CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
-    CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
-    CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
-    CCFileUtils::sharedFileUtils()->addSearchPath("images");
-	CCFileUtils::sharedFileUtils()->addSearchPath("battleImages");
-    /*
+
 	if(def->getStringForKey("update") != "0")
 		updateFiles();
     */
+
+	CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
+    CCFileUtils::sharedFileUtils()->addSearchPath("image2");
+	CCFileUtils::sharedFileUtils()->addSearchPath("images");
+	CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
+    CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 
     
     CCLog("finish update read main.lua");

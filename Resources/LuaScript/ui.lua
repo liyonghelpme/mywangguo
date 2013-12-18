@@ -142,7 +142,8 @@ end
 function ui.newButton(params)
     local obj = {}
     local lay = CCLayer:create()
-    local sp = display.newScale9Sprite(params.image)
+    --local sp = display.newScale9Sprite(params.image)
+    local sp = CCSprite:create(params.image)
     lay:addChild(sp)
     obj.bg = lay
     local sz = sp:getContentSize()
@@ -162,15 +163,19 @@ function ui.newButton(params)
         local ret = checkIn(p.x, p.y, sz)
 
         if ret then
-            local tempSp = CCSprite:create(params.image)
-            lay:addChild(tempSp)
-            local function removeTemp()
-                removeSelf(tempSp)
+            if params.touchBegan ~= nil then
+                params.touchBegan(params.delegate, params.param)
+            else
+                local tempSp = CCSprite:create(params.image)
+                lay:addChild(tempSp)
+                local function removeTemp()
+                    removeSelf(tempSp)
+                end
+                local anchor = sp:getAnchorPoint()
+                tempSp:setAnchorPoint(anchor)
+                setSize(tempSp, spSize)
+                tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
             end
-            local anchor = sp:getAnchorPoint()
-            tempSp:setAnchorPoint(anchor)
-            setSize(tempSp, spSize)
-            tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
         end
         return ret
     end

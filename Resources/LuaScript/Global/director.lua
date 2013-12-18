@@ -6,7 +6,7 @@ end
 Director = class()
 function Director:ctor()
     self.stack = {}
-    self.designSize = {800, 480}
+    self.designSize = {1024, 768}
     local vs = CCDirector:sharedDirector():getVisibleSize()
     self.disSize = {vs.width, vs.height}
     self.sceneStack = {}
@@ -25,12 +25,12 @@ function Director:pushPage(view, z)
 end
 
 --view 封装了 CCNode
-function Director:pushView(view, dark, autoPop)
+function Director:pushView(view, dark, autoPop, showDark)
     if dark == 1 then
         print('pushView', dark)
         local temp = {}
         temp.bg = CCNode:create()
-        local d = Dark.new()
+        local d = Dark.new(autoPop, showDark)
         temp.bg:addChild(d.bg)
         temp.bg:addChild(view.bg)
         self.curScene.bg:addChild(temp.bg)
@@ -40,13 +40,15 @@ function Director:pushView(view, dark, autoPop)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
+    Event:sendMsg(EVENT_TYPE.SHOW_DIALOG)
 end
 
 function Director:popView()
     local v = self.stack[#self.stack]
+    table.remove(self.stack, #self.stack)
     print('popView', #self.stack, v, v.bg)
     v.bg:removeFromParentAndCleanup(true)
-    table.remove(self.stack, #self.stack)
+    Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
 end
 --上一个场景没有对话框
 function Director:popTransfer()

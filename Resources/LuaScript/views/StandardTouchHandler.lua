@@ -119,30 +119,6 @@ function StandardTouchHandler:MoveBack(difx, dify)
         self.targetMove[2] = tm[2]-dify
     end
 
-    --[[
-    local ox, oy = self.bg:getPosition()
-    self.bg:setPosition(ccp(ox+difx, oy+dify))
-    local leftBottom = self.bg:convertToNodeSpace(ccp(0, 0))
-    local rightTop = self.bg:convertToNodeSpace(ccp(global.director.disSize[1], global.director.disSize[2]))
-    if leftBottom.x < 0 and difx > 0 then
-        difx = 0
-    end
-    if leftBottom.y < 0 and dify > 0 then
-        dify = 0
-    end
-    local sz = self.bg:getContentSize()
-    if rightTop.x > sz.width and difx < 0 then
-        difx = 0
-    end
-    if rightTop.y > sz.height and dify < 0 then
-        dify = 0
-    end
-    if self.accMove == nil then
-        self.accMove = 0
-    end
-    self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
-    self.bg:setPosition(ccp(ox+difx, oy+dify))
-    --]]
 end
 function StandardTouchHandler:ScaleBack(sca)
     local oldScale = self.bg:getScale()
@@ -246,20 +222,12 @@ function StandardTouchHandler:tMoved(touches)
         --print("touch just Move ok?", sim:encode(move))
         self:MoveBack(move[1], move[2])
 
-        --local newInBg = self.bg:convertToWorldSpace(oldInBg)
-        --local move = {midOld[1]-newInBg.x, midOld[2]-newInBg.y}
-        --[[
-        local move = {midNew[1]-midOld[1], midNew[2]-midOld[2]}
-        if math.abs(move[1]) > 3 or math.abs(move[2]) > 3 then
-            self:MoveBack(move[1], move[2])
-        end
-        self:adjustMove()
-        --]]
         
     elseif self.touchValue.count == 1 and self.touchValue[0] ~= nil then
         if oldPos.count == 1 and oldPos[0] ~= nil then
             local difx = self.touchValue[0][1]-oldPos[0][1]
             local dify = self.touchValue[0][2]-oldPos[0][2]
+            self.accMove = self.accMove+ math.abs(difx)+math.abs(dify)
             --if math.abs(difx)+math.abs(dify) < 200 then
                 self:MoveBack(difx, dify)
             --end

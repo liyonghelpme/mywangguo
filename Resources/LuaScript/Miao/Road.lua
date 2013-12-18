@@ -73,16 +73,24 @@ function Road:adjustRoad()
     end
     self:adjustValue()
 end
+function Road:beginMove()
+    self:removeSelf()
+end
+function Road:finishMove()
+    if self.baseBuild.colNow == 0 then
+        self:adjustRoad()
+    end
+end
 function Road:removeSelf()
     --[[
     if true then
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
         return
     end
-    --]]
     if self.baseBuild.state == BUILD_STATE.MOVE then
         return
     end
+    --]]
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态
@@ -168,11 +176,26 @@ function Road:setColor()
             print("road setColor", self.baseBuild.colNow, self.baseBuild.otherBuild.picName, dir)
             if self.baseBuild.otherBuild.picName == 'slope' and (dir ==0 or dir == 1) then
                 print("setColor")
-                setColor(self.baseBuild.bottom, {0, 255, 0})
+                --setColor(self.baseBuild.bottom, {0, 255, 0})
+                self:setBottomColor(1)
             end
         end
     end
 end
+function Road:checkBuildable()
+    if self.baseBuild.colNow == 1 then
+        if self.baseBuild.otherBuild ~= nil then
+            local dir = self.baseBuild.otherBuild.dir
+            if self.baseBuild.otherBuild.picName == 'slope' and (dir ==0 or dir == 1) then
+                return true
+            end
+        end
+        return false
+    else
+        return true
+    end
+end
+
 --斜坡上面完成建造
 function Road:checkFinish()
     if self.baseBuild.colNow == 1 then

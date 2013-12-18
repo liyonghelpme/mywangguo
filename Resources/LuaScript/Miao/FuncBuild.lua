@@ -18,6 +18,10 @@ function FuncBuild:adjustRoad()
 end
 function FuncBuild:finishBuild()
 end
+function FuncBuild:beginMove()
+end
+function FuncBuild:finishMove()
+end
 function FuncBuild:removeSelf()
 end
 function FuncBuild:finishMove()
@@ -38,25 +42,80 @@ function FuncBuild:setColor()
 end
 function FuncBuild:checkFinish()
 end
+
+function FuncBuild:checkBuildable()
+    return self.baseBuild.colNow==0
+end
+
 function FuncBuild:canFinish()
     return true
 end
+function FuncBuild:checkBuildable()
+    return true
+end
+function FuncBuild:clearMenu()
+    if self.selGrid ~= nil then
+        removeSelf(self.selGrid)
+        self.baseBuild.changeDirNode:stopAllActions()
+        setColor(self.baseBuild.changeDirNode, {255, 255, 255})
+        self.selGrid = nil
+        if self.baseBuild.colNow == 1 and not self:checkBuildable() then
+            self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
+            local np = getPos(self.baseBuild.bg)
+            setPos(self.baseBuild.bg, self.baseBuild.oldPos)
+            self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
+            self:finishMove()
+            setPos(self.baseBuild.bg, np)
+            self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
+        end
+        if #global.director.stack > 0 then
+            global.director:popView()
+        end
+    end
+end
 function FuncBuild:showInfo()
-    local bi
-    bi = BuildInfo.new(self.baseBuild)
-    global.director:pushView(bi, 1, 0)
-    global.director.curScene.menu:setMenu(bi)
+    --先清理旧的
+    Event:sendMsg(EVENT_TYPE.SELECT_ME, self.baseBuild)
+
+    local bo = BuildOpMenu.new(self.baseBuild)
+    global.director:pushView(bo)
+
+    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({itintto(0.5, 128, 128, 128), itintto(0.5, 255, 255, 255)})))
+    self.baseBuild.oldPos = getPos(self.baseBuild.bg)
+    self:initBottom()
+end
+
+function FuncBuild:finishBottom()
+    if self.selGrid ~= nil then
+        removeSelf(self.selGrid)
+        self.selGrid = nil
+    end
 end
 function FuncBuild:initBottom()
+    if self.selGrid == nil then
+        self.selGrid = setAnchor(setPos(CCSprite:create("newBlueGrid.png"), {0, (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY}), {0.5, 0.5})
+        self.baseBuild.heightNode:addChild(self.selGrid, -1)
+    end
+    --[[
     self.baseBuild.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY}), {0.5, 0.5}), {(self.baseBuild.sx+self.baseBuild.sy)*SIZEX+20, (self.baseBuild.sx+self.baseBuild.sy)*SIZEY+10})
     self.baseBuild.heightNode:addChild(self.baseBuild.bottom, 1)
+    --]]
 end
 function FuncBuild:setBottomColor(c)
+    if self.selGrid ~= nil then
+        if c == 0 then
+            setTexture(self.selGrid, "newRedGrid.png")
+        else
+            setTexture(self.selGrid, "newBlueGrid.png")
+        end
+    end
+    --[[
     if c == 0 then
         setColor(self.baseBuild.bottom, {255, 0, 0})
     else
         setColor(self.baseBuild.bottom, {0, 255, 0})
     end
+    --]]
 end
 function FuncBuild:doSwitch()
 end

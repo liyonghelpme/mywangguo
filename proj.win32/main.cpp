@@ -25,12 +25,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     // create the application instance
     AppDelegate app;
     CCEGLView* eglView = CCEGLView::sharedOpenGLView();
-<<<<<<< HEAD
     eglView->setViewName("HelloLua");
-=======
-    eglView->setViewName("HelloLuaWangguo");
->>>>>>> mygit/tmx
-    eglView->setFrameSize(800, 480);
+    eglView->setFrameSize(1024, 768);
     int ret = CCApplication::sharedApplication()->run();
 
 #ifdef USE_WIN32_CONSOLE

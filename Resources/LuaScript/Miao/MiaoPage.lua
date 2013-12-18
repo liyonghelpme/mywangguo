@@ -219,6 +219,10 @@ function MiaoPage:ctor(s)
     registerMultiTouch(self)
     self.touchDelegate:scaleToMax(0.5)
 end
+function MiaoPage:touchesCanceled(touches)
+    self.touchDelegate:tCanceled(touches)
+end
+
 function MiaoPage:setPoint(x, y)
     local wp = self.bg:convertToWorldSpace(ccp(x, y))
     local sz = getVS()
@@ -378,6 +382,14 @@ function MiaoPage:touchesEnded(touches)
     --处理完 blockMove 之后 再清理 blockMove
     if self.touchBuild then
         self.touchBuild:touchesEnded(touches)
+    else
+        print("touchDelegate accMove", self.touchDelegate.accMove)
+        if self.touchDelegate.accMove < 20 then
+            --关闭移动菜单
+            if #global.director.stack > 0 then
+                global.director:popView()
+            end
+        end
     end
 end
 function MiaoPage:beginBuild(kind, id, px, py)
