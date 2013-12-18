@@ -15,6 +15,7 @@ require "Miao.Fence"
 require "Miao.MiaoPath"
 require "Miao.RemoveBuild"
 require "Miao.MoveBuild"
+require "menu.BuildOpMenu"
 
 MiaoBuild = class()
 BUILD_STATE = {

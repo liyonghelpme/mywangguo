@@ -1,3 +1,4 @@
+require "menu.FindPeople2"
 PeopleMenu2 = class()
 function PeopleMenu2:ctor()
     local vs = getVS()
@@ -51,6 +52,9 @@ function PeopleMenu2:onBut(p)
 
         if p == 1 then
         elseif p == 2 then
+        elseif p == 4 then
+            global.director:popView()
+            global.director:pushView(FindPeople2.new(), 1)
         end
     end
 end

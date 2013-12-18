@@ -42,10 +42,15 @@ function FuncBuild:canFinish()
     return true
 end
 function FuncBuild:showInfo()
+    local bo = BuildOpMenu.new(self)
+    global.director:pushView(bo)
+
+    --[[
     local bi
     bi = BuildInfo.new(self.baseBuild)
     global.director:pushView(bi, 1, 0)
     global.director.curScene.menu:setMenu(bi)
+    --]]
 end
 function FuncBuild:initBottom()
     self.baseBuild.bottom = setSize(setAnchor(setPos(CCSprite:create("white2.png"), {0, (self.baseBuild.sx+self.baseBuild.sy)/2*SIZEY}), {0.5, 0.5}), {(self.baseBuild.sx+self.baseBuild.sy)*SIZEX+20, (self.baseBuild.sx+self.baseBuild.sy)*SIZEY+10})

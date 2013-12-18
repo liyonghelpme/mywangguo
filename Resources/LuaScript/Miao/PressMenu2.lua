@@ -61,20 +61,20 @@ function PressMenu2:clearMenu()
     end
 end
 function PressMenu2:onBut(p)
+    local first = false
     if self.curSel ~= p then
+        first = true
         self:clearMenu()
         self:setSelect(p)
+    end
 
-        if p == 1 then
-            global.director:popView()
-            local m = NewBuildMenu2.new()
-            global.director:pushView(m)
-        elseif p == 2 then
-            local m = PeopleMenu2.new(self)
-            self.bg:addChild(m.bg)
-            self.subMenu = m
-            --local sp = setSize(setPos(addSprite(self.temp, "主菜单底板 .png"), {298, fixY(sz.height, 223)}), {199, 291})
-            --setPos(m.bg, {298-199/2, fixY(self.sz.height, 223+291/2)})
-        end
+    if p == 1 then
+        global.director:popView()
+        local m = NewBuildMenu2.new()
+        global.director:pushView(m, 1 )
+    elseif p == 2 and first then
+        local m = PeopleMenu2.new(self)
+        self.bg:addChild(m.bg)
+        self.subMenu = m
     end
 end

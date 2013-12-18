@@ -30,7 +30,7 @@ function Director:pushView(view, dark, autoPop, showDark)
         print('pushView', dark)
         local temp = {}
         temp.bg = CCNode:create()
-        local d = Dark.new(showDark)
+        local d = Dark.new(autoPop, showDark)
         temp.bg:addChild(d.bg)
         temp.bg:addChild(view.bg)
         self.curScene.bg:addChild(temp.bg)
