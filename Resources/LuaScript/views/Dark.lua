@@ -1,5 +1,5 @@
 Dark = class()
-function Dark:ctor(auto)
+function Dark:ctor(auto, showDark)
     self.autoPop = auto
     self.bg = CCLayer:create()
     --[[

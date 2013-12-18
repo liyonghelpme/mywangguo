@@ -1,4 +1,5 @@
 require "menu.PeopleMenu2"
+require "menu.NewBuildMenu2"
 PressMenu2 = class()
 --适配在最后调整每个UI即可
 function PressMenu2:ctor()
@@ -65,9 +66,12 @@ function PressMenu2:onBut(p)
         self:setSelect(p)
 
         if p == 1 then
+            global.director:popView()
+            local m = NewBuildMenu2.new()
+            global.director:pushView(m)
         elseif p == 2 then
             local m = PeopleMenu2.new(self)
-            self.temp:addChild(m.bg)
+            self.bg:addChild(m.bg)
             self.subMenu = m
             --local sp = setSize(setPos(addSprite(self.temp, "主菜单底板 .png"), {298, fixY(sz.height, 223)}), {199, 291})
             --setPos(m.bg, {298-199/2, fixY(self.sz.height, 223+291/2)})

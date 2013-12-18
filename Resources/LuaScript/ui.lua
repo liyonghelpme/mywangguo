@@ -142,7 +142,8 @@ end
 function ui.newButton(params)
     local obj = {}
     local lay = CCLayer:create()
-    local sp = display.newScale9Sprite(params.image)
+    --local sp = display.newScale9Sprite(params.image)
+    local sp = CCSprite:create(params.image)
     lay:addChild(sp)
     obj.bg = lay
     local sz = sp:getContentSize()
