@@ -13,12 +13,13 @@ function StandardTouchHandler:ctor()
     self.targetAnchor = nil
     --追踪所有的touch对象
     self.touchValue = {count=0}
+    self.smooth = 10
 end
 --调整状态的函数
 function StandardTouchHandler:update(diff)
     if self.targetMove ~= nil then
         local pos = getPos(self.bg)
-        local smooth = diff*5
+        local smooth = diff*self.smooth
         smooth = math.min(smooth, 1)
         local px = pos[1]*(1-smooth)+self.targetMove[1]*smooth
         local py = pos[2]*(1-smooth)+self.targetMove[2]*smooth
@@ -26,7 +27,7 @@ function StandardTouchHandler:update(diff)
     end
     if self.targetScale ~= nil then
         local sca = getScale(self.bg)
-        local smooth = diff*5
+        local smooth = diff*self.smooth
         smooth = math.min(smooth, 1)
         local ns = sca*(1-smooth)+self.targetScale*smooth
         setScale(self.bg, ns)

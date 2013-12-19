@@ -413,6 +413,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setPos(p)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
+        self.curBuild:beginBuild()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         
         Logic.paused = true

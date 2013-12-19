@@ -321,6 +321,7 @@ function MiaoBuildLayer:initRoad()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
             b:finishBuild()
+            b.funcBuild:adjustRoad()
         end
     end
 

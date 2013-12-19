@@ -277,6 +277,9 @@ function MiaoBuild:touchesBegan(touches)
     self.accMove = 0
     self.moveStart = self.lastPos[0]
 end
+function MiaoBuild:beginBuild()
+    self.funcBuild:beginBuild()
+end
 function MiaoBuild:touchesMoved(touches)
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
@@ -461,7 +464,7 @@ function MiaoBuild:setPos(p)
     --self:adjustHeight()
 end
 function MiaoBuild:adjustRoad()
-    self.funcBuild:adjustRoad()
+    --self.funcBuild:adjustRoad()
 end
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
@@ -534,7 +537,7 @@ end
 function MiaoBuild:finishBuild()
     --白名单 方法
     if not self.setYet then
-        self:adjustRoad()
+        --self:adjustRoad()
     end
     self.changeDirNode:stopAllActions()
     self.changeDirNode:runAction(fadein(0))

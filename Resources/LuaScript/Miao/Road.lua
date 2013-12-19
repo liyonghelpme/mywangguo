@@ -218,3 +218,9 @@ function Road:initView()
     end
 end
 
+function Road:beginBuild()
+    if self.baseBuild.colNow == 0 or self:checkBuildable() then
+        self:adjustRoad()
+    end
+end
+

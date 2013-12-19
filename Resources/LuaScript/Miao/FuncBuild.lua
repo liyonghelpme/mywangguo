@@ -18,6 +18,8 @@ function FuncBuild:adjustRoad()
 end
 function FuncBuild:finishBuild()
 end
+function FuncBuild:beginBuild()
+end
 function FuncBuild:beginMove()
 end
 function FuncBuild:finishMove()
