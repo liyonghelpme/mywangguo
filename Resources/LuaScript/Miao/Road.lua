@@ -4,7 +4,11 @@ Road = class(FuncBuild)
 function Road:adjustValue()
     if not self.baseBuild.onSlope then
         print("adjust Value", self.baseBuild.value)
-        setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+        if self.baseBuild.value >= 16 then
+            setDisplayFrame(self.baseBuild.changeDirNode, "t0.png")
+        else
+            setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+        end
     else
         --self:whenColNow()
         self:adjustOnSlope()
@@ -17,13 +21,9 @@ function Road:adjustRoad()
     --判定周围八个map状态
     local nei = {
         {bm[3]-1, bm[4]+1},
-        --{bm[3], bm[4]+2},
         {bm[3]+1, bm[4]+1},
-        --{bm[3]+2, bm[4]},
         {bm[3]+1, bm[4]-1},
-        --{bm[3], bm[4]-2},
         {bm[3]-1, bm[4]-1},
-        --{bm[3]-2, bm[4]},
     }
     local neiState = {
     }
@@ -42,11 +42,10 @@ function Road:adjustRoad()
         end
     end
     --print("neiState", simple.encode(neiState))
-    local num = {1, 3, 5, 7}
     local val = 0
     local wei = 1
-    for i=1, #num, 1 do
-        if neiState[(num[i]+1)/2] then
+    for i=1, 4, 1 do
+        if neiState[i] then
             val = val+wei
         end
         wei = wei*2
@@ -58,40 +57,34 @@ function Road:adjustRoad()
     self.baseBuild.value = val
     local addVal = {
         [1]=4,
-        [3]=8,
-        [5]=1,
-        [7]=2,
+        [2]=8,
+        [3]=1,
+        [4]=2,
     }
+    print("finish adjust Road ", val)
+    self:adjustValue()
     if val ~= 0 then
-        for k, v in ipairs(num) do
+        for v=1, 4, 1 do
             --邻居点存在
-            local nv = (v+1)/2
+            local nv = v
             if neiborNode[nv] ~= false then
                 neiborNode[nv].value = neiborNode[nv].value+addVal[v]
                 neiborNode[nv].funcBuild:adjustValue()
             end
         end
     end
-    self:adjustValue()
 end
 function Road:beginMove()
-    self:removeSelf()
+    if self.baseBuild.colNow == 0 or self.checkBuildable() then
+        self:removeSelf()
+    end
 end
 function Road:finishMove()
-    if self.baseBuild.colNow == 0 then
+    if self.baseBuild.colNow == 0 or self:checkBuildable() then
         self:adjustRoad()
     end
 end
 function Road:removeSelf()
-    --[[
-    if true then
-        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
-        return
-    end
-    if self.baseBuild.state == BUILD_STATE.MOVE then
-        return
-    end
-    --]]
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态
@@ -122,18 +115,17 @@ function Road:removeSelf()
         end
     end
     print("neiState", simple.encode(neiState))
-    local num = {1, 3, 5, 7}
     --调整邻居的状态
     local addVal = {
         [1]=4,
-        [3]=8,
-        [5]=1,
-        [7]=2,
+        [2]=8,
+        [3]=1,
+        [4]=2,
     }
     if val ~= 0 then
-        for k, v in ipairs(num) do
+        for v=1, 4, 1 do
             --邻居点存在
-            local nv = (v+1)/2
+            local nv = v
             if neiborNode[nv] ~= false then
                 neiborNode[nv].value = neiborNode[nv].value-addVal[v]
                 neiborNode[nv].funcBuild:adjustValue()
@@ -143,6 +135,7 @@ function Road:removeSelf()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 function Road:adjustOnSlope()
+    local set = false
     if self.baseBuild.otherBuild.dir == 0 then
         local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
         self.baseBuild.changeDirNode:setDisplayFrame(tex)
@@ -154,6 +147,7 @@ function Road:adjustOnSlope()
         setYet = true
         self.baseBuild.onSlope = true
     end
+    return setYet
 end
 --当和斜坡冲突的时候变换路块类型
 function Road:whenColNow()
@@ -161,7 +155,7 @@ function Road:whenColNow()
     if self.baseBuild.colNow == 1 then
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
-                self:adjustOnSlope()
+                setYet = self:adjustOnSlope()
                 --[[
                 if self.baseBuild.otherBuild.dir == 0 then
                     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
@@ -236,9 +230,11 @@ function Road:initView()
 end
 
 function Road:beginBuild()
+    print("beginBuild!!!!!!!!!!!!!", self.baseBuild.colNow)
     if self.baseBuild.colNow == 0 or self:checkBuildable() then
         self:adjustRoad()
     end
 end
-
-
+function Road:finishBuild()
+    print("finish Building!!!!!", self.baseBuild.value)
+end

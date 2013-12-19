@@ -182,7 +182,7 @@ function MiaoBuild:ctor(m, data)
     setPos(self.posLabel, {0, 50})
     addChild(allLabel, self.posLabel)
 
-    self.stateLabel = ui.newBMFontLabel({text="", size=15})
+    self.stateLabel = ui.newBMFontLabel({text="", size=35})
     setPos(self.stateLabel, {0, 70})
     addChild(allLabel, self.stateLabel)
 
@@ -278,7 +278,8 @@ function MiaoBuild:touchesBegan(touches)
     self.moveStart = self.lastPos[0]
 end
 function MiaoBuild:beginBuild()
-    self.funcBuild:beginBuild()
+    self.funcBuild:beginBuild()--调整道路值
+    self:setColor(1-self.colNow)
 end
 function MiaoBuild:touchesMoved(touches)
     local oldPos = self.lastPos
@@ -341,7 +342,6 @@ function MiaoBuild:calAff()
     return ax, ay
 end
 function MiaoBuild:setColPos()
-
     self.colNow = 1
     self.otherBuild = nil
     self:setColor(0)
@@ -392,7 +392,9 @@ function MiaoBuild:touchesEnded(touches)
         self:setPos(p)
         self.map.mapGridController:updateMap(self)
 
-        self.funcBuild:finishMove()
+        if self.moveYet then
+            self.funcBuild:finishMove()
+        end
         
         --建造建筑物在finish的时候 生效
         --self:doMyEffect()
@@ -436,7 +438,7 @@ function MiaoBuild:update(diff)
         local p = getPos(self.bg)
         local ax, ay = self:calAff()
         self.posLabel:setString(self.id.." "..ax.." "..ay)
-        self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone)
+        self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone.." v"..self.value)
         local s = ''
         for k, v in ipairs(self.belong) do
             s = s..v.." "
@@ -638,23 +640,4 @@ function MiaoBuild:setGoodsKind(k)
     self.goodsKind = k
     self.workNum = 0
     self.funcBuild:updateGoods()
-end
-function MiaoBuild:adjustHeight()
-    local p = getPos(self.bg)
-    local ax, ay = newCartesianToAffine(p[1], p[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
-    print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
-    local ad = adjustNewHeight(self.map.scene.mask2, self.map.scene.width, ax, ay)
-    if ad then
-        setPos(self.changeDirNode, {0, SIZEY+90})
-    else
-        setPos(self.changeDirNode, {0, SIZEY})
-    end
-    if self.bottom then
-        local oy = (self.sx+self.sy)/2*SIZEY
-        if ad then
-            setPos(self.bottom, {0, 90+oy})
-        else
-            setPos(self.bottom, {0, oy})
-        end
-    end
 end

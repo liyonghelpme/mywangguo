@@ -393,6 +393,7 @@ function MiaoPage:touchesEnded(touches)
     end
 end
 function MiaoPage:beginBuild(kind, id, px, py)
+    print("MiaoPage beginBuild!!!!", kind, id, px, py)
     if self.curBuild == nil then
         local vs = getVS()
         --先确定位置 再加入到 buildLayer里面
@@ -403,16 +404,24 @@ function MiaoPage:beginBuild(kind, id, px, py)
         else
             p = {x=px, y=py}
         end
-        
         p = normalizePos({p.x, p.y}, 1, 1)
+        local ax, ay = newCartesianToAffine(p[1], p[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
+        ax = math.max(math.min(ax, self.width-1), 0)
+        ay = math.max(math.min(ay, self.height-1), 0)
+        local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
+        p = {cx, cy}
+
         self.curBuild:setPos(p)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        
         --调整建筑物高度
         self.curBuild:setPos(p)
         --调整bottom 冲突状态
-        self.curBuild:setColPos()
+        --self.curBuild:setColPos()
+
+        --初始化道路状态 因为如果建筑物已经加入到building 里面了那么就不能再检测到冲突了
         self.curBuild:beginBuild()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         

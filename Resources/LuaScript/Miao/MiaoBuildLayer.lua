@@ -52,9 +52,9 @@ end
 --商人的状态也要保存么？
 function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
-    if self.passTime >= 10 and self.initYet  then
+    if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        self:addPeople(6)
+        --self:addPeople(6)
     end
 end
 
@@ -320,8 +320,8 @@ function MiaoBuildLayer:initRoad()
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
-            b:finishBuild()
             b.funcBuild:adjustRoad()
+            b:finishBuild()
         end
     end
 
@@ -385,6 +385,7 @@ function MiaoBuildLayer:initRoad()
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
+            b.funcBuild:adjustRoad()
             b:finishBuild()
         end
     end
