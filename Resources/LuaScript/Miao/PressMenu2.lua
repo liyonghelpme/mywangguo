@@ -1,15 +1,33 @@
 require "menu.PeopleMenu2"
 require "menu.NewBuildMenu2"
 PressMenu2 = class()
+
+function PressMenu2:adjustHeight()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local scy = vs.height/global.director.designSize[2] 
+    setScale(self.bg, scy)
+    
+    --bg 整体向上平移位置 保证比例不变
+    local pos = getPos(self.temp)
+    local ay = (pos[2]+self.sz.height)/ds[2]
+    local cheight = scy*(pos[2]+self.sz.height)/vs.height
+    local ny = (ay-cheight)*vs.height
+    setPos(self.bg, {0, ny})
+
+    --local height = self.sz.height
+    --setPos(self.temp, {pos[1], pos[2]+(1-scy)*height})
+end
+--菜单太高需要调整 菜单超出屏幕范围才需要调整 高度 但是位置呢？
 --适配在最后调整每个UI即可
 function PressMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=398, height=532}
     self.sz = sz
-
-    self.temp = setPos(addNode(self.bg), {14, fixY(vs.height, 109+sz.height)})
-    
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {14, fixY(ds[2], 109+sz.height)})
+    self:adjustHeight() 
     local temp = {
         "建筑",
         "村民",

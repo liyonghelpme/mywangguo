@@ -4,7 +4,8 @@ function PeopleMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=199, height=291}
-    self.temp = setPos(addNode(self.bg), {213, fixY(vs.height, 187+sz.height)})
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {213, fixY(ds[2], 187+sz.height)})
     local temp = {
         "强度",
         "装备",

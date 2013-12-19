@@ -1,9 +1,23 @@
 FindPeople2 = class()
+function FindPeople2:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local pos = getPos(self.temp)
+    local cx, cy = ds[1]/2-pos[1], ds[2]/2-pos[2]
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(self.temp, sca)
+    setPos(self.temp, {nx, ny})
+
+    --调整切割屏幕高度
+end
 function FindPeople2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=715, height=601}
-    self.temp = setPos(addNode(self.bg), {192, fixY(vs.height, 66+sz.height)})
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {340, fixY(sz.height, 355)}), {603, 354}), {0.50, 0.50})

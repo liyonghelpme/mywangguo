@@ -1,7 +1,0 @@
-baseUrl=http://192.168.3.117/images/
-zipFile=test.zip
-versionFile=version
-imageVer=ser.ini
-localVer=all.ini
-codeUrl=http://192.168.3.117/code/
-netUrl=http://192.168.3.117:9000/

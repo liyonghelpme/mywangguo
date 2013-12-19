@@ -1,9 +1,27 @@
 NewBuildMenu2 = class()
+--设计坐标转化成实际坐标
+--cl 转换
+function NewBuildMenu2:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local pos = getPos(self.temp)
+    local cx, cy = ds[1]/2-pos[1], ds[2]/2-pos[2]
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(self.temp, sca)
+    setPos(self.temp, {nx, ny})
+
+    --调整切割屏幕高度
+    self.cl:setContentSize(CCSizeMake(580, self.HEIGHT*sca))
+end
 function NewBuildMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=752, height=601}
-    self.temp = setPos(addNode(self.bg), {192, fixY(vs.height, 66+sz.height)})
+    self.sz = sz
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 426)}), {82, 126}), {0.5, 0.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 291)}), {82, 126}), {0.5, 0.5})
@@ -30,8 +48,8 @@ function NewBuildMenu2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.envTab.bg, "envIcon.png"), {33-82/2, fixY(126, 63)-126/2}), {54, 51}), {0.50, 0.50})
     self.tabs = {self.envTab, self.laborTab, self.storeTab}
 
-    local but = ui.newButton({image="newClose.png", delegate=self, callback = self.onClose})
-    setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
+    --local but = ui.newButton({image="newClose.png", delegate=self, callback = self.onClose})
+    --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
 
     self.HEIGHT = 368
     
@@ -39,6 +57,8 @@ function NewBuildMenu2:ctor()
     self.temp:addChild(self.cl)
     self.cl:setPosition(ccp(144-184/2, fixY(sz.height, 422+183/2)))
     self.cl:setContentSize(CCSizeMake(580, self.HEIGHT))
+
+    self:adjustPos()
 
     self.flowNode = addNode(self.cl)
     setPos(self.flowNode, {0, self.HEIGHT})
