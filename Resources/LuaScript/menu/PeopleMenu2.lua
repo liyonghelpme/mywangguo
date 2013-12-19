@@ -16,7 +16,7 @@ function PeopleMenu2:ctor()
 
     local initX = 99
     local initY = fixY(sz.height, 42)
-    local offY = -60
+    local offY = -70
     local allbut = {}
     self.data = {}
     for i=1, #temp, 1 do

@@ -113,6 +113,10 @@ function ui.newTTFLabel(params)
     else
         label = CCLabelTTF:create(text, font, size)
     end
+    --描边
+    if font == 'f1' then
+
+    end
 
     if label then
         label:setColor(color)
