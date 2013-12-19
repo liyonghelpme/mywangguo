@@ -25,9 +25,9 @@ function registerMultiTouch(obj)
         elseif eventType == "ended" then
             return obj:touchesEnded(touches)
         elseif eventType == "cancelled" then
-            if obj.touchesCanceled ~= nil then
-                return obj:touchesCanceled(touches)
-            end
+            if obj.touchesCanceled ~= nil then
+                return obj:touchesCanceled(touches)
+            end
         end
     end
     --single Touch
@@ -464,11 +464,13 @@ function convertMultiToArr(touches)
     local ids = {}
     local x, y
     local count = 0
+    --x y id
     for i, v in ipairs(touches) do
         if (i-1) % 3 == 0 then
             x = v
         elseif (i-1) % 3 == 1 then
             y = v
+        --x y id
         else 
             lastPos[v] = {x, y, v}
             count = count+1
@@ -1324,6 +1326,7 @@ function colorWords(param)
     local col = param.color
     local si = param.size
     local n = CCNode:create()
+    local font = param.font
     local over = split(s, '>')
     local curX = 0
     local height = 0
@@ -1337,14 +1340,14 @@ function colorWords(param)
             local p = split(over[i], '<')
             if #p == 1 then
                 local cv = string.sub(p[1], 1, 6)
-                local l = ui.newTTFLabel({text=string.sub(p[1], 7), color=hexToDec(cv), size=si})
+                local l = ui.newTTFLabel({text=string.sub(p[1], 7), font=font, color=hexToDec(cv), size=si})
                 n:addChild(l)
                 setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
                 height = lSize.height
             elseif #p[1] > 0 then
-                local l = ui.newTTFLabel({text=p[1], color=col, size=si})
+                local l = ui.newTTFLabel({text=p[1], font=font, color=col, size=si})
                 n:addChild(l)
                 setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
                 local lSize = l:getContentSize()
@@ -1352,7 +1355,7 @@ function colorWords(param)
                 curX = curX+lSize.width
             elseif p[2] ~= nil and #p[2] > 0 then
                 local cv = string.sub(p[2], 1, 6)
-                local l = ui.newTTFLabel({text=string.sub(p[2], 7), color=hexToDec(cv), size=si})
+                local l = ui.newTTFLabel({text=string.sub(p[2], 7), font=font, color=hexToDec(cv), size=si})
                 n:addChild(l)
                 setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
                 local lSize = l:getContentSize()
@@ -1360,7 +1363,7 @@ function colorWords(param)
                 height = lSize.height
             end
         else
-            local l = ui.newTTFLabel({text=over[i], color=col, size=si})
+            local l = ui.newTTFLabel({text=over[i], font=font, color=col, size=si})
             n:addChild(l)
             setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
             local lSize = l:getContentSize()

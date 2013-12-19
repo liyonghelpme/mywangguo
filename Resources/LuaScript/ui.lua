@@ -106,6 +106,7 @@ function ui.newTTFLabel(params)
     local textValign = params.valign or ui.TEXT_VALIGN_CENTER
     local x, y       = params.x, params.y
     local dimensions = params.dimensions
+    local edgeWidth = params.edgeWidth
 
     local label
     if dimensions then
@@ -113,9 +114,11 @@ function ui.newTTFLabel(params)
     else
         label = CCLabelTTF:create(text, font, size)
     end
-    --描边
-    if font == 'f1' then
-
+    if font == 'f2' then
+        if edgeWidth == nil then
+            edgeWidth = 2
+        end
+        label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
     end
 
     if label then
@@ -159,6 +162,7 @@ function ui.newButton(params)
     local conSize = params.conSize
     local priority = params.priority
     local col = params.color
+    local font = params.font
 
     local spSize = {sz.width, sz.height}
 
@@ -209,10 +213,7 @@ function ui.newButton(params)
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        obj.text = setAnchor(addLabel(obj.bg, text, "", size), {0.5, 0.5})
-        if col ~= nil then
-            setColor(obj.text, col)
-        end
+        obj.text = setAnchor(addChild(obj.bg, ui.newTTFLabel({text=text, font=font, size=size, color=col})), {0.5, 0.5})
     end
     obj:setAnchor(0.5, 0.5)
     return obj

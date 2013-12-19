@@ -13,12 +13,13 @@ function StandardTouchHandler:ctor()
     self.targetAnchor = nil
     --追踪所有的touch对象
     self.touchValue = {count=0}
+    self.smooth = 10
 end
 --调整状态的函数
 function StandardTouchHandler:update(diff)
     if self.targetMove ~= nil then
         local pos = getPos(self.bg)
-        local smooth = diff*5
+        local smooth = diff*self.smooth
         smooth = math.min(smooth, 1)
         local px = pos[1]*(1-smooth)+self.targetMove[1]*smooth
         local py = pos[2]*(1-smooth)+self.targetMove[2]*smooth
@@ -26,7 +27,7 @@ function StandardTouchHandler:update(diff)
     end
     if self.targetScale ~= nil then
         local sca = getScale(self.bg)
-        local smooth = diff*5
+        local smooth = diff*self.smooth
         smooth = math.min(smooth, 1)
         local ns = sca*(1-smooth)+self.targetScale*smooth
         setScale(self.bg, ns)
@@ -222,15 +223,6 @@ function StandardTouchHandler:tMoved(touches)
         --print("touch just Move ok?", sim:encode(move))
         self:MoveBack(move[1], move[2])
 
-        --local newInBg = self.bg:convertToWorldSpace(oldInBg)
-        --local move = {midOld[1]-newInBg.x, midOld[2]-newInBg.y}
-        --[[
-        local move = {midNew[1]-midOld[1], midNew[2]-midOld[2]}
-        if math.abs(move[1]) > 3 or math.abs(move[2]) > 3 then
-            self:MoveBack(move[1], move[2])
-        end
-        self:adjustMove()
-        --]]
         
     elseif self.touchValue.count == 1 and self.touchValue[0] ~= nil then
         if oldPos.count == 1 and oldPos[0] ~= nil then

@@ -1,4 +1,4 @@
-﻿#ifndef __IMAGEUPDATE_H__
+#ifndef __IMAGEUPDATE_H__
 #define __IMAGEUPDATE_H__
 #include <curl/curl.h>
 #include "support/zip_support/unzip.h"
@@ -30,6 +30,8 @@ public:
     vector<string> needUpdate;
 
     CURL *_curl;
+
+	string tempData;
 
 };
 

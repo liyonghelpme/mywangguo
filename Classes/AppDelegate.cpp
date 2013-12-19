@@ -53,6 +53,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     //根据config.ini 配置UserDefault 
 	CCLog("hello wangguo");
+    /*
     unsigned long fsize;
     unsigned char *data = CCFileUtils::sharedFileUtils()->getFileData("config.ini", "r", &fsize);
     map<string, string> *nm = handleIni((char*)data, fsize); 
@@ -63,14 +64,20 @@ bool AppDelegate::applicationDidFinishLaunching()
     }
     delete nm;
 	//searchPath 都在一个位置设置
+
+
+	if(def->getStringForKey("update") != "0")
+		updateFiles();
+    */
+
 	CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
     CCFileUtils::sharedFileUtils()->addSearchPath("image2");
 	CCFileUtils::sharedFileUtils()->addSearchPath("images");
 	CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
-	//updateFiles();
 
-    //搜索文件路径
+    
+    CCLog("finish update read main.lua");
     
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
     pEngine->executeScriptFile(path.c_str());

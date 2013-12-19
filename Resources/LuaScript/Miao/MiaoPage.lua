@@ -1,6 +1,7 @@
 require "Miao.MiaoBuild"
 require "Miao.MiaoBuildLayer"
 require "Miao.RegionDialog"
+require "myMap.NewUtil"
 MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s
@@ -230,6 +231,9 @@ function MiaoPage:setPoint(x, y)
     local curPos = getPos(self.bg)
     setPos(self.bg, {curPos[1]+dx, curPos[2]+dy})
 end
+function MiaoPage:touchesCanceled(touches)
+    self.touchDelegate:tCanceled(touches)
+end
 --初始化地图遮罩部分 不用了 新的直接CCBatchNodeSprite 来绘制遮罩
 function MiaoPage:initTiles()
     self.allIsland = {}
@@ -409,6 +413,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setPos(p)
         --调整bottom 冲突状态
         self.curBuild:setColPos()
+        self.curBuild:beginBuild()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         
         Logic.paused = true

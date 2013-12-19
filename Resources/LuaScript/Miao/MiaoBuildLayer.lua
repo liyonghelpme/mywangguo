@@ -54,7 +54,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet  then
         self.passTime = 0
-        --self:addPeople(6)
+        self:addPeople(6)
     end
 end
 
@@ -321,6 +321,7 @@ function MiaoBuildLayer:initRoad()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
             b:finishBuild()
+            b.funcBuild:adjustRoad()
         end
     end
 

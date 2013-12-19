@@ -1,9 +1,27 @@
 NewBuildMenu2 = class()
+--设计坐标转化成实际坐标
+--cl 转换
+function NewBuildMenu2:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local pos = getPos(self.temp)
+    local cx, cy = ds[1]/2-pos[1], ds[2]/2-pos[2]
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(self.temp, sca)
+    setPos(self.temp, {nx, ny})
+
+    --调整切割屏幕高度
+    self.cl:setContentSize(CCSizeMake(580, self.HEIGHT*sca))
+end
 function NewBuildMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=752, height=601}
-    self.temp = setPos(addNode(self.bg), {192, fixY(vs.height, 66+sz.height)})
+    self.sz = sz
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 426)}), {82, 126}), {0.5, 0.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 291)}), {82, 126}), {0.5, 0.5})
@@ -30,8 +48,8 @@ function NewBuildMenu2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.envTab.bg, "envIcon.png"), {33-82/2, fixY(126, 63)-126/2}), {54, 51}), {0.50, 0.50})
     self.tabs = {self.envTab, self.laborTab, self.storeTab}
 
-    local but = ui.newButton({image="newClose.png", delegate=self, callback = self.onClose})
-    setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
+    --local but = ui.newButton({image="newClose.png", delegate=self, callback = self.onClose})
+    --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
 
     self.HEIGHT = 368
     
@@ -39,6 +57,8 @@ function NewBuildMenu2:ctor()
     self.temp:addChild(self.cl)
     self.cl:setPosition(ccp(144-184/2, fixY(sz.height, 422+183/2)))
     self.cl:setContentSize(CCSizeMake(580, self.HEIGHT))
+
+    self:adjustPos()
 
     self.flowNode = addNode(self.cl)
     setPos(self.flowNode, {0, self.HEIGHT})
@@ -52,9 +72,9 @@ function NewBuildMenu2:ctor()
 
     registerEnterOrExit(self)
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="饮料店", size=24, color={0, 255, 255}})), {0.00, 0.50}), {58, fixY(sz.height, 556)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="饮料店", size=24, font='f2', color={0, 255, 255}})), {0.00, 0.50}), {58, fixY(sz.height, 556)})
     self.name = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=24, color={0, 255, 255}})), {0.00, 0.50}), {188, fixY(sz.height, 556)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=24, font='f2', color={0, 255, 255}})), {0.00, 0.50}), {188, fixY(sz.height, 556)})
     self.price = w
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "silverIcon.png"), {165, fixY(sz.height, 556)}), {34, 34}), {0.50, 0.50})
     self.icon = sp
@@ -75,6 +95,8 @@ function NewBuildMenu2:setSel(s)
         self.data[self.selBuild][2]:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         local n = Logic.buildList[self.selBuild].name
         local p = Logic.buildList[self.selBuild].silver
+        self.name:setString(n)
+        self.price:setString(p)
         --global.director.curScene.menu.infoWord:setString(n.." "..p.."贯")
     end
 end
@@ -121,7 +143,7 @@ function NewBuildMenu2:updateTab()
         local sca = getSca(build, {134, 100})
         setScale(build, sca)
 
-        local w = setPos(setAnchor(addChild(sp, ui.newTTFLabel({text=v.name, size=18, color={0, 255, 255}})), {0.5, 0.5}), {92, fixY(sz.height, 146)})
+        local w = setPos(setAnchor(addChild(sp, ui.newTTFLabel({text=v.name, font='f2', size=18, color={0, 255, 255}})), {0.5, 0.5}), {92, fixY(sz.height, 146)})
 
         table.insert(self.data, {sp, build})
     end

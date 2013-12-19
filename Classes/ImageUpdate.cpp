@@ -1,4 +1,4 @@
-﻿#include "ImageUpdate.h"
+#include "ImageUpdate.h"
 #include "iniReader.h"
 #include <string.h>
 
@@ -15,6 +15,8 @@ ImageUpdate::ImageUpdate(const char *serverUrl, const char *versionUrl, const ch
     
     //设定图片路径 优先使用缓存中图片
     //再使用images 文件夹中的图片
+    
+    //AppDelegate 里面处理 路径问题
     //CCFileUtils::sharedFileUtils()->addSearchPath(_storagePath.c_str());
     //CCFileUtils::sharedFileUtils()->addSearchPath("images");
 
@@ -25,8 +27,14 @@ ImageUpdate::ImageUpdate(const char *serverUrl, const char *versionUrl, const ch
 }
 
 static size_t getVersionCode(void *ptr, size_t size, size_t nmemb, void *userdata) {
+	//如果文件过大 可能多次获取 version code 数据 等待获取结束
     CCLog("getVersionCode");
     ImageUpdate *pImage = (ImageUpdate *)userdata;
+	int len = size*nmemb;
+	char *word = (char*)ptr;
+	pImage->tempData.append(word, len);
+
+	/*
     map<string, string> *version = &pImage->_sversion;
     map<string, string> *temp = handleIni((char*)ptr, size*nmemb);
     (*version) = *(temp);
@@ -36,8 +44,10 @@ static size_t getVersionCode(void *ptr, size_t size, size_t nmemb, void *userdat
     FILE *nf = fopen(fullPath.c_str(), "wb");
     fwrite(ptr, size, nmemb, nf);
     fclose(nf);
+	*/
     return (size*nmemb);
 }
+//下载每个图片文件的内容写入到文件里面
 static size_t downLoadPackage(void *ptr, size_t size, size_t nmemb, void *userdata) {
     FILE *fp = (FILE *)userdata;
     size_t written = fwrite(ptr, size, nmemb, fp);
@@ -114,8 +124,20 @@ bool ImageUpdate::checkUpdate() {
         CCLog("image not get version file content");
         return false;
     }
-
+	//读取version file 结束 写入数据到 version中
+	map<string, string> *version = &_sversion;
+	map<string, string> *temp2 = handleIni(tempData.c_str(), tempData.size());
+    (*version) = *(temp2);
+    delete temp2;
     
+	//将下载的版本信息 写入到 ser.ini 文件里面  等图片下载完成再更新版本信息
+    string fullPath = _storagePath+_versionUrl;
+    FILE *nf = fopen(fullPath.c_str(), "wb");
+    fwrite(tempData.c_str(), tempData.size(), 1, nf);
+    fclose(nf);
+	tempData.clear();
+
+    //对比所有本地图片文件 和 远程图片文件 比较 需要更新的图片文件
     for(map<string, string>::iterator it=_sversion.begin(); it != _sversion.end(); it++) {
         CCLog("compare file %s %s", it->first.c_str(), it->second.c_str());
         if((*temp)[it->first] != it->second) {
@@ -124,7 +146,7 @@ bool ImageUpdate::checkUpdate() {
         }
     }
     delete temp;
-    
+
     //download(); 
 
     //verfileData = (char*)data;

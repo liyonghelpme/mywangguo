@@ -8,6 +8,7 @@
 
 #ifndef nozomi_VideoCamera_h
 #define nozomi_VideoCamera_h
+#include "ExtensionMacros.h"
 
 #include "base_nodes/CCNode.h"
 #include "cocos2d_ext_const.h"

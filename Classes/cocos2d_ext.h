@@ -11,8 +11,8 @@
 #include "extend_actions/CCExtendActionInterval.h"
 
 #include "network/CCHttpRequest.h"
-#include "crypto/CCCrypto.h"
+//#include "crypto/CCCrypto.h"
 
 #include "platform/VideoCamera.h"
 #include "platform/CCNative.h"
-#include "platform/CCWebView.h"
+//#include "platform/CCWebView.h"

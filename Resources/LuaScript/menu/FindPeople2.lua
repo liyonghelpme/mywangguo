@@ -1,19 +1,34 @@
 FindPeople2 = class()
+function FindPeople2:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local pos = getPos(self.temp)
+    local cx, cy = ds[1]/2-pos[1], ds[2]/2-pos[2]
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(self.temp, sca)
+    setPos(self.temp, {nx, ny})
+
+    --调整切割屏幕高度
+end
 function FindPeople2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=715, height=601}
-    self.temp = setPos(addNode(self.bg), {192, fixY(vs.height, 66+sz.height)})
+    local ds = global.director.designSize
+    self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
+    self:adjustPos()
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {340, fixY(sz.height, 355)}), {603, 354}), {0.50, 0.50})
-    local but = ui.newButton({image="newClose.png"})
-    setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
-    local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=27, callback=self.onPeople, delegate=self, conSize={152, 38}})
+    --local but = ui.newButton({image="newClose.png"})
+    --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
+    local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=34, callback=self.onPeople, delegate=self, conSize={152, 38}})
     setPos(addChild(self.temp, but.bg), {331, fixY(sz.height, 560)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="林雨皮之助", size=30, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {138, fixY(sz.height, 150)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv3", size=40, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {511, fixY(sz.height, 147)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/3", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {422, fixY(sz.height, 86)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/3", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {357, fixY(sz.height, 86)})
 
     
 

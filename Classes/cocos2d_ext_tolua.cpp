@@ -1138,9 +1138,11 @@ static int tolua_Cocos2d_CCCrypto_md5encode00(lua_State* tolua_S)
 	{
 		const char* src = ((const char*)  tolua_tostring(tolua_S,2,0));
 		{
+            /*
 			const char* tolua_ret = CCCrypto::encodeMd5((void *)src, strlen(src));
 			tolua_pushstring(tolua_S, (const char*)tolua_ret);
 			delete[] tolua_ret;
+             */
 		}
 	}
 	return 1;
@@ -1172,6 +1174,7 @@ static int tolua_Cocos2d_CCCrypto_rsaSign00(lua_State* tolua_S)
 		const char* key = ((const char*)  tolua_tostring(tolua_S,3,0));
 		{
 			unsigned char* buffer = new unsigned char[1000];
+            /*
 			int len = CCCrypto::rsa_sign_with_private((unsigned char *)src, strlen(src), buffer, 1000, key);
 			int verify = CCCrypto::rsa_verify_with_public((unsigned char*)src, strlen(src), buffer, len, "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCui00NhxlT+ijio8JFqWGVjb/mdreR+GeQ+L/ZrEKj9UoOMdNHGaNw7DdniFE1ehdw9WgQr45cwH8VEUofrDJCbKuzqxN5I/lAtrImIQNQUiVYSowVcvg3fndgnOeFpa51l+De+ZF3+rDtPtFiN15AUnxFdnArpyrv2jnnzp2uZwIDAQAB");
 			const char* temp = CCCrypto::encodeBase64(buffer, len);
@@ -1180,6 +1183,7 @@ static int tolua_Cocos2d_CCCrypto_rsaSign00(lua_State* tolua_S)
 			delete temp;
 			tolua_pushstring(tolua_S, (const char*)tolua_ret);
 			delete[] tolua_ret;
+             */
 		}
 	}
 	return 1;
@@ -1297,11 +1301,13 @@ static int tolua_Cocos2d_CCWebView_create00(lua_State* tolua_S)
 		const char* url = ((const char*)  tolua_tostring(tolua_S,2,0));
 		LUA_FUNCTION funcID = (toluafix_ref_function(tolua_S,3,0));
 		{
+            /*
 			CCWebView * tolua_ret = (CCWebView *) CCWebView::create(url, funcID);
 			int nID = (tolua_ret) ? tolua_ret->m_uID : -1;
 			int* pLuaID = (tolua_ret) ? &tolua_ret->m_nLuaID : NULL;
 			toluafix_pushusertype_ccobject(tolua_S, nID, pLuaID, (void*)tolua_ret,"CCWebView");
-		}
+             */
+        }
 	}
 	return 1;
 #ifndef TOLUA_RELEASE

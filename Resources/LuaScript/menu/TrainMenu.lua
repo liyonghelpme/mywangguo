@@ -1,4 +1,4 @@
-require "Menu.TrainNow"
+require "menu.TrainNow"
 TrainMenu = class(MenuBase)
 function TrainMenu:ctor()
     self:setTitle("村民一览")
