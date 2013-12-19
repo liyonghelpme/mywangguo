@@ -18,11 +18,12 @@ function FindPeople2:ctor()
     local sz = {width=715, height=601}
     local ds = global.director.designSize
     self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
+    self:adjustPos()
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {340, fixY(sz.height, 355)}), {603, 354}), {0.50, 0.50})
-    local but = ui.newButton({image="newClose.png"})
-    setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
+    --local but = ui.newButton({image="newClose.png"})
+    --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
     local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=27, callback=self.onPeople, delegate=self, conSize={152, 38}})
     setPos(addChild(self.temp, but.bg), {331, fixY(sz.height, 560)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="林雨皮之助", size=30, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {138, fixY(sz.height, 150)})

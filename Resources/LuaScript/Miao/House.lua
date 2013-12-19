@@ -52,13 +52,14 @@ function House:finishMove()
         self.owner = nil
     end
 end
+--[[
 function House:showInfo()
     local bi
     bi = HouseInfo.new(self.baseBuild)
     global.director:pushView(bi, 1, 0)
     global.director.curScene.menu:setMenu(bi)
 end
-
+--]]
 function House:showIncrease(n)
     local sp = ui.newButton({image="info.png", conSize={100, 45}, text="回复 +"..n, color={0, 0, 0}, size=25})
     self.baseBuild.map.bg:addChild(sp.bg)

@@ -9,6 +9,11 @@ function TMXMenu2:ctor(s)
     local sz = vs
     self.sz = sz
 
+    local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
+    self.bg:addChild(stateLabel)
+    setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
+    self.stateLabel = stateLabel
+
     local but = ui.newButton({image="buta.png", text="地图"})
     setPos(addChild(temp, but.bg), {62, fixY(768, 704)})
     self.leftBut = but
