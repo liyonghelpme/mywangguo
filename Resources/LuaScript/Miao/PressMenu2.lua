@@ -48,7 +48,7 @@ function PressMenu2:ctor()
     local dTime= 0
     self.data = {}
     for i=1, #temp, 1 do
-        local but = ui.newButton({image="mainA.png",  callback=self.onBut, delegate=self, param=i})
+        local but = ui.newButton({image="mainA.png",  callback=self.onBut, touchBegan=self.onTab, delegate=self, param=i})
         local sp = setSize(setPos(addSprite(but.bg, string.format("icon%d.png", i-1)), {31-181/2, fixY(60, 33)-60/2}), {45, 42})
         local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], font='f2', size=24, color={255, 255, 255}})), {0, 0.5}), {95-181/2, fixY(60, 29)-60/2})
 
@@ -78,19 +78,29 @@ function PressMenu2:clearMenu()
         self.subMenu = nil
     end
 end
+function PressMenu2:onTab(p)
+    self.first = false
+    if self.curSel ~= p then
+        self.first = true
+        self:clearMenu()
+        self:setSelect(p)
+    end
+end
 function PressMenu2:onBut(p)
+    --[[
     local first = false
     if self.curSel ~= p then
         first = true
         self:clearMenu()
         self:setSelect(p)
     end
+    --]]
 
-    if p == 1 then
+    if p == 1  then
         global.director:popView()
         local m = NewBuildMenu2.new()
         global.director:pushView(m, 1 )
-    elseif p == 2 and first then
+    elseif p == 2 and  self.first then
         local m = PeopleMenu2.new(self)
         self.bg:addChild(m.bg)
         self.subMenu = m
