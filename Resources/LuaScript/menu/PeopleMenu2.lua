@@ -17,13 +17,13 @@ function PeopleMenu2:ctor()
 
     local initX = 99
     local initY = fixY(sz.height, 42)
-    local offY = -60
+    local offY = -70
     local allbut = {}
     self.data = {}
     for i=1, #temp, 1 do
         local but = ui.newButton({image="mainBa.png", callback=self.onBut, delegate=self, param=i})
         setPos(addChild(self.temp, but.bg), {99, fixY(sz.height, 42)+offY*(i-1)})
-        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], size=24, color={255, 255, 255}})), {0, 0.5}), {13-181/2, fixY(60, 29)-60/2})
+        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], font='f2', size=24, color={255, 255, 255}})), {0, 0.5}), {13-181/2, fixY(60, 29)-60/2})
 
         if i == 4 then
             setColor(w, {255, 255, 255, 255*0.8})

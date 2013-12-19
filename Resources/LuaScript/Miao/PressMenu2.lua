@@ -50,7 +50,7 @@ function PressMenu2:ctor()
     for i=1, #temp, 1 do
         local but = ui.newButton({image="mainA.png",  callback=self.onBut, delegate=self, param=i})
         local sp = setSize(setPos(addSprite(but.bg, string.format("icon%d.png", i-1)), {31-181/2, fixY(60, 33)-60/2}), {45, 42})
-        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], size=24, color={255, 255, 255}})), {0, 0.5}), {95-181/2, fixY(60, 29)-60/2})
+        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], font='f2', size=24, color={255, 255, 255}})), {0, 0.5}), {95-181/2, fixY(60, 29)-60/2})
 
         setPos(but.bg, {initX, initY+(i-1)*offY})
         but:setAnchor(0.5, 0.5)

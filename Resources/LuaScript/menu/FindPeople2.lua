@@ -24,11 +24,11 @@ function FindPeople2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {340, fixY(sz.height, 355)}), {603, 354}), {0.50, 0.50})
     --local but = ui.newButton({image="newClose.png"})
     --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
-    local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=27, callback=self.onPeople, delegate=self, conSize={152, 38}})
+    local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=34, callback=self.onPeople, delegate=self, conSize={152, 38}})
     setPos(addChild(self.temp, but.bg), {331, fixY(sz.height, 560)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="林雨皮之助", size=30, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {138, fixY(sz.height, 150)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv3", size=40, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {511, fixY(sz.height, 147)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/3", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {422, fixY(sz.height, 86)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/3", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {357, fixY(sz.height, 86)})
 
     
 

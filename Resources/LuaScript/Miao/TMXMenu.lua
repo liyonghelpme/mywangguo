@@ -34,7 +34,7 @@ function TMXMenu:ctor(s)
     local year = display.newScale9Sprite("yearboard.jpg")
     setAnchor(setPos(setContentSize(year, {268, 39}), {40, vs.height-10}), {0, 1})
     self.bg:addChild(year)
-    local t = ui.newTTFLabel({text="0年0月0天", size=20, color={10, 10, 102}})
+    local t = ui.newTTFLabel({text="0年0月0天", font='f2', size=20, color={10, 10, 102}})
     setPos(t, {134, 20})
     year:addChild(t)
     self.year = t

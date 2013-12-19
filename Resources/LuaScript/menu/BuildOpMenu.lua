@@ -1,6 +1,13 @@
 require "menu.SellMenu2"
 
 BuildOpMenu = class()
+function BuildOpMenu:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local offX = vs.width/2-ds[1]/2
+
+    setPos(self.temp, {offX, 0})
+end
 function BuildOpMenu:ctor(b)
     self.build = b
     local vs = getVS()

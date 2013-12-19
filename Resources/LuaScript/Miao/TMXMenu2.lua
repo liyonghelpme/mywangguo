@@ -1,5 +1,7 @@
 require "Miao.PressMenu2"
 TMXMenu2 = class()
+function TMXMenu2:adjustPos()
+end
 function TMXMenu2:ctor(s)
     self.scene = s
     local vs = getVS()
@@ -14,30 +16,27 @@ function TMXMenu2:ctor(s)
     setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
     self.stateLabel = stateLabel
 
-    local but = ui.newButton({image="buta.png", text="地图"})
+    local but = ui.newButton({image="buta.png", font='f2', text="地图", size=26})
     setPos(addChild(temp, but.bg), {62, fixY(768, 704)})
     self.leftBut = but
-    local but = ui.newButton({image="buta.png", text="菜单", delegate=self, callback=self.onMenu})
+    local but = ui.newButton({image="buta.png", text="菜单", font='f2', size=26, delegate=self, callback=self.onMenu})
     setScriptTouchPriority(but.bg, -256)
     setPos(addChild(temp, but.bg), {vs.width-fixX(1024, 961), fixY(768, 704)})
     self.mbut = but
     local sp = setSize(setPos(addSprite(self.temp, "numBack.png"), {110, fixY(sz.height, 72)}), {156, 30})
     local sp = setSize(setPos(addSprite(self.temp, "silverIcon.png"), {39, fixY(sz.height, 72)}), {50, 50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=18, color={255, 255, 255}})), {0, 0.5}), {79, fixY(sz.height, 70)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {79, fixY(sz.height, 70)})
     self.silver = w
 
     local sp = setSize(setPos(addSprite(self.temp, "numBack.png"), {288, fixY(sz.height, 72)}), {156, 30})
     local sp = setSize(setPos(addSprite(self.temp, "chargeIcon.png"), {349, fixY(sz.height, 73)}), {33, 37})
     local sp = setSize(setPos(addSprite(self.temp, "goldIcon.png"), {217, fixY(sz.height, 73)}), {50, 50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=18, color={255, 255, 255}})), {0, 0.5}), {257, fixY(sz.height, 70)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {257, fixY(sz.height, 70)})
     self.gold = w
 
-    local w = colorWords({text="<57b7fd999><ffffff年><57b7fd12><ffffff月><57b7fd7><ffffff周>"})
-    setPos(setAnchor(addChild(self.temp, w), {0, 0.5}), {210, fixY(sz.height, 24)})
-    self.year = w
 
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最长的村落名字", size=24, color={255, 255, 255}})), {0, 0.5}), {16, fixY(sz.height, 25)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最长的村落名字", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {16, fixY(sz.height, 25)})
     self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG}
     registerEnterOrExit(self)
 end
@@ -81,9 +80,11 @@ end
 
 function TMXMenu2:updateYear()
     local y, m, w = getDate()
-    removeSelf(self.year)
+    if self.year ~= nil then
+        removeSelf(self.year)
+    end
 
-    local word = colorWords({text=string.format("<57b7fd%d><ffffff年><57b7fd%d><ffffff月><57b7fd%d><ffffff周>", y, m, w)})
+    local word = colorWords({text=string.format("<57b7fd%d><ffffff年><57b7fd%d><ffffff月><57b7fd%d><ffffff周>", y, m, w), size=25, font='f2'})
     setPos(setAnchor(addChild(self.temp, word), {0, 0.5}), {210, fixY(self.sz.height, 24)})
     self.year = word
 end
