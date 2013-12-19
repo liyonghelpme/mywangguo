@@ -137,6 +137,33 @@ function MoveMap:checkCollision(build)
     end
     return nil
 end
+function MoveMap:adjustLayer(chd)
+    chd.bg:retain()
+    removeSelf(chd.bg)
+    if chd.picName == 'build' or chd.picName == 'fence' then
+        if chd.id == 2 then
+            self.farmLayer:addChild(chd.bg)
+        --斜坡
+        elseif chd.data.kind == 1 then
+            self.roadLayer:addChild(chd.bg)
+        else
+            self.buildingLayer:addChild(chd.bg)
+        end
+    elseif chd.picName == 'remove' then
+        self.removeLayer:addChild(chd.bg)
+    elseif chd.picName == 'move' then
+        self.removeLayer:addChild(chd.bg)
+    elseif chd.picName == 't' then
+        self.roadLayer:addChild(chd.bg)
+    else
+        self.terrian:addChild(chd.bg)
+    end
+    chd.bg:release()
+end
+function MoveMap:fastAddBuilding(chd, z)
+    self.buildingLayer:addChild(chd.bg, z)
+    self.mapGridController:addBuilding(chd)
+end
 function MoveMap:addBuilding(chd, z)
     print('MoveMap addBuilding', chd, z)
     if chd.picName == 'build' or chd.picName == 'fence' then

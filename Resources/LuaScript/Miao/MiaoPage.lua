@@ -414,7 +414,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setPos(p)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
-        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
+        self.buildLayer:fastAddBuilding(self.curBuild, MAX_BUILD_ZORD)
         
         --调整建筑物高度
         self.curBuild:setPos(p)
@@ -470,6 +470,7 @@ function MiaoPage:cancelBuild()
 end
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
+        self.buildLayer:adjustLayer(self.curBuild)
         local c = Logic.buildings[self.curBuild.id].silver
         doCost(c)
         if self.curBuild.picName == 't' then

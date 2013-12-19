@@ -75,7 +75,7 @@ function Road:adjustRoad()
     end
 end
 function Road:beginMove()
-    if self.baseBuild.colNow == 0 or self.checkBuildable() then
+    if self.baseBuild.colNow == 0 or self:checkBuildable() then
         self:removeSelf()
     end
 end
@@ -152,30 +152,19 @@ end
 --当和斜坡冲突的时候变换路块类型
 function Road:whenColNow()
     local setYet = false
+    print("when col now", self.baseBuild.colNow)
     if self.baseBuild.colNow == 1 then
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
                 setYet = self:adjustOnSlope()
-                --[[
-                if self.baseBuild.otherBuild.dir == 0 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
-                    self.baseBuild.changeDirNode:setDisplayFrame(tex)
-                    setYet = true
-                    self.baseBuild.onSlope = true
-                elseif self.baseBuild.otherBuild.dir == 1 then
-                    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile37.png")
-                    self.baseBuild.changeDirNode:setDisplayFrame(tex)
-                    setYet = true
-                    self.baseBuild.onSlope = true
-                end
-                --]]
             end
         end
     end
     --没有斜坡
     if not setYet then
-        setDisplayFrame(self.baseBuild.changeDirNode, "t0.png")
+        print("not set set as t0 touch adjustValue")
         self.baseBuild.onSlope = false
+        --self:adjustValue()
     end
 end
 
