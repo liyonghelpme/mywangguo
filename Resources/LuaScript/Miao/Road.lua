@@ -6,7 +6,8 @@ function Road:adjustValue()
         print("adjust Value", self.baseBuild.value)
         setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
     else
-        self:whenColNow()
+        --self:whenColNow()
+        self:adjustOnSlope()
     end
 end
 
@@ -141,12 +142,27 @@ function Road:removeSelf()
     end
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
+function Road:adjustOnSlope()
+    if self.baseBuild.otherBuild.dir == 0 then
+        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
+        self.baseBuild.changeDirNode:setDisplayFrame(tex)
+        setYet = true
+        self.baseBuild.onSlope = true
+    elseif self.baseBuild.otherBuild.dir == 1 then
+        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile37.png")
+        self.baseBuild.changeDirNode:setDisplayFrame(tex)
+        setYet = true
+        self.baseBuild.onSlope = true
+    end
+end
 --当和斜坡冲突的时候变换路块类型
 function Road:whenColNow()
     local setYet = false
     if self.baseBuild.colNow == 1 then
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
+                self:adjustOnSlope()
+                --[[
                 if self.baseBuild.otherBuild.dir == 0 then
                     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
                     self.baseBuild.changeDirNode:setDisplayFrame(tex)
@@ -158,6 +174,7 @@ function Road:whenColNow()
                     setYet = true
                     self.baseBuild.onSlope = true
                 end
+                --]]
             end
         end
     end
@@ -223,4 +240,5 @@ function Road:beginBuild()
         self:adjustRoad()
     end
 end
+
 
