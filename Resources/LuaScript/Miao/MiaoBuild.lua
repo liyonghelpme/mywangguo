@@ -172,7 +172,7 @@ function MiaoBuild:ctor(m, data)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
-    allLabel:setVisible(true)
+    allLabel:setVisible(false)
 
     self.nameLabel = ui.newBMFontLabel({text="", size=21, color={8, 20, 176}})
     setPos(self.nameLabel, {0, 250})
