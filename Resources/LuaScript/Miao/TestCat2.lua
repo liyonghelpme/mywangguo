@@ -60,6 +60,19 @@ function Cat2:initView()
     self.carlbMove = createAnimation("car_lb", "car_lb_%d.png", 0, 9, 1, 1, true)
     self.carltMove = createAnimation("car_lt", "car_lt_%d.png", 0, 9, 1, 1, true)
 
+
+    local banner = setSize(CCSprite:create("probg.png"), {200, 38})
+    local pro = display.newScale9Sprite("pro1.png")
+    banner:addChild(pro)
+    setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
+    setPos(banner, {271, fixY(280, 91)})
+    self.banner = banner
+    setPos(self.banner, {0, 200})
+    self.people.heightNode:addChild(self.banner)
+    self.pro = pro
+end
+function Cat2:updateState(diff)
+    setProNum(self.pro, self.people.health, self.people.maxHealth)
 end
 
 function Cat2:checkWork(k)
@@ -67,6 +80,7 @@ function Cat2:checkWork(k)
     --两种情况 给 其它工厂运输农作物 丰收状态 
     --生产农作物
     --先不允许并行处理
+    print("checkWork", k.id, k,owner)
     if k.picName == 'build' and k.owner == nil then
         --farm
         if k.id == 2 then
@@ -188,17 +202,20 @@ function Cat2:findTarget()
 
     if #allPossible > 0 then
         --按照建筑物的距离排序
-        local myp = getPos(self.people.bg)
-        local function cmp(a, b)
-            local ap = getPos(a.bg)
-            local bp = getPos(b.bg)
-            local ad = mdist(myp, ap) 
-            local bd = mdist(myp, bp)
-            return ad < bd
-        end
-        table.sort(allPossible, cmp)
+        self:sortBuildings(allPossible)
         self:checkAllPossible() 
     end
+end
+function Cat2:sortBuildings(blist)
+    local myp = getPos(self.people.bg)
+    local function cmp(a, b)
+        local ap = getPos(a.bg)
+        local bp = getPos(b.bg)
+        local ad = mdist(myp, ap) 
+        local bd = mdist(myp, bp)
+        return ad < bd
+    end
+    table.sort(blist, cmp)
 end
 function Cat2:checkAllPossible()
     --按照距离排序的建筑物
@@ -216,6 +233,7 @@ function Cat2:checkAllPossible()
                 checkRes = false
             end
             if checkRes and #self.allFreeFactory > 0 then
+                self:sortBuildings(self.allFreeFactory)
                 self.people.predictFactory = self.allFreeFactory[1] 
                 self.people.predictFactory:setOwner(self.people)
                 self.people.predictStore = k
@@ -224,6 +242,7 @@ function Cat2:checkAllPossible()
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT})
                     table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD})
+                    self:sortBuildings(self.allFoodFarm)
                     self.people.predictTarget = self.allFoodFarm[1]
                     self.people.predictTarget:setOwner(self.people)
                     self.people.actionContext= CAT_ACTION.TAKE_FOOD

@@ -34,3 +34,5 @@ function FuncPeople:setPos()
     print("adjust People Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay, hei)
     setPos(self.people.heightNode, {0, 103*hei})
 end
+function FuncPeople:updateState(diff)
+end

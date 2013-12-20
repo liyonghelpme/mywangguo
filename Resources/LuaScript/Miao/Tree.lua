@@ -1,18 +1,19 @@
 Tree = class(FuncBuild)
 
 function Tree:initView()
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("build4.plist")
+    --local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    --sf:addSpriteFramesWithFile("build4.plist")
+
 
     local bd = Logic.buildings[self.baseBuild.id]
-    self.baseBuild.changeDirNode = CCSprite:create()
-    setDisplayFrame(self.baseBuild.changeDirNode, "build4.png")
+    self.baseBuild.changeDirNode = createSprite("build4.png")
 
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    setAnchor(self.baseBuild.changeDirNode, {489/sz.width, (sz.height-442)/sz.height})
+    setPos(setAnchor(self.baseBuild.changeDirNode, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
 
-    self.shadow = CCSprite:create()
-    setAnchor(setDisplayFrame(self.shadow, "build4_shadow_0.png"), {489/sz.width, (sz.height-442)/sz.height})
+
+    self.shadow = createSprite("build4_shadow_0.png")
+    setPos(setAnchor(self.shadow, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
     self.baseBuild.heightNode:addChild(self.shadow)
     
     local temp = CCSpriteBatchNode:create("white2.png")

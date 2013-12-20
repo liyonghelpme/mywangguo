@@ -1,9 +1,11 @@
 House = class(FuncBuild)
 
+--[[
 function House:initView()
     local sz = self.baseBuild.changeDirNode:getContentSize()
     setAnchor(self.baseBuild.changeDirNode, {204/sz.width, (sz.height-310)/sz.height})
 end
+--]]
 function House:finishBuild()
     self:doMyEffect()
 end
@@ -31,9 +33,12 @@ function House:update(diff)
         local owner = self.baseBuild.owner
         if owner.state == PEOPLE_STATE.IN_HOME then
             self.banner:setVisible(true)
+            setProNum(self.pro, owner.health, owner.maxHealth)
+            --[[
             local l = owner.health/owner.maxHealth*339
             l = math.max(0, l)
             setContentSize(self.pro, {l, 29})
+            --]]
         else
             self.banner:setVisible(false)
         end

@@ -5,7 +5,8 @@ MapHeight=1700+FIX_HEIGHT
 --]]
 MapWidth = 4080
 FIX_HEIGHT = 170
-MapHeight = 2040+FIX_HEIGHT
+--两个斜坡的高度
+MapHeight = 2040+FIX_HEIGHT+103*2+20 
 
 SIZEX=340/2
 SIZEY=170/2

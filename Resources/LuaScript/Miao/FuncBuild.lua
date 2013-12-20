@@ -5,8 +5,8 @@ end
 function FuncBuild:initView()
     local bd = Logic.buildings[self.baseBuild.id]
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    --setPos(setAnchor(self.baseBuild.changeDirNode, {170/512, (sz.height-bd.ay)/sz.height}), {0, SIZEY})
-    setAnchor(self.baseBuild.changeDirNode, {170/sz.width, 0})
+    setPos(setAnchor(self.baseBuild.changeDirNode, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+    --setAnchor(self.baseBuild.changeDirNode, {170/sz.width, 0})
 end
 function FuncBuild:handleTouchEnded()
 end
@@ -39,29 +39,28 @@ end
 function FuncBuild:initWork()
 end
 function FuncBuild:whenColNow()
+    addBanner("该位置有冲突")
 end
 function FuncBuild:setColor()
 end
 function FuncBuild:checkFinish()
 end
 
-function FuncBuild:checkBuildable()
-    return self.baseBuild.colNow==0
-end
-
 function FuncBuild:canFinish()
     return true
 end
 function FuncBuild:checkBuildable()
-    return true
+    print("checkBuildable", self.baseBuild.colNow)
+    return self.baseBuild.colNow == 0
 end
 function FuncBuild:clearMenu()
+    print("try to clear Menu", self.baseBuild.colNow, self.selGrid)
     if self.selGrid ~= nil then
         removeSelf(self.selGrid)
         self.baseBuild.changeDirNode:stopAllActions()
         setColor(self.baseBuild.changeDirNode, {255, 255, 255})
         self.selGrid = nil
-        if self.baseBuild.colNow == 1 and not self:checkBuildable() then
+        if not self:checkBuildable() then
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
             setPos(self.baseBuild.bg, self.baseBuild.oldPos)
@@ -73,6 +72,8 @@ function FuncBuild:clearMenu()
         if #global.director.stack > 0 then
             global.director:popView()
         end
+
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
 function FuncBuild:showInfo()
@@ -120,9 +121,6 @@ function FuncBuild:setBottomColor(c)
     --]]
 end
 function FuncBuild:doSwitch()
-end
-function FuncBuild:checkBuildable()
-    return true
 end
 function FuncBuild:takeTool()
 end

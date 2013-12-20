@@ -160,6 +160,9 @@ function Road:whenColNow()
             end
         end
     end
+    if self.baseBuild.colNow == 1 and not setYet then
+        addBanner("该位置有冲突")
+    end
     --没有斜坡
     if not setYet then
         print("not set set as t0 touch adjustValue")
