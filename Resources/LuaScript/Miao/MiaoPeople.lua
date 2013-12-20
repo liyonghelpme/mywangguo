@@ -510,12 +510,20 @@ function MiaoPeople:doMove(diff)
         if self.passTime >= self.waitTime then
             self.passTime = 0
             local nextPoint = self.curPoint+1
+
+
             if nextPoint > #self.path then
                 --去休息
                 --if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
                 --    self:handleHome()
                 --商人 工作移动到了目的点 开始 往回走了
-                if self.data.kind == 2 then
+
+                --首先检测目标是否移动 
+                local moved = self:checkMoved()
+                if moved then
+                    self:clearStateStack()
+                    self:resetState()
+                elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction()
                     --收获农作物 商店资源
@@ -580,7 +588,7 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.id == 5 then
                         self:handleFactory()
                     --商店产品
-                    elseif self.realTarget.id == 6 then
+                    elseif self.realTarget.data.IsStore == 1 then
                         self:handleStore()
                     --去采矿场工作
                     elseif self.realTarget.id == 12 then
@@ -601,71 +609,80 @@ function MiaoPeople:doMove(diff)
                 end
                 self:setZord()
             else
-                --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
-                local np = self.path[nextPoint]
-                local buildCell = self.map.mapGridController.mapDict
-                local key = getMapKey(np[1], np[2])
-                local bv = buildCell[key]
-
-
-                local cp = self.path[self.curPoint]
-                local key = getMapKey(cp[1], cp[2])
-                local cv = buildCell[key]
-
-                --行走在有可能是斜坡的道路上面
-                --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
-                --根据normal 得到上坡 还是下坡'
-                --下个点在石头路上
-                --下一个点是斜坡 下下一个点的高度值 和当前点高度值 平均值 
-                local goYet = false
-                --道路是onSlope 
-                --道路下面的斜坡才是真正的地形高度
-                if bv ~= nil then
-                    local ons = bv[#bv][1].onSlope
-                    if ons then
-                        goYet = true
-                        local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.waitTime = 3
-                        self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
-                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
-                        self:setDir(cxy[1], cxy[2])
-                        self:setZord()
-                        --local nnp = self.path[nextPoint+1]
-                        --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
-                        --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
-                        self:moveSlope(dx, dy, 0, bv[#bv-1][1].height)
-                        self.curPoint = self.curPoint+1
+                local moved = false
+                if nextPoint == #self.path then
+                    moved = self:checkMoved()
+                    if moved then
+                        self:clearStateStack()
+                        self:resetState()
                     end
                 end
-                --当前点在 斜坡上 下一个点的高度值
-                if not goYet and cv ~= nil then
-                    local ons = cv[#cv][1].onSlope
-                    if ons then
-                        goYet = true
+                if not moved then
+                    --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
+                    local np = self.path[nextPoint]
+                    local buildCell = self.map.mapGridController.mapDict
+                    local key = getMapKey(np[1], np[2])
+                    local bv = buildCell[key]
+
+
+                    local cp = self.path[self.curPoint]
+                    local key = getMapKey(cp[1], cp[2])
+                    local cv = buildCell[key]
+
+                    --行走在有可能是斜坡的道路上面
+                    --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
+                    --根据normal 得到上坡 还是下坡'
+                    --下个点在石头路上
+                    --下一个点是斜坡 下下一个点的高度值 和当前点高度值 平均值 
+                    local goYet = false
+                    --道路是onSlope 
+                    --道路下面的斜坡才是真正的地形高度
+                    if bv ~= nil then
+                        local ons = bv[#bv][1].onSlope
+                        if ons then
+                            goYet = true
+                            local cxy = setBuildMap({1, 1, np[1], np[2]})
+                            self.waitTime = 3
+                            self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                            local dx, dy = np[1]-cp[1], np[2]-cp[2]
+                            self:setDir(cxy[1], cxy[2])
+                            self:setZord()
+                            --local nnp = self.path[nextPoint+1]
+                            --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
+                            --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
+                            self:moveSlope(dx, dy, 0, bv[#bv-1][1].height)
+                            self.curPoint = self.curPoint+1
+                        end
+                    end
+                    --当前点在 斜坡上 下一个点的高度值
+                    if not goYet and cv ~= nil then
+                        local ons = cv[#cv][1].onSlope
+                        if ons then
+                            goYet = true
+                            local cxy = setBuildMap({1, 1, np[1], np[2]})
+                            self.waitTime = 3
+                            self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                            local dx, dy = np[1]-cp[1], np[2]-cp[2]
+                            self:setDir(cxy[1], cxy[2])
+                            self:setZord()
+                            self:moveSlope(dx, dy, 1, np)
+                            self.curPoint = self.curPoint+1
+                        end
+                    end
+
+                    if not goYet then
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.waitTime = 3
+                        self.waitTime = 1.5
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
-                        local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
                         self:setZord()
-                        self:moveSlope(dx, dy, 1, np)
                         self.curPoint = self.curPoint+1
                     end
+                    --是否在运送货物
+                    if self.food > 0 or self.stone > 0 or self.workNum > 0 then
+                        self.health = self.health-1
+                    end
                 end
-
-                if not goYet then
-                    local cxy = setBuildMap({1, 1, np[1], np[2]})
-                    self.waitTime = 1.5
-                    self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
-                    self:setDir(cxy[1], cxy[2])
-                    self:setZord()
-                    self.curPoint = self.curPoint+1
-                end
-                --是否在运送货物
-                if self.food > 0 or self.stone > 0 or self.workNum > 0 then
-                    self.health = self.health-1
-                end
-
             end
         end
     end
@@ -677,7 +694,11 @@ end
 --人物播放劳作动画
 function MiaoPeople:doWork(diff)
     if self.state == PEOPLE_STATE.IN_WORK then
-        if self.realTarget.deleted then
+        local moved = self:checkMoved()
+        if moved then
+            self:clearStateStack()
+            self:resetState()
+        elseif self.realTarget.deleted then
             self:clearStateStack()
             self:resetState()
         else
@@ -694,7 +715,16 @@ function MiaoPeople:doWork(diff)
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
-        self:workInHome(diff)
+        local moved = self:checkMoved()
+        if moved then
+            self:clearStateStack()
+            self:resetState()
+        elseif self.realTarget.deleted then
+            self:clearStateStack()
+            self:resetState()
+        else
+            self:workInHome(diff)
+        end
     end
 end
 
@@ -889,12 +919,14 @@ function MiaoPeople:getPath()
             end
             parent = self.cells[parent].parent
         end
-        --不包括最后一个点
-        for i =#path, 2, -1 do
+        --包括最后一个点 只是在行走的时候 调整一下 到最后一个点的时候 要消失 或者每半个作为一个移动单位 
+        for i =#path, 1, -1 do
             table.insert(self.path, {path[i][1], path[i][2]})
         end
         print("getPath", simple.encode(self.endPoint), simple.encode(path))
-        
+        --用于确认 当前工作的目标是否移动了
+        self.tempEndPoint = {path[1][1], path[1][2]}
+        --[[
         --走到房间边缘消失掉
         if self.predictTarget.id == 1 then
             if #self.path >= 2 then
@@ -919,6 +951,7 @@ function MiaoPeople:getPath()
         else
             table.insert(self.path, path[1])
         end
+        --]]
         --设置全局Cell 中此处的权重+10
         if #self.path > 0 then
             self.endPoint = self.path[#self.path]

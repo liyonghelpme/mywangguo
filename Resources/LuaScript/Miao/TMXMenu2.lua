@@ -37,12 +37,14 @@ function TMXMenu2:ctor(s)
 
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最长的村落名字", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {16, fixY(sz.height, 25)})
-    self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG}
+    self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG, EVENT_TYPE.UPDATE_RESOURCE}
     registerEnterOrExit(self)
 end
 
 function TMXMenu2:receiveMsg(msg, para)
-    if msg == EVENT_TYPE.SHOW_DIALOG then
+    if name == EVENT_TYPE.UPDATE_RESOURCE then
+        self:updateText()
+    elseif msg == EVENT_TYPE.SHOW_DIALOG then
         self.mbut.text:setString("返回")
     elseif msg == EVENT_TYPE.CLOSE_DIALOG then
         self.mbut.text:setString("菜单")

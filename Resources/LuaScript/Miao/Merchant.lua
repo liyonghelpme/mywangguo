@@ -3,7 +3,7 @@ Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
     local ret = false
     if k.owner == nil and k.picName == 'build' and not k.deleted and k.workNum > 0 then
-        if k.id == 2 or k.id == 6 then
+        if k.id == 2 or k.data.IsStore == 1 then
             ret = true
         end
     end
@@ -137,7 +137,7 @@ function Merchant:handleAction()
         print("BUY_GOODS", self.people.predictTarget.id)
         if self.people.predictTarget.stone > 0 then
             local sp = CCSprite:create("silver.png")
-            local p = getPos(self.people.predictTarget.bg)
+            local p = getPos(self.people.predictTarget.heightNode)
             self.people.map.bg:addChild(sp)
             setPos(sp, p)
             local rx = math.random(20)-10
@@ -151,7 +151,7 @@ function Merchant:handleAction()
         elseif self.people.predictTarget.id == 13 or self.people.predictTarget.id == 6 then
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silver.png")
-            local p = getPos(self.people.predictTarget.bg)
+            local p = getPos(self.people.predictTarget.heightNode)
             self.people.map.bg:addChild(sp)
             setPos(sp, p)
             local rx = math.random(20)-10
@@ -174,7 +174,7 @@ function Merchant:handleAction()
         elseif self.people.predictTarget.workNum > 0 then
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silver.png")
-            local p = getPos(self.people.predictTarget.bg)
+            local p = getPos(self.people.predictTarget.heightNode)
             self.people.map.bg:addChild(sp)
             setPos(sp, p)
             local rx = math.random(20)-10

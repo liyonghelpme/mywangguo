@@ -89,6 +89,8 @@ GoodsName = {
     [1]={name="浊酒", food=1, wood=0, stone=0, price=6},
     [2]={name="白酒", food=2, wood=0, stone=0, price=13},
     [3]={name="素酒", food=2, wood=0, stone=1, price=37},
+
+    [4]={name="饮料", food=1, price=20},
 }
 
 laborEffect = {
