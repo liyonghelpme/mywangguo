@@ -11,10 +11,13 @@ function MiaoPeople:stopMoveAction()
     end
 end
 function MiaoPeople:setMoveAction(aniName)
-    self:stopMoveAction()
-    local ani = CCAnimationCache:sharedAnimationCache():animationByName(aniName)
-    self.moveAction = repeatForever(CCAnimate:create(ani))
-    self.changeDirNode:runAction(self.moveAction)
+    if self.curAni ~= aniName then
+        self:stopMoveAction()
+        self.curAni = aniName
+        local ani = CCAnimationCache:sharedAnimationCache():animationByName(aniName)
+        self.moveAction = repeatForever(CCAnimate:create(ani))
+        self.changeDirNode:runAction(self.moveAction)
+    end
 end
 function MiaoPeople:setDir(x, y)
     local p = getPos(self.bg)
@@ -334,6 +337,9 @@ function MiaoPeople:handleFarm()
     end
 end
 
+--popState Factory 是当前的目标
+--setOwner = self
+--而在resetState 的时候 没有检查realTarget 是不是statecontext里面的目标导致被清理了
 function MiaoPeople:popState()
     if #self.stateStack > 0 then
         for k, v in ipairs(self.stateStack) do
@@ -354,7 +360,13 @@ end
 function MiaoPeople:beforeHandle()
 end
 function MiaoPeople:resetState()
-    self.realTarget:setOwner(nil)
+    if self.stateContext ~= nil then
+        if self.stateContext[2] ~= self.realTarget then
+            self.realTarget:setOwner(nil)
+        end
+    else
+        self.realTarget:setOwner(nil)
+    end
     self.realTarget = nil
     self.state = PEOPLE_STATE.FREE
 end
@@ -615,10 +627,12 @@ function MiaoPeople:workInFarm()
     end
 end
 function MiaoPeople:workInHome(diff)
+    --[[
     if self.realTarget.deleted then
         self.state = PEOPLE_STATE.FREE
         self.myHouse = nil
     end
+    --]]
     self.restTime = self.restTime+diff
     --0.5 恢复一下 共8s 总共16下
     --调整一下时间频率即可
@@ -652,7 +666,7 @@ function MiaoPeople:showState()
         setTexture(self.statePic, "herb109.png")
     end
 end
-
+--移动了之后 清理owner
 function MiaoPeople:clearStateStack()
     for k, v in ipairs(self.stateStack) do
         if type(v) == 'table' then
@@ -690,4 +704,17 @@ function MiaoPeople:moveSlope(dx, dy, val, cp, nnp)
         self.slopeAct = moveto(self.waitTime, 0, chei*103)
     end
     self.heightNode:runAction(self.slopeAct)
+end
+function MiaoPeople:checkMoved()
+    local moved = false
+    if not self.realTarget.deleted then
+        local pxy = self.tempEndPoint 
+        local txy = getPos(self.realTarget.bg)
+        local map = getBuildMap(self.realTarget)
+        if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
+            addBanner("目标被移动了 "..simple.encode(pxy).." "..simple.encode(map))
+            moved = true
+        end
+    end
+    return moved
 end

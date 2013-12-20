@@ -16,6 +16,7 @@ require "Miao.MiaoPath"
 require "Miao.RemoveBuild"
 require "Miao.MoveBuild"
 require "menu.BuildOpMenu"
+require "Miao.Drink"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -111,13 +112,11 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
             self.funcBuild:initView()
-        --斜坡建筑物
-        --[[
-        elseif self.id == 7 or self.id == 8 or self.id == 9 or self.id == 10 then
-            self.changeDirNode = setAnchor(CCSprite:create("slope"..(self.id-6)..".png"), {0.5, 0})
-            self.funcBuild = Slope.new(self)
+        --饮料店
+        elseif self.id == 7 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = Drink.new(self)
             self.funcBuild:initView()
-        --]]
         elseif self.id == 5 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
@@ -244,7 +243,7 @@ function MiaoBuild:touchesBegan(touches)
     self.inSelf = false
     self.moveYet = false
 
-
+    --self.startPos = getBuildMap(self)
     print("build touch began")
     if self.lastPos.count == 1 then
         --建筑物 getBuildMap 0.5 0 位置
@@ -274,7 +273,6 @@ function MiaoBuild:touchesBegan(touches)
                 self.doMove = true
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
             end
-
         end
     end
 
@@ -580,6 +578,7 @@ function MiaoBuild:finishBottom()
 end
 
 function MiaoBuild:setOwner(s)
+    self.funcBuild:setOwner(s)
     self.owner = s
     if not self.deleted then
         if s == nil then

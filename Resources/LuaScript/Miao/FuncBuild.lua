@@ -39,7 +39,9 @@ end
 function FuncBuild:initWork()
 end
 function FuncBuild:whenColNow()
-    addBanner("该位置有冲突")
+    if self.baseBuild.colNow == 1 then
+        addBanner("该位置有冲突")
+    end
 end
 function FuncBuild:setColor()
 end
@@ -60,19 +62,30 @@ function FuncBuild:clearMenu()
         self.baseBuild.changeDirNode:stopAllActions()
         setColor(self.baseBuild.changeDirNode, {255, 255, 255})
         self.selGrid = nil
+        
+        --local curMap = getBuildMap(self.baseBuild)
         if not self:checkBuildable() then
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
             setPos(self.baseBuild.bg, self.baseBuild.oldPos)
+            --curMap = getBuildMap(self.baseBuild)
+
             self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
             self:finishMove()
             setPos(self.baseBuild.bg, np)
             self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
+
         end
         if #global.director.stack > 0 then
             global.director:popView()
         end
+        --getPosMap(self.baseBuild.sx, self.baseBuild.sy)    
 
+        --deleted = true
+        --构建一个新的建筑物 放在相同的位置  告诉所有的猫我被移动了 大家就要把我从allBuilding 里面删除掉
+        --当前所有正在向这个建筑物移动的人 来确认建筑物 moved 移动了 
+        --每只猫都hold 到这个建筑物的oldPos 和 newPos 进行比对 如果不同了 表示建筑物move了 网格 这样就要调整当前的网格
+        --self.baseBuild.moved = true
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
@@ -181,4 +194,6 @@ function FuncBuild:getProductName()
 end
 function FuncBuild:getProductPrice()
     return "--"
+end
+function FuncBuild:setOwner(s)
 end

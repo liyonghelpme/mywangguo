@@ -169,6 +169,7 @@ function Road:whenColNow()
         self.baseBuild.onSlope = false
         --self:adjustValue()
     end
+    self:adjustScale()
 end
 
 --斜坡上面 可以建造道路
@@ -210,6 +211,13 @@ function Road:checkFinish()
         end
     end
 end
+function Road:adjustScale()
+    if self.baseBuild.onSlope then
+        self.baseBuild.changeDirNode:setScale(1)
+    else
+        self.baseBuild.changeDirNode:setScale(1.1)
+    end
+end
 function Road:initView()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("road.plist")
@@ -219,6 +227,7 @@ function Road:initView()
     else
         self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("t0.png"), {170/512, 0})
     end
+    self:adjustScale()
 end
 
 function Road:beginBuild()

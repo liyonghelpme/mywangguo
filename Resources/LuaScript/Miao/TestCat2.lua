@@ -85,7 +85,7 @@ function Cat2:checkWork(k)
         --farm
         if k.id == 2 then
             ret = (k.state == BUILD_STATE.FREE and k.workNum < k.maxNum)
-        elseif k.id == 6 then
+        elseif k.data.IsStore == 1 then
             --print('try goto store')
             ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
         elseif k.id == 12 then
@@ -198,7 +198,7 @@ function Cat2:findTarget()
     print("allFoodFarm num", #allFoodFarm)
     print("allStoneQuarry num", #allStoneQuarry)
     print("allFreeQuarry num", #allFreeQuarry)
-    global.director.curScene.menu.stateLabel:setString(string.format("allFoodFarm %d\nallStoneQuarry %d\n", #allFoodFarm, #allStoneQuarry))
+    global.director.curScene.menu.stateLabel:setString(string.format("allPossible %d\nallFoodFarm %d\nallStoneQuarry %d\n", #allPossible, #allFoodFarm, #allStoneQuarry))
 
     if #allPossible > 0 then
         --按照建筑物的距离排序
@@ -221,7 +221,7 @@ function Cat2:checkAllPossible()
     --按照距离排序的建筑物
     for _, k in ipairs(self.allPossible) do
         --新商店只有 粮食物品
-        if k.id == 6 then
+        if k.data.IsStore == 1 then
             local food = GoodsName[k.goodsKind].food
             local wood = GoodsName[k.goodsKind].wood
             local stone = GoodsName[k.goodsKind].stone

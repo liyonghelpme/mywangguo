@@ -74,3 +74,9 @@ function House:showIncrease(n)
     sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
+--之前的主人 不为nil 且 之前的主人 不等于 当前新主人
+function House:setOwner(s)
+    if self.baseBuild.owner ~= nil and self.baseBuild.owner ~= s then
+        self.baseBuild.owner.myHouse = nil
+    end
+end
