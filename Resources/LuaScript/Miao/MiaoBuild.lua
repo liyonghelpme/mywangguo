@@ -25,6 +25,7 @@ BUILD_STATE = {
 function MiaoBuild:setWork(wd)
     self.goodsKind = wd.goodsKind or 1
     self.workNum = wd.workNum or 0
+    self.funcBuild:updateGoods()
 end
 function MiaoBuild:ctor(m, data)
     self.map = m
@@ -50,7 +51,6 @@ function MiaoBuild:ctor(m, data)
     self.picName = data.picName
     self.id = data.id
     self.owner = nil
-    self.ownerNum = 0
     self.workNum = 0
     --农田生产力 20 -- 1
     self.productNum = 20
@@ -80,10 +80,13 @@ function MiaoBuild:ctor(m, data)
 
     self.bg = CCLayer:create()
     self.heightNode = addNode(self.bg)
+
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("buildOne.plist")
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0.5})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0.5})
             self.funcBuild = Bridge.new(self)
             self.funcBuild:initView()
         --樱花树
@@ -93,19 +96,19 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild:initView()
         --民居 农田
         elseif self.id == 1 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = House.new(self) 
             self.funcBuild:initView()
         elseif self.id == 2 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Farm.new(self) 
             self.funcBuild:initView()
         elseif self.id == 5 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
             self.funcBuild:initView()
         elseif self.id == 6 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
             self.funcBuild:initView()
         --斜坡建筑物
@@ -174,7 +177,7 @@ function MiaoBuild:ctor(m, data)
     local allLabel = addNode(self.heightNode)
     allLabel:setVisible(false)
 
-    self.nameLabel = ui.newBMFontLabel({text="", size=21, color={8, 20, 176}})
+    self.nameLabel = ui.newBMFontLabel({text="", size=40, color={8, 20, 176}})
     setPos(self.nameLabel, {0, 250})
     addChild(allLabel, self.nameLabel)
 
@@ -240,6 +243,7 @@ function MiaoBuild:touchesBegan(touches)
     self.doMove = false
     self.inSelf = false
     self.moveYet = false
+
 
     print("build touch began")
     if self.lastPos.count == 1 then
@@ -416,7 +420,7 @@ function MiaoBuild:touchesEnded(touches)
 
                 end
             else
-                addBanner("该位置有冲突")
+                --addBanner("该位置有冲突")
             end
         elseif ba then
             if self.accMove < 20 and self.state == BUILD_STATE.MOVE and self.funcBuild:canFinish() then

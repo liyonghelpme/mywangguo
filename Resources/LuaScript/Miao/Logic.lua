@@ -18,6 +18,15 @@ function doGain(r)
     end
 end
 Logic.paused = false
+function setLogicPause(p)
+    Logic.paused = p
+    if Logic.paused then
+        Event:sendMsg(EVENT_TYPE.PAUSE_GAME)
+    else
+        Event:sendMsg(EVENT_TYPE.CONTINUE_GAME)
+    end
+end
+
 Logic.maxBid = 0
 function getBid()
     Logic.maxBid = Logic.maxBid+1
@@ -81,4 +90,58 @@ GoodsName = {
     [2]={name="白酒", food=2, wood=0, stone=0, price=13},
     [3]={name="素酒", food=2, wood=0, stone=1, price=37},
 }
+
+laborEffect = {
+    [10]={time=-1},
+    [20]={time=-1},
+    [30]={product=1},
+    [40]={time=-1},
+    [50]={time=-1},
+    [60]={product=1},
+    [70]={time=-1},
+    [80]={product=1},
+    [90]={move=2},
+    [100]={health=-1},
+    [110]={time=-1},
+    [120]={time=-1},
+    [130]={health=-1},
+    [140]={product=1},
+--每增加10点 health都减少1
+}
+newEffect = {
+}
+function calEffect()
+    newEffect[10] = laborEffect[10]
+    for k = 20, 140, 10 do
+        local la = newEffect[k-10]
+        local cur = laborEffect[k]
+        newEffect[k] = {time=(la.time or 0)+(cur.time or 0), product=(la.product or 0)+(cur.product or 0), move=(la.move or 0)+(cur.move or 0), health=(la.health or 0) +(cur.health or 0)}
+    end
+    --[[
+    for k, v in pairs(newEffect) do
+        print("newEffect", k, v)
+        for nk, nv in pairs(v) do
+            print(nk, nv)
+        end
+    end
+    --]]
+end
+calEffect()
+function getLaborEffect(l)
+    --print("labor", l)
+    --print("newEffect ", simple:encode(newEffect))
+    if l < 10 then
+        return {}
+    elseif l < 150  then
+        local d = math.floor(l/10)
+        return newEffect[d*10]
+    else
+        local ll = math.floor((l-140)/10)
+        local p = copyTable(newEffect[140])
+        --最少1点
+        p.health = -ll
+        return p
+    end
+
+end
 

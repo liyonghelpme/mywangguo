@@ -1,9 +1,21 @@
 function MiaoPeople:setZord()
     local p = getPos(self.bg)
-    local zOrd = MAX_BUILD_ZORD-p[2]
+    local zOrd = MAX_BUILD_ZORD-p[2]-1
     self.bg:setZOrder(zOrd)
 end
 
+function MiaoPeople:stopMoveAction()
+    if self.moveAction ~= nil then
+        self.changeDirNode:stopAction(self.moveAction)
+        self.moveAction = nil
+    end
+end
+function MiaoPeople:setMoveAction(aniName)
+    self:stopMoveAction()
+    local ani = CCAnimationCache:sharedAnimationCache():animationByName(aniName)
+    self.moveAction = repeatForever(CCAnimate:create(ani))
+    self.changeDirNode:runAction(self.moveAction)
+end
 function MiaoPeople:setDir(x, y)
     local p = getPos(self.bg)
     local dx = x-p[1]
@@ -11,16 +23,14 @@ function MiaoPeople:setDir(x, y)
     if self.send then
         if dx > 0 then
             if dy > 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lt")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                --self.changeDirNode:stopAllActions()
+                self:setMoveAction("car_lt")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "a3.png")
                 end
             elseif dy < 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lb")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                --self.changeDirNode:stopAllActions()
+                self:setMoveAction("car_lb")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "b3.png")
                 end
@@ -29,16 +39,12 @@ function MiaoPeople:setDir(x, y)
             setScaleX(self.changeDirNode, -sca)
         elseif dx < 0 then
             if dy > 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lt")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("car_lt")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "a3.png")
                 end
             elseif dy < 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("car_lb")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("car_lb")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "b3.png")
                 end
@@ -49,23 +55,15 @@ function MiaoPeople:setDir(x, y)
     else
         if dx > 0 then
             if dy > 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rt")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("people"..self.id.."_rt")
             elseif dy < 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_rb")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("people"..self.id.."_rb")
             end
         elseif dx < 0 then
             if dy > 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lt")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("people"..self.id.."_lt")
             elseif dy < 0 then
-                self.changeDirNode:stopAllActions()
-                local ani = CCAnimationCache:sharedAnimationCache():animationByName("people"..self.id.."_lb")
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("people"..self.id.."_lb")
             end
         end
     end
@@ -83,15 +81,39 @@ function MiaoPeople:clearWork()
         self.state = PEOPLE_STATE.FREE
     end
 end
+function MiaoPeople:hideSelf()
+    if self.lastVisible then
+        self.changeDirNode:runAction(fadeout(0.5))
+        self.shadow:runAction(fadeout(0.5))
+        self.lastVisible = false
+    end
+end
+function MiaoPeople:showSelf()
+    if not self.lastVisible then
+        self.changeDirNode:runAction(fadein(0.5))
+        self.shadow:runAction(fadein(0.5))
+        self.lastVisible = true
+    end
+end
 
 --在回到房屋之后 处理房屋被拆迁的问题
 function MiaoPeople:handleHome()
-    self.state = PEOPLE_STATE.IN_HOME
-    self.restTime = 0
-    --self.bg:setVisible(false)
+    if self.actionContext == CAT_ACTION.GO_HOME then
+        if self.realTarget.deleted then
+            self:clearStateStack()
+            self:resetState()
+        else
+            local function setNPos()
+                local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
+                setPos(self.bg, np)
+            end
+            self.changeDirNode:runAction(sequence({delaytime(0.5), callfunc(nil, setNPos)}))
 
-    local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
-    setPos(self.bg, np)
+            self.state = PEOPLE_STATE.IN_HOME
+            self.restTime = 0
+            self:hideSelf()
+        end
+    end
 end
 function MiaoPeople:handleStore()
     if self.actionContext == CAT_ACTION.PUT_PRODUCT then
@@ -105,12 +127,7 @@ function MiaoPeople:handleStore()
         self:setDir(1, -1)
         self:popState()
         self:resetState()
-    else
-        --即便商店deleted 掉了 也不用考虑了
-        self.realTarget.workNum = self.realTarget.workNum +self.product
-        self.realTarget:setOwner(nil)
-        self.realTarget = nil
-        self.state = PEOPLE_STATE.FREE
+        self:hideSelf()
     end
 end
 function MiaoPeople:handleQuarry()
@@ -284,11 +301,15 @@ function MiaoPeople:handleFarm()
                 self:clearStateStack()
             else
                 --同一个对象身上可能 会 有多重的
-                self.food = self.realTarget.workNum
-                self.realTarget.workNum = 0
-                self:sendGoods()
-                self:setDir(1, -1)
-                self:popState()
+                if self.realTarget.workNum > 0 then
+                    self.food = self.realTarget.workNum
+                    self.realTarget.workNum = 0
+                    self:sendGoods()
+                    self:setDir(1, -1)
+                    self:popState()
+                else
+                    self:clearStateStack()
+                end
             end
             self:resetState()
         elseif self.actionContext == CAT_ACTION.PLANT_FARM then
@@ -299,76 +320,16 @@ function MiaoPeople:handleFarm()
                 local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
                 sf:addSpriteFramesWithFile("cat_labor.plist")
                 local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
-                self.changeDirNode:stopAllActions()
-                self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+                self:setMoveAction("cat_labor")
+                --self.changeDirNode:stopAllActions()
+                --self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
+
                 local sz = self.changeDirNode:getContentSize()
                 setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
 
                 self.state = PEOPLE_STATE.IN_WORK
                 self.workTime = 0
             end
-        end
-
-    --销售塔的商品 
-    elseif self.predictTower ~= nil then
-        if self.realTarget.deleted then
-            self.state = PEOPLE_STATE.FREE
-            self.predictFactory:setOwner(nil)
-            self.predictFactory = nil
-            self.predictTower:setOwner(nil)
-            self.predictTower = nil
-            self.predictQuarry:setOwner(nil)
-            self.predictQuarry = nil
-            self.realTarget:setOwner(nil)
-            self.realTarget = nil
-        else
-            self.realTarget:setOwner(nil)
-            self.food = self.realTarget.workNum
-            self.realTarget.workNum = 0
-            self.tempFactory = self.predictFactory
-            self.goFactory = true
-            self.tempTower = self.predictTower
-            self.tempQuarry = self.predictQuarry
-            self.state = PEOPLE_STATE.FREE
-            self.realTarget = nil
-        end
-    --拉走去工厂生产食物
-    elseif self.predictFactory ~= nil then
-        if self.realTarget.deleted then
-            print("Farm removed!!!")
-            self.state = PEOPLE_STATE.FREE
-            self.predictFactory:setOwner(nil)
-            self.predictFactory = nil
-            self.predictStore:setOwner(nil)
-            self.predictStore = nil
-            self.realTarget:setOwner(nil)
-            self.realTarget = nil
-        else
-            self.realTarget:setOwner(nil)
-            self.food = self.realTarget.workNum
-            self.realTarget.workNum = 0
-            self.tempFactory = self.predictFactory
-            self.goFactory = true
-            self.tempStore = self.predictStore
-            self.state = PEOPLE_STATE.FREE
-            self.realTarget = nil
-        end
-    --去农田劳作生产粮食
-    else
-        if self.realTarget.deleted then
-            self.state = PEOPLE_STATE.FREE
-            self.realTarget = nil
-        else
-            local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-            sf:addSpriteFramesWithFile("cat_labor.plist")
-            local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
-            self.changeDirNode:stopAllActions()
-            self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-            local sz = self.changeDirNode:getContentSize()
-            setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
-
-            self.state = PEOPLE_STATE.IN_WORK
-            self.workTime = 0
         end
     end
 end
@@ -429,6 +390,7 @@ function MiaoPeople:handleFactory()
             end
             self:resetState()
         end
+        self:hideSelf()
         return 
     end
     --运送粮食
@@ -490,9 +452,32 @@ end
 
 
 function MiaoPeople:workInFactory()
-    if self.workTime > 1 then
+    local le = getLaborEffect(self.labor)
+    local totalTime = 10
+    local productNum = 5
+    local healthCost = 5
+    if le.time ~= nil then
+        totalTime = totalTime+le.time
+    end
+    if le.product ~= nil then
+        productNum = productNum + le.product
+    end
+    if le.health ~= nil then
+        healthCost = healthCost+le.health
+    end
+    totalTime = math.max(1, totalTime)
+    healthCost = math.max(1, healthCost)
+    --计算出1个 的生产时间 和 消耗的 生命值
+    local rate = totalTime/productNum
+    local cost = healthCost/productNum
+
+    --10s 生产5个
+    --local rate = 10/5
+    --local cost = 5/5 
+
+    if self.workTime > rate then
         self.workTime = 0
-        self.health = self.health -1
+        self.health = self.health - cost
         print("product what??", self.realTarget.goodsKind)
 
         if self.actionContext ~= nil then
@@ -514,6 +499,7 @@ function MiaoPeople:workInFactory()
                 self:sendGoods()
                 self:setDir(1, -1)
                 self:resetState()
+                --self:showSelf()
             end
         --生产混合原材料物品
         elseif self.realTarget.productKind ~= nil then
@@ -586,10 +572,35 @@ function MiaoPeople:workInMine()
         end
     end
 end
+--10 10 10 10 5 = 5点体力值
+--种植的时间 40s 算在这个生产过程里面的 
 function MiaoPeople:workInFarm()
-    if self.workTime > 1 then
+    --local rate = 40/self.realTarget.maxNum
+    --local cost = 5/self.realTarget.maxNum
+
+    local le = getLaborEffect(self.labor)
+    local totalTime = 10
+    local productNum = 5
+    local healthCost = 5
+    if le.time ~= nil then
+        totalTime = totalTime+le.time
+    end
+    if le.product ~= nil then
+        productNum = productNum + le.product
+    end
+    if le.health ~= nil then
+        healthCost = healthCost+le.health
+    end
+    totalTime = math.max(1, totalTime)
+    healthCost = math.max(1, healthCost)
+    print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
+    --计算出1个 的生产时间 和 消耗的 生命值
+    local rate = totalTime/productNum
+    local cost = healthCost/productNum
+
+    if self.workTime > rate then
         self.workTime = 0
-        self.health = self.health-1
+        self.health = self.health-cost
         if self.realTarget.workNum >= self.realTarget.maxNum then
             self.state = PEOPLE_STATE.FREE
             self.realTarget:setOwner(nil)
@@ -630,7 +641,7 @@ function MiaoPeople:workInHome(diff)
         self.lastState = PEOPLE_STATE.IN_HOME
         self.lastEndPoint = self.tempEndPoint
         self.state = PEOPLE_STATE.FREE
-        --self.bg:setVisible(true)
+        --self:showSelf()
     end
 end
 function MiaoPeople:showState()

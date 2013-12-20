@@ -13,6 +13,9 @@ EVENT_TYPE = {
     SHOW_DIALOG=21,
     CLOSE_DIALOG=22,
     SELECT_ME=23,
+
+    PAUSE_GAME=24,
+    CONTINUE_GAME=25,
 }
 Event = {}
 Event.callbacks = {}

@@ -29,4 +29,6 @@ NS_CC_EXT_END
 
 void setScriptTouchPriority(CCLayer *lay, int pri);
 std::string getFileData(const char *fname);
+//只停止动作不要停止 更新
+void pauseAction(CCNode *n);
 #endif // __CC_EXTENSION_CCNATIVE_H_

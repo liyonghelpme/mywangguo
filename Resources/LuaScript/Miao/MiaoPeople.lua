@@ -33,21 +33,23 @@ PEOPLE_STATE = {
 function MiaoPeople:ctor(m, data)
     self.map = m
     self.state = PEOPLE_STATE.APPEAR
+    self.id = data.id
+    self.data = Logic.people[self.id]
     self.passTime = 0
     self.health = 0
-    self.maxHealth = 20
+    self.maxHealth = Logic.people[self.id].health
+    self.labor = self.data.labor
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
     self.lastState = nil
-    self.id = data.id
     self.name = str(math.random(99999))
     self.food = 0
     self.stone = 0
-    self.product = 0
+    self.workNum = 0
+    self.lastVisible = true
     --修习之后就升级
     self.level = 0
-    self.data = Logic.people[self.id]
     --普通猫咪 才会有私有的miaoPath
     if self.data.kind == 1 then
         self.miaoPath = MiaoPath.new(self)
@@ -76,6 +78,7 @@ function MiaoPeople:ctor(m, data)
     self.statePic = CCSprite:create()
     addChild(self.bg, self.statePic)
 
+    self.events = {EVENT_TYPE.PAUSE_GAME, EVENT_TYPE.CONTINUE_GAME}
     registerEnterOrExit(self)
 end
 function MiaoPeople:enterScene()
@@ -87,6 +90,14 @@ function MiaoPeople:receiveMsg(name, msg)
         --清理寻路的road信息
         self.dirty = true
         --self.miaoPath.allBuilding = nil
+    elseif name == EVENT_TYPE.PAUSE_GAME then
+        --self.changeDirNode:pauseSchedulerAndActions()
+        pauseNode(self.changeDirNode)
+        pauseNode(self.bg)
+    elseif name == EVENT_TYPE.CONTINUE_GAME then
+        --self.changeDirNode:resumeSchedulerAndActions()
+        resumeNode(self.changeDirNode)
+        resumeNode(self.bg)
     end
 end
 function MiaoPeople:exitScene()
@@ -228,6 +239,7 @@ function MiaoPeople:update(diff)
     self:doMove(diff)
     self:doWork(diff)
     self:doPaused(diff)
+    self:setZord()
     local s = ''
     for k, v in ipairs(self.stateStack) do
         if type(v) == 'table' then
@@ -237,6 +249,7 @@ function MiaoPeople:update(diff)
         end
     end
     self.stateLabel:setString(s)
+    self.funcPeople:updateState(diff)
     --[[
     if self.predictTarget ~= nil then
         self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
@@ -326,10 +339,14 @@ function MiaoPeople:initFind(diff)
             --寻找要去收割的建筑物
             self:findWorkBuilding()
             --没有找到工作地点 或者 购买物品的地点
+            --村民应该 
             if self.predictTarget == nil then
+                --self:showSelf()
+                --村民没有找到工作点开始寻找附近的可以工作的地点
+                if self.state == PEOPLE_STATE.FIND_NEAR_BUILDING then
                 --普通村民 没有呆在房间内 则回到房间内
                 --重新生成建筑物连通性路径
-                if self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
+                elseif self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
                     self:findHouse()
                 --商人往回走 miaoPath 初始化结束
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
@@ -428,7 +445,7 @@ function MiaoPeople:doFind(diff)
             n = n+1
         end
         self.map:updateCells(self.cells, self.map.cells)
-        --找到路径
+        --找到路径 显示自己开始移动
         if self.endPoint ~= nil then
             print("Find Path Over")
             self.state = PEOPLE_STATE.FIND
@@ -439,6 +456,7 @@ function MiaoPeople:doFind(diff)
             self.closedList = nil
             self.pqDict = nil
             self.cells = nil
+            self:showSelf()
         elseif #self.openList == 0 then
         --回家无路可走了 休息 
             if self.tired then
@@ -468,7 +486,7 @@ function MiaoPeople:initMove(diff)
             local np = setBuildMap({1, 1, mx, my})
             setPos(self.bg, np)
             self:setZord()
-            self.bg:setVisible(true)
+            --self.bg:setVisible(true)
             self.lastState = nil
         end
 
@@ -494,10 +512,10 @@ function MiaoPeople:doMove(diff)
             local nextPoint = self.curPoint+1
             if nextPoint > #self.path then
                 --去休息
-                if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
-                    self:handleHome()
+                --if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
+                --    self:handleHome()
                 --商人 工作移动到了目的点 开始 往回走了
-                elseif self.data.kind == 2 then
+                if self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction()
                     --收获农作物 商店资源
@@ -552,9 +570,11 @@ function MiaoPeople:doMove(diff)
                     end
                 else
                     self:beforeHandle()
+                    if self.realTarget.id == 1 then
+                        self:handleHome()
                     --运送物资到工厂 带走农田产量
                     --之前的是农田 并且 农田已经 种植好了 则 走向 工厂
-                    if self.realTarget.id == 2 then
+                    elseif self.realTarget.id == 2 then
                         self:handleFarm()
                     --向工厂前进
                     elseif self.realTarget.id == 5 then
@@ -605,7 +625,7 @@ function MiaoPeople:doMove(diff)
                     if ons then
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.waitTime = 4
+                        self.waitTime = 3
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
@@ -623,7 +643,7 @@ function MiaoPeople:doMove(diff)
                     if ons then
                         goYet = true
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
-                        self.waitTime = 4
+                        self.waitTime = 3
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         local dx, dy = np[1]-cp[1], np[2]-cp[2]
                         self:setDir(cxy[1], cxy[2])
@@ -635,14 +655,14 @@ function MiaoPeople:doMove(diff)
 
                 if not goYet then
                     local cxy = setBuildMap({1, 1, np[1], np[2]})
-                    self.waitTime = 2
+                    self.waitTime = 1.5
                     self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                     self:setDir(cxy[1], cxy[2])
                     self:setZord()
                     self.curPoint = self.curPoint+1
                 end
                 --是否在运送货物
-                if self.food > 0 or self.stone > 0 or self.product > 0 then
+                if self.food > 0 or self.stone > 0 or self.workNum > 0 then
                     self.health = self.health-1
                 end
 

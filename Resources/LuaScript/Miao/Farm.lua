@@ -18,47 +18,51 @@ function Farm:update(diff)
     --4 5
     --6
     if self.baseBuild.workNum >0 and self.baseBuild.workNum < 2 then
-        if self.state ~= 1 then
+        if self.state < 1 then
             self.state = 1
             if self.fn == nil then
-                self.fn = CCSprite:create("p0.png")
+                self.fn = createSprite("p0.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 79})
+                local sz = self.fn:getContentSize() 
+                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
             else
-                setTexture(self.fn, "p0.png")
+                setDisplayFrame(self.fn, "p0.png")
             end
         end
     elseif self.baseBuild.workNum >= 2 and self.baseBuild.workNum < 4 then
-        if self.state ~= 2 then
+        if self.state < 2 then
             self.state = 2
             if self.fn == nil then
-                self.fn = CCSprite:create("p1.png")
+                self.fn = createSprite("p1.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 79})
+                local sz = self.fn:getContentSize() 
+                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
             else
-                setTexture(self.fn, "p1.png")
+                setDisplayFrame(self.fn, "p1.png")
             end
         end
     elseif self.baseBuild.workNum >= 4 and self.baseBuild.workNum < 6 then
-        if self.state ~= 3 then
+        if self.state < 3 then
             self.state = 3
             if self.fn == nil then
-                self.fn = CCSprite:create("p2.png")
+                self.fn = createSprite("p2.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 79})
+                local sz = self.fn:getContentSize() 
+                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
             else
-                setTexture(self.fn, "p2.png")
+                setDisplayFrame(self.fn, "p2.png")
             end
         end
     elseif self.baseBuild.workNum >= 6  then
-        if self.state ~= 4 then
+        if self.state < 4 then
             self.state = 4
             if self.fn == nil then
-                self.fn = CCSprite:create("p3.png")
+                self.fn = createSprite("p3.png")
                 self.baseBuild.heightNode:addChild(self.fn)
-                setPos(self.fn, {0, 79})
+                local sz = self.fn:getContentSize() 
+                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
             else
-                setTexture(self.fn, "p3.png")
+                setDisplayFrame(self.fn, "p3.png")
             end
         end
     elseif self.baseBuild.workNum == 0 then

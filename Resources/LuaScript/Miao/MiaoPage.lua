@@ -413,7 +413,8 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:beginBuild()
         self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         
-        Logic.paused = true
+        --Logic.paused = true
+        setLogicPause(true)
         global.director.curScene.menu:beginBuild()
     end
     return self.curBuild
@@ -452,7 +453,8 @@ function MiaoPage:cancelBuild()
     if self.curBuild ~= nil then
         self.curBuild:removeSelf()
         self.curBuild = nil
-        Logic.paused = false
+        --Logic.paused = false
+        setLogicPause(false)
         global.director.curScene.menu:finishBuild()
     end
 end
@@ -542,7 +544,8 @@ function MiaoPage:finishBuild()
                 self:beginBuild('build', 15, self.oldBuildPos[2][1]+sx, self.oldBuildPos[2][2]+sy)
             end
         else
-            Logic.paused = false
+            --Logic.paused = false
+            setLogicPause(false)
             global.director.curScene.menu:finishBuild()
         end
         Logic.gotoHouse = true

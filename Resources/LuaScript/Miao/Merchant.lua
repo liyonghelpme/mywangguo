@@ -1,7 +1,13 @@
 
 Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
-    local ret
+    local ret = false
+    if k.owner == nil and k.picName == 'build' and not k.deleted and k.workNum > 0 then
+        if k.id == 2 or k.id == 6 then
+            ret = true
+        end
+    end
+    --[[
     ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
     --去商店
     if not ret then
@@ -21,6 +27,7 @@ function Merchant:checkWork(k)
         print("try tower goods")
         ret = (k.picName == 'build' and k.id == 14 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
     end
+    --]]
     return ret
 end
 function Merchant:initView()
@@ -34,8 +41,12 @@ function Merchant:initView()
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_rt_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.7), {0, SIZEY})
-    
     self.people.shadow = CCSprite:create("roleShadow.png")
+
+    self.people.changeDirNode:setOpacity(0) 
+    self.people.lastVisible = false
+    self.people.shadow:setOpacity(0)
+
     self.people.heightNode:addChild(self.people.shadow, -1)
 
     setScale(setPos(self.people.shadow, {0, SIZEY}), 3.5)

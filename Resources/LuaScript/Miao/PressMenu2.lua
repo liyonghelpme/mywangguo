@@ -104,5 +104,8 @@ function PressMenu2:onBut(p)
         local m = PeopleMenu2.new(self)
         self.bg:addChild(m.bg)
         self.subMenu = m
+    elseif p == 7 then
+        global.director:popView()
+        global.director.curScene:saveGame()
     end
 end

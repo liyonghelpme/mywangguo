@@ -1402,7 +1402,7 @@ function colorLine(param)
 end
 
 function setProNum(banner, n, max)
-    if n == 0 then
+    if n <= 0 then
         banner:setVisible(false)
     else
         banner:setVisible(true)
@@ -1462,5 +1462,33 @@ function clearEvent(s)
         for k, v in ipairs(s.events) do
             Event:unregisterEvent(v, s)
         end
+    end
+end
+
+function copyTable(b)
+    local temp = {}
+    for k, v in pairs(b) do
+        temp[k] = v
+    end
+    return temp
+end
+function pauseNode(n)
+    local director = CCDirector:sharedDirector()
+    local act = director:getActionManager()
+    act:pauseTarget(n)
+end
+function resumeNode(n)
+    local director = CCDirector:sharedDirector()
+    local act = director:getActionManager()
+    act:resumeTarget(n)
+end
+
+function createSprite(n)
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    local f = sf:spriteFrameByName(n)
+    if f ~= nil then
+        return CCSprite:createWithSpriteFrameName(n)   
+    else
+        return CCSprite:create(n)
     end
 end
