@@ -68,9 +68,11 @@ function FuncBuild:clearMenu()
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
             setPos(self.baseBuild.bg, self.baseBuild.oldPos)
-            --curMap = getBuildMap(self.baseBuild)
 
             self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
+            self:adjustHeight()
+            --清理冲突 调整周围道路的value
+            self.baseBuild.colNow = 0
             self:finishMove()
             setPos(self.baseBuild.bg, np)
             self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
@@ -196,4 +198,10 @@ function FuncBuild:getProductPrice()
     return "--"
 end
 function FuncBuild:setOwner(s)
+end
+function FuncBuild:enterStore(s)
+    self.inMerchant = s
+end
+function FuncBuild:exitStore()
+    self.inMerchant = nil
 end

@@ -32,7 +32,7 @@ function Cat2:initView()
     self.people.smoke = CCSprite:createWithSpriteFrame(sf:spriteFrameByName("cat_smoke_0.png"))
     local sz = self.people.smoke:getContentSize()
     setPos(setScale(setAnchor(self.people.smoke, {147/sz.width, (sz.height-208)/sz.height}), 1.4), {0, SIZEY})
-    self.people.bg:addChild(self.people.smoke)
+    self.people.heightNode:addChild(self.people.smoke, 1)
     
     self.people.smoke:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeSelf, self.people.smoke)}))
 

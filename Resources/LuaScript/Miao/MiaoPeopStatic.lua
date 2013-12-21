@@ -322,7 +322,7 @@ function MiaoPeople:handleFarm()
             else
                 local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
                 sf:addSpriteFramesWithFile("cat_labor.plist")
-                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 2, true)
+                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 1, true)
                 self:setMoveAction("cat_labor")
                 --self.changeDirNode:stopAllActions()
                 --self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))

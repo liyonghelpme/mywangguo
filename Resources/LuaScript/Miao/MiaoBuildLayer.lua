@@ -512,6 +512,41 @@ function MiaoBuildLayer:addPeople(param)
         local vs = getVS()
         pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         pos = normalizePos({pos.x, pos.y}, 1, 1)
+        local nv = getPosMap(1, 1, pos[1], pos[2])
+        nv = {nv[3], nv[4]}
+
+        local neiNode = {
+            {nv[1], nv[2]},
+            {nv[1], nv[2]+2},
+            {nv[1]+1, nv[2]+1},
+            {nv[1]+2, nv[2]},
+            {nv[1]+1, nv[2]-1},
+            {nv[1], nv[2]-2},
+            {nv[1]-1, nv[2]-1},
+            {nv[1]-2, nv[2]},
+            {nv[1]-1, nv[2]+1},
+        }
+        local buildCell = self.mapGridController.mapDict
+        local findPos = nil
+        for k, v in ipairs(neiNode) do
+            local key = getMapKey(v[1], v[2])
+            print("state", v[1], v[2], buildCell[key])
+            if buildCell[key] ~= nil then
+                local bb = buildCell[key][#buildCell[key]][1]
+                if bb.picName == 't' then
+                    findPos = v
+                    break
+                end
+            else
+                findPos = v
+                break
+            end
+        end
+        print("findPos", simple.encode(findPos))
+        print(simple.encode(neiNode))
+        if findPos ~= nil then
+            pos = setBuildMap({1, 1, findPos[1], findPos[2]})
+        end
     --商人
     elseif data.kind == 2 then
         local width = self.scene.width

@@ -1,6 +1,6 @@
 Drink = class(FuncBuild)
 function Drink:ctor(b)
-    self.goodsKind = 4
+    self.baseBuild.goodsKind = 4
 
     self.goodsNum = 0
     self.allGoods = {}

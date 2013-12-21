@@ -219,6 +219,7 @@ function MiaoPage:ctor(s)
     registerMultiTouch(self)
     self.touchDelegate:scaleToMax(0.5)
 end
+
 function MiaoPage:touchesCanceled(touches)
     self.touchDelegate:tCanceled(touches)
 end
@@ -415,6 +416,8 @@ function MiaoPage:beginBuild(kind, id, px, py)
         self.curBuild:setColPos()
         self.curBuild:setState(BUILD_STATE.MOVE)
         self.buildLayer:fastAddBuilding(self.curBuild, MAX_BUILD_ZORD)
+        --调整自动道路图片
+        self.curBuild.funcBuild:whenColNow()
         
         --调整建筑物高度
         self.curBuild:setPos(p)
