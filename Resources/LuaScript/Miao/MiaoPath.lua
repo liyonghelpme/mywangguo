@@ -79,7 +79,7 @@ function MiaoPath:checkNeibor(x, y)
                 --道路或者 桥梁 建造好的建筑物
                 if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
                     hasRoad = true
-                    print("buildCell Kind Road")
+                    --print("buildCell Kind Road")
                 --同一个建筑物不能多次插入
                 elseif bb.picName == 'build' and bb.data.kind == 0 then
                     --是一个可以到达的 去工作的建筑物
@@ -90,12 +90,12 @@ function MiaoPath:checkNeibor(x, y)
                     if #bb.belong > 3 then
                         table.remove(bb.belong, 1)
                     end
-                    print("add Building ", bb.id, bb.picName)
+                    --print("add Building ", bb.id, bb.picName)
                 else
-                    print("no road")
+                    --print("no road")
                 end
             else
-                print("not Road")
+                --print("not Road")
             end
 
             --使用最短路径 更新parent信息  
@@ -140,7 +140,7 @@ function MiaoPath:update()
     --所有建筑物  水面 道路
     local buildCell = self.target.map.mapGridController.mapDict
     local staticObstacle = self.target.map.staticObstacle 
-    print("MiaoPath update")
+    --print("MiaoPath update")
     while n < 10 do
         if #self.openList == 0 then
             break
@@ -160,7 +160,7 @@ function MiaoPath:update()
         self.searchYet = true
         self.inSearch = false
     end
-    print("miaoPath find over", getLen(self.allBuilding))
+    --print("miaoPath find over", getLen(self.allBuilding))
 
     self.map:updateCells(self.cells, self.map.cells)
 end

@@ -359,13 +359,7 @@ function MiaoPage:moveToPoint(x, y)
     self.bg:runAction(self.moveAct)
 end
 function MiaoPage:touchesEnded(touches)
-    if not self.blockMove then
-        --快速点击 curBuild 移动到 这个点击位置  屏幕移动到中心位置 
-        self.touchDelegate:tEnded(touches)
-    else
-        --清理touchValue
-        self.touchDelegate:tEnded(touches)
-    end
+    self.touchDelegate:tEnded(touches)
 
     --处理完 blockMove 之后 再清理 blockMove
     if self.touchBuild then
