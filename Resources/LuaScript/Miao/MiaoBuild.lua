@@ -440,7 +440,8 @@ function MiaoBuild:update(diff)
         local p = getPos(self.bg)
         local ax, ay = self:calAff()
         self.posLabel:setString(self.id.." "..ax.." "..ay)
-        self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone.." v"..self.value)
+        --self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone.." v"..self.value.." max "..self.maxNum)
+        self.stateLabel:setString(map[3].." "..map[4])
         local s = ''
         for k, v in ipairs(self.belong) do
             s = s..v.." "

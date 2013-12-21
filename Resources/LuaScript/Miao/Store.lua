@@ -4,24 +4,7 @@ function Store:ctor(b)
     self.goodsNum = 0
     self.allGoods = {}
 end
---[[
-function Store:showInfo()
-    local bi
-    bi = StoreInfo.new(self.baseBuild)
-    global.director:pushView(bi, 1, 0)
-    global.director.curScene.menu:setMenu(bi)
-end
---]]
 function Store:updateGoods()
-    --[[
-    if self.goods ~= nil then
-        removeSelf(self.goods)
-    end
-
-    self.goods = CCNode:create()
-    self.baseBuild.changeDirNode:addChild(self.goods)
-    --]]
-
     local show = math.floor(6*self.baseBuild.workNum/self.baseBuild.maxNum)
     --local sz = {width=1024, height=768}
     local showPos = {

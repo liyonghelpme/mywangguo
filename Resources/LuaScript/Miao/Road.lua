@@ -74,17 +74,24 @@ function Road:adjustRoad()
         end
     end
 end
+--只remove自己1次
 function Road:beginMove()
-    if self.baseBuild.colNow == 0 or self:checkBuildable() then
-        self:removeSelf()
-    end
+    --if self.baseBuild.colNow == 0 or self:checkBuildable() then
+    self:removeSelf()
+    --end
 end
+
 function Road:finishMove()
-    if self.baseBuild.colNow == 0 or self:checkBuildable() then
+    if self:checkBuildable() then
         self:adjustRoad()
     end
 end
 function Road:removeSelf()
+    --道路不可建造的时候 不会影响周围的地面
+    if not self:checkBuildable() then
+        return
+    end
+
     local bm = getBuildMap(self.baseBuild) 
     print("self.baseBuild map", bm[1], bm[2], bm[3], bm[4])
     --判定周围八个map状态
@@ -232,7 +239,7 @@ end
 
 function Road:beginBuild()
     print("beginBuild!!!!!!!!!!!!!", self.baseBuild.colNow)
-    if self.baseBuild.colNow == 0 or self:checkBuildable() then
+    if self:checkBuildable() then
         self:adjustRoad()
     end
 end

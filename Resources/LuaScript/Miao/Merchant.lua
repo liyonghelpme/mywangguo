@@ -2,7 +2,7 @@
 Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
     local ret = false
-    if k.owner == nil and k.picName == 'build' and not k.deleted and k.workNum > 0 then
+    if k.picName == 'build' and not k.deleted and k.workNum > 0 then
         if k.id == 2 or k.data.IsStore == 1 then
             ret = true
         end
@@ -115,7 +115,8 @@ end
 function Merchant:checkAllPossible()
     for _, k in ipairs(self.allPossible) do
         table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
-        k:setOwner(self)
+        --商人不会限制农民去工作的 使用排队处理进入商店
+        --k:setOwner(self)
         self.people.predictTarget = k
         self.people.actionContext = CAT_ACTION.BUY_GOODS
         if Logic.inNew and not Logic.checkFarm then
@@ -128,6 +129,7 @@ function Merchant:checkAllPossible()
         break
     end
 end
+
 function Merchant:handleAction()
     if self.people.actionContext == CAT_ACTION.MER_BACK then
         self.people.state = PEOPLE_STATE.GO_AWAY
@@ -138,8 +140,9 @@ function Merchant:handleAction()
         if self.people.predictTarget.stone > 0 then
             local sp = CCSprite:create("silver.png")
             local p = getPos(self.people.predictTarget.heightNode)
+            local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
-            setPos(sp, p)
+            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
             local rx = math.random(20)-10
             sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
             local pay = self.people.predictTarget.stone*math.floor(self.people.predictTarget.rate+1)
@@ -148,12 +151,13 @@ function Merchant:handleAction()
             setPos(num, {50, 0})
             doGain(pay)
             self.people.predictTarget.stone = 0
-        elseif self.people.predictTarget.id == 13 or self.people.predictTarget.id == 6 then
+        elseif self.people.predictTarget.data.IsStore == 1 then
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silver.png")
             local p = getPos(self.people.predictTarget.heightNode)
+            local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
-            setPos(sp, p)
+            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
             local rx = math.random(20)-10
             sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
             
@@ -175,8 +179,9 @@ function Merchant:handleAction()
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silver.png")
             local p = getPos(self.people.predictTarget.heightNode)
+            local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
-            setPos(sp, p)
+            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
             local rx = math.random(20)-10
             sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
             local num = ui.newBMFontLabel({text=str(self.people.predictTarget.workNum*math.floor(self.people.predictTarget.rate+1)), font="bound.fnt", size=30})

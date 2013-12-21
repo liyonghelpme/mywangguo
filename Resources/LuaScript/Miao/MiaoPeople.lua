@@ -609,15 +609,21 @@ function MiaoPeople:doMove(diff)
                 end
                 self:setZord()
             else
+                --商人会在商店门口等待一下 
                 local moved = false
+                local wait = false
                 if nextPoint == #self.path then
                     moved = self:checkMoved()
                     if moved then
                         self:clearStateStack()
                         self:resetState()
+                    --商店 如果已经有人进去了 在门口排队等待 enterQueue 进入队列
+                    --不是商人的返回点
+                    elseif self.realTarget.data ~= nil and self.realTarget.data.IsStore == 1 and self.realTarget.funcBuild.inMerchant ~= nil then
+                         wait = true
                     end
                 end
-                if not moved then
+                if not moved and not wait then
                     --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                     local np = self.path[nextPoint]
                     local buildCell = self.map.mapGridController.mapDict
@@ -637,8 +643,20 @@ function MiaoPeople:doMove(diff)
                     local goYet = false
                     --道路是onSlope 
                     --道路下面的斜坡才是真正的地形高度
+                    --dir 不是 0 或者 1的斜坡不能行走的 
                     if bv ~= nil then
-                        local ons = bv[#bv][1].onSlope
+                        --计算斜坡的高度
+                        local height
+                        local ons = bv[#bv][1].onSlope 
+                        if ons then
+                            height = bv[#bv-1][1].height
+                        else
+                            ons = bv[#bv][1].picName == 'slope' 
+                            if ons then
+                                height = bv[#bv][1].height
+                            end
+                        end
+
                         if ons then
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})
@@ -650,13 +668,23 @@ function MiaoPeople:doMove(diff)
                             --local nnp = self.path[nextPoint+1]
                             --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
                             --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
-                            self:moveSlope(dx, dy, 0, bv[#bv-1][1].height)
+                            self:moveSlope(dx, dy, 0, height)
                             self.curPoint = self.curPoint+1
                         end
                     end
                     --当前点在 斜坡上 下一个点的高度值
                     if not goYet and cv ~= nil then
+                        local height 
                         local ons = cv[#cv][1].onSlope
+                        if ons then
+                            height = cv[#cv-1][1].height
+                        else
+                            ons = cv[#cv][1].picName == 'slope'
+                            if ons then
+                                height = cv[#cv][1].height
+                            end
+                        end
+
                         if ons then
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})

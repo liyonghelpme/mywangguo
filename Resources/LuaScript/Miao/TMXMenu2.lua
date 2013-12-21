@@ -42,7 +42,7 @@ function TMXMenu2:ctor(s)
 end
 
 function TMXMenu2:receiveMsg(msg, para)
-    if name == EVENT_TYPE.UPDATE_RESOURCE then
+    if msg == EVENT_TYPE.UPDATE_RESOURCE then
         self:updateText()
     elseif msg == EVENT_TYPE.SHOW_DIALOG then
         self.mbut.text:setString("返回")
