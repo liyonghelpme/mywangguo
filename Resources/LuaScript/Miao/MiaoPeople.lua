@@ -121,14 +121,14 @@ function MiaoPeople:checkHealth()
 end
 function MiaoPeople:showNoHome()
     if self.homeLabel == nil then
-        self.homeLabel = ui.newTTFLabel({text="无家可归", size=20, color={100, 10, 10}})
-        self.bg:addChild(self.homeLabel)
-        setPos(self.homeLabel, {0, 90})
+        self.homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="无家可归", color={0, 0, 0}, size=25})
+        self.heightNode:addChild(self.homeLabel.bg)
+        setPos(self.homeLabel.bg, {0, 200})
     end
 end
 function MiaoPeople:clearNoHome()
     if self.homeLabel ~= nil then
-        removeSelf(self.homeLabel)
+        removeSelf(self.homeLabel.bg)
         self.homeLabel = nil
     end
 end
