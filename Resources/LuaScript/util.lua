@@ -1424,31 +1424,36 @@ function getScaleY(sp)
     return sp:getScaleY()
 end
 
-function getScale(s)
-    return s:getScale()
-end
-
-function updateTouchTable(a, b)
-    for k, v in pairs(b) do
-        if a[k] == nil then
-            a.count = a.count+1
-        end
-        a[k] = v
-    end
-end
-function clearTouchTable(a, b)
-    for k, v in pairs(b) do
-        a[k] = nil
-        a.count = a.count-1
-    end
-end
-function copyTouchTable(a)
-    local temp = {}
-    for k, v in pairs(a) do
-        temp[k] = v
-    end
-    return temp
-end
+function getScale(s)
+    return s:getScale()
+end
+
+--只考虑 0 1 两个touchId
+function updateTouchTable(a, b)
+    for k, v in pairs(b) do
+        if k < 2 then
+            if a[k] == nil then
+                a.count = a.count+1
+            end
+            a[k] = v
+        end
+    end
+end
+function clearTouchTable(a, b)
+    for k, v in pairs(b) do
+        if a[k] ~= nil then
+            a[k] = nil
+            a.count = a.count-1
+        end
+    end
+end
+function copyTouchTable(a)
+    local temp = {}
+    for k, v in pairs(a) do
+        temp[k] = v
+    end
+    return temp
+end
 
 function regEvent(s)
     if s.events ~= nil then

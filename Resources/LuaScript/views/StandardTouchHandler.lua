@@ -1,5 +1,5 @@
 --越界情况 普通move 确保target move targetScale 设定 targetScale targetMove时检查一下即可
-local sim = require "SimpleJson"
+--local sim = require "SimpleJson"
 StandardTouchHandler = class()
 function StandardTouchHandler:ctor()
     local vs = getVS()
@@ -36,14 +36,16 @@ end
 --world Points 世界坐标的点
 --x y id
 function StandardTouchHandler:tBegan(touches)
-    --print("tBegan", sim:encode(touches))
+    --print("tBegan", simple.encode(touches))
     self.accMove = 0
-    local temp1, temp2 = convertMultiToArr(touches)
+    local _, temp2 = convertMultiToArr(touches)
     updateTouchTable(self.touchValue, temp2)
+    --print("myTouch")
+    --print(simple.encode(self.touchValue))
 end
 
 function StandardTouchHandler:fastScale(sca, midOld)
-    --print("fastScale", sca, sim:encode(midOld))
+    ----print("fastScale", sca, sim:encode(midOld))
     if self.targetScale == nil then
         self.targetScale = self.bg:getScale()
     end
@@ -105,7 +107,7 @@ function StandardTouchHandler:MoveBack(difx, dify)
     local vs = getVS()
     local tm = self.targetMove
     --保护边界
-    --print("target Move is ", sim:encode(tm))
+    ----print("target Move is ", sim:encode(tm))
     if tm[1] >= 5 and difx > 0 then
         self.targetMove[1] = tm[1]-difx
     end
@@ -176,7 +178,7 @@ function StandardTouchHandler:adjustMove()
 end
 
 function StandardTouchHandler:tMoved(touches)
-    --print("tMoved", sim:encode(touches))
+    ----print("tMoved", sim:encode(touches))
     local oldPos = copyTouchTable(self.touchValue)
     --local oldPos = self.lastPos
     --self.lastPos = convertMultiToArr(touches)
@@ -199,7 +201,7 @@ function StandardTouchHandler:tMoved(touches)
         end
         local oldDis = distance(oldPos[0], oldPos[1])
         local newDis = distance(self.touchValue[0], self.touchValue[1])
-        ----print("oldDis newDis", oldDis, newDis)
+        ------print("oldDis newDis", oldDis, newDis)
         --[[
         local sca = (newDis-oldDis)/100
         if math.abs(sca) < 0.03 then
@@ -207,7 +209,7 @@ function StandardTouchHandler:tMoved(touches)
         end
         --]]
 
-        ----print("sca", sca)
+        ------print("sca", sca)
         local difx = oldPos[1][1]-oldPos[0][1]
         local dify = oldPos[1][2]-oldPos[0][2]
         --旧的顶点
@@ -220,7 +222,7 @@ function StandardTouchHandler:tMoved(touches)
         --local oldScale = self.bg:getScale()
         --sca = self:fastScale(sca)
         local move = {midNew[1]-midOld[1], midNew[2]-midOld[2]}
-        --print("touch just Move ok?", sim:encode(move))
+        ----print("touch just Move ok?", sim:encode(move))
         self:MoveBack(move[1], move[2])
 
         
@@ -236,12 +238,16 @@ function StandardTouchHandler:tMoved(touches)
     end
 end
 function StandardTouchHandler:tEnded(touches)
-    --print("tEnded", sim:encode(touches))
+    --print("tEnded", simple.encode(touches))
     local _, temp = convertMultiToArr(touches)
     clearTouchTable(self.touchValue, temp)    
+    --print(simple.encode(self.touchValue))
 end
+--6个touch的时候没有end信息 只有cancel信息
 function StandardTouchHandler:tCanceled(touches)
-    --print("tCanceled", sim:encode(touches))
+    --print("tCanceled", simple.encode(touches))
+    local _, temp = convertMultiToArr(touches)
+    clearTouchTable(self.touchValue, temp)    
 end
 
 function StandardTouchHandler:scaleToMax(sm)

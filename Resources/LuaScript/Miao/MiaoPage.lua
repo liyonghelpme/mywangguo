@@ -285,10 +285,12 @@ end
 --点击某个建筑物 进入移动状态 
 --原地还有这个建筑物 不过 新的 替换成了这个建筑物 的 图像 可以移动 桥梁 普通建筑物   道路不能移动
 function MiaoPage:touchesBegan(touches)
-    self.touchBuild = nil
-    self.lastPos = convertMultiToArr(touches)
-    if self.lastPos.count == 1 then
-        local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
+    --self.touchBuild = nil
+    --self.lastPos = convertMultiToArr(touches)
+    self.touchDelegate:tBegan(touches)
+    --只有一个手指的时候建筑物会可能响应touch事件 多个手指之后 取消建筑物响应
+    if self.touchDelegate.touchValue.count == 1 and self.touchDelegate.touchValue[0] ~= nil then
+        local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.touchDelegate.touchValue[0][1], self.touchDelegate.touchValue[0][2]))
         --tp.y = tp.y-SIZEY
         local ax, ay, height = cxyToAxyWithDepth(tp.x, tp.y, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask, self.cxyToAxyMap)
         print("touchesBegan", ax, ay, height)
@@ -314,11 +316,15 @@ function MiaoPage:touchesBegan(touches)
                 --end
             end
         end
+    else
+        if self.touchBuild ~= nil then
+            self.touchBuild:touchesEnded(touches)
+            self.touchBuild = nil
+        end
     end
 
-    if not self.blockMove then
-        self.touchDelegate:tBegan(touches)
-    end
+    --if not self.blockMove then
+    --end
 end
 function MiaoPage:touchesMoved(touches)
     if self.touchBuild then
@@ -353,36 +359,12 @@ function MiaoPage:moveToPoint(x, y)
     self.bg:runAction(self.moveAct)
 end
 function MiaoPage:touchesEnded(touches)
-    if not self.blockMove then
-        --快速点击 curBuild 移动到 这个点击位置  屏幕移动到中心位置 
-        if self.touchDelegate.accMove == nil then
+    self.touchDelegate:tEnded(touches)
 
-        elseif self.touchDelegate.accMove < 20 then
-            --点击移动建筑物 
-            if self.curBuild ~= nil and self.curBuild.picName == 'move' then
-                self.lastPos = convertMultiToArr(touches)
-                --场景没有被缩放的情况下 使用 SIZEY 偏移世界坐标
-                --场景缩放了之后 不能使用SIZEY 偏移世界坐标
-                local tp = self.buildLayer.bg:convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
-                tp.y = tp.y-SIZEY
-                local np = normalizePos({tp.x, tp.y}, 1, 1)
-                self.curBuild:runMoveAction(np[1], np[2])
-                self:moveToPoint(np[1], np[2]+SIZEY)
-            end
-        else
-            if self.curBuild ~= nil and self.curBuild.picName == 'move' then
-                local vs = getVS()
-                local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-                p = normalizePos({p.x, p.y-SIZEY}, 1, 1)
-                self.curBuild:runMoveAction(p[1], p[2])
-            end
-        end
-
-        self.touchDelegate:tEnded(touches)
-    end
     --处理完 blockMove 之后 再清理 blockMove
     if self.touchBuild then
         self.touchBuild:touchesEnded(touches)
+        self.touchBuild = nil
     else
         print("touchDelegate accMove", self.touchDelegate.accMove)
         if self.touchDelegate.accMove < 20 then

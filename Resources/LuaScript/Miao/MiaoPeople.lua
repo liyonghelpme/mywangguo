@@ -862,7 +862,7 @@ function MiaoPeople:checkNeibor(x, y)
                 --道路或者 桥梁 建造好的建筑物
                 if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
                     hasRoad = true
-                    print("buildCell Kind Road")
+                    --print("buildCell Kind Road")
                 else
                     if bb == self.predictTarget then
                         isTarget = true
