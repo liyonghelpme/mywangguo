@@ -1,7 +1,7 @@
 Logic = {}
 Logic.name = "liyong"
 Logic.uid = nil
-Logic.resource = {silver=1000, food=0, wood=0, stone=0}
+Logic.resource = {silver=1000, food=0, wood=0, stone=0, gold=0}
 Logic.battleTime = nil
 Logic.battleSoldier = nil
 Logic.buildings = {}

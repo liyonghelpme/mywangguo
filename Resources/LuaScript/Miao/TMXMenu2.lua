@@ -77,7 +77,8 @@ function TMXMenu2:initDataOver()
 end
 
 function TMXMenu2:updateText()
-    self.silver:setString(Logic.resource.silver.."贯")
+    self.silver:setString(Logic.resource.silver.."银币")
+    self.gold:setString(Logic.resource.gold.."金币")
 end
 
 function TMXMenu2:updateYear()

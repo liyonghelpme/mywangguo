@@ -47,8 +47,8 @@ function Cat2:initView()
     self.people.shadow = CCSprite:create("roleShadow.png")
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 3.5)
-    self.people.shadow:runAction(sequence({scaleto(1, 2.8, 2.8), scaleto(1, 3.5, 3.5)}))
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 1)
+    self.people.shadow:runAction(sequence({scaleto(1, 0.8, 0.8), scaleto(1, 1, 1)}))
 
     --self.passTime = 0
     --registerEnterOrExit(self)

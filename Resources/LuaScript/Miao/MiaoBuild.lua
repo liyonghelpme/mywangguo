@@ -173,6 +173,7 @@ function MiaoBuild:ctor(m, data)
     elseif self.picName == 'fence' then
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {170/512, 0})
         self.funcBuild = Fence.new(self)
+        self.funcBuild:initView()
     end
 
     self.heightNode:addChild(self.changeDirNode)
@@ -202,7 +203,7 @@ function MiaoBuild:ctor(m, data)
 
     self.inRangeLabel = ui.newBMFontLabel({text="", size=15, color={102, 0, 0}})
     setPos(self.inRangeLabel, {0, 120})
-    addChild(self.bg, self.inRangeLabel)
+    addChild(allLabel, self.inRangeLabel)
     
     
     self.possibleLabel = ui.newBMFontLabel({text="", size=15, color={0, 102, 0}})

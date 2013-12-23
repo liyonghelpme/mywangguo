@@ -49,12 +49,12 @@ function Merchant:initView()
 
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 3.5)
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 1)
     --self.people.shadow:runAction(sequence({scaleto(1, 1.2, 1.2), scaleto(1, 1.5, 1.5)}))
 
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=20})
     if not DEBUG then
-        setVisible(self.people.stateLabel)
+        setVisible(self.people.stateLabel, false)
     end
     setPos(self.people.stateLabel, {0, 100})
     self.people.heightNode:addChild(self.people.stateLabel)
@@ -62,6 +62,9 @@ function Merchant:initView()
     self.people.actionLabel = ui.newBMFontLabel({text=str(0), color={255, 0, 0}, size=25})
     self.people.heightNode:addChild(self.people.actionLabel, 1)
     setPos(self.people.actionLabel, {0, 200})
+    if not DEBUG then
+        setVisible(self.people.actionLabel, false)
+    end
 end
 
 function Merchant:findTarget()
