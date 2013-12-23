@@ -31,7 +31,7 @@ function Farm:update(diff)
                 self.fn = createSprite("p0.png")
                 self.baseBuild.heightNode:addChild(self.fn)
                 local sz = self.fn:getContentSize() 
-                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+                setScale(setPos(setAnchor(self.fn, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY}), 1.25)
             else
                 setDisplayFrame(self.fn, "p0.png")
             end
@@ -43,7 +43,7 @@ function Farm:update(diff)
                 self.fn = createSprite("p1.png")
                 self.baseBuild.heightNode:addChild(self.fn)
                 local sz = self.fn:getContentSize() 
-                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+                setScale(setPos(setAnchor(self.fn, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY}), 1.25)
             else
                 setDisplayFrame(self.fn, "p1.png")
             end
@@ -55,7 +55,7 @@ function Farm:update(diff)
                 self.fn = createSprite("p2.png")
                 self.baseBuild.heightNode:addChild(self.fn)
                 local sz = self.fn:getContentSize() 
-                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+                setScale(setPos(setAnchor(self.fn, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY}), 1.25)
             else
                 setDisplayFrame(self.fn, "p2.png")
             end
@@ -67,7 +67,7 @@ function Farm:update(diff)
                 self.fn = createSprite("p3.png")
                 self.baseBuild.heightNode:addChild(self.fn)
                 local sz = self.fn:getContentSize() 
-                setPos(setAnchor(self.fn, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+                setScale(setPos(setAnchor(self.fn, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY}), 1.25)
             else
                 setDisplayFrame(self.fn, "p3.png")
             end
