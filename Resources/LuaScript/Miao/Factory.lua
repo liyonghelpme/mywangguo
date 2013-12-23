@@ -22,7 +22,7 @@ function Factory:startWork()
         setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
         setPos(banner, {271, fixY(280, 91)})
         self.banner = banner
-        setPos(self.banner, {0, 200})
+        setPos(self.banner, {0, 240})
         self.baseBuild.heightNode:addChild(banner, 1)
         self.bg = banner
         self.passTime = 0

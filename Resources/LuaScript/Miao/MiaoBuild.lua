@@ -17,11 +17,14 @@ require "Miao.RemoveBuild"
 require "Miao.MoveBuild"
 require "menu.BuildOpMenu"
 require "Miao.Drink"
+require "Miao.BuildPath"
 
 MiaoBuild = class()
 BUILD_STATE = {
     FREE = 0,
     MOVE = 1,
+    --找到附近的工房
+    CHECK_NEARBY=2,
 }
 function MiaoBuild:setWork(wd)
     self.goodsKind = wd.goodsKind or 1
@@ -37,6 +40,7 @@ function MiaoBuild:ctor(m, data)
     self.colNow = 0
     --道路的状态
     self.value = 0
+    self.name = 'b'..math.random(10000)
     self.setYet = data.setYet
     if data.picName == 'build' and data.id == 15 then
         data.picName = 't'
@@ -60,6 +64,7 @@ function MiaoBuild:ctor(m, data)
     self.deleted = false
     self.moveTarget = nil
     self.rate = 0
+    self.dirty = false
     self.data = Logic.buildings[self.id]
     --篱笆数据
     print("buildkind", self.id)
@@ -78,6 +83,7 @@ function MiaoBuild:ctor(m, data)
 
     self.goodsKind = 1
     self.maxNum = 10
+    self.buildPath = BuildPath.new(self)
 
     self.bg = CCLayer:create()
     self.heightNode = addNode(self.bg)
@@ -174,17 +180,18 @@ function MiaoBuild:ctor(m, data)
     setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
-    allLabel:setVisible(false)
+    allLabel:setVisible(true)
 
     self.nameLabel = ui.newBMFontLabel({text="", size=40, color={8, 20, 176}})
     setPos(self.nameLabel, {0, 250})
     addChild(allLabel, self.nameLabel)
 
+
     self.posLabel = ui.newBMFontLabel({text="", size=15})
     setPos(self.posLabel, {0, 50})
     addChild(allLabel, self.posLabel)
 
-    self.stateLabel = ui.newBMFontLabel({text="", size=35})
+    self.stateLabel = ui.newBMFontLabel({text="", size=35, color={255, 0, 0}})
     setPos(self.stateLabel, {0, 70})
     addChild(allLabel, self.stateLabel)
 
@@ -203,7 +210,7 @@ function MiaoBuild:ctor(m, data)
     --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
     self:setState(BUILD_STATE.FREE)
 
-    self.events = {EVENT_TYPE.SELECT_ME}
+    self.events = {EVENT_TYPE.SELECT_ME, EVENT_TYPE.ROAD_CHANGED}
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
 end
@@ -211,6 +218,12 @@ function MiaoBuild:receiveMsg(msg, param)
     if msg == EVENT_TYPE.SELECT_ME then
         if param ~= self then
             self.funcBuild:clearMenu()
+        end
+    elseif msg == EVENT_TYPE.ROAD_CHANGED then
+        --self.dirty = true
+        self.dirty = false
+        if self.data and (self.data.IsStore == 1 or self.id == 2) then
+            self:findNearby()
         end
     end
 end
@@ -264,7 +277,7 @@ function MiaoBuild:touchesBegan(touches)
             --if setSuc == 1 then
             --选中建筑物成功了 正在建造的时候 就不能选中建筑物
             if self.funcBuild.selGrid ~= nil then
-                self.dirty = 1
+                --self.dirty = 1
                 self.map.mapGridController:clearMap(self)
                 --正在建造当中 touch 过程不调整 属性只在确认之后调整属性
                 --移动过程中 一开始就要调整属性 除非建造的时候 一开始就对周围产生影响力
@@ -304,21 +317,23 @@ function MiaoBuild:touchesMoved(touches)
         print("touchMoved  !!", ax, ay, height)
         --移动不在裂缝里面
         if ax ~= nil and ay ~= nil then
-            --在高地上面 修正位置 屏幕映射到 3D世界坐标
-            --cartesianToNormal 使用菱形 0.5 0 位置来计算normalPos位置点 所以要减去SIZEY
-            --参照MiaoPage 中touchesBegan的处理方法
-            parPos.y = parPos.y-103*height-SIZEY
-            
-            local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
-            --先判定是否冲突 再 设置位置
-            local curPos = self.lastPos[0]
-            local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
-            if dx+dy > 20 then
-                self.moveStart = self.lastPos[0]
-                self:setColPos()
+            if ax < self.map.scene.width-1 and ay < self.map.scene.height-1 and ax >= 0 and ay >= 0 then 
+                --在高地上面 修正位置 屏幕映射到 3D世界坐标
+                --cartesianToNormal 使用菱形 0.5 0 位置来计算normalPos位置点 所以要减去SIZEY
+                --参照MiaoPage 中touchesBegan的处理方法
+                parPos.y = parPos.y-103*height-SIZEY
+                
+                local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+                --先判定是否冲突 再 设置位置
+                local curPos = self.lastPos[0]
+                local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
+                if dx+dy > 20 then
+                    self.moveStart = self.lastPos[0]
+                    self:setColPos()
+                end
+                self:setPos(newPos)
+                self:setMenuWord()
             end
-            self:setPos(newPos)
-            self:setMenuWord()
         end
     end
     self.accMove = self.accMove+math.abs(difx)+math.abs(dify)
@@ -435,18 +450,21 @@ function MiaoBuild:touchesEnded(touches)
     end
 end
 function MiaoBuild:update(diff)
-    if self.id ~= -1 and self.id ~= nil then
-        local map = getBuildMap(self)
-        local p = getPos(self.bg)
-        local ax, ay = self:calAff()
-        self.posLabel:setString(self.id.." "..ax.." "..ay)
-        --self.stateLabel:setString(" "..simple.encode(self.product).." "..self.workNum.." "..str(self.food).." "..self.stone.." v"..self.value.." max "..self.maxNum)
-        self.stateLabel:setString(map[3].." "..map[4])
-        local s = ''
-        for k, v in ipairs(self.belong) do
-            s = s..v.." "
+    if not Logic.paused then 
+        if self.id ~= -1 and self.id ~= nil then
+            local map = getBuildMap(self)
+            local p = getPos(self.bg)
+            local ax, ay = self:calAff()
+            self.posLabel:setString(self.id.." "..ax.." "..ay)
+            self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
+            --self.stateLabel:setString(map[3].." "..map[4])
+            local s = ''
+            for k, v in ipairs(self.belong) do
+                s = s..v.." "
+            end
+            self.inRangeLabel:setString(s)
         end
-        self.inRangeLabel:setString(s)
+        self:updateState(diff)
     end
 end
 function MiaoBuild:enterScene()
@@ -541,19 +559,49 @@ end
 --只有拆除路径 铺设路径 
 function MiaoBuild:finishBuild()
     --白名单 方法
-    if not self.setYet then
+    --if not self.setYet then
         --self:adjustRoad()
-    end
+    --end
     self.changeDirNode:stopAllActions()
     self.changeDirNode:runAction(fadein(0))
     self.funcBuild:finishBuild()
     self:setState(BUILD_STATE.FREE)
     self:finishBottom()
+    --self:findNearby()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     if publicMiaoPath ~= nil then
         publicMiaoPath.dirty = true
     end
 end
+
+--自己移动了 
+--别人移动了
+--初始化建筑物 dirty = true 之后就要新的寻路 
+--如果寻路过程中仍然有东西dirty了 那么就需要再次寻路一下
+--有人确定 道路可达 该商店 
+--请求该商店检测一下周围建筑物  然后人物状态又回到了Free 状态
+--该商店检测完建筑物之后 别的人物再请求即可
+--
+--inSearch 中如果又dirty了 那么就要重新再searth一下 dirty = false  
+--dirty = true
+function MiaoBuild:findNearby()
+    --if not self.buildPath.inSearch then 
+        self.state = BUILD_STATE.CHECK_NEARBY
+        local p = getPos(self.bg)
+        local mxy = getPosMapFloat(1, 1, p[1], p[2])
+        local mx, my = mxy[3], mxy[4]
+        self.buildPath:init(mx, my)
+    --end
+end
+function MiaoBuild:updateState(diff)
+    if self.state == BUILD_STATE.CHECK_NEARBY then
+        self.buildPath:update()
+        if self.buildPath.searchYet then
+            self.state = BUILD_STATE.FREE
+        end
+    end
+end
+
 
 function MiaoBuild:setState(s)
     self.state = s

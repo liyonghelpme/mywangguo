@@ -28,7 +28,7 @@ function Store:updateGoods()
             wt = wt+0.2
         end
     elseif self.goodsNum > show then
-        for k=self.goodsNum, show, -1 do
+        for k=self.goodsNum, show+1, -1 do
             local sp = table.remove(self.allGoods)
             sp:runAction(sequence({fadeout(0.5), callfunc(nil, removeSelf, sp)}))
         end

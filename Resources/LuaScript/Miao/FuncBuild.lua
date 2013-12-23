@@ -67,7 +67,7 @@ function FuncBuild:clearMenu()
         if not self:checkBuildable() then
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
-            setPos(self.baseBuild.bg, self.baseBuild.oldPos)
+            self.baseBuild:setPos(self.baseBuild.oldPos)
 
             self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
             self:adjustHeight()

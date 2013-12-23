@@ -512,6 +512,14 @@ function MiaoBuildLayer:addPeople(param)
         local vs = getVS()
         pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         pos = normalizePos({pos.x, pos.y}, 1, 1)
+        local p = pos
+
+        local ax, ay = newCartesianToAffine(p[1], p[2], self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT)
+        ax = math.max(math.min(ax, self.scene.width-1-1-1-1), 1)
+        ay = math.max(math.min(ay, self.scene.height-1-1-1-1), 1)
+        local cx, cy = newAffineToCartesian(ax, ay, self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT)
+        pos = {cx, cy}
+        
         local nv = getPosMap(1, 1, pos[1], pos[2])
         nv = {nv[3], nv[4]}
 

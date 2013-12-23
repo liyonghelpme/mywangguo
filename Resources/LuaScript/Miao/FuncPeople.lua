@@ -36,3 +36,14 @@ function FuncPeople:setPos()
 end
 function FuncPeople:updateState(diff)
 end
+function FuncPeople:findPathError()
+end
+function FuncPeople:checkMovable(k)
+    return true
+end
+
+function FuncPeople:buildMove()
+    self.people:clearStateStack()
+    self.people:resetState()
+end
+

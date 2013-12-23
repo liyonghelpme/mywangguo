@@ -50,6 +50,7 @@ function MiaoPeople:ctor(m, data)
     self.lastVisible = true
     --修习之后就升级
     self.level = 0
+    self.ignoreTerrian = false
     --普通猫咪 才会有私有的miaoPath
     if self.data.kind == 1 then
         self.miaoPath = MiaoPath.new(self)
@@ -94,10 +95,12 @@ function MiaoPeople:receiveMsg(name, msg)
         --self.changeDirNode:pauseSchedulerAndActions()
         pauseNode(self.changeDirNode)
         pauseNode(self.bg)
+        pauseNode(self.heightNode)
     elseif name == EVENT_TYPE.CONTINUE_GAME then
         --self.changeDirNode:resumeSchedulerAndActions()
         resumeNode(self.changeDirNode)
         resumeNode(self.bg)
+        resumeNode(self.heightNode)
     end
 end
 function MiaoPeople:exitScene()
@@ -250,6 +253,7 @@ function MiaoPeople:update(diff)
     end
     self.stateLabel:setString(s)
     self.funcPeople:updateState(diff)
+    self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))
     --[[
     if self.predictTarget ~= nil then
         self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
@@ -298,6 +302,7 @@ function MiaoPeople:initFind(diff)
         if self.stateContext ~= nil then
             self.predictTarget = self.stateContext[2]
             self.actionContext = self.stateContext[3] 
+            self.needClearOwner = self.stateContext.needClearOwner or true
             self.stateContext = nil
             if self.predictTarget.deleted then
                 self.predictTarget = nil
@@ -348,8 +353,9 @@ function MiaoPeople:initFind(diff)
                 --重新生成建筑物连通性路径
                 elseif self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
                     self:findHouse()
-                --商人往回走 miaoPath 初始化结束
+                --商人往回走 miaoPath 初始化结束 
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
+                    --self.funcPeople:findPathError()
                     self.goBack = true
                 --农民没有地方去工作 则休息一下 miaoPath 已经初始化ok了
                 elseif (self.data.kind == 1 or self.data.kind == 2) and self.state == PEOPLE_STATE.START_FIND then
@@ -457,14 +463,20 @@ function MiaoPeople:doFind(diff)
             self.pqDict = nil
             self.cells = nil
             self:showSelf()
+            self.ignoreTerrian = false
         elseif #self.openList == 0 then
         --回家无路可走了 休息 
             if self.tired then
                 self.state = PEOPLE_STATE.PAUSED 
                 self.pausedTime = 0
+            --商人寻路失败了
             else
-                self.state = PEOPLE_STATE.FREE
+                --到商店寻路失败
+                --回家寻路失败
+                --self.state = PEOPLE_STATE.FREE
             end
+
+            self.funcPeople:findPathError()
 
             self.openList = nil
             self.closedList = nil
@@ -520,9 +532,10 @@ function MiaoPeople:doMove(diff)
 
                 --首先检测目标是否移动 
                 local moved = self:checkMoved()
-                if moved then
-                    self:clearStateStack()
-                    self:resetState()
+                if moved or self.realTarget.deleted then
+                    --self:clearStateStack()
+                    --self:resetState()
+                    self.funcPeople:buildMove()
                 elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction()
@@ -612,18 +625,21 @@ function MiaoPeople:doMove(diff)
                 --商人会在商店门口等待一下 
                 local moved = false
                 local wait = false
+                local deleted = false
                 if nextPoint == #self.path then
                     moved = self:checkMoved()
-                    if moved then
-                        self:clearStateStack()
-                        self:resetState()
+                    if moved or self.realTarget.deleted then
+                        deleted = true
+                        --self:clearStateStack()
+                        --self:resetState()
+                        self.funcPeople:buildMove()
                     --商店 如果已经有人进去了 在门口排队等待 enterQueue 进入队列
                     --不是商人的返回点
                     elseif self.realTarget.data ~= nil and self.realTarget.data.IsStore == 1 and self.realTarget.funcBuild.inMerchant ~= nil then
                          wait = true
                     end
                 end
-                if not moved and not wait then
+                if not moved and not wait and not deleted then
                     --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                     local np = self.path[nextPoint]
                     local buildCell = self.map.mapGridController.mapDict
@@ -894,7 +910,10 @@ function MiaoPeople:checkNeibor(x, y)
 
             --target 点不能和目标点紧邻 除了回家之外
             --isTarget isStart 不能即是目标 也是 开始点 
-            if self.closedList[key] == nil and not (isTarget and isStart) and (hasRoad or isTarget or self.actionContext == CAT_ACTION.GO_HOME) then
+            --是否无视地形呢
+            --or self.actionContext == CAT_ACTION.GO_HOME
+
+            if self.closedList[key] == nil and (self.ignoreTerrian or (not (isTarget and isStart) and (hasRoad or isTarget))) then
                 --没有加入过openList
                 if self.cells[key] == nil then
                     self.cells[key] = {}

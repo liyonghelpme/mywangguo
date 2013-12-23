@@ -24,6 +24,7 @@ function UpgradeBanner:ctor(w, col, cb, delegate)
 end
 function UpgradeBanner:removeNow()
     removeSelf(self.bg)
+    self.bg = nil
     if self.callback ~= nil then
         callback(delegate)
     end

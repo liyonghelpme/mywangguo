@@ -14,6 +14,8 @@ CAT_ACTION = {
     MER_BACK=10,
     BUY_GOODS=11,
     GO_HOME = 12,
+
+    CHECK_ACCESS = 13,
 }
 
 Cat2 = class(FuncPeople)
@@ -70,6 +72,10 @@ function Cat2:initView()
     setPos(self.banner, {0, 200})
     self.people.heightNode:addChild(self.banner)
     self.pro = pro
+
+    self.people.actionLabel = ui.newBMFontLabel({text=str(0), color={255, 0, 0}, size=25})
+    self.people.heightNode:addChild(self.people.actionLabel, 1)
+    setPos(self.people.actionLabel, {0, 200})
 end
 function Cat2:updateState(diff)
     setProNum(self.pro, self.people.health, self.people.maxHealth)
@@ -222,30 +228,51 @@ function Cat2:checkAllPossible()
     for _, k in ipairs(self.allPossible) do
         --新商店只有 粮食物品
         if k.data.IsStore == 1 then
+            local nbuilding = k.buildPath.nearby
+            local allFreeFactory = {}
+            local allFoodFarm = {}
+            local allStoneQuarry = {}
+            for k, v in pairs(k.buildPath.nearby) do
+                if k.id == 2 and k.workNum > 0 then
+                    table.insert(allFoodFarm, k)
+                elseif k.id == 5 and k.owner == nil then
+                    table.insert(allFreeFactory, k)
+                end
+            end
+            --民居可达的农田 ----> 农田可达的工厂-----》工厂可达这个商店
+
             local food = GoodsName[k.goodsKind].food
             local wood = GoodsName[k.goodsKind].wood
             local stone = GoodsName[k.goodsKind].stone
             local checkRes = true
-            if food > 0 and #self.allFoodFarm == 0 then
+            --建筑物 路径确定
+
+            if food > 0 and #allFoodFarm == 0 then
                 checkRes = false
             end
+            --[[
             if stone > 0 and #self.allStoneQuarry == 0 then
                 checkRes = false
             end
-            if checkRes and #self.allFreeFactory > 0 then
-                self:sortBuildings(self.allFreeFactory)
-                self.people.predictFactory = self.allFreeFactory[1] 
+            --]]
+            --检查 工厂 可达性 以及 农田可达性 以及 
+            if checkRes and #allFreeFactory > 0 then
+                self:sortBuildings(allFreeFactory)
+                self.people.predictFactory = allFreeFactory[1] 
                 self.people.predictFactory:setOwner(self.people)
                 self.people.predictStore = k
                 self.people.predictStore:setOwner(self.people)
                 if food > 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD})
-                    self:sortBuildings(self.allFoodFarm)
-                    self.people.predictTarget = self.allFoodFarm[1]
-                    self.people.predictTarget:setOwner(self.people)
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
+                    self:sortBuildings(allFoodFarm)
+                    self.people.predictTarget = allFoodFarm[1]
+                    --no needClear Owner 不用占用这个农田 通过其它方式写入 Queue之类的
+                    --self.people.predictTarget:setOwner(self.people)
                     self.people.actionContext= CAT_ACTION.TAKE_FOOD
+                    --不用再清理 owner 默认需要 clearOwner needClearOwner = nil
+                    self.people.needClearOwner = false
                     self.people.goodsKind = k.goodsKind
                 end
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
@@ -359,3 +386,18 @@ function Cat2:checkAllPossible()
     end
 end
 
+function Cat2:findPathError()
+    --回家没有找到路径
+    if self.people.actionContext == CAT_ACTION.GO_HOME then
+        self.people.state = PEOPLE_STATE.FREE 
+        self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.myHouse, CAT_ACTION.GO_HOME}
+        self.people.ignoreTerrian = true
+    --去工厂没有找到路径 去农田没有找到路径
+    --去商店没有找到路径
+    --放弃这次操作
+    else    
+        self.people:clearStateStack()
+        --bug: 大量移动建筑物之后 为什么 self.realTarget 没见了呢？
+        self.people:resetState()
+    end
+end

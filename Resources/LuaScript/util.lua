@@ -1105,6 +1105,11 @@ function str(v)
     if v == nil then
         return "nil"
     end
+    if v == true then
+        return 'true'
+    elseif v == false then
+        return 'false'
+    end
     return ""..v
 end
 function disappear(obj)

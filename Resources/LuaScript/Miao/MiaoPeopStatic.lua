@@ -360,15 +360,19 @@ end
 function MiaoPeople:beforeHandle()
 end
 function MiaoPeople:resetState()
-    if self.stateContext ~= nil then
-        if self.stateContext[2] ~= self.realTarget then
+    --bug: 为什么realTarget 变成了nil
+    if self.realTarget ~= nil then
+        if self.stateContext ~= nil then
+            if self.stateContext[2] ~= self.realTarget and not (self.needClearOwner == false) then
+                self.realTarget:setOwner(nil)
+            end
+        else
             self.realTarget:setOwner(nil)
         end
-    else
-        self.realTarget:setOwner(nil)
     end
     self.realTarget = nil
     self.state = PEOPLE_STATE.FREE
+    self.needClearOwner = true
 end
 function MiaoPeople:handleFactory()
     if self.actionContext ~= nil then
@@ -587,9 +591,6 @@ end
 --10 10 10 10 5 = 5点体力值
 --种植的时间 40s 算在这个生产过程里面的 
 function MiaoPeople:workInFarm()
-    --local rate = 40/self.realTarget.maxNum
-    --local cost = 5/self.realTarget.maxNum
-
     local le = getLaborEffect(self.labor)
     local totalTime = 10
     local productNum = 5
@@ -605,24 +606,35 @@ function MiaoPeople:workInFarm()
     end
     totalTime = math.max(1, totalTime)
     healthCost = math.max(1, healthCost)
-    print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
+    --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
     --计算出1个 的生产时间 和 消耗的 生命值
     local rate = totalTime/productNum
     local cost = healthCost/productNum
 
     if self.workTime > rate then
         self.workTime = 0
-        self.health = self.health-cost
-        if self.realTarget.workNum >= self.realTarget.maxNum then
-            self.state = PEOPLE_STATE.FREE
-            self.realTarget:setOwner(nil)
-            self.realTarget = nil
-             
+        if self.health < cost then
+            self:clearStateStack()
+            self:resetState()
             self:setDir(0, 0)
             local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
-            self.realTarget:changeWorkNum(1)
+            self.health = self.health-cost
+            if self.realTarget.workNum >= self.realTarget.maxNum then
+                --[[
+                self.state = PEOPLE_STATE.FREE
+                self.realTarget:setOwner(nil)
+                self.realTarget = nil
+                --]]
+                self:resetState()
+                 
+                self:setDir(0, 0)
+                local sz = self.changeDirNode:getContentSize()
+                setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
+            else
+                self.realTarget:changeWorkNum(1)
+            end
         end
     end
 end

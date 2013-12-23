@@ -58,6 +58,10 @@ function Merchant:initView()
     end
     setPos(self.people.stateLabel, {0, 100})
     self.people.heightNode:addChild(self.people.stateLabel)
+
+    self.people.actionLabel = ui.newBMFontLabel({text=str(0), color={255, 0, 0}, size=25})
+    self.people.heightNode:addChild(self.people.actionLabel, 1)
+    setPos(self.people.actionLabel, {0, 200})
 end
 
 function Merchant:findTarget()
@@ -129,6 +133,20 @@ function Merchant:checkAllPossible()
         break
     end
 end
+--商人寻找回家的道路失败之后 怎么调整状态 接着寻路 但是条件放宽
+function Merchant:findPathError()
+    print("Merchant findPathError", self.people.actionContext)
+    if self.people.actionContext == CAT_ACTION.MER_BACK then
+        self.people.state = PEOPLE_STATE.FREE 
+        self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK}
+        self.people.ignoreTerrian = true
+    --找不到可达农田的路径 为什么不更新可达建筑物呢? 
+    elseif self.people.actionContext == CAT_ACTION.BUY_GOODS then
+        self.people:clearStateStack()
+        self.people.state = PEOPLE_STATE.FREE
+        self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK}
+    end
+end
 
 function Merchant:handleAction()
     if self.people.actionContext == CAT_ACTION.MER_BACK then
@@ -137,7 +155,9 @@ function Merchant:handleAction()
         self.people.map.mapGridController:removeSoldier(self.people)
     elseif self.people.actionContext == CAT_ACTION.BUY_GOODS then
         print("BUY_GOODS", self.people.predictTarget.id)
-        if self.people.predictTarget.stone > 0 then
+        if self.people.predictTarget.deleted then
+            addBanner("建筑物不见了")
+        elseif self.people.predictTarget.stone > 0 then
             local sp = CCSprite:create("silver.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
@@ -165,6 +185,7 @@ function Merchant:handleAction()
             local wn = self.people.predictTarget.workNum
             self.people.predictTarget.workNum = wn-bn
             self.people.predictTarget.funcBuild:updateGoods()
+            print("take goods Num", wn, bn)
 
             local val = GoodsName[self.people.predictTarget.goodsKind].price*bn
             local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
@@ -172,9 +193,7 @@ function Merchant:handleAction()
             setPos(num, {50, 0})
             --+商店的贩卖能力
             doGain(val)
-        --去农田
-        --去商店
-        --去铁匠铺
+        --去农田 每个食材3贯
         elseif self.people.predictTarget.workNum > 0 then
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silver.png")
@@ -183,11 +202,13 @@ function Merchant:handleAction()
             self.people.map.bg:addChild(sp)
             setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
             local rx = math.random(20)-10
+            local val = self.people.predictTarget.workNum*3
+
             sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-            local num = ui.newBMFontLabel({text=str(self.people.predictTarget.workNum*math.floor(self.people.predictTarget.rate+1)), font="bound.fnt", size=30})
+            local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
             sp:addChild(num)
             setPos(num, {50, 0})
-            doGain(3)
+            doGain(val)
             self.people.predictTarget.workNum = 0
         end
         if Logic.inNew and not Logic.buyIt then
@@ -197,7 +218,23 @@ function Merchant:handleAction()
             global.director:pushView(w, 1, 0)
         end
         self.people:popState()
-        self.people:resetState()
+        self:resetNotOwner()
     end
 end
 
+function Merchant:checkMovable(k)
+    if self.people.ignoreTerrian then
+        return true
+    else
+
+    end
+end
+function Merchant:buildMove()
+    self.people:popState()
+    self:resetNotOwner()
+end
+
+function Merchant:resetNotOwner()
+    self.people.realTarget = nil
+    self.people.state = PEOPLE_STATE.FREE
+end

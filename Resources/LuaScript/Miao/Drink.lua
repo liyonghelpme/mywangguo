@@ -18,6 +18,7 @@ function Drink:updateGoods()
     local sz = self.baseBuild.changeDirNode:getContentSize()
     local wt = 0
     self.goodsNum = #self.allGoods
+    print("Drink goodsNum", self.goodsNum, show)
     if self.goodsNum < show then
         for k=self.goodsNum+1, show, 1 do
             local sp = CCSprite:create("goods7.png")
@@ -28,7 +29,7 @@ function Drink:updateGoods()
             wt = wt+0.2
         end
     elseif self.goodsNum > show then
-        for k=self.goodsNum, show, -1 do
+        for k=self.goodsNum, show+1, -1 do
             local sp = table.remove(self.allGoods)
             sp:runAction(sequence({fadeout(0.5), callfunc(nil, removeSelf, sp)}))
         end

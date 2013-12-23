@@ -307,12 +307,11 @@ function MiaoPage:touchesBegan(touches)
             if allCell[key] ~= nil then
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
                 --移动地图 和 单纯的点击 地图
-                --if self.curBuild ~= nil and self.curBuild.picName == 'move' then
-                --    self.touchBuild = self.curBuild
-                --    self.touchBuild:touchesBegan(touches)
-                --else
-                self.touchBuild = allCell[key][#allCell[key]][1]
-                self.touchBuild:touchesBegan(touches)
+                local cb = allCell[key][#allCell[key]][1]
+                if cb.picName == 'build' or cb.picName == 't' then
+                    self.touchBuild = allCell[key][#allCell[key]][1]
+                    self.touchBuild:touchesBegan(touches)
+                end
                 --end
             end
         end
@@ -388,9 +387,10 @@ function MiaoPage:beginBuild(kind, id, px, py)
             p = {x=px, y=py}
         end
         p = normalizePos({p.x, p.y}, 1, 1)
+        --取消左下右下的边
         local ax, ay = newCartesianToAffine(p[1], p[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
-        ax = math.max(math.min(ax, self.width-1), 0)
-        ay = math.max(math.min(ay, self.height-1), 0)
+        ax = math.max(math.min(ax, self.width-1-1), 0)
+        ay = math.max(math.min(ay, self.height-1-1), 0)
         local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
         p = {cx, cy}
 
