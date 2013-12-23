@@ -21,7 +21,7 @@ function Store:updateGoods()
     if self.goodsNum < show then
         for k=self.goodsNum+1, show, 1 do
             local sp = CCSprite:create("goods6.png")
-            setPos(addChild(self.baseBuild.changeDirNode, sp), {showPos[k][1], sz.height-showPos[k][2]})
+            setPos(addChild(self.baseBuild.changeDirNode, sp), {showPos[k][1]*0.8, (sz.height-showPos[k][2]*0.8)})
             sp:setOpacity(0)
             sp:runAction(sequence({delaytime(wt), fadein(0.5)}))
             table.insert(self.allGoods, sp)

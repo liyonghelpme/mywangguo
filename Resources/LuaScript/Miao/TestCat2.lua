@@ -27,7 +27,10 @@ function Cat2:initView()
     local sz = self.people.changeDirNode:getContentSize()
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 0.8), {0, SIZEY})
     
-    self.people.changeDirNode:runAction(CCAnimate:create(ani))
+    if self.people.privData.needAppear == false then
+    else
+        self.people.changeDirNode:runAction(CCAnimate:create(ani))
+    end
 
     sf:addSpriteFramesWithFile("cat_smoke.plist")
     local ani = createAnimation("cat_smoke", "cat_smoke_%d.png", 0, 12, 1, 2, true)

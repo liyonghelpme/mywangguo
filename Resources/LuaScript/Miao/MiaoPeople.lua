@@ -32,11 +32,12 @@ PEOPLE_STATE = {
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
+    self.privData = data
     self.state = PEOPLE_STATE.APPEAR
     self.id = data.id
     self.data = Logic.people[self.id]
     self.passTime = 0
-    self.health = 0
+    self.health = data.health or 0
     self.maxHealth = Logic.people[self.id].health
     self.labor = self.data.labor
     self.tired = false
@@ -353,13 +354,17 @@ function MiaoPeople:initFind(diff)
                 --重新生成建筑物连通性路径
                 --已经在house里面 就不要再去找house了
                 --self.lastState ~= PEOPLE_STATE.IN_HOME
-                elseif self.data.kind == 1 then
+                elseif self.data.kind == 1 and self.state == PEOPLE_STATE.START_FIND then
                     --显示出来自己
                     --如果和别的建筑物冲突了也要移动到旁边显示自己
                     if not self:checkMeInHouse() then
                         self:findHouse()
                         self:showSelf()
+                    else
+                        self.state = PEOPLE_STATE.PAUSED
+                        self.pausedTime = 0
                     end
+
                 --商人往回走 miaoPath 初始化结束 
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
                     --self.funcPeople:findPathError()

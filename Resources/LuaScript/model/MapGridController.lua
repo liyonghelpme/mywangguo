@@ -5,6 +5,7 @@ function MapGridController:ctor(scene)
     self.allBuildings = {}
     self.allSoldiers = {}
     self.allEnvTile = {}
+    self.allRoad = {}
     self.solList = {}
     self.bidToBuilding = {}
 end
@@ -104,6 +105,8 @@ function MapGridController:addBuilding(chd)
         self.allBuildings[chd] = true
         --用于初始化进入游戏的时候 确定人物的房间
         self.bidToBuilding[chd.bid] = chd
+    elseif chd.picName == 't' then
+        self.allRoad[chd] = true
     else
         self.allEnvTile[chd] = true
     end
@@ -112,6 +115,7 @@ end
 function MapGridController:removeBuilding(build)
     self:clearMap(build)
     self.allBuildings[build] = nil
+    self.allRoad[build] = nil
     self.allEnvTile[build] = nil
 end
 
