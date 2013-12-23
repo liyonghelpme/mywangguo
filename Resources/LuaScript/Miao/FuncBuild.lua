@@ -5,9 +5,9 @@ end
 function FuncBuild:initView()
     local bd = Logic.buildings[self.baseBuild.id]
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    setPos(setAnchor(self.baseBuild.changeDirNode, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
-    --setAnchor(self.baseBuild.changeDirNode, {170/sz.width, 0})
+    setPos(setAnchor(self.baseBuild.changeDirNode, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY})
 end
+
 function FuncBuild:handleTouchEnded()
 end
 function FuncBuild:clearEffect()

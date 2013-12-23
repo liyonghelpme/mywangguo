@@ -906,6 +906,10 @@ function getSca(n, box)
     end
     return sca
 end
+function adjustBox(sp, box)
+    local sca = getSca(sp, box)
+    setScale(sp, sca)
+end
 
 function checkInChild(bg, pos)
     local sub = bg:getChildren()
