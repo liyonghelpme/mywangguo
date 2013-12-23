@@ -670,6 +670,18 @@ function MiaoPeople:workInHome(diff)
         --self:showSelf()
     end
 end
+function MiaoPeople:checkMeInHouse()
+    local pxy = getPos(self.bg)
+    local map = getPosMapFloat(1, 1, pxy[1], pxy[2]) 
+    local housePos = nil
+    if self.myHouse and not self.myHouse.deleted then
+        local hxy = getBuildMap(self.myHouse)
+        if map[3] == hxy[3] and map[4] == hxy[4] then
+            return true
+        end
+    end
+    return false
+end
 function MiaoPeople:showState()
     --拿到矿刀
     if self.tempMine ~= nil then
@@ -721,7 +733,7 @@ function MiaoPeople:checkMoved()
     local moved = false
     if not self.realTarget.deleted then
         local pxy = self.tempEndPoint 
-        local txy = getPos(self.realTarget.bg)
+        --local txy = getPos(self.realTarget.bg)
         local map = getBuildMap(self.realTarget)
         if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
             addBanner("目标被移动了 "..simple.encode(pxy).." "..simple.encode(map))

@@ -351,7 +351,9 @@ function MiaoPeople:initFind(diff)
                 if self.state == PEOPLE_STATE.FIND_NEAR_BUILDING then
                 --普通村民 没有呆在房间内 则回到房间内
                 --重新生成建筑物连通性路径
-                elseif self.data.kind == 1 and self.lastState ~= PEOPLE_STATE.IN_HOME then
+                --已经在house里面 就不要再去找house了
+                --self.lastState ~= PEOPLE_STATE.IN_HOME
+                elseif self.data.kind == 1 and not self:checkMeInHouse() then
                     self:findHouse()
                 --商人往回走 miaoPath 初始化结束 
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
@@ -491,6 +493,7 @@ function MiaoPeople:initMove(diff)
     --print("initMove")
     if self.state == PEOPLE_STATE.FIND then
         --开始从房间里面出来了 调整一下初始的位置 people 所在网格靠近附近邻居的位置 中点
+        --[[
         if self.lastState == PEOPLE_STATE.IN_HOME then
             print("init Home Pos", #self.path, simple.encode(self.path[2]), simple.encode(self.lastEndPoint))
             local mx = (self.path[2][1]+self.lastEndPoint[1])/2
@@ -501,6 +504,8 @@ function MiaoPeople:initMove(diff)
             --self.bg:setVisible(true)
             self.lastState = nil
         end
+        --]]
+
 
         self.state = PEOPLE_STATE.IN_MOVE
         self.curPoint = 1
