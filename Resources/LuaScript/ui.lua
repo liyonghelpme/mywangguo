@@ -119,6 +119,7 @@ function ui.newTTFLabel(params)
             edgeWidth = 2
         end
         label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
+        --label:enableShadow(CCSizeMake(2, 2), 1, 1, true)
     end
 
     if label then
