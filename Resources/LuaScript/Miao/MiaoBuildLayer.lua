@@ -116,10 +116,10 @@ function MiaoBuildLayer:initCat()
     if cat ~= "" then
         cat = simple.decode(cat)
         for k, v in ipairs(cat) do
-            local p = MiaoPeople.new(self, {id=v.id or 3})
+            local p = MiaoPeople.new(self, {id=v.id or 3, needAppear = false, health=v.health})
             self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
             local pos = normalizePos({v.px, v.py}, 1, 1)
-            setPos(p.bg, pos)
+            p:setPos(pos)
             p:setZord()
             self.mapGridController:addSoldier(p)
             if v.hid ~= nil then
@@ -187,6 +187,27 @@ function MiaoBuildLayer:initBuild()
         mbid = mbid+1
         Logic.maxBid = mbid
     end
+
+    --[[
+    local road = u:getStringForKey("road")
+    if road ~= "" then
+        road = simple:decode(road)
+        for k, v in ipairs(road) do
+            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            b:setWork(v)
+            local p = normalizePos({v.px, v.py}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b.funcBuild:adjustRoad()
+            b:finishBuild()
+            mbid = math.max(v.bid, mbid)
+        end
+        mbid = mbid+1
+        Logic.maxBid = mbid
+    end
+    --]]
 end
 function MiaoBuildLayer:initSea()
     local initX = -128
@@ -293,8 +314,8 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initBackPoint()
     self:initBuild()
+    self:initCat()
     --[[
-    --self:initCat()
     --]]
     self.initYet = true
 end

@@ -75,12 +75,25 @@ function TMXScene:saveGame(hint)
             table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
         end
     end
+    
+    local allRoad = {}
+    for k, v in pairs(self.page.buildLayer.mapGridController.allRoad) do
+        local p = getPos(k.bg)
+        if k.bid ~= nil then
+            table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
+        end
+    end
+
+
     local b = simple.encode(allBuild)
     local u = CCUserDefault:sharedUserDefault()
     u:setStringForKey("build", b)
     if not hint then
         addBanner("保存建筑物成功 "..#allBuild)
     end
+
+    local r = simple.encode(allRoad)
+    u:setStringForKey("road", r)
 
     local allPeople = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do
@@ -91,7 +104,7 @@ function TMXScene:saveGame(hint)
             if k.myHouse ~= nil  then
                 hid = k.myHouse.bid
             end
-            table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id})
+            table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health})
         end
     end
     local p = simple.encode(allPeople)

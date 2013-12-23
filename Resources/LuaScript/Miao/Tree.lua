@@ -9,7 +9,7 @@ function Tree:initView()
     self.baseBuild.changeDirNode = createSprite("build4.png")
 
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    setPos(setAnchor(self.baseBuild.changeDirNode, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+    setPos(setAnchor(self.baseBuild.changeDirNode, {249/sz.width, (sz.height-253)/sz.height}), {0, SIZEY})
 
 
     self.shadow = createSprite("build4_shadow_0.png")
