@@ -186,6 +186,9 @@ function MiaoBuild:ctor(m, data)
     setPos(self.nameLabel, {0, 250})
     addChild(allLabel, self.nameLabel)
 
+    self.idLabel = ui.newBMFontLabel({text=self.name, size=30, color={102, 102, 30}})
+    setPos(self.idLabel, {0, 300})
+    addChild(allLabel, self.idLabel)
 
     self.posLabel = ui.newBMFontLabel({text="", size=15})
     setPos(self.posLabel, {0, 50})

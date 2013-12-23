@@ -1502,3 +1502,29 @@ function createSprite(n)
         return CCSprite:create(n)
     end
 end
+function interSet(a, b)
+    local temp = {}
+    local count = 0
+    for k, v in pairs(a) do
+        if b[k] ~= nil then
+            temp[k] = true
+            count = count+1
+        end
+    end
+    temp['count'] = count
+    return temp
+end
+function setToArr(a)
+    local temp = {}
+    for k, v in pairs(a) do
+        table.insert(temp, k)
+    end
+    return temp
+end
+function printTable(t)
+    local s = ''
+    for k, v in ipairs(t) do
+        s = s..str(k)..','..str(v)..','
+    end
+    return s
+end

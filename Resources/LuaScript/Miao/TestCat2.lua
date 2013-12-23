@@ -232,6 +232,25 @@ function Cat2:checkAllPossible()
             local allFreeFactory = {}
             local allFoodFarm = {}
             local allStoneQuarry = {}
+
+            local storeFactory = k.buildPath:getAllFreeFactory()
+
+            self:sortBuildings(self.allFoodFarm)
+            local gotoFarm = nil
+            local gotoFac = nil
+            for nk, nv in ipairs(self.allFoodFarm) do
+                local tempFactory = nv.buildPath:getAllFreeFactory()
+                local interFac = interSet(tempFactory, storeFactory)  
+                if interFac.count > 0 then
+                    gotoFarm = nv
+                    gotoFac = interFac
+                    interFac.count = nil
+                    break
+                end
+            end
+
+            --求交集
+            --[[
             for k, v in pairs(k.buildPath.nearby) do
                 if k.id == 2 and k.workNum > 0 then
                     table.insert(allFoodFarm, k)
@@ -239,6 +258,9 @@ function Cat2:checkAllPossible()
                     table.insert(allFreeFactory, k)
                 end
             end
+            --]]
+            
+
             --民居可达的农田 ----> 农田可达的工厂-----》工厂可达这个商店
 
             local food = GoodsName[k.goodsKind].food
@@ -247,34 +269,39 @@ function Cat2:checkAllPossible()
             local checkRes = true
             --建筑物 路径确定
 
+            --[[
             if food > 0 and #allFoodFarm == 0 then
                 checkRes = false
             end
+            --]]
             --[[
             if stone > 0 and #self.allStoneQuarry == 0 then
                 checkRes = false
             end
             --]]
             --检查 工厂 可达性 以及 农田可达性 以及 
-            if checkRes and #allFreeFactory > 0 then
-                self:sortBuildings(allFreeFactory)
-                self.people.predictFactory = allFreeFactory[1] 
+            if gotoFarm ~= nil and gotoFac ~= nil then
+            --if checkRes and #allFreeFactory > 0 then
+                gotoFac = setToArr(gotoFac)
+                print("allFactory", printTable(gotoFac))
+                self:sortBuildings(gotoFac)
+                self.people.predictFactory = gotoFac[1]
                 self.people.predictFactory:setOwner(self.people)
                 self.people.predictStore = k
                 self.people.predictStore:setOwner(self.people)
-                if food > 0 then
+                --if food > 0 then
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT, needClearOwner = true})
                     table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT, needClearOwner = true})
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
-                    self:sortBuildings(allFoodFarm)
-                    self.people.predictTarget = allFoodFarm[1]
+                    --self:sortBuildings(allFoodFarm)
+                    self.people.predictTarget = gotoFarm
                     --no needClear Owner 不用占用这个农田 通过其它方式写入 Queue之类的
                     --self.people.predictTarget:setOwner(self.people)
                     self.people.actionContext= CAT_ACTION.TAKE_FOOD
                     --不用再清理 owner 默认需要 clearOwner needClearOwner = nil
                     self.people.needClearOwner = false
                     self.people.goodsKind = k.goodsKind
-                end
+                --end
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
                 return
             end

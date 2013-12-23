@@ -52,6 +52,10 @@ function MiaoPath:checkNeibor(x, y)
         {x+1, y+1},
         {x-1, y+1},
     }
+    local isStart = false
+    if x == self.startPoint[1] and y == self.startPoint[2] then
+        isStart = true
+    end
     local curKey = getMapKey(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
@@ -81,7 +85,7 @@ function MiaoPath:checkNeibor(x, y)
                     hasRoad = true
                     --print("buildCell Kind Road")
                 --同一个建筑物不能多次插入
-                elseif bb.picName == 'build' and bb.data.kind == 0 then
+                elseif not isStart and  bb.picName == 'build' and bb.data.kind == 0 then
                     --是一个可以到达的 去工作的建筑物
                     --建筑物不能贯通周围邻居
                     local oldDist = self.allBuilding[bb] or 999999
