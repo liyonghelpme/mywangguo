@@ -56,18 +56,21 @@ function MiaoPeople:setDir(x, y)
             setScaleX(self.changeDirNode, sca)
         end
     else
+        local sca = getScaleY(self.changeDirNode)
         if dx > 0 then
             if dy > 0 then
                 self:setMoveAction("people"..self.id.."_rt")
             elseif dy < 0 then
                 self:setMoveAction("people"..self.id.."_rb")
             end
+            setScaleX(self.changeDirNode, sca)
         elseif dx < 0 then
             if dy > 0 then
-                self:setMoveAction("people"..self.id.."_lt")
+                self:setMoveAction("people"..self.id.."_rt")
             elseif dy < 0 then
-                self:setMoveAction("people"..self.id.."_lb")
+                self:setMoveAction("people"..self.id.."_rb")
             end
+            setScaleX(self.changeDirNode, -sca)
         end
     end
 end

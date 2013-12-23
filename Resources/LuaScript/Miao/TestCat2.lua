@@ -25,7 +25,7 @@ function Cat2:initView()
     local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
-    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height}), 0.7), {0, SIZEY})
+    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 1), {0, SIZEY})
     
     self.people.changeDirNode:runAction(CCAnimate:create(ani))
 
@@ -39,12 +39,17 @@ function Cat2:initView()
     self.people.smoke:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeSelf, self.people.smoke)}))
 
     sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", self.people.id))
+    --需要调整scaleX 的值 类似于小车
     self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, 1, true)
-    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_lb_%d.png", 0, 9, 1, 1, true)
+    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, 1, true)
     self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, 1, true)
-    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_lt_%d.png", 0, 9, 1, 1, true)
+    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, 1, true)
 
-    self.people.shadow = CCSprite:create("roleShadow.png")
+    if self.people.data.girl == 1 then 
+        self.people.shadow = CCSprite:create("roleShadow1.png")
+    else
+        self.people.shadow = CCSprite:create("roleShadow.png")
+    end
     self.people.heightNode:addChild(self.people.shadow, -1)
 
     setScale(setPos(self.people.shadow, {0, SIZEY}), 1)

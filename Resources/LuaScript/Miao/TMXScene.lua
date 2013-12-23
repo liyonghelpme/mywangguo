@@ -5,10 +5,13 @@ require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
-    --sendReq('login', dict(), self.initData, nil, self)
+    sendReq('login', dict(), self.initData, nil, self)
+
+    --[[
     local rep = getFileData("data.txt")
     rep = simple.decode(rep)
     self:initData(rep, nil)
+    --]]
 end
 function TMXScene:ctor()
     self.bg = CCScene:create()
