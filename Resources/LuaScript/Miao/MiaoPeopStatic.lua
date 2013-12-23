@@ -281,7 +281,8 @@ function MiaoPeople:sendGoods()
     if self.food > 0 then
         local sp = setDisplayFrame(CCSprite:create(), "b3.png")
         self.changeDirNode:addChild(sp)
-        setPos(setAnchor(sp, {0.5, 0.5}), {256, 256})
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
         self.carGoods = sp
     end
     setScaleX(self.changeDirNode, -sca)
@@ -325,13 +326,13 @@ function MiaoPeople:handleFarm()
             else
                 local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
                 sf:addSpriteFramesWithFile("cat_labor.plist")
-                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 20, 1, 1, true)
+                local ani = createAnimation("cat_labor", "cat_labor_%d.png", 0, 19, 1, 1, true)
                 self:setMoveAction("cat_labor")
                 --self.changeDirNode:stopAllActions()
                 --self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
 
                 local sz = self.changeDirNode:getContentSize()
-                setAnchor(self.changeDirNode, {279/sz.width, (sz.height-327)/sz.height})
+                setAnchor(self.changeDirNode, {184/sz.width, (sz.height-201)/sz.height})
 
                 self.state = PEOPLE_STATE.IN_WORK
                 self.workTime = 0
