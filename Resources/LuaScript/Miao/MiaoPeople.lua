@@ -353,8 +353,13 @@ function MiaoPeople:initFind(diff)
                 --重新生成建筑物连通性路径
                 --已经在house里面 就不要再去找house了
                 --self.lastState ~= PEOPLE_STATE.IN_HOME
-                elseif self.data.kind == 1 and not self:checkMeInHouse() then
-                    self:findHouse()
+                elseif self.data.kind == 1 then
+                    --显示出来自己
+                    --如果和别的建筑物冲突了也要移动到旁边显示自己
+                    if not self:checkMeInHouse() then
+                        self:findHouse()
+                        self:showSelf()
+                    end
                 --商人往回走 miaoPath 初始化结束 
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
                     --self.funcPeople:findPathError()

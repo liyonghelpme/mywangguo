@@ -608,7 +608,8 @@ function MiaoPeople:workInFarm()
     healthCost = math.max(1, healthCost)
     --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
     --计算出1个 的生产时间 和 消耗的 生命值
-    local rate = totalTime/productNum
+    --self.myHouse.productNum 花费时间减少  消耗体力不变
+    local rate = totalTime/(self.realTarget.productNum/20)/productNum
     local cost = healthCost/productNum
 
     if self.workTime > rate then

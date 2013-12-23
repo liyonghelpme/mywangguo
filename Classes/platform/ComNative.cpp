@@ -1,4 +1,4 @@
-#include "CCNative.h"
+﻿#include "CCNative.h"
 #include "cocos2d.h"
 #include <stdlib.h>
 using namespace cocos2d;
@@ -27,3 +27,7 @@ string getFileData(const char *fname) {
     delete [] con;
     return str;
 }
+void pauseAction(CCNode *n) {
+    
+}
+

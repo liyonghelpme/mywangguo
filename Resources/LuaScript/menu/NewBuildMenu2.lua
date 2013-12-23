@@ -23,23 +23,30 @@ function NewBuildMenu2:ctor()
     local ds = global.director.designSize
     self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
 
+
+    --[[
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 426)}), {82, 126}), {0.5, 0.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 291)}), {82, 126}), {0.5, 0.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.5, 0.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {338, fixY(sz.height, 329)}), {617, 396}), {0.5, 0.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "tabb.png"), {711, fixY(sz.height, 156)}), {82, 126}), {0.5, 0.5})
     self.envTab = sp
+    --]]
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.5, 0.5})
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {338, fixY(sz.height, 329)}), {617, 396}), {0.5, 0.5})
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商店", size=34, color={102, 4, 554}})), {0.50, 0.50}), {329, fixY(sz.height, 87)})
 
     local but = ui.newButton({image="taba.png", delegate=self, touchBegan=self.onTab, param=3})
     setPos(addChild(self.temp, but.bg), {711, fixY(sz.height, 426)})
     self.storeTab = but
+    but.bg:setZOrder(-1)
+
     local sp = setAnchor(setSize(setPos(addSprite(but.bg, "storeIcon.png"), {33-82/2, fixY(126, 63)-126/2}), {54, 51}), {0.50, 0.50})
 
     local but = ui.newButton({image="taba.png", delegate=self, param=2, touchBegan=self.onTab })
     setPos(addChild(self.temp, but.bg), {711, fixY(sz.height, 291)})
     self.laborTab = but
+    but.bg:setZOrder(-1)
+
     local sp = setAnchor(setSize(setPos(addSprite(but.bg, "laborIcon.png"), {33-82/2, fixY(126, 63)-126/2}), {54, 51}), {0.50, 0.50})
 
     local but = ui.newButton({image="tabb.png", delegate=self, param=1, touchBegan=self.onTab})
@@ -110,9 +117,11 @@ end
 function NewBuildMenu2:setSelect(s)
     if self.curSel ~= nil then
         setTexture(self.tabs[self.curSel].sp, "taba.png")
+        self.tabs[self.curSel].bg:setZOrder(-1)
     end
     self.curSel = s
     setTexture(self.tabs[self.curSel].sp, "tabb.png")
+    self.tabs[self.curSel].bg:setZOrder(0)
 end
 function NewBuildMenu2:enterScene()
     registerUpdate(self)

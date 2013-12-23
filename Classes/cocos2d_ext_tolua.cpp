@@ -1,4 +1,4 @@
-#include "cocos2d_ext_tolua.h"
+﻿#include "cocos2d_ext_tolua.h"
 #include "tolua_fix.h"
 
 #include "cocos2d.h"
@@ -1195,6 +1195,8 @@ static int tolua_Cocos2d_CCCrypto_rsaSign00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+
+
 /* method: openURL of class CCNative */
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_CCNative_openURL00
 static int tolua_Cocos2d_CCNative_openURL00(lua_State* tolua_S)
@@ -1486,6 +1488,7 @@ TOLUA_API int tolua_ext_reg_types(lua_State* tolua_S)
 TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
+
   tolua_function(tolua_S,"setScriptTouchPriority", tolua_Cocos2d_setScriptTouchPriority00);
   tolua_function(tolua_S,"getFileData", tolua_Cocos2d_getFileData00);
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);

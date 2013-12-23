@@ -76,6 +76,10 @@ function Cat2:initView()
     self.people.actionLabel = ui.newBMFontLabel({text=str(0), color={255, 0, 0}, size=25})
     self.people.heightNode:addChild(self.people.actionLabel, 1)
     setPos(self.people.actionLabel, {0, 200})
+    if not DEBUG then
+        setVisible(banner, false)
+        setVisible(self.people.actionLabel, false)
+    end
 end
 function Cat2:updateState(diff)
     setProNum(self.pro, self.people.health, self.people.maxHealth)
