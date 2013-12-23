@@ -23,6 +23,7 @@ function FindPeople2:ctor()
     local sz = {width=715, height=601}
     local ds = global.director.designSize
     self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
+    self.num = 3
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {340, fixY(sz.height, 355)}), {603, 354}), {0.50, 0.50})
@@ -30,7 +31,7 @@ function FindPeople2:ctor()
     --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
     local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=34, callback=self.onPeople, delegate=self, conSize={152, 38}})
     setPos(addChild(self.temp, but.bg), {331, fixY(sz.height, 560)})
-    local pdata = Logic.people[4]
+    local pdata = Logic.people[self.num]
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=pdata.name, size=30, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {138, fixY(sz.height, 150)})
     self.name = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv1", size=40, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {511, fixY(sz.height, 147)})
@@ -58,10 +59,10 @@ function FindPeople2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "peopBoard.png"), {171, fixY(sz.height, 336)}), {184, 183}), {0.50, 0.50})
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", (4)))
+    sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", (self.num)))
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "role.png"), {167, fixY(sz.height, 332)}), {162, 161}), {0.50, 0.50})
     self.head = sp
-    self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", 4)))
+    self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
     adjustBox(self.head, {150, 150}) 
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 262)}), {191, 29}), {0.50, 0.50})
@@ -86,11 +87,10 @@ function FindPeople2:ctor()
     self.leftBut = but
 
     self:adjustPos()
-    self.num = 4
 end
 
 function FindPeople2:onLeft()
-    if self.num > 4 then
+    if self.num > 3 then
         self.num = self.num-1
         local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
         self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
@@ -116,6 +116,8 @@ function FindPeople2:setPeople()
     self.brawn:setString(pdata.brawn)
     self.shoot:setString(pdata.shoot)
     self.labor:setString(pdata.labor)
+    local total = #Logic.allPeople-3
+    self.curPeople:setString("人才启用"..(self.num-2)..'/'..total)
 end
 
 function FindPeople2:onPeople()

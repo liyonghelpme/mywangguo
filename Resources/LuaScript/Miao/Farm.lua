@@ -8,6 +8,13 @@ function Farm:ctor()
     self.state = 0
     self.baseBuild.maxNum = 6
 end
+
+function Farm:initView()
+    local bd = Logic.buildings[self.baseBuild.id]
+    local sz = self.baseBuild.changeDirNode:getContentSize()
+    setScale(setPos(setAnchor(self.baseBuild.changeDirNode, {248.8/sz.width, (sz.height-236)/sz.height}), {0, SIZEY}), 1.25)
+end
+
 function Farm:enterScene()
     registerUpdate(self)
 end

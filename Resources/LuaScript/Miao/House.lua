@@ -1,11 +1,5 @@
 House = class(FuncBuild)
 
---[[
-function House:initView()
-    local sz = self.baseBuild.changeDirNode:getContentSize()
-    setAnchor(self.baseBuild.changeDirNode, {204/sz.width, (sz.height-310)/sz.height})
-end
---]]
 function House:finishBuild()
     self:doMyEffect()
 end

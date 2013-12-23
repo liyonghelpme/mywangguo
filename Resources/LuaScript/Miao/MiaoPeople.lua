@@ -69,8 +69,8 @@ function MiaoPeople:ctor(m, data)
         self.funcPeople = Worker.new(self)
     elseif self.data.kind == 2 then
         self.funcPeople = Merchant.new(self) 
-    elseif self.id == 3 then
-        self.funcPeople = Cat.new(self)
+    --elseif self.id == 3 then
+    --    self.funcPeople = Cat.new(self)
     elseif self.data.kind == 1 then
         self.funcPeople = Cat2.new(self)
     end

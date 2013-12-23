@@ -25,7 +25,7 @@ function Cat2:initView()
     local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
-    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 1), {0, SIZEY})
+    setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 0.8), {0, SIZEY})
     
     self.people.changeDirNode:runAction(CCAnimate:create(ani))
 

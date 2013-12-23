@@ -24,6 +24,8 @@ function TMXScene:ctor()
 
     self.page:moveToPoint(1644, 384)
     delayCall(0.3, self.initDataNow, self)
+    registerEnterOrExit(self)
+    self.passTime = 0
 end
 
 function TMXScene:initData(rep, param)
@@ -47,13 +49,25 @@ function TMXScene:initData(rep, param)
         global.director:pushView(NewGame.new(), 1, 0)
     end
 end
+function TMXScene:enterScene()
+    registerUpdate(self)
+end
+
+function TMXScene:update(diff)
+    self.passTime = self.passTime+diff
+    if self.passTime > 20 then
+        self.passTime = 0
+        self:saveGame(true)
+    end
+end
+
 function TMXScene:onBuild()
     self.page:addBuilding()
 end
 
 --普通建筑物 和 环境
 --保存道路
-function TMXScene:saveGame()
+function TMXScene:saveGame(hint)
     local allBuild = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do
         local p = getPos(k.bg)
@@ -64,7 +78,9 @@ function TMXScene:saveGame()
     local b = simple.encode(allBuild)
     local u = CCUserDefault:sharedUserDefault()
     u:setStringForKey("build", b)
-    addBanner("保存建筑物成功 "..#allBuild)
+    if not hint then
+        addBanner("保存建筑物成功 "..#allBuild)
+    end
 
     local allPeople = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do
@@ -80,5 +96,7 @@ function TMXScene:saveGame()
     end
     local p = simple.encode(allPeople)
     u:setStringForKey('people', p)
-    addBanner("保存人物成功 "..#allPeople)
+    if not hint then
+        addBanner("保存人物成功 "..#allPeople)
+    end
 end
