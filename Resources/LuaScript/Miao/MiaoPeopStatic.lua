@@ -500,7 +500,7 @@ function MiaoPeople:workInFactory()
             local gn = GoodsName[self.realTarget.goodsKind]
             print("gname", simple.encode(gn))
             local enough = true
-            if self.realTarget.food >= gn.food and self.realTarget.stone >= gn.stone and self.realTarget.wood >= gn.wood then
+            if self.realTarget.food >= (gn.food or 0 ) and self.realTarget.stone >= (gn.stone or 0) and self.realTarget.wood >= (gn.wood or 0) then
                 self.realTarget:doProduct() 
             else
                 enough = false
