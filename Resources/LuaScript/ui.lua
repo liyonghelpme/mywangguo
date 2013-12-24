@@ -118,6 +118,7 @@ function ui.newTTFLabel(params)
         if edgeWidth == nil then
             edgeWidth = 2
         end
+        --调整阴影的padding 就可以改变切割了  padding＋5
         label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
         --label:enableShadow(CCSizeMake(2, 2), 1, 1, true)
     end

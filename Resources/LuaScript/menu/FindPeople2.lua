@@ -16,10 +16,12 @@ function FindPeople2:adjustPos()
     local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
     setScale(self.butNode, sca)
     setPos(self.butNode, {nx, ny})
+    print("butNode", nx, ny, sca)
 end
 function FindPeople2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
+    setPos(self.bg, {0, 0})
     local sz = {width=715, height=601}
     local ds = global.director.designSize
     self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
@@ -78,12 +80,12 @@ function FindPeople2:ctor()
     self.butNode = addNode(self.bg)
     local but = ui.newButton({image="newRightArrow.png", text="", font="f1", size=18, callback=self.onRight, delegate=self})
     but:setContentSize(90, 106)
-    setPos(addChild(self.butNode, but.bg), {922, fixY(ds.height, 389)})
+    setPos(addChild(self.butNode, but.bg), {922, 384})
     self.rightBut = but
 
     local but = ui.newButton({image="newLeftArrow.png", text="", font="f1", size=18, callback=self.onLeft, delegate=self})
     but:setContentSize(90, 106)
-    setPos(addChild(self.butNode, but.bg), {139, fixY(ds.height, 391)})
+    setPos(addChild(self.butNode, but.bg), {139, 384})
     self.leftBut = but
 
     self:adjustPos()

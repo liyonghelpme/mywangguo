@@ -5,12 +5,15 @@ require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
-    sendReq('login', dict(), self.initData, nil, self)
+    if not DEBUG then
+        local rep = getFileData("data.txt")
+        rep = simple.decode(rep)
+        self:initData(rep, nil)
+    else
+        sendReq('login', dict(), self.initData, nil, self)
+    end
 
     --[[
-    local rep = getFileData("data.txt")
-    rep = simple.decode(rep)
-    self:initData(rep, nil)
     --]]
 end
 function TMXScene:ctor()
