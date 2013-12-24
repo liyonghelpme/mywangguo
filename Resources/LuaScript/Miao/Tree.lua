@@ -13,7 +13,7 @@ function Tree:initView()
 
 
     self.shadow = createSprite("build4_shadow_0.png")
-    setPos(setAnchor(self.shadow, {313/sz.width, (sz.height-298)/sz.height}), {0, SIZEY})
+    setPos(setAnchor(self.shadow, {249/sz.width, (sz.height-253)/sz.height}), {0, SIZEY})
     self.baseBuild.heightNode:addChild(self.shadow)
     
     local temp = CCSpriteBatchNode:create("white2.png")

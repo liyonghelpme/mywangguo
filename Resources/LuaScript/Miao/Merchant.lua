@@ -162,7 +162,7 @@ function Merchant:handleAction()
         if self.people.predictTarget.deleted then
             addBanner("建筑物不见了")
         elseif self.people.predictTarget.stone > 0 then
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
@@ -177,7 +177,7 @@ function Merchant:handleAction()
             self.people.predictTarget.stone = 0
         elseif self.people.predictTarget.data.IsStore == 1 then
             getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
@@ -200,7 +200,7 @@ function Merchant:handleAction()
         --去农田 每个食材3贯
         elseif self.people.predictTarget.workNum > 0 then
             getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)

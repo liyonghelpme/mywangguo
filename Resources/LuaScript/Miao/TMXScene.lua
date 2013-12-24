@@ -29,11 +29,23 @@ function TMXScene:ctor()
 end
 
 function TMXScene:initData(rep, param)
+    local u = CCUserDefault:sharedUserDefault()
+    local r = u:getStringForKey("resource")
+    if r ~= "" then
+        Logic.resource = simple.decode(r)
+    end
+
     Logic.buildings = {}
     for k, v in ipairs(rep.build) do
         Logic.buildings[v.id] = v 
     end
-    Logic.buildList = rep.build
+    Logic.buildList = {}
+    for k, v in ipairs(rep.build) do
+        if v.deleted == 0 then
+            table.insert(Logic.buildList, v)
+        end
+    end
+
     Logic.people = {}
     Logic.allPeople = rep.people
     print("allPeople", #Logic.allPeople)
@@ -115,4 +127,6 @@ function TMXScene:saveGame(hint)
     if not hint then
         addBanner("保存人物成功 "..#allPeople)
     end
+
+    u:setStringForKey("resource", simple.encode(Logic.resource))
 end
