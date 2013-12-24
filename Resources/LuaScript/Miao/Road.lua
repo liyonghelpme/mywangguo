@@ -143,16 +143,18 @@ function Road:removeSelf()
 end
 function Road:adjustOnSlope()
     local set = false
-    if self.baseBuild.otherBuild.dir == 0 then
-        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
-        self.baseBuild.changeDirNode:setDisplayFrame(tex)
-        setYet = true
-        self.baseBuild.onSlope = true
-    elseif self.baseBuild.otherBuild.dir == 1 then
-        local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile37.png")
-        self.baseBuild.changeDirNode:setDisplayFrame(tex)
-        setYet = true
-        self.baseBuild.onSlope = true
+    if self.baseBuild.otherBuild ~= nil then
+        if self.baseBuild.otherBuild.dir == 0 then
+            local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile36.png")
+            self.baseBuild.changeDirNode:setDisplayFrame(tex)
+            setYet = true
+            self.baseBuild.onSlope = true
+        elseif self.baseBuild.otherBuild.dir == 1 then
+            local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName("tile37.png")
+            self.baseBuild.changeDirNode:setDisplayFrame(tex)
+            setYet = true
+            self.baseBuild.onSlope = true
+        end
     end
     return setYet
 end

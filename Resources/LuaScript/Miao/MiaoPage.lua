@@ -308,7 +308,7 @@ function MiaoPage:touchesBegan(touches)
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
                 --移动地图 和 单纯的点击 地图
                 local cb = allCell[key][#allCell[key]][1]
-                if cb.picName == 'build' or cb.picName == 't' then
+                if (cb.picName == 'build' or cb.picName == 't') and not cb.static then
                     self.touchBuild = allCell[key][#allCell[key]][1]
                     self.touchBuild:touchesBegan(touches)
                 end

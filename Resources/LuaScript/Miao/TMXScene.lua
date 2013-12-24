@@ -29,11 +29,23 @@ function TMXScene:ctor()
 end
 
 function TMXScene:initData(rep, param)
+    local u = CCUserDefault:sharedUserDefault()
+    local r = u:getStringForKey("resource")
+    if r ~= "" then
+        Logic.resource = simple.decode(r)
+    end
+
     Logic.buildings = {}
     for k, v in ipairs(rep.build) do
         Logic.buildings[v.id] = v 
     end
-    Logic.buildList = rep.build
+    Logic.buildList = {}
+    for k, v in ipairs(rep.build) do
+        if v.deleted == 0 then
+            table.insert(Logic.buildList, v)
+        end
+    end
+
     Logic.people = {}
     Logic.allPeople = rep.people
     print("allPeople", #Logic.allPeople)
@@ -80,7 +92,7 @@ function TMXScene:saveGame(hint)
     for k, v in pairs(self.page.buildLayer.mapGridController.allRoad) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
-            table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
+            table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, static=k.static})
         end
     end
 
@@ -94,6 +106,9 @@ function TMXScene:saveGame(hint)
 
     local r = simple.encode(allRoad)
     u:setStringForKey("road", r)
+    if not hint then
+        addBanner("保存道路成功"..#allRoad)
+    end
 
     local allPeople = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do
@@ -112,4 +127,6 @@ function TMXScene:saveGame(hint)
     if not hint then
         addBanner("保存人物成功 "..#allPeople)
     end
+
+    u:setStringForKey("resource", simple.encode(Logic.resource))
 end

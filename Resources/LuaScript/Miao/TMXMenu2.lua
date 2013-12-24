@@ -15,6 +15,9 @@ function TMXMenu2:ctor(s)
     self.bg:addChild(stateLabel)
     setAnchor(setPos(stateLabel, {vs.width-200, vs.height-10}), {0, 1})
     self.stateLabel = stateLabel
+    if not DEBUG then
+        setVisible(self.stateLabel, false)
+    end
 
     local but = ui.newButton({image="buta.png", font='f2', text="地图", size=26})
     setPos(addChild(temp, but.bg), {62, fixY(768, 704)})
@@ -77,8 +80,8 @@ function TMXMenu2:initDataOver()
 end
 
 function TMXMenu2:updateText()
-    self.silver:setString(Logic.resource.silver.."银币")
-    self.gold:setString(Logic.resource.gold.."金币")
+    self.silver:setString(Logic.resource.silver)
+    self.gold:setString(Logic.resource.gold)
 end
 
 function TMXMenu2:updateYear()

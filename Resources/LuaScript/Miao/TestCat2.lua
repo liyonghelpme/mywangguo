@@ -55,8 +55,8 @@ function Cat2:initView()
     end
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 1)
-    self.people.shadow:runAction(sequence({scaleto(1, 0.8, 0.8), scaleto(1, 1, 1)}))
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 0.8)
+    self.people.shadow:runAction(sequence({scaleto(1, 0.6, 0.6), scaleto(1, 0.8, 0.8)}))
 
     --self.passTime = 0
     --registerEnterOrExit(self)

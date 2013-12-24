@@ -189,6 +189,7 @@ function NewBuildMenu2:touchEnded(x, y)
             if self.selBuild ~= t then
                 self:setSel(t)
             else
+                local buildData = Logic.buildList[self.selBuild]
                 local p = Logic.buildList[self.selBuild].silver
                 if Logic.resource.silver < p then
                     addBanner("金钱不足!")
@@ -203,7 +204,7 @@ function NewBuildMenu2:touchEnded(x, y)
                         return
                     end
 
-                    global.director.curScene.page:beginBuild('build', t)
+                    global.director.curScene.page:beginBuild('build', buildData.id)
                     return 
                 end
             end

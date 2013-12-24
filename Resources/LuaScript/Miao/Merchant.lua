@@ -2,6 +2,7 @@
 Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
     local ret = false
+    print("Merchant checkWork", k.id)
     if k.picName == 'build' and not k.deleted and k.workNum > 0 then
         if k.id == 2 or k.data.IsStore == 1 then
             ret = true
@@ -49,8 +50,7 @@ function Merchant:initView()
 
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 1)
-    --self.people.shadow:runAction(sequence({scaleto(1, 1.2, 1.2), scaleto(1, 1.5, 1.5)}))
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 0.8)
 
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=20})
     if not DEBUG then
@@ -78,6 +78,7 @@ function Merchant:findTarget()
     self.people.miaoPath = publicMiaoPath
     if not publicMiaoPath.inSearch then
         if publicMiaoPath.allBuilding == nil or publicMiaoPath.dirty == true then
+            print("Merchant find near building")
             publicMiaoPath.dirty = false
             local p = getPos(self.people.bg)
             local mxy = getPosMapFloat(1, 1, p[1], p[2])
@@ -161,7 +162,7 @@ function Merchant:handleAction()
         if self.people.predictTarget.deleted then
             addBanner("建筑物不见了")
         elseif self.people.predictTarget.stone > 0 then
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
@@ -176,7 +177,7 @@ function Merchant:handleAction()
             self.people.predictTarget.stone = 0
         elseif self.people.predictTarget.data.IsStore == 1 then
             getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)
@@ -199,7 +200,7 @@ function Merchant:handleAction()
         --去农田 每个食材3贯
         elseif self.people.predictTarget.workNum > 0 then
             getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silver.png")
+            local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
             local bgPos = getPos(self.people.predictTarget.bg)
             self.people.map.bg:addChild(sp)

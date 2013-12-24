@@ -89,6 +89,7 @@ function FuncBuild:clearMenu()
         --每只猫都hold 到这个建筑物的oldPos 和 newPos 进行比对 如果不同了 表示建筑物move了 网格 这样就要调整当前的网格
         --self.baseBuild.moved = true
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        print("finish clear Menu send Msg!!!!!!!!!!!!!")
     end
 end
 function FuncBuild:showInfo()

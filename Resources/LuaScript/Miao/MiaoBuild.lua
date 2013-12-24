@@ -42,6 +42,7 @@ function MiaoBuild:ctor(m, data)
     self.value = 0
     self.name = 'b'..math.random(10000)
     self.setYet = data.setYet
+    self.static = data.static
     if data.picName == 'build' and data.id == 15 then
         data.picName = 't'
         --data.id = nil
@@ -575,9 +576,6 @@ function MiaoBuild:finishBuild()
     self:finishBottom()
     --self:findNearby()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
-    if publicMiaoPath ~= nil then
-        publicMiaoPath.dirty = true
-    end
 end
 
 --自己移动了 
