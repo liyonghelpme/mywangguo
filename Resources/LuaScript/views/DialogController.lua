@@ -38,7 +38,7 @@ end
 function DialogController:addBanner(banner)
     while #self.bannerStack > getParam("maxBannerNum") do
         local t = table.remove(self.bannerStack, 1)
-        removeSelf(t[1])
+        removeSelf(t[1].bg)
     end
 
     local maxOff = #self.bannerStack
