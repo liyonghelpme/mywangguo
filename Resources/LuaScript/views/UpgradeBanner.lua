@@ -25,15 +25,18 @@ end
 function UpgradeBanner:removeNow()
     removeSelf(self.bg)
     self.bg = nil
+    self.sb = nil
     if self.callback ~= nil then
         callback(delegate)
     end
 end
 function UpgradeBanner:setMoveAni(X, Y)
-    if self.moveAni ~= nil then
-        self.sb:stopAction(self.moveAni)
+    if self.bg ~= nil then
+        if self.moveAni ~= nil then
+            self.sb:stopAction(self.moveAni)
+        end
+        self.moveAni = expout(moveto(0.2, X, Y))
+        self.sb:runAction(self.moveAni) 
     end
-    self.moveAni = expout(moveto(0.2, X, Y))
-    self.sb:runAction(self.moveAni) 
 end
 
