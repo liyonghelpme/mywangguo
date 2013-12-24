@@ -40,8 +40,16 @@ function MiaoBuildLayer:ctor(s)
     self.curSol = nil
     self.cells = {}
     self.passTime = 10
+    self.events = {EVENT_TYPE.ROAD_CHANGE}
     registerEnterOrExit(self)
     self:initCar()
+end
+function MiaoBuildLayer:receiveMsg(msg, param)
+    if msg == EVENT_TYPE.ROAD_CHANGE then
+        if publicMiaoPath ~= nil then
+            publicMiaoPath.dirty = true
+        end
+    end
 end
 function MiaoBuildLayer:initCar()
 end
@@ -188,18 +196,20 @@ function MiaoBuildLayer:initBuild()
         Logic.maxBid = mbid
     end
 
-    --[[
     local road = u:getStringForKey("road")
     if road ~= "" then
-        road = simple:decode(road)
+        --print("road is what")
+        --print(road)
+        road = simple.decode(road)
         for k, v in ipairs(road) do
             local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
-            b:setWork(v)
+            --b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
+            b.funcBuild:whenColNow()
             b.funcBuild:adjustRoad()
             b:finishBuild()
             mbid = math.max(v.bid, mbid)
@@ -207,7 +217,6 @@ function MiaoBuildLayer:initBuild()
         mbid = mbid+1
         Logic.maxBid = mbid
     end
-    --]]
 end
 function MiaoBuildLayer:initSea()
     local initX = -128
@@ -311,59 +320,20 @@ function MiaoBuildLayer:initDataOver()
     self:initRoad()
     self:initMerchantRoad()
     --]]
-    self:initRoad()
-    self:initBackPoint()
+    self:initEnv()
     self:initBuild()
     self:initCat()
+    --最后保存道路
+    self:initRoad()
+    --backPoint 在道路上面
+    self:initBackPoint()
     --[[
     --]]
     self.initYet = true
 end
---road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
-function MiaoBuildLayer:initRoad() 
-    local nlayer = self.scene.layerName['road']
+function MiaoBuildLayer:initEnv()
     local width = self.scene.width
     local height = self.scene.height
-    local mask2 = self.scene.mask2
-    for dk, dv in ipairs(nlayer.data) do
-        if dv ~= 0 then
-            local pname = tidToTile(dv)
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            --local cx, cy = axyToCxyWithDepth(w, h, width, height, MapWidth/2, FIX_HEIGHT, mask2)
-            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, pname=pname})
-            local p = normalizePos({cx, cy}, 1, 1)
-
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            b:setPos(p)
-            b.funcBuild:adjustRoad()
-            b:finishBuild()
-        end
-    end
-
-    --建筑物名称
-    --[[
-    local nlayer = self.scene.layerName['build']
-    for dk, dv in ipairs(nlayer.data) do
-        if dv ~= 0 then
-            local pname = self.scene.tileName[dv]
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            local pic = CCSprite:create(pname)
-            self.buildingLayer:addChild(pic)
-            setAnchor(setPos(pic, {cx, cy}), {0.5, 0})
-
-        end
-    end
-    --]]
 
     for dk, dv in ipairs(self.scene.layerName.slop2.data) do
         if dv ~= 0 then
@@ -391,26 +361,6 @@ function MiaoBuildLayer:initRoad()
         end
     end
 
-    --临时斜坡显示一下 和斜坡的方向 0 1 
-    for dk, dv in ipairs(self.scene.layerName.ladder.data) do
-        if dv ~= 0 then
-            local pname = tidToTile(dv)
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-
-            --得到affine坐标到笛卡尔坐标的变换
-            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0})
-            local p = normalizePos({cx, cy}, 1, 1)
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            b:setPos(p)
-            b.funcBuild:adjustRoad()
-            b:finishBuild()
-        end
-    end
-
     --篱笆 
     for dk, dv in ipairs(self.scene.layerName.fence.data) do
         if dv ~= 0 then
@@ -431,6 +381,72 @@ function MiaoBuildLayer:initRoad()
             
         end
     end
+end
+--road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
+function MiaoBuildLayer:initRoad() 
+    local u = CCUserDefault:sharedUserDefault()
+    local initRoadYet = u:getBoolForKey("initRoadYet")
+    if initRoadYet == true then
+        return
+    end
+
+    local nlayer = self.scene.layerName['road']
+    local width = self.scene.width
+    local height = self.scene.height
+    for dk, dv in ipairs(nlayer.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            --不能移动的道路
+            local static = false
+            if w >= width-2 then
+                static =true
+            end
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, pname=pname, bid = getBid(), static=static})
+            local p = normalizePos({cx, cy}, 1, 1)
+
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b.funcBuild:adjustRoad()
+            b:finishBuild()
+        end
+    end
+
+
+    --临时斜坡显示一下 和斜坡的方向 0 1 
+    for dk, dv in ipairs(self.scene.layerName.ladder.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            local static = false
+            if w >= width-2 then
+                static =true
+            end
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0, static = static, bid=getBid()})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b.funcBuild:adjustRoad()
+            b:finishBuild()
+        end
+    end
+
+
+    global.director.curScene:saveGame(true)
+    u:setBoolForKey("initRoadYet", true)
 end
 
 function MiaoBuildLayer:initData()

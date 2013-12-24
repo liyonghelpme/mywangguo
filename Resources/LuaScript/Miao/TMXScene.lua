@@ -80,7 +80,7 @@ function TMXScene:saveGame(hint)
     for k, v in pairs(self.page.buildLayer.mapGridController.allRoad) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
-            table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
+            table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, static=k.static})
         end
     end
 
@@ -94,6 +94,9 @@ function TMXScene:saveGame(hint)
 
     local r = simple.encode(allRoad)
     u:setStringForKey("road", r)
+    if not hint then
+        addBanner("保存道路成功"..#allRoad)
+    end
 
     local allPeople = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do

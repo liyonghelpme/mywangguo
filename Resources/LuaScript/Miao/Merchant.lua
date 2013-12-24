@@ -2,6 +2,7 @@
 Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
     local ret = false
+    print("Merchant checkWork", k.id)
     if k.picName == 'build' and not k.deleted and k.workNum > 0 then
         if k.id == 2 or k.data.IsStore == 1 then
             ret = true
@@ -49,8 +50,7 @@ function Merchant:initView()
 
     self.people.heightNode:addChild(self.people.shadow, -1)
 
-    setScale(setPos(self.people.shadow, {0, SIZEY}), 1)
-    --self.people.shadow:runAction(sequence({scaleto(1, 1.2, 1.2), scaleto(1, 1.5, 1.5)}))
+    setScale(setPos(self.people.shadow, {0, SIZEY}), 0.8)
 
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=20})
     if not DEBUG then
