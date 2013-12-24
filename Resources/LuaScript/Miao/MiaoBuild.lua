@@ -228,8 +228,9 @@ function MiaoBuild:receiveMsg(msg, param)
         end
     elseif msg == EVENT_TYPE.ROAD_CHANGED then
         --self.dirty = true
-        self.dirty = false
+        --self.dirty = false
         if self.data and (self.data.IsStore == 1 or self.id == 2) then
+            --self.dirty = true
             self:findNearby()
         end
     end
@@ -589,7 +590,8 @@ end
 --inSearch 中如果又dirty了 那么就要重新再searth一下 dirty = false  
 --dirty = true
 function MiaoBuild:findNearby()
-    --if not self.buildPath.inSearch then 
+    --if self.dirty then
+        self.dirty = false
         self.state = BUILD_STATE.CHECK_NEARBY
         local p = getPos(self.bg)
         local mxy = getPosMapFloat(1, 1, p[1], p[2])
@@ -597,6 +599,7 @@ function MiaoBuild:findNearby()
         self.buildPath:init(mx, my)
     --end
 end
+
 function MiaoBuild:updateState(diff)
     if self.state == BUILD_STATE.CHECK_NEARBY then
         self.buildPath:update()

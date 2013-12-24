@@ -1010,13 +1010,15 @@ end
 function client2Server(t)
     return math.floor(t-global.user.clientTime+global.user.serverTime)
 end
+--DisplayFrame 有trimedSize 导致 位置不对 改变这个trimmedSize
 function setTexture(sp, tex)
     local t = CCTextureCache:sharedTextureCache():addImage(tex)
     --print('setTexture', sp, t)
     sp:setTexture(t)
     local sz = t:getContentSize()
     local r = CCRectMake(0, 0, sz.width, sz.height)
-    sp:setTextureRect(r)
+    sp:setContentSize(sz)
+    sp:setTextureRect(r, false, sz)
     return sp
 end
 function linearInter(va, vb, ta, tb, cut)
@@ -1421,6 +1423,7 @@ function setProNum(banner, n, max)
     end
 end
 function setDisplayFrame(sp, n)
+    print("setDisplayFrame !!!!!", sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
     sp:setDisplayFrame(tex)
     return sp
@@ -1531,4 +1534,8 @@ function printTable(t)
         s = s..str(k)..','..str(v)..','
     end
     return s
+end
+function getContentSize(sp)
+    local sz = sp:getContentSize()
+    return {sz.width, sz.height}
 end

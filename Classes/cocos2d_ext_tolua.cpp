@@ -37,6 +37,36 @@ static int tolua_Cocos2d_convertToSprite00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_setTextureRect00
+static int tolua_Cocos2d_setTextureRect00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+        !tolua_isusertype(tolua_S,1,"CCSprite",0,&tolua_err) ||
+        !tolua_isusertype(tolua_S,2,"CCRect",0,&tolua_err) ||
+        !tolua_isboolean(tolua_S,3,1,&tolua_err) ||
+        !tolua_isusertable(tolua_S,4,"CCSize",0,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        CCSprite *sp = (CCSprite*) tolua_tousertype(tolua_S, 1, 0);
+        CCRect rect = *((CCRect*) tolua_tousertype(tolua_S, 2, 0));
+        bool rotate = (bool) tolua_toboolean(tolua_S, 3, 0);
+        CCSize size = *((CCSize *) tolua_tousertype(tolua_S, 4, 0));
+        setTextureRect(sp, rect, rotate, size);
+	}
+	return 0;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'setScriptTouchPriority'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_setScriptTouchPriority00
 static int tolua_Cocos2d_setScriptTouchPriority00(lua_State* tolua_S)
 {

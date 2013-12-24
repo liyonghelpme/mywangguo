@@ -67,8 +67,9 @@ function Cat2:initView()
 
 
     sf:addSpriteFramesWithFile("car.plist")
-    self.carlbMove = createAnimation("car_lb", "car_lb_%d.png", 0, 9, 1, 1, true)
-    self.carltMove = createAnimation("car_lt", "car_lt_%d.png", 0, 9, 1, 1, true)
+    print("add car plist")
+    self.carrbMove = createAnimation("car_rb", "car_rb_%d.png", 0, 9, 1, 1, true)
+    self.carrtMove = createAnimation("car_rt", "car_rt_%d.png", 0, 9, 1, 1, true)
 
 
     local banner = setSize(CCSprite:create("probg.png"), {200, 38})
@@ -245,6 +246,11 @@ function Cat2:checkAllPossible()
             local allFoodFarm = {}
             local allStoneQuarry = {}
 
+            --[[
+            if k.dirty then
+                k:findNearby()
+            end
+            --]]
             local storeFactory = k.buildPath:getAllFreeFactory()
 
             self:sortBuildings(self.allFoodFarm)

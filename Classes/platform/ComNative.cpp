@@ -31,3 +31,6 @@ void pauseAction(CCNode *n) {
     
 }
 
+void setTextureRect(CCSprite *sp, CCRect rect, bool rotated, CCSize size) {
+    sp->setTextureRect(rect, rotated, size);
+}

@@ -167,6 +167,12 @@ function BuildPath:update()
     self.map:updateCells(self.cells, self.map.cells)
 end
 function BuildPath:getAllFreeFactory()
+    --[[
+    if self.target.dirty then
+        return {}
+    end
+    --]]
+
     local temp = {}
     for k, v in pairs(self.nearby) do
         if k.id == 5 and k.owner == nil then

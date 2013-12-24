@@ -39,6 +39,13 @@ function MiaoPage:ctor(s)
     self.width = width
     self.height = height
     local tilesets = mj.tilesets
+    self.tilesets = tilesets
+    local gidToImage = {}
+    for k, v in ipairs(self.tilesets) do
+        gidToImage[v.firstgid] = string.gsub(v.name, 'build', '')
+    end
+    self.gidToImage = gidToImage
+
     --1-64   --> tile0 tile63
     --65-128 ---> tile0 tile63
     --tid tileNames 
