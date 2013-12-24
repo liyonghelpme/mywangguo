@@ -297,7 +297,7 @@ function MiaoPeople:adjustShadow()
     else
         removeSelf(self.shadow)
         self.shadow = CCSprite:create()
-        self.heightNode:addChild(self.shadow)
+        self.heightNode:addChild(self.shadow, -1)
         --local sz = getContentSize(self.shadow)
         if self.data.girl == 1 then 
             setTexture(self.shadow, "roleShadow1.png")
