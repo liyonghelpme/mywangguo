@@ -78,6 +78,7 @@ function Merchant:findTarget()
     self.people.miaoPath = publicMiaoPath
     if not publicMiaoPath.inSearch then
         if publicMiaoPath.allBuilding == nil or publicMiaoPath.dirty == true then
+            print("Merchant find near building")
             publicMiaoPath.dirty = false
             local p = getPos(self.people.bg)
             local mxy = getPosMapFloat(1, 1, p[1], p[2])

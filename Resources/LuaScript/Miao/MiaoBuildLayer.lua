@@ -40,12 +40,14 @@ function MiaoBuildLayer:ctor(s)
     self.curSol = nil
     self.cells = {}
     self.passTime = 10
-    self.events = {EVENT_TYPE.ROAD_CHANGE}
+    self.events = {EVENT_TYPE.ROAD_CHANGED}
     registerEnterOrExit(self)
     self:initCar()
 end
 function MiaoBuildLayer:receiveMsg(msg, param)
-    if msg == EVENT_TYPE.ROAD_CHANGE then
+    --print("receiveMsg !!!!!!!!!!", msg, param)
+    if msg == EVENT_TYPE.ROAD_CHANGED then
+        print("dirty public MiaoPath !!!!!!!!!", publicMiaoPath)
         if publicMiaoPath ~= nil then
             publicMiaoPath.dirty = true
         end
