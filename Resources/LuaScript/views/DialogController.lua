@@ -1,4 +1,3 @@
-require "views.Happen"
 DialogController = class()
 function DialogController:ctor(sc)
     self.scene = sc
