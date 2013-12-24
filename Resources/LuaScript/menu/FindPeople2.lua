@@ -94,9 +94,8 @@ end
 function FindPeople2:onLeft()
     if self.num > 3 then
         self.num = self.num-1
-        local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-        self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
-        adjustBox(self.head, {150, 150}) 
+    else
+        self.num = #Logic.allPeople
     end
     self:setPeople()
 end
@@ -104,14 +103,23 @@ function FindPeople2:onRight()
     print("self.onRight", self.num, #Logic.allPeople)
     if self.num < #Logic.allPeople then
         self.num = self.num+1
-        local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-        sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", (self.num)))
-        self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
-        adjustBox(self.head, {150, 150}) 
+    else
+        self.num = 3
     end
     self:setPeople()
 end
 function FindPeople2:setPeople()
+    --[[
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
+    adjustBox(self.head, {150, 150}) 
+    --]]
+
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", (self.num)))
+    self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
+    adjustBox(self.head, {150, 150}) 
+
     local pdata = Logic.people[self.num]
     self.name:setString(pdata.name)
     self.health:setString(pdata.health)
