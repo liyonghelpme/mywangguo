@@ -24,36 +24,43 @@ function MiaoPeople:setDir(x, y)
     local dx = x-p[1]
     local dy = y-p[2]
     if self.send then
+        print("setDir of car !!!")
         if dx > 0 then
             if dy > 0 then
                 --self.changeDirNode:stopAllActions()
-                self:setMoveAction("car_lt")
+                self:setMoveAction("car_rt")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "a3.png")
                 end
+                setDisplayFrame(self.shadow, "shadow0.png")
             elseif dy < 0 then
                 --self.changeDirNode:stopAllActions()
-                self:setMoveAction("car_lb")
+                self:setMoveAction("car_rb")
                 if self.carGoods ~= nil then
                     setDisplayFrame(self.carGoods, "b3.png")
                 end
-            end
-            local sca = getScaleY(self.changeDirNode)
-            setScaleX(self.changeDirNode, -sca)
-        elseif dx < 0 then
-            if dy > 0 then
-                self:setMoveAction("car_lt")
-                if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "a3.png")
-                end
-            elseif dy < 0 then
-                self:setMoveAction("car_lb")
-                if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "b3.png")
-                end
+                setDisplayFrame(self.shadow, "shadow1.png")
             end
             local sca = getScaleY(self.changeDirNode)
             setScaleX(self.changeDirNode, sca)
+            setScaleX(self.shadow, sca)
+        elseif dx < 0 then
+            if dy > 0 then
+                self:setMoveAction("car_rt")
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "a3.png")
+                end
+                setDisplayFrame(self.shadow, "shadow0.png")
+            elseif dy < 0 then
+                self:setMoveAction("car_rb")
+                if self.carGoods ~= nil then
+                    setDisplayFrame(self.carGoods, "b3.png")
+                end
+                setDisplayFrame(self.shadow, "shadow1.png")
+            end
+            local sca = getScaleY(self.changeDirNode)
+            setScaleX(self.changeDirNode, -sca)
+            setScaleX(self.shadow, -sca)
         end
     else
         local sca = getScaleY(self.changeDirNode)
@@ -273,10 +280,43 @@ function MiaoPeople:finishHandle()
     self:refreshOwner()
 end
 
+function MiaoPeople:adjustScale()
+    if self.send == true then
+        self.changeDirNode:setScale(0.88)
+        self.shadow:setScale(0.88)
+    else
+        self.changeDirNode:setScale(0.8)
+        self.shadow:setScale(0.8)
+    end
+end
+function MiaoPeople:adjustShadow()
+    if self.send == true then
+        setDisplayFrame(self.shadow, "shadow1.png")
+        local sz = self.shadow:getContentSize()
+        setPos(setAnchor(self.shadow, {244/512,  (512-357)/512}), {0, SIZEY})
+    else
+        removeSelf(self.shadow)
+        self.shadow = CCSprite:create()
+        self.heightNode:addChild(self.shadow)
+        --local sz = getContentSize(self.shadow)
+        if self.data.girl == 1 then 
+            setTexture(self.shadow, "roleShadow1.png")
+        else
+            setTexture(self.shadow, "roleShadow.png")
+        end
+        --local sz2 = getContentSize(self.shadow)
+        --print("adjust shadow pos and anchor!!!!", simple.encode(sz), simple.encode(sz2))
+        local sca = getScaleY(self.changeDirNode)
+        setScaleX(setPos(setAnchor(self.shadow, {0.5, 0.5}), {0, SIZEY}), sca)
+        --setAnchor(self.shadow, {0.5, 31/512})
+    end
+end
 --清理每个状态的时候 self.food 也要清理一下 根据不同状态类型 调用状态的清理代码
 function MiaoPeople:sendGoods()
     self.send = true
-    setDisplayFrame(self.changeDirNode, "car_lb_0.png")
+    self:adjustScale()
+    self:adjustShadow()
+    setDisplayFrame(self.changeDirNode, "car_rb_0.png")
     local sca = getScaleY(self.changeDirNode)
     if self.food > 0 then
         local sp = setDisplayFrame(CCSprite:create(), "b3.png")
@@ -285,11 +325,12 @@ function MiaoPeople:sendGoods()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
         self.carGoods = sp
     end
-    setScaleX(self.changeDirNode, -sca)
+    setScaleX(self.changeDirNode, sca)
 end
 function MiaoPeople:putGoods()
     if self.send then
         self.send = false
+        self:adjustScale()
         setDisplayFrame(self.changeDirNode, "cat_"..self.id.."_rb_0.png")
         local sca = getScaleY(self.changeDirNode)
         setScaleX(self.changeDirNode, sca)
@@ -297,6 +338,7 @@ function MiaoPeople:putGoods()
             removeSelf(self.carGoods)
             self.carGoods = nil
         end
+        self:adjustShadow()
     end
 end
 

@@ -31,4 +31,5 @@ void setScriptTouchPriority(CCLayer *lay, int pri);
 std::string getFileData(const char *fname);
 //只停止动作不要停止 更新
 void pauseAction(CCNode *n);
+void setTextureRect(CCSprite *, CCRect, bool, CCSize);
 #endif // __CC_EXTENSION_CCNATIVE_H_

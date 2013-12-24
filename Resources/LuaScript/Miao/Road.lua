@@ -8,10 +8,12 @@ function Road:adjustValue()
             setDisplayFrame(self.baseBuild.changeDirNode, "t0.png")
         else
             setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+            setPos(self.baseBuild.changeDirNode, {0, -10})
         end
     else
         --self:whenColNow()
         self:adjustOnSlope()
+        setPos(self.baseBuild.changeDirNode, {0, 0})
     end
 end
 

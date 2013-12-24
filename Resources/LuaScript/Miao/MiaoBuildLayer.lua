@@ -219,6 +219,7 @@ function MiaoBuildLayer:initBuild()
         mbid = mbid+1
         Logic.maxBid = mbid
     end
+
 end
 function MiaoBuildLayer:initSea()
     local initX = -128
@@ -436,6 +437,32 @@ function MiaoBuildLayer:initRoad()
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0, static = static, bid=getBid()})
+            local p = normalizePos({cx, cy}, 1, 1)
+            b:setPos(p)
+            b:setColPos()
+            self:addBuilding(b, MAX_BUILD_ZORD)
+            b:setPos(p)
+            b.funcBuild:adjustRoad()
+            b:finishBuild()
+        end
+    end
+
+
+    for dk, dv in ipairs(self.scene.layerName.build2.data) do
+        if dv ~= 0 then
+            local pname = self.scene.gidToImage[dv]
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            local static = false
+            if w >= width-2 then
+                static =true
+            end
+            print("dv is what", dv, pname)
+
+            --得到affine坐标到笛卡尔坐标的变换
+            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
+            local b = MiaoBuild.new(self, {picName='build', id=tonumber(pname), static = static, bid=getBid()})
             local p = normalizePos({cx, cy}, 1, 1)
             b:setPos(p)
             b:setColPos()
