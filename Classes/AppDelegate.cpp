@@ -5,13 +5,16 @@
 #include "CCLuaEngine.h"
 #include "cocos2d_ext_tolua.h"
 #include "iniReader.h"
+
 #include "ImageUpdate.h"
 #include "UpdateScene.h"
+#include "AssetsManager.h"
 
 
 
 USING_NS_CC;
 using namespace CocosDenshion;
+using namespace std;
 
 AppDelegate::AppDelegate()
 {
@@ -93,13 +96,13 @@ bool AppDelegate::applicationDidFinishLaunching()
 //更新脚本
 //更新图片
 static AssetsManager *pAssetsManager = NULL;
-static ImageUpdate *pImageUpdate = NULL;
 void AppDelegate::updateFiles() {
     pathToSave = CCFileUtils::sharedFileUtils()->getWritablePath();
     CCLog("pathToSave %s", pathToSave.c_str());
     if(pAssetsManager == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();
 		pAssetsManager = new AssetsManager((def->getStringForKey("codeUrl")+def->getStringForKey("zipFile")).c_str(), (def->getStringForKey("codeUrl")+def->getStringForKey("versionFile")).c_str());
+        publicAssets = pAssetsManager;
     }
     bool suc = false;
     if(pAssetsManager->checkUpdate()) {
@@ -107,11 +110,13 @@ void AppDelegate::updateFiles() {
             suc = true;
             CCLog("update Script successfully");
         } else {
+            progress = 200;
             CCLog("update Script Fail");
         }
     }
     
-    
+
+    /*
     if(pImageUpdate == NULL) {
         CCUserDefault *def = CCUserDefault::sharedUserDefault();
 		pImageUpdate = new ImageUpdate(def->getStringForKey("baseUrl").c_str(), (def->getStringForKey("imageVer")).c_str(), def->getStringForKey("localVer").c_str());
@@ -125,6 +130,7 @@ void AppDelegate::updateFiles() {
             CCLog("update Image fail");
 		}
     }
+    */
 }
 
 

@@ -24,7 +24,12 @@ local function main()
 
     require "myMap.MapScene"
 
-    global.director:runWithScene(TMXScene.new())
+    --global.director:runWithScene(TMXScene.new())
+
+    local director = CCDirector:sharedDirector()
+    local sc = TMXScene.new()
+    director:replaceScene(sc.bg)
+    global.director:onlyRun(sc)
 
     --require "Miao.TestScene"
     --global.director:runWithScene(TestScene.new())

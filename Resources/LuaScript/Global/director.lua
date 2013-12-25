@@ -113,6 +113,13 @@ function Director:pushScene(view)
     table.insert(self.sceneStack, view)
     print("pushScene", #self.sceneStack)
 end
+
+function Director:onlyRun(view)
+    self.curScene = view
+    table.insert(self.sceneStack, view)
+    print("scene runWithScene", #self.sceneStack)
+end
+
 function Director:runWithScene(view)
     CCDirector:sharedDirector():runWithScene(view.bg)
     self.curScene = view
