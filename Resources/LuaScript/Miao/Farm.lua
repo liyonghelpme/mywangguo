@@ -86,17 +86,17 @@ end
 
 function Farm:initState()
 end
-function Farm:finishBuild()
-    --self.baseBuild:doMyEffect()
-    self:doMyEffect()
-end
 function Farm:removeSelf()
     if self.baseBuild.owner ~= nil then
         self.baseBuild.owner:clearWork()
         self.baseBuild.owner = nil
     end
 end
+--移动结束 清理持有者的工作状态
 function Farm:finishMove()
+    if self:checkBuildable() then
+        self.baseBuild:doMyEffect()
+    end
     if self.owner ~= nil then
         self.owner:clearWork()
         self.owner = nil
@@ -114,7 +114,10 @@ function Farm:checkBuyer()
     return self.buyer == nil
 end
 
-
+function Farm:getIncWord()
+    return "生产"
+end
+--[[
 function Farm:showIncrease(n)
     local sp = ui.newButton({image="info.png", conSize={100, 45}, text="生产 +"..n, color={0, 0, 0}, size=25})
     self.baseBuild.map.bg:addChild(sp.bg)
@@ -124,6 +127,17 @@ function Farm:showIncrease(n)
     sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
+
+function Farm:showDecrease(n)
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text="生产 -"..n, color={0, 0, 0}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+    sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum-n
+end
+--]]
 
 
 function Farm:getProductName()

@@ -35,4 +35,26 @@ function Drink:updateGoods()
         end
     end
 end
-
+function Drink:getIncWord()
+    return "贩卖"
+end
+--[[
+function Drink:showDecrease(n)
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text="贩卖 -"..n, color={102, 10, 10}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+    sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum-n
+end
+function Drink:showIncrease(n)
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text="贩卖 +"..n, color={0, 0, 0}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+    sp.bg:runAction(sequence({moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum+n
+end
+--]]

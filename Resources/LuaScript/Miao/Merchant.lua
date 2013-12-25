@@ -190,8 +190,8 @@ function Merchant:handleAction()
             self.people.predictTarget.workNum = wn-bn
             self.people.predictTarget.funcBuild:updateGoods()
             print("take goods Num", wn, bn)
-
-            local val = GoodsName[self.people.predictTarget.goodsKind].price*bn
+            --商店贩卖能力
+            local val = math.floor(GoodsName[self.people.predictTarget.goodsKind].price*bn*(self.people.predictTarget.productNum/20))
             local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
             sp:addChild(num)
             setPos(num, {50, 0})

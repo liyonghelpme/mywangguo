@@ -17,16 +17,25 @@ end
 function FuncBuild:adjustRoad()
 end
 function FuncBuild:finishBuild()
+    --finishMove 没有生效 则 finishBuild生效
+    if not self.baseBuild.moveYet and self.baseBuild.data ~= nil and self.baseBuild.data.kind == 0 then
+        self.baseBuild:doMyEffect()
+    end
 end
 function FuncBuild:beginBuild()
 end
 function FuncBuild:beginMove()
+    --第一次移动没有效果所以不清除
+    if not self.baseBuild.firstMove and self:checkBuildable() then
+        self.baseBuild:clearMyEffect()
+    end
 end
 function FuncBuild:finishMove()
+    if self:checkBuildable() then
+        self.baseBuild:doMyEffect()
+    end
 end
 function FuncBuild:removeSelf()
-end
-function FuncBuild:finishMove()
 end
 function FuncBuild:setBuyer(b)
 end
@@ -158,40 +167,48 @@ function FuncBuild:adjustHeight()
     setPos(self.baseBuild.heightNode, {0, hei*103})
 end
 
-function FuncBuild:showIncrease(n)
-end
---调用公有代码
-function FuncBuild:doMyEffect()
-    local map = getBuildMap(self.baseBuild) 
-    local initX = 0
-    local initY = -4
-    local offX = 1
-    local offY = 1
-    local mapDict = self.baseBuild.map.mapGridController.mapDict
-    for i =0, 4, 1 do
-        local curX = initX-i
-        local curY = initY+i
-        for j = 0, 4, 1 do
-            local key = getMapKey(curX+map[3], curY+map[4])
-            if mapDict[key] ~= nil then
-                local ob = mapDict[key][#mapDict[key]][1]
-                local dist = math.abs(curX)+math.abs(curY)
-                --周围要是匹配的建筑物才行 农田等
-                --樱花树建筑物
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showIncrease(2)
-                    elseif dist == 4 then
-                        self:showIncrease(1)
-                    end
-                end
-            end
-
-            curX = curX+1
-            curY = curY+1
-        end
+function delayShow(sp, w)
+    sp.bg:setVisible(false)
+    local function showSelf()
+        sp.bg:setVisible(true)
+        sp.sp:runAction(sequence({fadein(0.2), fadeout(0.8)}))
     end
+    return sequence({delaytime(w), callfunc(nil, showSelf)})
 end
+--实现这个接口 用于调整效果
+function FuncBuild:showIncrease(n, waitTime)
+    if waitTime == nil then
+        waitTime = 0
+    end
+
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text=self:getIncWord().." +"..n, color={0, 0, 0}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+
+
+    sp.bg:runAction(sequence({delayShow(sp, waitTime), moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum+n
+end
+function FuncBuild:showDecrease(n, waitTime)
+    if waitTime == nil then
+        waitTime = 0
+    end
+    local sp = ui.newButton({image="info.png", conSize={100, 45}, text=self:getIncWord().." -"..n, color={102, 10, 10}, size=25})
+    self.baseBuild.map.bg:addChild(sp.bg)
+    local wp = self.baseBuild.heightNode:convertToWorldSpace(ccp(0, 100))
+    local np = self.baseBuild.map.bg:convertToNodeSpace(wp)
+    setPos(sp.bg, {np.x, np.y})
+    sp.bg:runAction(sequence({delayShow(sp, waitTime), moveby(1, 0, 20), callfunc(nil, removeSelf, sp.bg)}))
+    self.baseBuild.productNum = self.baseBuild.productNum-n
+end
+
+function FuncBuild:getIncWord()
+    return "null" 
+end
+
+
 function FuncBuild:getProductName()
     return "--"
 end

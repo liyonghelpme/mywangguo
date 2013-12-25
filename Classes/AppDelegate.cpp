@@ -6,6 +6,7 @@
 #include "cocos2d_ext_tolua.h"
 #include "iniReader.h"
 #include "ImageUpdate.h"
+#include "UpdateScene.h"
 
 
 
@@ -24,7 +25,7 @@ AppDelegate::~AppDelegate()
     SimpleAudioEngine::sharedEngine()->end();
     //CCScriptEngineManager::purgeSharedManager();
 }
-
+static UpdateScene *scene=NULL;
 bool AppDelegate::applicationDidFinishLaunching()
 {
     // initialize director
@@ -54,20 +55,9 @@ bool AppDelegate::applicationDidFinishLaunching()
     //根据config.ini 配置UserDefault 
 	CCLog("hello wangguo");
     /*
-    unsigned long fsize;
-    unsigned char *data = CCFileUtils::sharedFileUtils()->getFileData("config.ini", "r", &fsize);
-    map<string, string> *nm = handleIni((char*)data, fsize); 
-    delete []data;
-    CCUserDefault *def = CCUserDefault::sharedUserDefault();
-    for(map<string, string>::iterator it=nm->begin(); it!=nm->end(); it++) {
-		def->setStringForKey(it->first.c_str(), it->second);
-    }
-    delete nm;
 	//searchPath 都在一个位置设置
 
 
-	if(def->getStringForKey("update") != "0")
-		updateFiles();
     */
 
 	CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
@@ -77,10 +67,27 @@ bool AppDelegate::applicationDidFinishLaunching()
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 
     
+    unsigned long fsize;
+    unsigned char *data = CCFileUtils::sharedFileUtils()->getFileData("config.ini", "r", &fsize);
+    map<string, string> *nm = handleIni((char*)data, fsize); 
+    delete []data;
+    CCUserDefault *def = CCUserDefault::sharedUserDefault();
+    for(map<string, string>::iterator it=nm->begin(); it!=nm->end(); it++) {
+		def->setStringForKey(it->first.c_str(), it->second);
+    }
+    delete nm;
+	if(def->getStringForKey("update") != "0")
+	    updateFiles();
+
+    scene = UpdateScene::create();
+    scene->ap = this;
+    pDirector->runWithScene(scene);
+
     CCLog("finish update read main.lua");
-    
+    /*
     std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
     pEngine->executeScriptFile(path.c_str());
+    */
     return true;
 }
 //更新脚本

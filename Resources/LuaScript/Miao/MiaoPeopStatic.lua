@@ -326,6 +326,8 @@ function MiaoPeople:sendGoods()
         self.carGoods = sp
     end
     setScaleX(self.changeDirNode, sca)
+    self.carVirAct = repeatForever(sequence({moveby(0.2, 0, 5), moveby(0.2, 0, -5)}))
+    self.changeDirNode:runAction(self.carVirAct)
 end
 function MiaoPeople:putGoods()
     if self.send then
@@ -339,6 +341,7 @@ function MiaoPeople:putGoods()
             self.carGoods = nil
         end
         self:adjustShadow()
+        self.changeDirNode:stopAction(self.carVirAct)
     end
 end
 
@@ -756,23 +759,21 @@ function MiaoPeople:setPos(p)
     setPos(self.bg, p)
     self.funcPeople:setPos()
 end
-function MiaoPeople:moveSlope(dx, dy, val, cp, nnp)
+function MiaoPeople:moveSlope(dx, dy, val, cp)
     --就要上坡 下下个目标点高度
+    --第一个阶段 走到到斜坡上面
+    local mvOff = 6
+    local mvDelta = 0.15
     if val == 0 then
-        --[[
-        local cax, cay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
-        local chei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, cax, cay) 
-
-        local nax, nay = newNormalToAffine(nnp[1], nnp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
-        local nhei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, nax, nay) 
-        local mid = (chei+nhei)/2*103
-        --]]
-        self.slopeAct = moveto(self.waitTime, 0, cp)
-    --当前斜坡 目标点高度
+        self.slopeAct = sequence({delaytime(self.waitTime/2), moveto(self.waitTime/2, 0, cp)})
+        self.changeDirNode:runAction(sequence({delaytime(self.waitTime/2), repeatN(sequence({moveby(mvDelta, 0, mvOff), moveby(mvDelta, 0, -mvOff)}), math.floor(self.waitTime/2/mvDelta/2))}))
+    --目标点高度位置 当前在斜坡上
     else
         local cax, cay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
         local chei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, cax, cay) 
-        self.slopeAct = moveto(self.waitTime, 0, chei*103)
+        self.slopeAct = sequence({moveto(self.waitTime/2, 0, chei*103), delaytime(self.waitTime/2)})
+        --跌宕
+        self.changeDirNode:runAction(repeatN(sequence({moveby(mvDelta, 0, mvOff), moveby(mvDelta, 0, -mvOff)}), math.floor(self.waitTime/2/mvDelta/2)))
     end
     self.heightNode:runAction(self.slopeAct)
 end

@@ -184,7 +184,8 @@ function MiaoBuildLayer:initBuild()
     if build ~= "" then
         build = simple.decode(build)
         for k, v in ipairs(build) do
-            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            local dir = v.dir or 0
+            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid, dir=1-dir})
             b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
@@ -192,6 +193,8 @@ function MiaoBuildLayer:initBuild()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
             b:finishBuild()
+            --调整建筑物方向
+            b:doSwitch()
             mbid = math.max(v.bid, mbid)
         end
         mbid = mbid+1

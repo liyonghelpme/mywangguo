@@ -24,7 +24,7 @@ function FindPeople2:ctor()
     setPos(self.bg, {0, 0})
     local sz = {width=715, height=601}
     local ds = global.director.designSize
-    self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
+    self.temp = setPos(addNode(self.bg), {173, fixY(ds[2], 66+sz.height)})
     self.num = 3
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.50, 0.50})
@@ -32,13 +32,13 @@ function FindPeople2:ctor()
     --local but = ui.newButton({image="newClose.png"})
     --setPos(addChild(self.temp, but.bg), {677, fixY(sz.height, 40)})
     local but = ui.newButton({image="butc.png", text="进行启用", font="f1", size=34, callback=self.onPeople, delegate=self, conSize={152, 38}})
-    setPos(addChild(self.temp, but.bg), {331, fixY(sz.height, 560)})
+    setPos(addChild(self.temp, but.bg), {339, fixY(sz.height, 560)})
     local pdata = Logic.people[self.num]
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=pdata.name, size=30, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {138, fixY(sz.height, 150)})
     self.name = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv1", size=40, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {511, fixY(sz.height, 147)})
-    local total = #Logic.allPeople-3
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/"..total, size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {357, fixY(sz.height, 86)})
+    local total = #Logic.allPeople-2
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="人才启用1/"..total, size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {339, fixY(sz.height, 86)})
     self.curPeople = w
 
     
@@ -85,7 +85,7 @@ function FindPeople2:ctor()
 
     local but = ui.newButton({image="newLeftArrow.png", text="", font="f1", size=18, callback=self.onLeft, delegate=self})
     but:setContentSize(90, 106)
-    setPos(addChild(self.butNode, but.bg), {139, 384})
+    setPos(addChild(self.butNode, but.bg), {102, 384})
     self.leftBut = but
 
     self:adjustPos()
@@ -126,7 +126,7 @@ function FindPeople2:setPeople()
     self.brawn:setString(pdata.brawn)
     self.shoot:setString(pdata.shoot)
     self.labor:setString(pdata.labor)
-    local total = #Logic.allPeople-3
+    local total = #Logic.allPeople-2
     self.curPeople:setString("人才启用"..(self.num-2)..'/'..total)
 end
 

@@ -65,7 +65,7 @@ function Tree:doEffect()
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
                 --点数 都是增加4点 1点 不论目标对象
-                if ob.id == 1 or ob.id == 2 or ob.id == 5 then
+                if ob.data ~= nil and ob.data.kind == 0 then
                     if dist == 2 then
                         ob:showIncrease(2)
                     elseif dist == 4 then
@@ -95,9 +95,9 @@ function Tree:clearEffect()
                 local ob = mapDict[key][#mapDict[key]][1]
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
-                if ob.id == 1 or ob.id == 2 then
+                if ob.data ~= nil and ob.data.kind == 0 then
                     if dist == 2 then
-                        ob:showDecrease(4)
+                        ob:showDecrease(2)
                     elseif dist == 4 then
                         ob:showDecrease(1)
                     end
@@ -118,4 +118,16 @@ function Tree:finishBuild()
 end
 function Tree:removeSelf()
     self.baseBuild:clearEffect()
+end
+--当前位置无冲突 清理附近状态
+function Tree:beginMove()
+    if self:checkBuildable() then
+        self:clearEffect() 
+    end
+end
+--clearMenu 的时候是会恢复状态的
+function Tree:finishMove()
+    if self:checkBuildable() then
+        self:doEffect()
+    end
 end

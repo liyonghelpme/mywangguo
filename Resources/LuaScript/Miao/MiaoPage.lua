@@ -467,49 +467,26 @@ function MiaoPage:finishBuild()
         self.buildLayer:adjustLayer(self.curBuild)
         local c = Logic.buildings[self.curBuild.id].silver
         doCost(c)
-        if self.curBuild.picName == 't' then
-            table.insert(self.oldBuildPos, getPos(self.curBuild.bg))
-            if #self.oldBuildPos >= 3 then
-                table.remove(self.oldBuildPos, 1)
-            end
+        local bdata = self.curBuild.data
+        --if self.curBuild.picName == 't' then
+        table.insert(self.oldBuildPos, getPos(self.curBuild.bg))
+        if #self.oldBuildPos >= 3 then
+            table.remove(self.oldBuildPos, 1)
         end
+        --end
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
-        if self.curBuild.picName == 'move' then
-            if self.curBuild.moveTarget == nil then
-                self.curBuild:removeSelf()
-                self.curBuild = nil
-            --取消移动
-            else
-                self.curBuild:removeSelf()
-                self.curBuild = nil
-            end
         --道路和 斜坡冲突 斜坡不能移动
         --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
-        elseif self.curBuild.picName == 't' then
-            if self.curBuild.colNow == 0 then
-                self.curBuild:finishBuild()
-                self.curBuild = nil
-            else
-                if type(self.curBuild.otherBuild) == 'table' then
-                    local ob = self.curBuild.otherBuild
-                    --斜坡
-                    if ob.picName == 'slope' then
-                        self.curBuild:finishBuild()
-                        self.curBuild = nil
-                    else
-                        addBanner("道路不能修建在这里！")
-                    end
-                end
-            end
-        --矿坑
-        elseif self.curBuild.picName == 'build' and self.curBuild.id == 11 then
+        --矿坑斜坡上
+        if self.curBuild.picName == 'build' and self.curBuild.id == 11 then
             if self.curBuild.funcBuild:checkSlope() then
                 self.curBuild:finishBuild()
                 self.curBuild = nil
             else
                 addBanner("必须建造到斜坡上面！")
             end
+        --桥梁建河流上
         elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
             if self.curBuild.colNow == 0 then
@@ -526,26 +503,22 @@ function MiaoPage:finishBuild()
                     end
                 end
             end
-        elseif self.curBuild.picName == 'remove' then
-            self.curBuild:removeSelf()
-            self.curBuild = nil
-        elseif self.curBuild.colNow == 0  then
+        else
             self.curBuild:finishBuild()
             self.curBuild = nil
-        else
-            addBanner("和其它建筑物冲突啦！")
         end
 
         --根据当前的位置 调整一个新位置
-        if oldBuild.picName == 't' and Logic.resource.silver >= Logic.buildings[15].silver then
+        --oldBuild.picName == 't' and
+        if Logic.resource.silver >= c then
             if #self.oldBuildPos == 1 then
-                self:beginBuild('build', 15, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
+                self:beginBuild('build', bdata.id, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
             else
                 local dx = self.oldBuildPos[2][1]-self.oldBuildPos[1][1]
                 local dy = self.oldBuildPos[2][2]-self.oldBuildPos[1][2]
                 local sx = Sign(dx)*SIZEX
                 local sy = Sign(dy)*SIZEY
-                self:beginBuild('build', 15, self.oldBuildPos[2][1]+sx, self.oldBuildPos[2][2]+sy)
+                self:beginBuild('build', bdata.id, self.oldBuildPos[2][1]+sx, self.oldBuildPos[2][2]+sy)
             end
         else
             --Logic.paused = false
