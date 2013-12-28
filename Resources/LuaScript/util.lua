@@ -217,7 +217,13 @@ function addSprite(bg, name)
     if name == nil then
         sp = CCSprite:create()
     else
-        sp = CCSprite:create(name)
+        local spc = CCSpriteFrameCache:sharedSpriteFrameCache()
+        local frame = spc:spriteFrameByName(name)
+        if frame ~= nil then
+            sp = CCSprite:createWithSpriteFrameName(name)
+        else
+            sp = CCSprite:create(name)
+        end
     end
     bg:addChild(sp)
     return sp
@@ -490,6 +496,10 @@ end
 function setDesignScale(sp)
     sp:setScaleX(global.director.disSize[1]/global.director.designSize[1])
     sp:setScaleY(global.director.disSize[2]/global.director.designSize[2])
+    return sp
+end
+function setScaleY(sp, s)
+    sp:setScaleY(s)
     return sp
 end
 
@@ -1357,21 +1367,24 @@ function colorWords(param)
                 local lSize = l:getContentSize()
                 curX = curX+lSize.width
                 height = lSize.height
-            elseif #p[1] > 0 then
-                local l = ui.newTTFLabel({text=p[1], font=font, color=col, size=si})
-                n:addChild(l)
-                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
-                local lSize = l:getContentSize()
-                height = lSize.height
-                curX = curX+lSize.width
-            elseif p[2] ~= nil and #p[2] > 0 then
-                local cv = string.sub(p[2], 1, 6)
-                local l = ui.newTTFLabel({text=string.sub(p[2], 7), font=font, color=hexToDec(cv), size=si})
-                n:addChild(l)
-                setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
-                local lSize = l:getContentSize()
-                curX = curX+lSize.width
-                height = lSize.height
+            else
+                if #p[1] > 0 then
+                    local l = ui.newTTFLabel({text=p[1], font=font, color=col, size=si})
+                    n:addChild(l)
+                    setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                    local lSize = l:getContentSize()
+                    height = lSize.height
+                    curX = curX+lSize.width
+                end
+                if p[2] ~= nil and #p[2] > 0 then
+                    local cv = string.sub(p[2], 1, 6)
+                    local l = ui.newTTFLabel({text=string.sub(p[2], 7), font=font, color=hexToDec(cv), size=si})
+                    n:addChild(l)
+                    setPos(setAnchor(l, {0, 0}), {curX, -totalHeight})
+                    local lSize = l:getContentSize()
+                    curX = curX+lSize.width
+                    height = lSize.height
+                end
             end
         else
             local l = ui.newTTFLabel({text=over[i], font=font, color=col, size=si})
@@ -1390,7 +1403,11 @@ function colorWords(param)
     n:setContentSize(CCSizeMake(curX, totalHeight))
     return n
 end
+
 --anchor 0 1
+--CCNode 设置Anchor 没有用为什么？
+--anchor 0 0
+--相对于node 的0 0 位置来做的所以没有用处 gimp 里面使用colorLine 来标注这个字体
 function colorLine(param)
     local s = param.text
     local col = param.color
@@ -1399,11 +1416,12 @@ function colorLine(param)
     local n = CCNode:create()
     local curHeight = 0
     local curWidth = 0
+    local anchor = param.anchor or {0, 1}
     for k, v in ipairs(words) do
         print("colorLine", v)
-        local temp = colorWords({text=v, color=col, size=si, width=param.width})
+        local temp = colorWords({text=v, color=col, size=si, width=param.width, font=param.font})
         n:addChild(temp)
-        setPos(setAnchor(temp, {0, 1}), {0, -curHeight})
+        setPos(setAnchor(temp, anchor), {0, -curHeight})
         local sz = temp:getContentSize()
         curHeight = curHeight+sz.height
         curWidth = math.max(curWidth, sz.width)
@@ -1422,6 +1440,19 @@ function setProNum(banner, n, max)
         setContentSize(banner, {wid, 29})
     end
 end
+function newProNum(banner, n, max)
+    if n <= 0 then
+        banner:setVisible(false)
+    else
+        banner:setVisible(true)
+        local wid = math.floor((n/max)*183)
+        wid = math.max(0, wid)
+        local r = CCRectMake(0, 0, wid, 20)
+        banner:setTextureRect(r)
+        --setContentSize(banner, {wid, 29})
+    end
+end
+
 function setDisplayFrame(sp, n)
     print("setDisplayFrame !!!!!", sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
@@ -1539,3 +1570,31 @@ function getContentSize(sp)
     local sz = sp:getContentSize()
     return {sz.width, sz.height}
 end
+
+
+function addEquipAttr(old, edata)
+    local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot'}
+    for k, v in ipairs(allAtt) do
+        old[v] = old[v]+edata[v]
+    end
+end
+
+function calAttr(id, level, equip)
+    local data = Logic.people[id]
+    local temp = {health=data.health+data.healthAdd*level, labor=data.labor+data.laborAdd*level, attack=math.floor((data.brawn+data.brawnAdd*level)/2),
+    defense=0, shoot=data.shoot+data.shootAdd*level, 
+    brawn=data.brawn+data.brawnAdd*level}
+    if equip ~= nil then
+        if equip.weapon ~= nil then
+            addEquipAttr(temp, Logic.equip[equip.weapon])
+        end
+        if equip.head ~= nil then
+            addEquipAttr(temp, Logic.equip[equip.head])
+        end
+        if equip.body ~= nil then
+            addEquipAttr(temp, Logic.equip[equip.body])
+        end
+    end
+    return temp
+end
+

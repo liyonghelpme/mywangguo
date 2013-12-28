@@ -26,6 +26,11 @@ end
 
 --view 封装了 CCNode
 function Director:pushView(view, dark, autoPop, showDark)
+    if #self.stack > 0 then
+        local ov = self.stack[#self.stack]
+        ov.bg:retain()
+        ov.bg:removeFromParentAndCleanup(false)
+    end
     if dark == 1 then
         print('pushView', dark)
         local temp = {}
@@ -52,7 +57,14 @@ function Director:popView()
     v.bg:removeFromParentAndCleanup(true)
     --Logic.paused = false
     setLogicPause(false)
-    Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
+    
+    if #self.stack == 0 then
+        Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
+    else
+        local ov = self.stack[#self.stack]
+        self.curScene.bg:addChild(ov.bg)
+        ov.bg:release()
+    end
 end
 --上一个场景没有对话框
 function Director:popTransfer()

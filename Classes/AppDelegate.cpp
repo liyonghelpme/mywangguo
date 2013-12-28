@@ -113,6 +113,8 @@ void AppDelegate::updateFiles() {
             progress = 200;
             CCLog("update Script Fail");
         }
+    } else {
+        progress = 200;
     }
     
 

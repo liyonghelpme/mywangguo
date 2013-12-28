@@ -1,5 +1,9 @@
 require "menu.PeopleMenu2"
 require "menu.NewBuildMenu2"
+require "menu.StoreMenu2"
+require "menu.ResearchMenu2"
+require "menu.IncSoldierMenu"
+require "menu.UseGoldMenu"
 PressMenu2 = class()
 
 function PressMenu2:adjustHeight()
@@ -51,6 +55,16 @@ function PressMenu2:ctor()
         local but = ui.newButton({image="mainA.png",  callback=self.onBut, touchBegan=self.onTab, delegate=self, param=i})
         local sp = setSize(setPos(addSprite(but.bg, string.format("icon%d.png", i-1)), {31-181/2, fixY(60, 33)-60/2}), {45, 42})
         local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], font='f2', size=24, color={255, 255, 255}})), {0, 0.5}), {95-181/2, fixY(60, 29)-60/2})
+        if temp[i] == "研究" then
+            if Logic.inResearch ~= nil then
+                local sd = Logic.inResearch
+                local diff = math.floor(math.max(math.min((sd[2])/10, 1), 0)*100)
+                local edata = Logic.equip[Logic.researchGoods[sd[1]][2]]
+                local info = ui.newButton({image="info.png", text=edata.name..diff..'%', conSize={181, 60}, size=24, color={255, 255, 255}})
+                setPos(info.bg, {182, 0})
+                but.bg:addChild(info.bg)
+            end
+        end
 
         setPos(but.bg, {initX, initY+(i-1)*offY})
         but:setAnchor(0.5, 0.5)
@@ -104,6 +118,20 @@ function PressMenu2:onBut(p)
         local m = PeopleMenu2.new(self)
         self.bg:addChild(m.bg)
         self.subMenu = m
+    elseif p == 3 then
+        if Logic.inResearch == nil then
+            global.director:popView()
+            global.director:pushView(ResearchMenu2.new(), 1 )
+        end
+    elseif p == 4 then
+        global.director:popView()
+        global.director:pushView(StoreMenu2.new(), 1)
+    elseif p == 5 then
+        global.director:popView()
+        global.director:pushView(IncSoldierMenu.new(), 1)
+    elseif p == 6 then
+        global.director:popView()
+        global.director:pushView(UseGoldMenu.new(), 1)
     elseif p == 7 then
         global.director:popView()
         global.director.curScene:saveGame()

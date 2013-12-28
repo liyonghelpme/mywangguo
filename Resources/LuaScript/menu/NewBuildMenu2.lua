@@ -23,13 +23,6 @@ function NewBuildMenu2:ctor()
     local ds = global.director.designSize
     self.temp = setPos(addNode(self.bg), {192, fixY(ds[2], 66+sz.height)})
 
-
-    --[[
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 426)}), {82, 126}), {0.5, 0.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "taba.png"), {711, fixY(sz.height, 291)}), {82, 126}), {0.5, 0.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "tabb.png"), {711, fixY(sz.height, 156)}), {82, 126}), {0.5, 0.5})
-    self.envTab = sp
-    --]]
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {338, fixY(sz.height, 316)}), {677, 569}), {0.5, 0.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {338, fixY(sz.height, 329)}), {617, 396}), {0.5, 0.5})
 
@@ -88,6 +81,7 @@ function NewBuildMenu2:ctor()
     self:setSelect(1)
     self:setSel(1)
 end
+--点击开始
 function NewBuildMenu2:setSel(s)
     if self.selBuild ~= s then
         print("self.", self.selBuild)

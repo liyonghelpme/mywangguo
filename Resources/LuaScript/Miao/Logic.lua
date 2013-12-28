@@ -11,6 +11,33 @@ Logic.allPeople = {}
 
 Logic.waitPeople = {}
 
+--所有村民
+Logic.farmPeople = {}
+
+--all equip
+Logic.equip = {}
+Logic.allEquip = {}
+Logic.allWeapon = {}
+Logic.allHead = {}
+Logic.allBody = {}
+Logic.allSpe = {}
+
+Logic.skill = {}
+Logic.allSkill = {}
+
+--持有武器的数量
+Logic.holdNum = {}
+
+--待研究的物品 类型 id
+Logic.researchGoods = {{0, 2}, {0, 3}, {0, 4}}
+--正在研究的物品
+Logic.inResearch = nil
+
+--已经研究的物品 商店可以购买
+--默认割草镰刀
+Logic.ownGoods = {{0, 1}}
+
+--获得什么条件可以新增加的研究物品
 
 function doGain(r)
     for k, v in pairs(r) do
@@ -66,6 +93,10 @@ end
 Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
 
 function checkCost(c)
+    if Logic.resource.silver < c then
+        return false
+    end
+    return true
 end
 function doCost(c)
     Logic.resource.silver = Logic.resource.silver-c
@@ -146,4 +177,57 @@ function getLaborEffect(l)
     end
 
 end
+
+function changeEquip(id, num)
+    Logic.holdNum[id] = (Logic.holdNum[id] or 0)+num
+end
+
+--实现升级属性提升机制
+Logic.LevelCost = {
+    0,
+    200,
+    270,
+    380,
+    470, 
+    570,
+    680,
+    800,
+    930,
+    1070,
+    1220, 
+    1380,
+    1550,
+    1730,
+    1920,
+    2120,
+    2330,
+    2550,
+    2780,
+    3020,
+    3270,
+    3630,
+    3900,
+    4180,
+    4470,
+    4770,
+    5080,
+    5400,
+    5730,
+    6070,
+}
+
+--士兵初始数量 升级数量 价格
+Logic.IncCost = {
+    {50, 20, 200},
+    {30, 20, 300},
+    {20, 20, 400},
+    {10, 20, 500},
+}
+--等级 数量
+Logic.soldiers = {
+    [1] = {1, 50},
+    [2] = {0, 0},
+    [3] = {0, 0},
+    [4] = {0, 0},
+}
 

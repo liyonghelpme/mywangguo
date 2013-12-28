@@ -126,7 +126,10 @@ function MiaoBuildLayer:initCat()
     if cat ~= "" then
         cat = simple.decode(cat)
         for k, v in ipairs(cat) do
-            local p = MiaoPeople.new(self, {id=v.id or 3, needAppear = false, health=v.health})
+            --{id=v.id or 3, needAppear = false, health=v.health}
+            v.needAppear = false
+            local p = MiaoPeople.new(self, v)
+            table.insert(Logic.farmPeople, p)
             self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
             local pos = normalizePos({v.px, v.py}, 1, 1)
             p:setPos(pos)
@@ -578,6 +581,7 @@ function MiaoBuildLayer:addPeople(param)
     local data = Logic.people[param]
     local pos
     if data.kind == 1 then
+        table.insert(Logic.farmPeople, p)
         local vs = getVS()
         pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
         pos = normalizePos({pos.x, pos.y}, 1, 1)
@@ -624,6 +628,7 @@ function MiaoBuildLayer:addPeople(param)
         if findPos ~= nil then
             pos = setBuildMap({1, 1, findPos[1], findPos[2]})
         end
+        --只保存普通村民
     --商人
     elseif data.kind == 2 then
         local width = self.scene.width

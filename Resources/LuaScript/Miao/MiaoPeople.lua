@@ -37,9 +37,11 @@ function MiaoPeople:ctor(m, data)
     self.id = data.id
     self.data = Logic.people[self.id]
     self.passTime = 0
+    self.level = data.level or 0
+
     self.health = data.health or 0
-    self.maxHealth = Logic.people[self.id].health
-    self.labor = self.data.labor
+    self.maxHealth = Logic.people[self.id].health+self.data.healthAdd*self.level
+    self.labor = self.data.labor+self.data.laborAdd*self.level
     self.tired = false
     self.goBack = nil
     self.myHouse = nil
@@ -49,8 +51,12 @@ function MiaoPeople:ctor(m, data)
     self.stone = 0
     self.workNum = 0
     self.lastVisible = true
+    self.weapon = data.weapon
+    self.head = data.head
+    self.body = data.body
+    self.spe = data.spe
+
     --修习之后就升级
-    self.level = 0
     self.ignoreTerrian = false
     --普通猫咪 才会有私有的miaoPath
     if self.data.kind == 1 then
@@ -538,7 +544,6 @@ function MiaoPeople:doMove(diff)
             self.passTime = 0
             local nextPoint = self.curPoint+1
 
-
             if nextPoint > #self.path then
                 --去休息
                 --if self.realTarget ~= nil and self.realTarget.picName == 'build' and self.realTarget.id == 1 then
@@ -672,6 +677,11 @@ function MiaoPeople:doMove(diff)
                     --下个点在石头路上
                     --下一个点是斜坡 下下一个点的高度值 和当前点高度值 平均值 
                     local goYet = false
+
+                    local accMove = false
+                    if self.data.skill == 42 then
+                        accMove = true
+                    end
                     --道路是onSlope 
                     --道路下面的斜坡才是真正的地形高度
                     --dir 不是 0 或者 1的斜坡不能行走的 
@@ -692,6 +702,9 @@ function MiaoPeople:doMove(diff)
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})
                             self.waitTime = 3
+                            if accMove then
+                                self.waitTime = self.waitTime/2
+                            end
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
@@ -720,6 +733,9 @@ function MiaoPeople:doMove(diff)
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})
                             self.waitTime = 3
+                            if accMove then
+                                self.waitTime = self.waitTime/2
+                            end
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
@@ -732,6 +748,9 @@ function MiaoPeople:doMove(diff)
                     if not goYet then
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
                         self.waitTime = 1.5
+                        if accMove then
+                            self.waitTime = self.waitTime/2
+                        end
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         self:setDir(cxy[1], cxy[2])
                         self:setZord()
@@ -1029,6 +1048,39 @@ function MiaoPeople:doPaused(diff)
             self.pausedTime = 0
             self.state = PEOPLE_STATE.FREE
         end
+    end
+end
+function MiaoPeople:updateLevel()
+    self.level = self.level+1
+end
+function MiaoPeople:setEquip(eid)
+    local ed = Logic.equip[eid]
+    local kindToPart = {
+        [0]='weapon',
+        [1]='head',
+        [2]='body',
+        [3]='spe',
+    }
+    if ed.kind == 0 then
+        if self.weapon ~= nil then
+            Logic.holdNum[self.weapon] = (Logic.holdNum[self.weapon] or 0) +1
+        end
+        self.weapon = ed.id
+    elseif ed.kind == 1 then
+        if self.head ~= nil then
+            Logic.holdNum[self.head] = (Logic.holdNum[self.head] or 0)+1
+        end
+        self.head = ed.id
+    elseif ed.kind == 2 then
+        if self.body ~= nil then
+            Logic.holdNum[self.body] = (Logic.holdNum[self.body] or 0)+1
+        end
+        self.body = ed.id
+    elseif ed.kind == 3 then
+        if self.spe ~= nil then
+            Logic.holdNum[self.spe] = (Logic.holdNum[self.spe] or 0)+1
+        end
+        self.spe = ed.id
     end
 end
 

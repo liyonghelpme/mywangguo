@@ -67,14 +67,23 @@ function FindPeople2:ctor()
     self.head:setDisplayFrame(sf:spriteFrameByName(string.format("cat_%d_rb_0.png", self.num)))
     adjustBox(self.head, {150, 150}) 
 
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 262)}), {191, 29}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "proa.png"), {434, fixY(sz.height, 262)}), {183, 20}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 307)}), {191, 29}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "proa.png"), {434, fixY(sz.height, 307)}), {183, 20}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 357)}), {191, 29}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "proa.png"), {434, fixY(sz.height, 357)}), {183, 20}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 405)}), {191, 29}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "proa.png"), {434, fixY(sz.height, 405)}), {183, 20}), {0.50, 0.50})
+    --local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 262)}), {191, 29}), {0.50, 0.50})
+    --local sp = setAnchor(setSize(setPos(addSprite(self.temp, "proa.png"), {434, fixY(sz.height, 262)}), {183, 20}), {0.50, 0.50})
+    local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 262)}), {191, 29}), {0.50, 0.50})
+    local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
+    self.healthBar = pro
+
+    local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 307)}), {191, 29}), {0.50, 0.50})
+    local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
+    self.brawnBar = pro
+
+    local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 357)}), {191, 29}), {0.50, 0.50})
+    local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
+    self.shootBar = pro
+
+    local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {434, fixY(sz.height, 405)}), {191, 29}), {0.50, 0.50})
+    local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
+    self.laborBar = pro
 
 
     self.butNode = addNode(self.bg)
@@ -89,6 +98,7 @@ function FindPeople2:ctor()
     self.leftBut = but
 
     self:adjustPos()
+    self:setPeople()
 end
 
 function FindPeople2:onLeft()
@@ -128,6 +138,11 @@ function FindPeople2:setPeople()
     self.labor:setString(pdata.labor)
     local total = #Logic.allPeople-2
     self.curPeople:setString("人才启用"..(self.num-2)..'/'..total)
+
+    newProNum(self.healthBar, pdata.health, 300)
+    newProNum(self.brawnBar, pdata.brawn, 300)
+    newProNum(self.shootBar, pdata.shoot, 300)
+    newProNum(self.laborBar, pdata.labor, 300)
 end
 
 function FindPeople2:onPeople()
