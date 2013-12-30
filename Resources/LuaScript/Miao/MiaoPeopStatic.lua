@@ -698,10 +698,12 @@ function MiaoPeople:workInHome(diff)
     self.restTime = self.restTime+diff
     --0.5 恢复一下 共8s 总共16下
     --调整一下时间频率即可
-    --增加5% 生命值的时间  
-    local ntime = 1/(self.myHouse.productNum/20)
+    --增加5% 生命值的时间   
+    --大宅子1.5 倍率
+    local rate = self.realTarget.data.rate
+    local ntime = 1/(self.myHouse.productNum/20)/rate
     if self.restTime >= ntime then
-        self.restTime = 0
+        self.restTime = self.restTime-ntime
         --用小数表示health 但是 休息结束的时候 需要做成 整数 
         local r = math.max(math.floor(self.maxHealth/20), 1)
         self.health = self.health +r

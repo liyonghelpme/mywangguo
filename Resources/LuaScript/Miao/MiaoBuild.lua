@@ -18,6 +18,7 @@ require "Miao.MoveBuild"
 require "menu.BuildOpMenu"
 require "Miao.Drink"
 require "Miao.BuildPath"
+require "Miao.ItemShop"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -46,12 +47,6 @@ function MiaoBuild:ctor(m, data)
     if data.picName == 'build' and data.id == 15 then
         data.picName = 't'
         --data.id = nil
-    end
-    if data.picName == 'build' and data.id == 20 then
-        data.picName = 'remove'
-    end
-    if data.picName  == 'build' and data.id == 21 then
-        data.picName = 'move'
     end
 
     self.picName = data.picName
@@ -89,8 +84,6 @@ function MiaoBuild:ctor(m, data)
     self.bg = CCLayer:create()
     self.heightNode = addNode(self.bg)
 
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("buildOne.plist")
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
@@ -103,7 +96,7 @@ function MiaoBuild:ctor(m, data)
             --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
         --民居 农田
-        elseif self.id == 1 then
+        elseif self.data.kind == 5 then
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = House.new(self) 
             self.funcBuild:initView()
@@ -115,6 +108,7 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Factory.new(self)
             self.funcBuild:initView()
+        --普通商店1
         elseif self.id == 6 then
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
@@ -123,6 +117,11 @@ function MiaoBuild:ctor(m, data)
         elseif self.id == 7 then
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Drink.new(self)
+            self.funcBuild:initView()
+        --其它商店
+        elseif self.data.IsStore == 1 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = ItemShop.new(self)
             self.funcBuild:initView()
         elseif self.id == 5 then
             self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})

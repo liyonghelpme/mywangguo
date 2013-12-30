@@ -321,8 +321,14 @@ function MiaoBuildLayer:initMerchantRoad()
         end
     end
 end
+function MiaoBuildLayer:initPic()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("buildOne.plist")
+    sf:addSpriteFramesWithFile("buildTwo.plist")
+end
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
+    self:initPic()
     --[[
     self:initSea()
     self:initSlope()
