@@ -52,6 +52,7 @@ function FindPeople2:ctor()
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=pdata.health, size=25, color=hexToDec('f8b551'), font="f2"})), {1.00, 0.50}), {590, fixY(sz.height, 258)})
     self.health = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999银币", size=25, color=hexToDec('f8b551'), font="f2"})), {1.00, 0.50}), {508, fixY(sz.height, 461)})
+    self.costWord = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=pdata.brawn, size=25, color=hexToDec('f8b551'), font="f2"})), {1.00, 0.50}), {590, fixY(sz.height, 309)})
     self.brawn = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=pdata.shoot, size=25, color=hexToDec('f8b551'), font="f2"})), {1.00, 0.50}), {590, fixY(sz.height, 360)})
@@ -143,9 +144,22 @@ function FindPeople2:setPeople()
     newProNum(self.brawnBar, pdata.brawn, 300)
     newProNum(self.shootBar, pdata.shoot, 300)
     newProNum(self.laborBar, pdata.labor, 300)
+
+    if pdata.silver > 0 then
+        self.costWord:setString(pdata.silver.."银币")
+    else
+        self.costWord:setString(pdata.gold.."金币")
+    end
 end
 
 function FindPeople2:onPeople()
-    global.director:popView()
-    global.director.curScene.page:addPeople(self.num)
+    local pdata = Logic.people[self.num]
+    local cost = {silver=pdata.silver, gold=pdata.gold}
+    if not checkCost(cost) then
+        addBanner("钱不够!")
+    else
+        doCost(cost)
+        global.director:popView()
+        global.director.curScene.page:addPeople(self.num)
+    end
 end

@@ -56,9 +56,9 @@ function Director:popView()
     print('popView', #self.stack, v, v.bg)
     v.bg:removeFromParentAndCleanup(true)
     --Logic.paused = false
-    setLogicPause(false)
     
     if #self.stack == 0 then
+        setLogicPause(false)
         Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
     else
         local ov = self.stack[#self.stack]

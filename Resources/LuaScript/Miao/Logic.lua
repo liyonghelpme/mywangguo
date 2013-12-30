@@ -93,13 +93,27 @@ end
 Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
 
 function checkCost(c)
-    if Logic.resource.silver < c then
-        return false
+    if type(c) == "table" then
+        for k, v in pairs(c) do
+            if Logic.resource[k] < v then
+                return false
+            end
+        end
+    else
+        if Logic.resource.silver < c then
+            return false
+        end
     end
     return true
 end
 function doCost(c)
-    Logic.resource.silver = Logic.resource.silver-c
+    if type(c) == 'table' then
+        for k, v in pairs(c) do
+            Logic.resource[k] = Logic.resource[k]-v
+        end
+    else
+        Logic.resource.silver = Logic.resource.silver-c
+    end
     Event:sendMsg(EVENT_TYPE.UPDATE_RESOURCE) 
 end
 function doGain(g)

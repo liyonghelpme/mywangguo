@@ -68,6 +68,9 @@ function registerEnterOrExit(obj)
             if obj.enterScene ~= nil then
                 obj:enterScene()
             end
+            if obj.needUpdate then
+                registerUpdate(obj)
+            end
             regEvent(obj)
         elseif tag == 'exit' then
             if obj.updateFunc ~= nil then
