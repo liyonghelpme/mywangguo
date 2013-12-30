@@ -1,7 +1,17 @@
 require "menu.PeopleInfo"
 TrainMenu2 = class()
 function TrainMenu2:adjustPos()
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local cx, cy = ds[1]/2, ds[2]/2
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(self.bg, sca)
+    setPos(self.bg, {nx, ny})
+    self.cl:setContentSize(CCSizeMake(self.listSize.width, self.HEIGHT*sca))
 end
+
 function TrainMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
@@ -13,6 +23,7 @@ function TrainMenu2:ctor()
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="角色升级", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {545, fixY(sz.height, 153)})
 
     local listSize = {width=546, height=318}
+    self.listSize = listSize
     self.HEIGHT = listSize.height
     self.cl = Scissor:create()
     self.temp:addChild(self.cl)
@@ -26,7 +37,6 @@ function TrainMenu2:ctor()
     self.flowHeight = 0
     self:updateTab()
 
-    self:adjustPos()
     self:setSel(1)
 
 
@@ -37,6 +47,9 @@ function TrainMenu2:ctor()
     local pro = setAnchor(setSize(setPos(addSprite(sp, "scrollPro.png"), {0, fixY(315, 0)}), {17, 157}), {0.0, 1})
     self.scrollPro = pro
 
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {460, fixY(sz.height, 627)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv", size=41, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {332, fixY(sz.height, 216)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=26, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {717, fixY(sz.height, 219)})
 
     --每个屏幕显示6个 单屏幕比总量是高度比例
     --修正滚动条3个像素 根据缩放比例决定
@@ -47,11 +60,7 @@ function TrainMenu2:ctor()
     local sy = self.scrollHeight/(sz[2]-4)
     setScaleY(self.scrollPro, sy)
 
-
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {460, fixY(sz.height, 627)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv", size=41, color=hexToDec('f8b551'), font="f2"})), {0.00, 0.50}), {332, fixY(sz.height, 216)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=26, color={32, 7, 220}, font="f1"})), {0.00, 0.50}), {717, fixY(sz.height, 219)})
+    self:adjustPos()
 end
 
 function TrainMenu2:updateTab()

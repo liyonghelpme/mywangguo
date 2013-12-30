@@ -21,6 +21,7 @@ function EquipMenu2:ctor()
 
 
     local listSize = {width=551, height=325}
+    self.listSize = listSize
     self.HEIGHT = 325
     self.cl = Scissor:create()
     self.temp:addChild(self.cl)
@@ -45,6 +46,7 @@ function EquipMenu2:ctor()
     self.scrollHeight = math.max(math.min(6/total*315, 315), 10)
     sy = self.scrollHeight/(sz[2]-4)
     setScaleY(self.scrollPro, sy)
+    centerUI(self)
 end
 
 function EquipMenu2:setSel(s)

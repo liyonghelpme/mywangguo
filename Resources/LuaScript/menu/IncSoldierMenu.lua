@@ -3,7 +3,7 @@ function IncSoldierMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-20.0, fixY(vs.height, 0+sz.height)+-4.5})
+    self.temp = setPos(addNode(self.bg), {-20.0, -4.5})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {513, fixY(sz.height, 379)}), {619, 381}), {0.50, 0.50})
     
     local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=1, touchBegan=self.selTab})
@@ -56,6 +56,8 @@ function IncSoldierMenu:ctor()
 
     self:initButton()
     self:selTab(1)
+
+    centerUI(self)
 end
 function IncSoldierMenu:initButton()
     for i=1, 4, 1 do

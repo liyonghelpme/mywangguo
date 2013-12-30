@@ -1598,3 +1598,16 @@ function calAttr(id, level, equip)
     return temp
 end
 
+function centerUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local cx, cy = ds[1]/2, ds[2]/2
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(sp.bg, sca)
+    setPos(sp.bg, {nx, ny})
+    if sp.cl ~= nil then
+        sp.cl:setContentSize(CCSizeMake(sp.listSize.width, sp.HEIGHT*sca))
+    end
+end

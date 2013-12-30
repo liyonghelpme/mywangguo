@@ -4,7 +4,7 @@ function StoreMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-30.0, fixY(vs.height, 0+sz.height)+3.5})
+    self.temp = setPos(addNode(self.bg), {-30.0, 3.5})
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="全部", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {332, fixY(sz.height, 240)})
@@ -29,6 +29,7 @@ function StoreMenu2:ctor()
 
 
     local listSize = {width=537, height=269}
+    self.listSize = listSize
     self.HEIGHT = 269
     self.cl = Scissor:create()
     self.temp:addChild(self.cl)
@@ -51,8 +52,9 @@ function StoreMenu2:ctor()
     self.scrollBackHei = 315
     sy = self.scrollHeight/(sz[2]-4)
     setScaleY(self.scrollPro, sy)
-
     self:setSel(1)
+
+    centerUI(self)
 end
 
 function StoreMenu2:setSel(s)

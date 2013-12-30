@@ -1,5 +1,6 @@
 PeopleInfo = class()
 function PeopleInfo:adjustPos()
+    centerUI(self)
 end
 function PeopleInfo:ctor(p, attribute)
     self.selPeople = p
@@ -106,8 +107,9 @@ function PeopleInfo:ctor(p, attribute)
         setPos(addChild(self.temp, but.bg), {543, fixY(sz.height, 626)})
     end
 
-
     self:setPeople()
+
+    self:adjustPos()
 end
 function PeopleInfo:setPeople()
     local total = #Logic.farmPeople

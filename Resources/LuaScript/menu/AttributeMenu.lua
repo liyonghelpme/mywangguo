@@ -4,7 +4,7 @@ function AttributeMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-33.0, fixY(vs.height, 0+sz.height)+3.5})
+    self.temp = setPos(addNode(self.bg), {-33.0, 3.5})
     local but = ui.newButton({image="taba.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=2, touchBegan=self.onTab})
     but:setContentSize(82, 126)
     setPos(addChild(self.temp, but.bg), {908, fixY(sz.height, 357)})
@@ -29,6 +29,7 @@ function AttributeMenu:ctor()
 
 
     local listSize = {width=546, height=318}
+    self.listSize = listSize
     self.HEIGHT = 318
     self.cl = Scissor:create()
     self.temp:addChild(self.cl)
@@ -55,6 +56,7 @@ function AttributeMenu:ctor()
     sy = self.scrollHeight/(sz[2]-4)
     setScaleY(self.scrollPro, sy)
     self:setSel(1)
+    centerUI(self)
 end
 
 function AttributeMenu:setView()

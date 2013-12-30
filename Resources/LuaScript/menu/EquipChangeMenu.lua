@@ -5,7 +5,7 @@ function EquipChangeMenu:ctor(p, changeKind)
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-50, fixY(vs.height, 0+sz.height)+3.5})
+    self.temp = setPos(addNode(self.bg), {-50, 3.5})
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="准备后可自动回复15%的体力", size=26, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {394, fixY(sz.height, 626)})
@@ -21,6 +21,7 @@ function EquipChangeMenu:ctor(p, changeKind)
     setPos(addChild(self.temp, but.bg), {928, fixY(sz.height, 390)})
 
     local listSize = {width=537, height=269}
+    self.listSize = listSize
     self.HEIGHT = 269
     self.cl = Scissor:create()
     self.temp:addChild(self.cl)
@@ -51,6 +52,7 @@ function EquipChangeMenu:ctor(p, changeKind)
     setScaleY(self.scrollPro, sy)
 
     --self:initWeaponView()
+    centerUI(self)
 end
 function EquipChangeMenu:initWeaponView()
     local sz = {width=1024, height=768}
