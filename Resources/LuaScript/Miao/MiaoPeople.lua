@@ -175,8 +175,8 @@ function MiaoPeople:findHouse()
             local allBuild = self.map.mapGridController.allBuildings
             local p = getPos(self.bg)
             for k, v in pairs(allBuild) do
-                --找house
-                if k.owner == nil and k.state == BUILD_STATE.FREE and k.id == 1 and k.deleted == false then
+                --找house kind == 5
+                if k.owner == nil and k.state == BUILD_STATE.FREE and k.data.kind == 5 and k.deleted == false then
                     local hp = getPos(k.bg)
                     local dist = math.abs(hp[1]-p[1])+math.abs(hp[2]-p[2]) 
                     if dist < minDist then
@@ -611,7 +611,7 @@ function MiaoPeople:doMove(diff)
                     end
                 else
                     self:beforeHandle()
-                    if self.realTarget.id == 1 then
+                    if self.realTarget.data.kind == 5 then
                         self:handleHome()
                     --运送物资到工厂 带走农田产量
                     --之前的是农田 并且 农田已经 种植好了 则 走向 工厂

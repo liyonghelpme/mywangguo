@@ -24,7 +24,7 @@ function SellMenu2:ctor(b)
     setPos(setAnchor(addChild(self.temp, w), {0.50, 0.50}), {531, fixY(sz.height, 363)})
 
     local but = ui.newButton({image="butc.png", text="确定", font="f1", size=25, delegate=self, callback=self.onSell, conSize={117, 43} })
-    but:setContentSize(73, 38)
+    --but:setContentSize(73, 38)
     setPos(addChild(self.temp, but.bg), {532, fixY(sz.height, 533)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="确定卖出？", size=34, color={102, 4, 554}, font="f1"})), {0.00, 0.50}), {450, fixY(sz.height, 247)})
 end

@@ -49,8 +49,10 @@ function TMXMenu2:receiveMsg(msg, para)
         self:updateText()
     elseif msg == EVENT_TYPE.SHOW_DIALOG then
         self.mbut.text:setString("返回")
+        setVisible(self.leftBut.bg, false)
     elseif msg == EVENT_TYPE.CLOSE_DIALOG then
         self.mbut.text:setString("菜单")
+        setVisible(self.leftBut.bg, true)
     end
 end
 function TMXMenu2:onMenu()

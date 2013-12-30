@@ -479,6 +479,8 @@ function MiaoPage:finishBuild()
         --道路和 斜坡冲突 斜坡不能移动
         --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
         --矿坑斜坡上
+        ---11 现在是服装店 不再是矿坑了 矿坑建筑物 拥有自己的新的ID
+        --[[
         if self.curBuild.picName == 'build' and self.curBuild.id == 11 then
             if self.curBuild.funcBuild:checkSlope() then
                 self.curBuild:finishBuild()
@@ -486,8 +488,9 @@ function MiaoPage:finishBuild()
             else
                 addBanner("必须建造到斜坡上面！")
             end
+        --]]
         --桥梁建河流上
-        elseif self.curBuild.picName == 'build' and self.curBuild.id == 3 then
+        if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
             if self.curBuild.colNow == 0 then
                 self.curBuild:finishBuild()
