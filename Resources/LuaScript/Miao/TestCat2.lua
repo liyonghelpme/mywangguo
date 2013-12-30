@@ -64,6 +64,9 @@ function Cat2:initView()
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=30})
     setPos(self.people.stateLabel, {0, 100})
     self.people.heightNode:addChild(self.people.stateLabel, 10)
+    if not DEBUG then
+        setVisible(self.people.stateLabel, false)
+    end
 
 
     sf:addSpriteFramesWithFile("car.plist")
