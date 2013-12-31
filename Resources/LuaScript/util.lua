@@ -1421,7 +1421,7 @@ function colorLine(param)
     local curWidth = 0
     local anchor = param.anchor or {0, 1}
     for k, v in ipairs(words) do
-        print("colorLine", v)
+        --print("colorLine", v)
         local temp = colorWords({text=v, color=col, size=si, width=param.width, font=param.font})
         n:addChild(temp)
         setPos(setAnchor(temp, anchor), {0, -curHeight})
