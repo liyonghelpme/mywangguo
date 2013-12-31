@@ -64,6 +64,11 @@ function TrainMenu2:ctor()
 end
 
 function TrainMenu2:updateTab()
+    removeSelf(self.flowNode)
+    self.flowNode = addNode(self.cl)
+    setPos(self.flowNode, {0, self.HEIGHT})
+    self.flowHeight = 0
+
 	local initX = 1
 	local initY = -57
 	local offX = 0
@@ -83,7 +88,7 @@ function TrainMenu2:updateTab()
         panel:setTag(k)
         setContentSize(panel, {sz.width, sz.height})
         local sp = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {306, fixY(55, 26)}), {479, 52}), {0.50, 0.50})
-        setAnchor(setSize(setPos(addSprite(panel, "headIcon.png"), {27, fixY(55, 27)}), {50, 55}), {0.50, 0.50})
+        setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {27, fixY(55, 27)}), {50, 55}), {0.50, 0.50})
 
         local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color=hexToDec('fff100'), font="f2"})), {0.00, 0.50}), {87, fixY(sz.height, 27)})
         local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=Logic.LevelCost[v.level+1+1].."银币", size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {421, fixY(sz.height, 27)})
@@ -123,6 +128,9 @@ function TrainMenu2:touchMoved(x, y)
 end
 
 function TrainMenu2:setSel(s)
+    if #self.data < s then
+        return
+    end
     if self.selPanel ~= s then
         if self.selPanel ~= nil then
             setTexture(self.data[self.selPanel][1], "listB.png")
@@ -170,4 +178,8 @@ function TrainMenu2:touchEnded(x, y)
     oldPos[2] = math.max(0, math.min(self.minPos, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
+end
+function TrainMenu2:refreshData()
+    self:updateTab()
+    self:setSel(self.selPanel)
 end

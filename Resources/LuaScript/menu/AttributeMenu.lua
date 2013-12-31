@@ -135,7 +135,7 @@ function AttributeMenu:updateTab()
             local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.brawn, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {327, fixY(sz.height, 27)})
             local w4 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {253, fixY(sz.height, 26)})
             local w5 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {128, fixY(sz.height, 25)})
-            local sp = setAnchor(setSize(setPos(addSprite(panel, "headIcon.png"), {25, fixY(sz.height, 27)}), {50, 55}), {0.50, 0.50})
+            local sp = setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {25, fixY(sz.height, 27)}), {50, 55}), {0.50, 0.50})
 
             table.insert(self.data, {listback, w1, w2, w3, w4, w5})
         else
@@ -261,4 +261,7 @@ function AttributeMenu:touchEnded(x, y)
     oldPos[2] = math.max(0, math.min(self.minPos, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
+end
+function AttributeMenu:refreshData()
+    self:updateTab()
 end

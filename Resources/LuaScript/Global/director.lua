@@ -39,6 +39,7 @@ function Director:pushView(view, dark, autoPop, showDark)
         temp.bg:addChild(d.bg)
         temp.bg:addChild(view.bg)
         self.curScene.bg:addChild(temp.bg)
+        temp.realView = view
         table.insert(self.stack, temp)
     else
         self.curScene.bg:addChild(view.bg)
@@ -64,8 +65,12 @@ function Director:popView()
         local ov = self.stack[#self.stack]
         self.curScene.bg:addChild(ov.bg)
         ov.bg:release()
+        if ov.realView ~= nil and ov.realView.refreshData ~= nil then
+            ov.realView:refreshData()
+        end
     end
 end
+
 --上一个场景没有对话框
 function Director:popTransfer()
     print("popTransfer", #self.sceneStack, self.sceneStack[1])

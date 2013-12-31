@@ -72,3 +72,4 @@ function EquipChangeMenu:getFirstAtt(edata)
         end
     end
 end
+

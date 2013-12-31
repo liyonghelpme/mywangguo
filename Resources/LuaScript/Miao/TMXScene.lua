@@ -44,7 +44,8 @@ function TMXScene:initData(rep, param)
     end
     local r = u:getStringForKey("holdNum")
     if r ~= "" then
-        Logic.holdNum = simple.decode(r)
+        Logic.holdNum = tableToDict(simple.decode(r))
+        print("decode holdNum", simple.encode(Logic.holdNum))
     end
     local r = u:getStringForKey("researchData")
     if r ~= "" then
@@ -53,6 +54,8 @@ function TMXScene:initData(rep, param)
         Logic.inResearch = rd.inResearch
         Logic.ownGoods = rd.ownGoods
     end
+    initResearchEquip() 
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
@@ -127,6 +130,7 @@ function TMXScene:update(diff)
             table.remove(Logic.researchGoods, Logic.inResearch[1])
             table.insert(Logic.ownGoods, resG)
             Logic.inResearch = nil
+            initResearchEquip()
         end
     end
 end
@@ -187,7 +191,9 @@ function TMXScene:saveGame(hint)
     end
 
     u:setStringForKey("resource", simple.encode(Logic.resource))
-    u:setStringForKey("holdNum", simple.encode(Logic.holdNum))
+
+    --数字作为key的 dict 不能转化成json格式 所以先转化成一个 table
+    u:setStringForKey("holdNum", simple.encode(dictToTable(Logic.holdNum)))
     u:setStringForKey("researchData", simple.encode({researchGoods=Logic.researchGoods, inResearch=Logic.inResearch, ownGoods=Logic.ownGoods}))
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
 end

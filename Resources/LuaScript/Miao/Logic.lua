@@ -35,7 +35,20 @@ Logic.inResearch = nil
 
 --已经研究的物品 商店可以购买
 --默认割草镰刀
-Logic.ownGoods = {{0, 1}}
+Logic.ownGoods = {{0, 1}, {0, 28}, {0, 47}, {0, 67}}
+
+--初始化已经研究的物品
+--研究结束更新
+Logic.researchEquip = {}
+function initResearchEquip()
+    Logic.researchEquip = {}
+    for k, v in ipairs(Logic.ownGoods) do
+        if v[1] == 0 then
+            Logic.researchEquip[v[2]] = true
+        end
+    end
+end
+
 
 --获得什么条件可以新增加的研究物品
 

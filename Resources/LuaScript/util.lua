@@ -1614,3 +1614,17 @@ function centerUI(sp)
         sp.cl:setContentSize(CCSizeMake(sp.listSize.width, sp.HEIGHT*sca))
     end
 end
+function dictToTable(t)
+    local temp = {}
+    for k, v in pairs(t) do
+        table.insert(temp, {k, v})
+    end
+    return temp
+end
+function tableToDict(t)
+    local temp = {}
+    for k, v in ipairs(t) do
+        temp[v[1]] = v[2]
+    end
+    return temp
+end

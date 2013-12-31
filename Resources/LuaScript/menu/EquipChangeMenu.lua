@@ -139,6 +139,10 @@ end
 
 
 function EquipChangeMenu:setSel(s)
+    --数据量太少
+    if #self.data < s then
+        return
+    end
     if self.selPanel ~= s then
         if self.selPanel ~= nil then
             setTexture(self.data[self.selPanel][1], "listB.png")
@@ -161,8 +165,12 @@ function EquipChangeMenu:setSel(s)
             self:setBodyInfo()
         end
     end
+
+    local edata = self.allData[self.selPanel]
+    self.desWord:setString(edata.des)
 end
 
+--设定每种类型装备的 显示列表
 function EquipChangeMenu:setView()
     if self.selPage ~= nil then
         removeSelf(self.selPage)
@@ -202,6 +210,7 @@ function EquipChangeMenu:onRight()
     self:setView()
 end
 
+
 function EquipChangeMenu:updateTab()
     removeSelf(self.flowNode)
     self.flowNode = addNode(self.cl)
@@ -227,53 +236,72 @@ function EquipChangeMenu:updateTab()
         allData = Logic.allSpe
     end
     self.allData = allData
-
+    print("refresh View", self.selNum)
+    self.oldEquipId = nil
+    self.oldEquip = nil
+    local tempAllData = {}
 	for k, v in ipairs(allData) do
-		local row = math.floor((k-1)/rowWidth)
-		local col = (k-1)%rowWidth
+        if Logic.researchEquip[v.id]  == true then
+            table.insert(tempAllData, v)
+            local row = math.floor((k-1)/rowWidth)
+            local col = (k-1)%rowWidth
 
-        local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
-        panel:setTag(k)
-        setContentSize(panel, {sz.width, sz.height})
+            local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
+            panel:setTag(k)
+            setContentSize(panel, {sz.width, sz.height})
 
-        local back = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {297, fixY(sz.height, 30)}), {479, 52}), {0.50, 0.50})
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "goodsIcon.png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
-        local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
-        local w2
-        --当前装备的装备 高亮显示
-        if self.selNum == 1 then
-            if self.people.weapon == v.id then
-                setColor(back, {255, 255, 0})
+            local back = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {297, fixY(sz.height, 30)}), {479, 52}), {0.50, 0.50})
+            local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
+            local sp = setAnchor(setSize(setPos(addSprite(panel, "equip"..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
+
+            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
+            local w2
+            --当前装备的装备 高亮显示
+            --取消掉旧装备的高亮 增加新装备的高亮
+            if self.selNum == 1 then
+                print("self.people.weapon", self.people.weapon, v.id)
+                if self.people.weapon == v.id then
+                    setColor(back, {255, 255, 0})
+                    self.oldEquipId = v.id
+                    self.oldEquip = back
+                    print("self.oldEquip", self.oldEquip)
+                end
+                w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.attack, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+            elseif self.selNum == 2 then
+                if self.people.head == v.id then
+                    setColor(back, {255, 255, 0})
+                    self.oldEquipId = v.id
+                    self.oldEquip = back
+                end
+
+                local aname, anum = self:getFirstAtt(v)
+                local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=aname, size=20, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+                w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text="+"..anum, size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {322, fixY(sz.height, 30)})
+            elseif self.selNum == 3 then
+                if self.people.body == v.id then
+                    setColor(back, {255, 255, 0})
+                    self.oldEquipId = v.id
+                    self.oldEquip = back
+                end
+                w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.defense, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+
+            elseif self.selNum == 4 then
+                if self.people.spe == v.id then
+                    setColor(back, {255, 255, 0})
+                    self.oldEquipId = v.id
+                    self.oldEquip = back
+                end
+                w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text='', size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+
             end
-            w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.attack, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
-        elseif self.selNum == 2 then
-            if self.people.head == v.id then
-                setColor(back, {255, 255, 0})
-            end
 
-            local aname, anum = self:getFirstAtt(v)
-            local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=aname, size=20, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
-            w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text="+"..anum, size=20, color={255, 255, 255}, font="f1"})), {1.00, 0.50}), {342, fixY(sz.height, 30)})
-        elseif self.selNum == 3 then
-            if self.people.body == v.id then
-                setColor(back, {255, 255, 0})
-            end
-            w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.defense, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+            local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=(Logic.holdNum[v.id] or 0).."个", size=20, color={240, 196, 92}, font="f1"})), {1, 0.50}), {473, fixY(sz.height, 29)})
 
-        elseif self.selNum == 4 then
-            if self.people.spe == v.id then
-                setColor(back, {255, 255, 0})
-            end
-            w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text='', size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
-
+            table.insert(self.data, {back, w1, w2, w3, v.id})
+            self.flowHeight = self.flowHeight+offY
         end
-
-        local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=(Logic.holdNum[v.id] or 0).."个", size=20, color={240, 196, 92}, font="f1"})), {1, 0.50}), {473, fixY(sz.height, 29)})
-
-		table.insert(self.data, {back, w1, w2, w3})
-        self.flowHeight = self.flowHeight+offY
 	end
+    self.allData = tempAllData
 end
 
 function EquipChangeMenu:touchBegan(x, y)
@@ -310,8 +338,24 @@ function EquipChangeMenu:touchEnded(x, y)
             if self.selPanel ~= t then
                 self:setSel(t)
             else
-                --global.director:popView()
-                global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                local edata = self.allData[self.selPanel]
+                local eid = edata.id
+                --放下装备
+                if self.oldEquipId == eid then
+                    changeEquip(eid, 1)
+                    self.people:putEquip(eid)
+                    self:refreshData()
+                    addBanner(self.people.name.."卸下装备"..edata.name)
+                    self.oldEquipId = nil
+                    self.oldEquip = nil
+                elseif Logic.holdNum[eid] ~= nil and Logic.holdNum[eid] > 0  then
+                    changeEquip(eid, -1)
+                    self.people:setEquip(eid)
+                    addBanner(self.people.name.."装备"..edata.name..'成功')
+                    self:refreshData()
+                else
+                    global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                end
                 return
             end
         end
@@ -330,6 +374,11 @@ function EquipChangeMenu:touchEnded(x, y)
     oldPos[2] = math.max(0, math.min(self.minPos, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
+end
+--重新设定装备剩余数量 和当前装备的高亮状态
+--如果装备剩余数量大于0 则不用购买
+function EquipChangeMenu:refreshData()
+    self:setView()
 end
 
 require "menu.EquipChangeMenuStatic"

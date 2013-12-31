@@ -50,7 +50,10 @@ function EquipMenu2:ctor()
 end
 
 function EquipMenu2:setSel(s)
-    if self.selPanel ~= s then
+    if #self.data < s then
+        return
+    end
+    --if self.selPanel ~= s then
         if self.selPanel ~= nil then
             setTexture(self.data[self.selPanel][1], "listB.png")
             local word = self.data[self.selPanel] 
@@ -64,9 +67,14 @@ function EquipMenu2:setSel(s)
         setColor(word[3], {255, 255, 255})
         setColor(word[4], {255, 255, 255})
         setColor(word[5], {255, 255, 255})
-    end
+    --end
 end
 function EquipMenu2:updateTab()
+    removeSelf(self.flowNode)
+    self.flowNode = addNode(self.cl)
+    setPos(self.flowNode, {0, self.HEIGHT})
+    self.flowHeight = 0
+
 	local initX = 0
 	local initY = -60
 	local offX = 0
@@ -91,10 +99,10 @@ function EquipMenu2:updateTab()
 
         local sp = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {193, fixY(sz.height, 29)}), {263, 52}), {0.50, 0.50})
         local list = sp
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "headIcon.png"), {25, fixY(sz.height, 30)}), {50, 55}), {0.50, 0.50})
+        local sp = setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {25, fixY(sz.height, 30)}), {50, 55}), {0.50, 0.50})
 
         --装备的属性
-        local pdata = calAttr(v.id, v.level)
+        local pdata = calAttr(v.id, v.level, v)
         local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color={255, 241, 0}, font="f2"})), {0.00, 0.50}), {83, fixY(sz.height, 30)})
         local w1 = w
         local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={240, 196, 192}, font="f1"})), {0.00, 0.50}), {162, fixY(sz.height, 29)})
@@ -169,6 +177,7 @@ function EquipMenu2:touchEnded(x, y)
                 local icon = checkInChild(child, newPos)
                 local sdata = self.data[self.selPanel]
                 for i=6, 9, 1 do
+                    print("icon is ", icon, sdata[i])
                     if sdata[i] == icon then
                         --global.director:popView()
                         global.director:pushView(EquipChangeMenu.new(Logic.farmPeople[self.selPanel], i-5), 1)
@@ -196,3 +205,9 @@ function EquipMenu2:touchEnded(x, y)
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
 end
+--keep Select keep View 保证选择 保证view
+function EquipMenu2:refreshData()
+    self:updateTab()
+    self:setSel(self.selPanel)
+end
+
