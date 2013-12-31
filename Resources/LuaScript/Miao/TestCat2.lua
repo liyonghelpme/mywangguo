@@ -43,10 +43,14 @@ function Cat2:initView()
 
     sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", self.people.id))
     --需要调整scaleX 的值 类似于小车
-    self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, 1, true)
-    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, 1, true)
-    self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, 1, true)
-    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, 1, true)
+    local aniTime = 1
+    if self.people.data.skill == 42 then
+        aniTime = 0.5
+    end
+    self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, aniTime, true)
+    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 1, aniTime, true)
+    self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, aniTime, true)
+    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 1, aniTime, true)
 
     if self.people.data.girl == 1 then 
         self.people.shadow = CCSprite:create("roleShadow1.png")

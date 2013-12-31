@@ -14,18 +14,32 @@ function PeopleInfo:ctor(p, attribute)
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {539, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {536, fixY(sz.height, 421)}), {617, 352}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "heroAttr.png"), {403, fixY(sz.height, 447)}), {181, 239}), {0.50, 0.50})
+    local but = ui.newButton({image="heroAttr.png", delegate=self, callback=self.onAtt})
+    addChild(self.temp, setPos(but.bg, {403, fixY(sz.height, 447)}))
+
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="林雨披之助", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {358, fixY(sz.height, 219)})
     self.name = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="长刀", size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 350)})
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="长刀", size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 350)})
+    self.weapon = w1
+
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头巾", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 397)})
+    self.head = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="桶甲", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {389, fixY(sz.height, 448)})
+    self.body = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="草药", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {389, fixY(sz.height, 493)})
+    self.spe = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="物资搬运", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {376, fixY(sz.height, 543)})
+    self.skill = w
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 349)}), {32, 35}), {0.50, 0.50})
+    self.weaponIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 398)}), {32, 35}), {0.50, 0.50})
+    self.headIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 446)}), {32, 35}), {0.50, 0.50})
+    self.bodyIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 495)}), {32, 35}), {0.50, 0.50})
+    self.speIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 542)}), {32, 35}), {0.50, 0.50})
+    self.skillIcon = sp
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="武", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {268, fixY(sz.height, 349)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {269, fixY(sz.height, 396)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="体", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {266, fixY(sz.height, 446)})
@@ -111,18 +125,64 @@ function PeopleInfo:ctor(p, attribute)
 
     self:adjustPos()
 end
+function PeopleInfo:onAtt()
+    global.director:pushView(EquipChangeMenu.new(Logic.farmPeople[self.selPeople]), 1)
+end
 function PeopleInfo:setPeople()
     local total = #Logic.farmPeople
     local pdata = Logic.farmPeople[self.selPeople]
     self.title:setString("角色升级"..self.selPeople..'/'..total)
     self.name:setString(pdata.data.name)
-    local att = calAttr(pdata.id, pdata.level)
+    local att = calAttr(pdata.id, pdata.level, pdata)
     self.attack:setString(att.attack)
     self.defense:setString(att.defense)
     self.health:setString(att.health)
     self.brawn:setString(att.brawn)
     self.shoot:setString(att.shoot)
     self.labor:setString(att.labor)
+
+    if pdata.weapon ~= nil then
+        self.weapon:setString(Logic.equip[pdata.weapon].name)
+        setDisplayFrame(self.weaponIcon, "equip"..pdata.weapon..'.png')
+        setVisible(self.weaponIcon, true)
+    else
+        setVisible(self.weaponIcon, false)
+        self.weapon:setString('')
+    end
+
+    if pdata.head ~= nil then
+        self.head:setString(Logic.equip[pdata.head].name)
+        setDisplayFrame(self.headIcon, "equip"..pdata.head..'.png')
+        setVisible(self.headIcon, true)
+    else
+        setVisible(self.headIcon, false)
+        self.head:setString('')
+    end
+    if pdata.body ~= nil then
+        self.body:setString(Logic.equip[pdata.body].name)
+        setDisplayFrame(self.bodyIcon, "equip"..pdata.body..'.png')
+        setVisible(self.bodyIcon, true)
+    else
+        setVisible(self.bodyIcon, false)
+        self.body:setString('')
+    end
+    if pdata.spe ~= nil then
+        self.spe:setString(Logic.equip[pdata.spe].name)
+        setDisplayFrame(self.speIcon, "equip"..pdata.spe..'.png')
+        setVisible(self.speIcon, true)
+    else
+        setVisible(self.speIcon, false)
+        self.spe:setString('')
+    end
+    if pdata.data.skillName ~= nil and pdata.data.skillName ~= '' then
+        self.skill:setString(pdata.data.skillName)
+        setDisplayFrame(self.skillIcon, "skill"..pdata.data.skill..'.png')
+        setVisible(self.skillIcon, true)
+    else
+        setVisible(self.skillIcon, false)
+        self.skill:setString('')
+    end
+
 
     if not self.attribute then
         self.silver:setString(Logic.LevelCost[pdata.level+1+1].."银币")
@@ -135,6 +195,7 @@ function PeopleInfo:setPeople()
     newProNum(self.brawnBar, att.brawn, 300)
     newProNum(self.shootBar, att.shoot, 300)
     newProNum(self.laborBar, att.labor, 300)
+
 end
 
 function PeopleInfo:onLeft()
@@ -166,3 +227,6 @@ function PeopleInfo:onLevel()
     end
 end
 
+function PeopleInfo:refreshData()
+    self:setPeople()
+end

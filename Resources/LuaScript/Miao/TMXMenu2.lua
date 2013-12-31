@@ -41,8 +41,22 @@ function TMXMenu2:ctor(s)
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最长的村落名字", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {16, fixY(sz.height, 25)})
     self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG, EVENT_TYPE.UPDATE_RESOURCE}
+
     registerEnterOrExit(self)
+    self.needUpdate = true
+    self.passTime = 0
 end
+
+function TMXMenu2:update(diff)
+    if not Logic.paused then
+        self.passTime = self.passTime + diff
+        if self.passTime > 1 then
+            self.passTime = 0
+            self:updateYear()
+        end
+    end
+end
+
 
 function TMXMenu2:receiveMsg(msg, para)
     if msg == EVENT_TYPE.UPDATE_RESOURCE then

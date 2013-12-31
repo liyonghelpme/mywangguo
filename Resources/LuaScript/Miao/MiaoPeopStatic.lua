@@ -326,6 +326,7 @@ function MiaoPeople:sendGoods()
         self.carGoods = sp
     end
     setScaleX(self.changeDirNode, sca)
+    self.oldCarPos = getPos(self.changeDirNode)
     self.carVirAct = repeatForever(sequence({moveby(0.2, 0, 5), moveby(0.2, 0, -5)}))
     self.changeDirNode:runAction(self.carVirAct)
 end
@@ -342,6 +343,7 @@ function MiaoPeople:putGoods()
         end
         self:adjustShadow()
         self.changeDirNode:stopAction(self.carVirAct)
+        setPos(self.changeDirNode, self.oldCarPos)
     end
 end
 

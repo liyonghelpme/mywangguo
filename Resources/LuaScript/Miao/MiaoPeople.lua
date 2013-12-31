@@ -1053,6 +1053,22 @@ end
 function MiaoPeople:updateLevel()
     self.level = self.level+1
 end
+
+--旧装备放下
+function MiaoPeople:putEquip(eid)
+    local ed = Logic.equip[eid]
+    local kindToPart = {
+        [0]='weapon',
+        [1]='head',
+        [2]='body',
+        [3]='spe',
+    }
+    print("MIao putEquip", self.name, eid, ed.kind)
+    local obj = self
+    obj[kindToPart[ed.kind]] = nil
+end
+
+--旧装备卸下 新装备 装上
 function MiaoPeople:setEquip(eid)
     local ed = Logic.equip[eid]
     local kindToPart = {
@@ -1061,6 +1077,7 @@ function MiaoPeople:setEquip(eid)
         [2]='body',
         [3]='spe',
     }
+    print("MIao setEquip", self.name, eid, ed.kind)
     if ed.kind == 0 then
         if self.weapon ~= nil then
             Logic.holdNum[self.weapon] = (Logic.holdNum[self.weapon] or 0) +1

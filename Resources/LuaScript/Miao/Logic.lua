@@ -35,7 +35,20 @@ Logic.inResearch = nil
 
 --已经研究的物品 商店可以购买
 --默认割草镰刀
-Logic.ownGoods = {{0, 1}}
+Logic.ownGoods = {{0, 1}, {0, 28}, {0, 47}, {0, 67}}
+
+--初始化已经研究的物品
+--研究结束更新
+Logic.researchEquip = {}
+function initResearchEquip()
+    Logic.researchEquip = {}
+    for k, v in ipairs(Logic.ownGoods) do
+        if v[1] == 0 then
+            Logic.researchEquip[v[2]] = true
+        end
+    end
+end
+
 
 --获得什么条件可以新增加的研究物品
 
@@ -93,13 +106,27 @@ end
 Logic.yearHandler = CCDirector:sharedDirector():getScheduler():scheduleScriptFunc(yearUpdate, 1, false)
 
 function checkCost(c)
-    if Logic.resource.silver < c then
-        return false
+    if type(c) == "table" then
+        for k, v in pairs(c) do
+            if Logic.resource[k] < v then
+                return false
+            end
+        end
+    else
+        if Logic.resource.silver < c then
+            return false
+        end
     end
     return true
 end
 function doCost(c)
-    Logic.resource.silver = Logic.resource.silver-c
+    if type(c) == 'table' then
+        for k, v in pairs(c) do
+            Logic.resource[k] = Logic.resource[k]-v
+        end
+    else
+        Logic.resource.silver = Logic.resource.silver-c
+    end
     Event:sendMsg(EVENT_TYPE.UPDATE_RESOURCE) 
 end
 function doGain(g)

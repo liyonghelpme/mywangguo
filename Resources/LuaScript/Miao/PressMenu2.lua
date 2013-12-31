@@ -60,7 +60,7 @@ function PressMenu2:ctor()
                 local sd = Logic.inResearch
                 local diff = math.floor(math.max(math.min((sd[2])/10, 1), 0)*100)
                 local edata = Logic.equip[Logic.researchGoods[sd[1]][2]]
-                local info = ui.newButton({image="info.png", text=edata.name..diff..'%', conSize={181, 60}, size=24, color={255, 255, 255}})
+                local info = ui.newButton({image="info.png", text=edata.name..diff..'%', conSize={181, 60}, size=24, color={0, 0, 0}, font='f2'})
                 setPos(info.bg, {182, 0})
                 but.bg:addChild(info.bg)
             end

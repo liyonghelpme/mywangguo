@@ -130,18 +130,18 @@ function AttributeMenu:updateTab()
             local pdata = calAttr(v.id, v.level, v)
 
             local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color={255, 241, 0}, font="f2"})), {0.00, 0.50}), {87, fixY(sz.height, 27)})
-            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.labor, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {482, fixY(sz.height, 27)})
-            local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.shoot, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {408, fixY(sz.height, 26)})
-            local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.brawn, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {327, fixY(sz.height, 27)})
-            local w4 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {253, fixY(sz.height, 26)})
-            local w5 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {128, fixY(sz.height, 25)})
-            local sp = setAnchor(setSize(setPos(addSprite(panel, "headIcon.png"), {25, fixY(sz.height, 27)}), {50, 55}), {0.50, 0.50})
+            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.labor, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {482, fixY(sz.height, 27)})
+            local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.shoot, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {408, fixY(sz.height, 26)})
+            local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.brawn, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {327, fixY(sz.height, 27)})
+            local w4 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {253, fixY(sz.height, 26)})
+            local w5 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {128, fixY(sz.height, 25)})
+            local sp = setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {25, fixY(sz.height, 27)}), {50, 55}), {0.50, 0.50})
 
             table.insert(self.data, {listback, w1, w2, w3, w4, w5})
         else
             local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color={255, 241, 0}, font="f2"})), {0.00, 0.50}), {87, fixY(sz.height, 27)})
-            local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.skillName, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {430, fixY(sz.height, 27)})
-            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {132, fixY(sz.height, 25)})
+            local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.skillName, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {430, fixY(sz.height, 27)})
+            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {132, fixY(sz.height, 25)})
             local sp = setAnchor(setSize(setPos(addSprite(panel, "goodsIcon.png"), {383, fixY(sz.height, 24)}), {43, 48}), {0.50, 0.50})
             local sp = setAnchor(setSize(setPos(addSprite(panel, "headIcon.png"), {25, fixY(sz.height, 27)}), {50, 55}), {0.50, 0.50})
             table.insert(self.data, {listback, w1, w2})
@@ -194,10 +194,12 @@ end
 
 function AttributeMenu:setSel(s)
     if self.selPanel ~= s then
+        print("self sel", self.selPanel, self.selTab)
         if self.selPanel ~= nil then
             setTexture(self.data[self.selPanel][1], "listB.png")
             local word = self.data[self.selPanel] 
-            if self.setTab == 1 then
+            print("word", #word)
+            if self.selTab == 1 then
                 setColor(word[2], {240, 196, 92})
                 setColor(word[3], {240, 196, 92})
                 setColor(word[4], {240, 196, 92})
@@ -211,7 +213,8 @@ function AttributeMenu:setSel(s)
         self.selPanel = s
         setTexture(self.data[self.selPanel][1], "listA.png")
         local word = self.data[self.selPanel] 
-        if self.setTab == 1 then
+        if self.selTab == 1 then
+            print("selTab", self.selTab)
             setColor(word[2], {255, 255, 255})
             setColor(word[3], {255, 255, 255})
             setColor(word[4], {255, 255, 255})
@@ -258,4 +261,7 @@ function AttributeMenu:touchEnded(x, y)
     oldPos[2] = math.max(0, math.min(self.minPos, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
+end
+function AttributeMenu:refreshData()
+    self:updateTab()
 end
