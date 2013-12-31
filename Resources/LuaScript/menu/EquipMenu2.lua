@@ -103,13 +103,14 @@ function EquipMenu2:updateTab()
 
         --装备的属性
         local pdata = calAttr(v.id, v.level, v)
+        print("init EquipMenu2 data!!!!")
         local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color={255, 241, 0}, font="f2"})), {0.00, 0.50}), {83, fixY(sz.height, 30)})
         local w1 = w
-        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={240, 196, 192}, font="f1"})), {0.00, 0.50}), {162, fixY(sz.height, 29)})
+        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.health, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {162, fixY(sz.height, 29)})
         local w2 = w
-        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.attack, size=24, color={240, 196, 192}, font="f1"})), {0.00, 0.50}), {226, fixY(sz.height, 30)})
+        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.attack, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {226, fixY(sz.height, 30)})
         local w3 = w
-        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.defense, size=24, color={240, 196, 192}, font="f1"})), {0.00, 0.50}), {288, fixY(sz.height, 29)})
+        local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=pdata.defense, size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {288, fixY(sz.height, 29)})
         local w4 = w
 
         --装备的图片

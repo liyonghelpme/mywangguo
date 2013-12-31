@@ -210,7 +210,7 @@ function PeopleInfo:onRight()
     if self.selPeople < #Logic.farmPeople then
         self.selPeople = self.selPeople+1
     else
-        self.selPeople = #Logic.farmPeople
+        self.selPeople = 1
     end
     self:setPeople()
 end

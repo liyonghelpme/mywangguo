@@ -98,6 +98,15 @@ function Merchant:findTarget()
 
             if #allPossible > 0 then
                 --按照建筑物的距离排序
+                --别排序了随机吧 1 - 2    1 2  0 1 
+                local rd = math.random(#self.allPossible)
+                local temp = {}
+                for k=1, #self.allPossible, 1 do
+                    local n = (k+rd-1) % #self.allPossible+1
+                    table.insert(temp, allPossible[n])
+                end
+                self.allPossible = temp
+                --[[
                 local myp = getPos(self.people.bg)
                 local function cmp(a, b)
                     local ap = getPos(a.bg)
@@ -106,7 +115,8 @@ function Merchant:findTarget()
                     local bd = mdist(myp, bp)
                     return ad < bd
                 end
-                table.sort(allPossible, cmp)
+                --]]
+                --table.sort(allPossible, cmp)
                 self:checkAllPossible() 
             end
             if self.people.predictTarget == nil then

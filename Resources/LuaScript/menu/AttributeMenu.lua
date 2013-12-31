@@ -193,7 +193,10 @@ function AttributeMenu:touchMoved(x, y)
 end
 
 function AttributeMenu:setSel(s)
-    if self.selPanel ~= s then
+    if #self.data < s then
+        return
+    end
+    --if self.selPanel ~= s then
         print("self sel", self.selPanel, self.selTab)
         if self.selPanel ~= nil then
             setTexture(self.data[self.selPanel][1], "listB.png")
@@ -228,7 +231,7 @@ function AttributeMenu:setSel(s)
             --print(simple.encode(Logic.skill))
             self.attWord:setString(Logic.skill[fp].attribute)
         end
-    end
+    --end
 end
 
 function AttributeMenu:touchEnded(x, y)
@@ -264,4 +267,5 @@ function AttributeMenu:touchEnded(x, y)
 end
 function AttributeMenu:refreshData()
     self:updateTab()
+    self:setSel(self.selPanel)
 end

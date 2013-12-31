@@ -1356,10 +1356,10 @@ function colorWords(param)
     local height = 0
     local totalHeight = 0
     local width = param.width or 999999
-    print("curWord", s)
+    --print("curWord", s)
     for i=1, #over, 1 do
-        print("split", over[i])
-        print("word x y", curX, totalHeight)
+        --print("split", over[i])
+        --print("word x y", curX, totalHeight)
         if string.find(over[i], '<') ~= nil then
             local p = split(over[i], '<')
             if #p == 1 then
