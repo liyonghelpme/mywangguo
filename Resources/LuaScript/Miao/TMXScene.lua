@@ -143,10 +143,12 @@ end
 --保存道路
 function TMXScene:saveGame(hint)
     local allBuild = {}
+    --bug： allRoad 似乎没有生效
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
-            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum})
+            print("save Building static !!!!", k.static)
+            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static})
         end
     end
     
@@ -154,6 +156,7 @@ function TMXScene:saveGame(hint)
     for k, v in pairs(self.page.buildLayer.mapGridController.allRoad) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
+            print("save Road static !!!!", k.static)
             table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, static=k.static})
         end
     end
@@ -173,7 +176,9 @@ function TMXScene:saveGame(hint)
     end
 
     local allPeople = {}
-    for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do
+    --只保存农民
+    for _, k in pairs(Logic.farmPeople) do
+    --for k, v in pairs(self.page.buildLayer.mapGridController.allSoldiers) do
         --当前只保存普通民众
         if k.bg ~= nil and k.data.kind == 1 then
             local p = getPos(k.bg)
@@ -184,6 +189,7 @@ function TMXScene:saveGame(hint)
             table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health, level=k.level, weapon=k.weapon, head=k.head, body=k.body, spe=k.spe})
         end
     end
+
     local p = simple.encode(allPeople)
     u:setStringForKey('people', p)
     if not hint then

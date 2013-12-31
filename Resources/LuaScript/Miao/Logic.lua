@@ -1,7 +1,7 @@
 Logic = {}
 Logic.name = "liyong"
 Logic.uid = nil
-Logic.resource = {silver=1000, food=0, wood=0, stone=0, gold=0}
+Logic.resource = {silver=10000, food=0, wood=0, stone=0, gold=10000}
 Logic.battleTime = nil
 Logic.battleSoldier = nil
 Logic.buildings = {}
@@ -35,7 +35,7 @@ Logic.inResearch = nil
 
 --已经研究的物品 商店可以购买
 --默认割草镰刀
-Logic.ownGoods = {{0, 1}, {0, 28}, {0, 47}, {0, 67}}
+Logic.ownGoods = {{0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68}}
 
 --初始化已经研究的物品
 --研究结束更新

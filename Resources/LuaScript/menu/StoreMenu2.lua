@@ -133,9 +133,9 @@ function StoreMenu2:updateTab()
         local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
         local sp = setAnchor(setSize(setPos(addSprite(panel, "equip"..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
 
-        local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
-        local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=Logic.holdNum[v.id] or 0, size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
-        local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.silver.."银币", size=20, color={255, 255, 255}, font="f1"})), {1.00, 0.50}), {512, fixY(sz.height, 30)})
+        local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
+        local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=Logic.holdNum[v.id] or 0, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+        local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.silver.."银币", size=20, color={240, 196, 92}, font="f1"})), {1.00, 0.50}), {512, fixY(sz.height, 30)})
         panel:setTag(k)
         setContentSize(panel, {sz.width, sz.height})
 

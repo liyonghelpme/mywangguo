@@ -188,7 +188,8 @@ function MiaoBuildLayer:initBuild()
         build = simple.decode(build)
         for k, v in ipairs(build) do
             local dir = v.dir or 0
-            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid, dir=1-dir})
+            v.dir = 1-dir
+            local b = MiaoBuild.new(self, v)
             b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
@@ -210,7 +211,7 @@ function MiaoBuildLayer:initBuild()
         --print(road)
         road = simple.decode(road)
         for k, v in ipairs(road) do
-            local b = MiaoBuild.new(self, {picName=v.picName, id=v.id, bid=v.bid})
+            local b = MiaoBuild.new(self, v)
             --b:setWork(v)
             local p = normalizePos({v.px, v.py}, 1, 1)
             b:setPos(p)
@@ -407,6 +408,8 @@ function MiaoBuildLayer:initRoad()
         return
     end
 
+    local staticRow = 4
+
     local nlayer = self.scene.layerName['road']
     local width = self.scene.width
     local height = self.scene.height
@@ -420,7 +423,8 @@ function MiaoBuildLayer:initRoad()
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             --不能移动的道路
             local static = false
-            if w >= width-2 then
+            --斜 右下 4行 包括向上走的梯子
+            if w >= width-staticRow then
                 static =true
             end
             local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, pname=pname, bid = getBid(), static=static})
@@ -444,7 +448,7 @@ function MiaoBuildLayer:initRoad()
             local h = math.floor((dk-1)/width)
 
             local static = false
-            if w >= width-2 then
+            if w >= width-staticRow then
                 static =true
             end
 
@@ -469,7 +473,7 @@ function MiaoBuildLayer:initRoad()
             local h = math.floor((dk-1)/width)
 
             local static = false
-            if w >= width-2 then
+            if w >= width-staticRow then
                 static =true
             end
             print("dv is what", dv, pname)

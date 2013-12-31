@@ -744,13 +744,17 @@ function MiaoPeople:showState()
         setTexture(self.statePic, "herb109.png")
     end
 end
+
 --移动了之后 清理owner
 function MiaoPeople:clearStateStack()
-    for k, v in ipairs(self.stateStack) do
-        if type(v) == 'table' then
+    --应该反向出堆栈 不应该正向
+    for k =#self.stateStack, 1, -1 do
+        if type(v) == 'table' and self.needClearOwner then
             v[2]:setOwner(nil)
+            self.needClearOwner = v[4] or true
         end
     end
+    self.needClearOwner = true
     self.stateStack = {}
     self.stateContext = nil
     self.actionContext = nil
@@ -759,6 +763,7 @@ function MiaoPeople:clearStateStack()
     self:putGoods()
     self:setDir(1, -1)
 end
+
 function MiaoPeople:setPos(p)
     setPos(self.bg, p)
     self.funcPeople:setPos()
