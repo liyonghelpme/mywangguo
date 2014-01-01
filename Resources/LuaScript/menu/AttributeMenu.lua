@@ -4,7 +4,7 @@ function AttributeMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-33.0, 3.5})
+    self.temp = setPos(addNode(self.bg), {-26, 3.5})
     local but = ui.newButton({image="taba.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=2, touchBegan=self.onTab})
     but:setContentSize(82, 126)
     setPos(addChild(self.temp, but.bg), {908, fixY(sz.height, 357)})
@@ -22,7 +22,7 @@ function AttributeMenu:ctor()
 
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {535, fixY(sz.height, 421)}), {617, 352}), {0.50, 0.50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="基本属性1/2", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {545, fixY(sz.height, 153)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="基本属性1/2", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {538, fixY(sz.height, 153)})
     self.total = w
 
 

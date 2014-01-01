@@ -9,7 +9,7 @@ function PeopleInfo:ctor(p, attribute)
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-33, 0})
+    self.temp = setPos(addNode(self.bg), {-27, 3.5})
 
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {539, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {536, fixY(sz.height, 421)}), {617, 352}), {0.50, 0.50})
@@ -108,7 +108,7 @@ function PeopleInfo:ctor(p, attribute)
 
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "headIcon.png"), {292, fixY(sz.height, 292)}), {50, 50}), {0.50, 0.50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="角色升级1/10", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {545, fixY(sz.height, 153)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="角色升级1/10", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {538, fixY(sz.height, 153)})
     self.title = w
 
     if not self.attribute then
@@ -174,7 +174,7 @@ function PeopleInfo:setPeople()
         setVisible(self.speIcon, false)
         self.spe:setString('')
     end
-    if pdata.data.skillName ~= nil and pdata.data.skillName ~= '' then
+    if pdata.data.skillName ~= nil and pdata.data.skillName ~= '' and pdata.data.skill ~= 0 then
         self.skill:setString(pdata.data.skillName)
         setDisplayFrame(self.skillIcon, "skill"..pdata.data.skill..'.png')
         setVisible(self.skillIcon, true)

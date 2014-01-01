@@ -403,7 +403,11 @@ function MiaoPeople:popState()
         local stop = self.stateStack[#self.stateStack]
         self.stateContext = stop
         table.remove(self.stateStack)
-        self.stateContext[2]:setOwner(self)
+        --先去农田 工厂 伐木场 可能 获取资源就不需要多次设定owner了
+        local needOcc = stop[4] or true
+        if needOcc then
+            self.stateContext[2]:setOwner(self)
+        end
     else
         self.stateContext = nil
     end
@@ -415,10 +419,14 @@ function MiaoPeople:resetState()
     if self.realTarget ~= nil then
         if self.stateContext ~= nil then
             if self.stateContext[2] ~= self.realTarget and not (self.needClearOwner == false) then
-                self.realTarget:setOwner(nil)
+                if self.realTarget.owner == self then
+                    self.realTarget:setOwner(nil)
+                end
             end
         else
-            self.realTarget:setOwner(nil)
+            if self.realTarget.owner == self then
+                self.realTarget:setOwner(nil)
+            end
         end
     end
     self.realTarget = nil
@@ -749,12 +757,18 @@ end
 function MiaoPeople:clearStateStack()
     --应该反向出堆栈 不应该正向
     for k =#self.stateStack, 1, -1 do
-        if type(v) == 'table' and self.needClearOwner then
-            v[2]:setOwner(nil)
-            self.needClearOwner = v[4] or true
+        local v = self.stateStack[k]
+        if type(v) == 'table' then
+            local needClearOwner = v[4] or true
+            print("clear My State", needClearOwner, v[1], v[2], v[3], v[4])
+            if needClearOwner then
+                if v[2].owner == self then
+                    v[2]:setOwner(nil)
+                end
+            end
         end
     end
-    self.needClearOwner = true
+    --self.needClearOwner = true
     self.stateStack = {}
     self.stateContext = nil
     self.actionContext = nil

@@ -4,7 +4,7 @@ function EquipMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-30.5, 38})
+    self.temp = setPos(addNode(self.bg), {-31, 38})
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {543, fixY(sz.height, 422)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {540, fixY(sz.height, 456)}), {617, 352}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv", size=41, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {336, fixY(sz.height, 252)})
@@ -15,8 +15,8 @@ function EquipMenu2:ctor()
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="特", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {763, fixY(sz.height, 255)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="体", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {711, fixY(sz.height, 254)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {657, fixY(sz.height, 255)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="装备", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {542, fixY(sz.height, 187)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {551, fixY(sz.height, 657)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="装备", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {543, fixY(sz.height, 187)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {543, fixY(sz.height, 657)})
 
 
 
