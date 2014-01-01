@@ -258,6 +258,7 @@ function MiaoPeople:update(diff)
             s = s..v..'\n'
         end
     end
+    s = s..str(self.needClearOwner)
     self.stateLabel:setString(s)
     self.funcPeople:updateState(diff)
     self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))

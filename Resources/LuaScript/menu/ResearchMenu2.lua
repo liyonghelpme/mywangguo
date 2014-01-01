@@ -3,8 +3,9 @@ function ResearchMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-32.5, 3.5})
+    self.temp = setPos(addNode(self.bg), {-26, 3.5})
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
+
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="名称", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {333, fixY(sz.height, 240)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {691, fixY(sz.height, 240)})
@@ -56,8 +57,10 @@ function ResearchMenu2:ctor()
     centerUI(self)
 end
 
+--清理数据
 function ResearchMenu2:setSel(s)
     if #self.data < s then
+        self:getAllAtt(nil)
         return
     end
     if self.selPanel ~= s then
@@ -78,6 +81,16 @@ function ResearchMenu2:setSel(s)
     end
 end
 function ResearchMenu2:getAllAtt(edata)
+    if edata == nil then
+        self.ename:setString('')
+        self.desWord:setString('')
+
+        self.firAtt:setString('')
+        self.firNum:setString('')
+        self.secAtt:setString('')
+        self.secNum:setString('')
+        return
+    end
     self.ename:setString(edata.name)
     self.desWord:setString(edata.des)
     

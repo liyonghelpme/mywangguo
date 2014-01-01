@@ -5,13 +5,13 @@ function EquipChangeMenu:ctor(p, changeKind)
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-50, 3.5})
+    self.temp = setPos(addNode(self.bg), {-26, 3.5})
     local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="准备后可自动回复15%的体力", size=26, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {394, fixY(sz.height, 626)})
     self.desWord = w
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="装备变更1/4", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {556, fixY(sz.height, 154)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="装备变更1/4", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {538, fixY(sz.height, 154)})
     self.total = w
     local but = ui.newButton({image="newLeftArrow.png", text="", font="f1", size=18, delegate=self, callback=self.onLeft})
     but:setContentSize(90, 106)

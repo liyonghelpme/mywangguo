@@ -16,9 +16,9 @@ function TrainMenu2:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-33, 0})
+    self.temp = setPos(addNode(self.bg), {-26, 3})
     local temp = self.temp
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {667, 569}), {0.50, 0.50})
+    local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {535, fixY(sz.height, 421)}), {617, 352}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="角色升级", size=34, color={102, 4, 554}, font="f1"})), {0.50, 0.50}), {545, fixY(sz.height, 153)})
 

@@ -118,6 +118,7 @@ function IncSoldierMenu:onBut(param)
             if not checkCost(cost) then
                 addBanner("银币不足")
             else
+                doCost(cost)
                 local cnName = {'步卒', '弓队', '魔法', '铁骑'}
                 addBanner("增加"..cnName[self.selNum].."成功")
                 solData[1] = solData[1]+1
