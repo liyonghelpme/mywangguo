@@ -2,6 +2,11 @@ Mine = class(FuncBuild)
 function Mine:ctor(b)
     self.maxNum = 20
 end
+function Mine:initView()
+    local sz = self.baseBuild.changeDirNode:getContentSize()
+    setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0, SIZEY})
+end
+--在touch的时候setColor
 function Mine:setColor()
     local s = self:checkSlope()
     print("Mine setColor")
@@ -51,4 +56,8 @@ function Mine:whenColNow()
     else
         setScaleX(self.baseBuild.changeDirNode, scaY)
     end
+end
+function Mine:adjustRoad()
+    print("adjust Mine dir")
+    self:whenColNow()
 end

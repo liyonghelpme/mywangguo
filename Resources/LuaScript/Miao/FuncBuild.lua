@@ -139,7 +139,7 @@ function FuncBuild:setBottomColor(c)
             setTexture(self.selGrid, "newBlueGrid.png")
         end
     end
-    self:setColor()
+    --self:setColor()
     --[[
     if c == 0 then
         setColor(self.baseBuild.bottom, {255, 0, 0})

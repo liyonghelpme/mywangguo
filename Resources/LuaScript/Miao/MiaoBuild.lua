@@ -238,7 +238,7 @@ function MiaoBuild:receiveMsg(msg, param)
     elseif msg == EVENT_TYPE.ROAD_CHANGED then
         --self.dirty = true
         --self.dirty = false
-        if self.data and (self.data.IsStore == 1 or self.id == 2) then
+        if self.data and self.data.needFindBuild == 1 then
             --self.dirty = true
             self:findNearby()
         end

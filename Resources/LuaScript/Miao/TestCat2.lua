@@ -16,6 +16,9 @@ CAT_ACTION = {
     GO_HOME = 12,
 
     CHECK_ACCESS = 13,
+
+    --运送矿石到采矿场
+    --BACK_STONE = 14,
 }
 
 Cat2 = class(FuncPeople)
@@ -256,32 +259,90 @@ function Cat2:checkAllPossible()
 
             local storeFactory = k.buildPath:getAllFreeFactory()
 
-            self:sortBuildings(self.allFoodFarm)
+            local food = GoodsName[k.goodsKind].food
+            local wood = GoodsName[k.goodsKind].wood
+            local stone = GoodsName[k.goodsKind].stone
+
             local gotoFarm = nil
-            local gotoFac = nil
-            --寻找 农田附近的空闲工厂 
-            --和 商店附近的空闲工厂
-            for nk, nv in ipairs(self.allFoodFarm) do
-                local tempFactory = nv.buildPath:getAllFreeFactory()
-                local interFac = interSet(tempFactory, storeFactory)  
-                if interFac.count > 0 then
-                    gotoFarm = nv
-                    gotoFac = interFac
-                    interFac.count = nil
-                    break
+            local farmFac = nil
+            local quarryFac = nil
+            local lumberFac = nil
+            local gotoQuarry = nil
+            --如果工厂 food = 0 且 farm 可以到达工厂则 去这个工厂 ---> PRODUCT　 的时候检查没有产品　 那么就放弃这次工作重新寻路　 找另外一种资源　 
+            --farmFactory 包含 food > 0 的工厂
+            --quarryFactory 包含 stone > 0 的工厂
+            local allPosFac = {}
+            if food > 0 then
+                self:sortBuildings(self.allFoodFarm)
+                --寻找 农田附近的空闲工厂 
+                --和 商店附近的空闲工厂
+                for nk, nv in ipairs(self.allFoodFarm) do
+                    local tempFactory = nv.buildPath:getAllFreeFactory()
+                    local interFac = interSet(tempFactory, storeFactory)  
+                    if interFac.count > 0 then
+                        gotoFarm = nv
+                        farmFac = interFac
+                        farmFac.count = nil
+                        table.insert(allPosFac, farmFac)
+                        break
+                    end
                 end
             end
+            --如果停止的位置 不能去 采矿 怎么办？
+            --findPath Error gotoHome 即可
+            if stone > 0 then
+                self:sortBuildings(self.allStoneQuarry)
+                for nk, nv in ipairs(self.allStoneQuarry) do
+                    local tempFactory = nv.buildPath:getAllFreeFactory()
+                    local interFac = interSet(tempFactory, storeFactory)  
+                    if interFac.count > 0 then
+                        gotoQuarry = nv
+                        quarryFac = interFac
+                        quarryFac.count = nil
+                        table.insert(allPosFac, quarryFac)
+                        break
+                    end
+                end
+            end
+            --不一定是同一个工厂
+            --不求完美方案  可能有 4个 考虑 第一个 对象 或者前几个可能方案
+            --可以 考虑 若干个 农田 和 采矿场 的 工厂 不过运算量会增大
+            local checkRes = true
+            if (food > 0 and farmFac == nil) or (stone > 0 and quarryFac == nil) or (wood > 0 and  lumberFac == nil ) then
+                checkRes = false
+            end
+            --还有一种只考虑 每个house 的 连接点连接的建筑物
+            --求几个fac的并集合
+            local findFac = true
+            local resSet
+            --所有工厂的交集 
+            if checkRes then
+                resSet = allPosFac[1]
+                for k, v in ipairs(allPosFac) do
+                    if k > 1 then
+                        resSet = interSet(resSet, v)
+                        if resSet.count > 0 then
+                            resSet.count = nil
+                        else
+                            findFac = false
+                            break
+                        end
+                    end
+                end
+            end
+            print("allPosFac", checkRes, findFac, resSet)
+            gotoFac = resSet
+            
+            --同时去 石头采矿场 和 农田 应该怎么处理呢？ 最近的农田运送到工厂
+
             --求交集
 
             --民居可达的农田 ----> 农田可达的工厂-----》工厂可达这个商店
 
-            local food = GoodsName[k.goodsKind].food
-            local wood = GoodsName[k.goodsKind].wood
-            local stone = GoodsName[k.goodsKind].stone
-            local checkRes = true
             --建筑物 路径确定
             --检查 工厂 可达性 以及 农田可达性 以及 
-            if gotoFarm ~= nil and gotoFac ~= nil then
+            if checkRes and findFac then
+            --if gotoFarm ~= nil and gotoFac ~= nil then
             --if checkRes and #allFreeFactory > 0 then
                 gotoFac = setToArr(gotoFac)
                 print("allFactory", printTable(gotoFac))
@@ -290,9 +351,11 @@ function Cat2:checkAllPossible()
                 self.people.predictFactory:setOwner(self.people)
                 self.people.predictStore = k
                 self.people.predictStore:setOwner(self.people)
-                --if food > 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT, needClearOwner = true})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT, needClearOwner = true})
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT, needClearOwner = true})
+                table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT, needClearOwner = true})
+                --获取资源不用占用 农田 和 采矿场 
+                --cpu 资源调度程序
+                if food > 0 and stone == 0 then
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
                     --self:sortBuildings(allFoodFarm)
                     self.people.predictTarget = gotoFarm
@@ -302,7 +365,21 @@ function Cat2:checkAllPossible()
                     --不用再清理 owner 默认需要 clearOwner needClearOwner = nil
                     self.people.needClearOwner = false
                     self.people.goodsKind = k.goodsKind
-                --end
+                elseif stone > 0 and food == 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE, needClearOwner = true})
+                    self.people.predictTarget = gotoQuarry
+                    --self.people.predictTarget:setOwner(self.people)
+                    self.people.actionContext= CAT_ACTION.TAKE_STONE
+                    self.people.goodsKind = k.goodsKind
+                elseif food > 0 and stone > 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FARM, self.people.gotoFarm, CAT_ACTION.TAKE_FOOD, needClearOwner = false})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE, needClearOwner = false})
+                    self.people.predictTarget = gotoQuarry
+                    --self.people.predictTarget:setOwner(self.people)
+                    self.people.actionContext= CAT_ACTION.TAKE_STONE
+                    self.people.goodsKind = k.goodsKind
+                end
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
                 return
             end
@@ -313,10 +390,12 @@ function Cat2:checkAllPossible()
                 local gotoMine = setToArr(freeMine)
                 self:sortBuildings(gotoMine)
                 table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.PUT_STONE_QUARRY, needClearOwner=true})
+                --table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, gotoMine[1], CAT_ACTION.BACK_STONE, needClearOwner = true})
                 table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, gotoMine[1], CAT_ACTION.MINE_STONE, needClearOwner = true})
                 self.people.actionContext = CAT_ACTION.TAKE_MINE_TOOL
                 self.people.predictTarget = k
                 k:setOwner(self.people)
+                self.people.quarry = k
             end
         --商店
         elseif k.id == 13 then
@@ -439,5 +518,14 @@ function Cat2:findPathError()
         self.people:clearStateStack()
         --bug: 大量移动建筑物之后 为什么 self.realTarget 没见了呢？
         self.people:resetState()
+        
+        --尝试回家 重新开始看看 可能存在问题  
+        --
+        --                                                  store
+        --                                                  factory
+        --                                                  quarry
+        --store  ------  factory    -----  farm   -----   house  
+        --这时候 先去 farm的商店 就不能找到 去矿石商店的路径了
+        self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.myHouse, CAT_ACTION.GO_HOME}
     end
 end

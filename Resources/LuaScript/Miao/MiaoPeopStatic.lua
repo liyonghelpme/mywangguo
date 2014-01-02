@@ -30,14 +30,14 @@ function MiaoPeople:setDir(x, y)
                 --self.changeDirNode:stopAllActions()
                 self:setMoveAction("car_rt")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "a3.png")
+                    setDisplayFrame(self.carGoods, self.carName[1])
                 end
                 setDisplayFrame(self.shadow, "shadow0.png")
             elseif dy < 0 then
                 --self.changeDirNode:stopAllActions()
                 self:setMoveAction("car_rb")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "b3.png")
+                    setDisplayFrame(self.carGoods, self.carName[2])
                 end
                 setDisplayFrame(self.shadow, "shadow1.png")
             end
@@ -48,13 +48,13 @@ function MiaoPeople:setDir(x, y)
             if dy > 0 then
                 self:setMoveAction("car_rt")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "a3.png")
+                    setDisplayFrame(self.carGoods, self.carName[1])
                 end
                 setDisplayFrame(self.shadow, "shadow0.png")
             elseif dy < 0 then
                 self:setMoveAction("car_rb")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "b3.png")
+                    setDisplayFrame(self.carGoods, self.carName[2])
                 end
                 setDisplayFrame(self.shadow, "shadow1.png")
             end
@@ -162,6 +162,7 @@ function MiaoPeople:handleQuarry()
                 self.realTarget.stone = self.realTarget.stone+self.stone
                 self.stone = 0
                 self:popState()
+                self:putGoods()
             end
             self:resetState()
         elseif self.actionContext == CAT_ACTION.TAKE_STONE then
@@ -247,9 +248,13 @@ function MiaoPeople:handleQuarry()
 end
 
 function MiaoPeople:handleMine()
+    print("handleMine now")
+    --if self.actionContext == CAT_ACTION.BACK_STONE then
+    --else
     if self.actionContext == CAT_ACTION.MINE_STONE then
         self.state = PEOPLE_STATE.IN_WORK
         self.workTime = 0
+        self:hideSelf()
     end
 end
 function MiaoPeople:handleSmith()
@@ -324,6 +329,14 @@ function MiaoPeople:sendGoods()
         self.changeDirNode:addChild(sp)
         local sz = self.changeDirNode:getContentSize()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"a3.png", "b3.png"}
+        self.carGoods = sp
+    elseif self.stone > 0 then
+        local sp = createSprite("f3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"e3.png", 'f3.png'}
         self.carGoods = sp
     end
     setScaleX(self.changeDirNode, sca)
@@ -628,26 +641,57 @@ function MiaoPeople:workInFactory()
         --生产结束 直到运送到工厂
     end
 end
+function MiaoPeople:getMyLaborEffect()
+    local pdata = calAttr(self.id,  self.level, self)
+    local le = getLaborEffect(pdata.labor)
+    return le
+end
 
 --把actionList 打出来
 --一个action 结束执行下一个action
 function MiaoPeople:workInMine()
-    if self.workTime > 1 then
-        self.workTime = 0
-        self.health = self.health -1
-        self.realTarget.stone = self.realTarget.stone + 1
+    --labor 包括自身和 装备总的劳动力
+    local le = self:getMyLaborEffect()
+    local totalTime = 10
+    local productNum = 5
+    local healthCost = 5
+    if le.time ~= nil then
+        totalTime = totalTime+le.time
+    end
+    if le.product ~= nil then
+        productNum = productNum + le.product
+    end
+    if le.health ~= nil then
+        healthCost = healthCost+le.health
+    end
+    totalTime = math.max(1, totalTime)
+    healthCost = math.max(1, healthCost)
+    --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
+    --计算出1个 的生产时间 和 消耗的 生命值
+    --self.myHouse.productNum 花费时间减少  消耗体力不变
+    local rate = totalTime/(self.quarry.productNum/20)/productNum
+    local cost = healthCost/productNum
+
+    --print("workInMine", self.workTime, rate, totalTime, productNum, healthCost)
+    if self.workTime > rate then
+        self.workTime = self.workTime - rate
+        self.health = self.health -cost
+        self.realTarget.workNum = self.realTarget.workNum + 1
         --如果工厂生产数量超过上限 就不要生产了
         --离开矿坑 但是predictQuarry 不会消除
-        print("workInMine", self.goQuarry)
-        if self.realTarget.stone >= self.realTarget.maxNum then
-            self.stone = self.realTarget.stone
-            self.realTarget.stone = 0
+        --print("workInMine", self.goQuarry)
+        if self.realTarget.workNum >= self.realTarget.maxNum then
+            self.stone = self.realTarget.workNum
+            self.realTarget.workNum = 0
             self:popState()
             self:resetState()
+            self:sendGoods()
+            self:setDir(1, -1)
             return
         end
     end
 end
+
 --10 10 10 10 5 = 5点体力值
 --种植的时间 40s 算在这个生产过程里面的 
 function MiaoPeople:workInFarm()
@@ -674,14 +718,16 @@ function MiaoPeople:workInFarm()
 
     if self.workTime > rate then
         self.workTime = 0
-        if self.health < cost then
+        --总要消耗掉劳动力 否则 会出现 不停停留在 农田上的情况
+        self.health = self.health-cost
+        if self.health <= 0 then
             self:clearStateStack()
             self:resetState()
             self:setDir(0, 0)
             local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
-            self.health = self.health-cost
+            --self.health = self.health-cost
             if self.realTarget.workNum >= self.realTarget.maxNum then
                 --[[
                 self.state = PEOPLE_STATE.FREE

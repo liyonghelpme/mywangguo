@@ -196,6 +196,7 @@ function MiaoBuildLayer:initBuild()
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
+            b:adjustRoad()
             b:finishBuild()
             --调整建筑物方向
             b:doSwitch()

@@ -628,7 +628,7 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.id == 12 then
                         self:handleQuarry()
                     --去矿坑工作
-                    elseif self.realTarget.id == 11 then
+                    elseif self.realTarget.id == 28 then
                         self:handleMine()
                         --矿坑stone 保持
                         --self.realTarget.stone = 0
@@ -786,7 +786,7 @@ function MiaoPeople:doWork(diff)
             if self.realTarget.id == 5 then
                 self:workInFactory()
             --在采石场工作
-            elseif self.realTarget.id == 11 then
+            elseif self.realTarget.id == 28 then
                 self:workInMine()
             --农田工作 
             elseif self.realTarget.id == 2 then
