@@ -25,6 +25,7 @@ function Cat2:initView()
     local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 12, 1, 2, true)
     self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
+    --在当前基础上再缩小0.8 倍率 0.64 * 0.8 = 0.512 尺寸 然后是位置
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 0.8), {0, SIZEY})
     
     if self.people.privData.needAppear == false then
@@ -68,6 +69,9 @@ function Cat2:initView()
     self.people.stateLabel = ui.newBMFontLabel({text=str(self.people.state), size=30})
     setPos(self.people.stateLabel, {0, 100})
     self.people.heightNode:addChild(self.people.stateLabel, 10)
+    if not DEBUG then
+        setVisible(self.people.stateLabel, false)
+    end
 
 
     sf:addSpriteFramesWithFile("car.plist")
@@ -112,8 +116,8 @@ function Cat2:checkWork(k)
             --print('try goto store')
             ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
         elseif k.id == 12 then
-            --print("mine stone", k.stone)
-            ret = k.stone < k.maxNum 
+            print("mine stone", k.stone)
+            ret = k.workNum < k.maxNum 
         --铁匠铺可以生产物品
         elseif k.id == 13 then
             ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
@@ -250,16 +254,13 @@ function Cat2:checkAllPossible()
             local allFoodFarm = {}
             local allStoneQuarry = {}
 
-            --[[
-            if k.dirty then
-                k:findNearby()
-            end
-            --]]
             local storeFactory = k.buildPath:getAllFreeFactory()
 
             self:sortBuildings(self.allFoodFarm)
             local gotoFarm = nil
             local gotoFac = nil
+            --寻找 农田附近的空闲工厂 
+            --和 商店附近的空闲工厂
             for nk, nv in ipairs(self.allFoodFarm) do
                 local tempFactory = nv.buildPath:getAllFreeFactory()
                 local interFac = interSet(tempFactory, storeFactory)  
@@ -270,18 +271,7 @@ function Cat2:checkAllPossible()
                     break
                 end
             end
-
             --求交集
-            --[[
-            for k, v in pairs(k.buildPath.nearby) do
-                if k.id == 2 and k.workNum > 0 then
-                    table.insert(allFoodFarm, k)
-                elseif k.id == 5 and k.owner == nil then
-                    table.insert(allFreeFactory, k)
-                end
-            end
-            --]]
-            
 
             --民居可达的农田 ----> 农田可达的工厂-----》工厂可达这个商店
 
@@ -290,17 +280,6 @@ function Cat2:checkAllPossible()
             local stone = GoodsName[k.goodsKind].stone
             local checkRes = true
             --建筑物 路径确定
-
-            --[[
-            if food > 0 and #allFoodFarm == 0 then
-                checkRes = false
-            end
-            --]]
-            --[[
-            if stone > 0 and #self.allStoneQuarry == 0 then
-                checkRes = false
-            end
-            --]]
             --检查 工厂 可达性 以及 农田可达性 以及 
             if gotoFarm ~= nil and gotoFac ~= nil then
             --if checkRes and #allFreeFactory > 0 then
@@ -326,6 +305,18 @@ function Cat2:checkAllPossible()
                 --end
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
                 return
+            end
+        --寻找采矿场附近的空闲 矿坑
+        elseif k.id == 12 then
+            local freeMine, count = k.buildPath:getAllFreeMine()
+            if count > 0 then
+                local gotoMine = setToArr(freeMine)
+                self:sortBuildings(gotoMine)
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.PUT_STONE_QUARRY, needClearOwner=true})
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, gotoMine[1], CAT_ACTION.MINE_STONE, needClearOwner = true})
+                self.people.actionContext = CAT_ACTION.TAKE_MINE_TOOL
+                self.people.predictTarget = k
+                k:setOwner(self.people)
             end
         --商店
         elseif k.id == 13 then

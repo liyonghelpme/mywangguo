@@ -139,16 +139,20 @@ function ResearchMenu2:updateTab()
 		local col = (k-1)%rowWidth
 
         --当前只有装备可以研究
+        local picname = 'equip' 
         if v[1] == 0 then
             v = Logic.allEquip[v[2]]
+        elseif v[1] == 1 then
+            v = GoodsName[v[2]]
+            picname = 'storeGoods'
         end
         local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
         local listback = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {297, fixY(sz.height, 30)}), {479, 52}), {0.50, 0.50})
         local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "equip"..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
+        local sp = setAnchor(setSize(setPos(addSprite(panel, picname..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
 
         local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
-        local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.silver.."银币", size=20, color={240, 196, 92}, font="f1"})), {1.00, 0.50}), {485, fixY(sz.height, 30)})
+        local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.researchCost.."银币", size=20, color={240, 196, 92}, font="f1"})), {1.00, 0.50}), {485, fixY(sz.height, 30)})
         panel:setTag(k)
         setContentSize(panel, {sz.width, sz.height})
 
@@ -192,8 +196,14 @@ function ResearchMenu2:touchEnded(x, y)
             if self.selPanel ~= t then
                 self:setSel(t)
             else
-                local edata = Logic.allEquip[Logic.researchGoods[self.selPanel][2]]
-                local s = edata.silver
+                local rd = Logic.researchGoods[self.selPanel]
+                local edata 
+                if rd[1] == 0 then
+                    edata = Logic.allEquip[rd[2]]
+                elseif rd[1] == 1 then
+                    edata = GoodsName[rd[2]]
+                end
+                local s = edata.researchCost
                 if not checkCost(s) then
                     addBanner("银币不足")
                 else

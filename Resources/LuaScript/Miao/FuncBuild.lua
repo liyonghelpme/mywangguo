@@ -101,6 +101,8 @@ function FuncBuild:clearMenu()
         print("finish clear Menu send Msg!!!!!!!!!!!!!")
     end
 end
+function FuncBuild:detailDialog()
+end
 function FuncBuild:showInfo()
     --先清理旧的
     Event:sendMsg(EVENT_TYPE.SELECT_ME, self.baseBuild)
@@ -137,6 +139,7 @@ function FuncBuild:setBottomColor(c)
             setTexture(self.selGrid, "newBlueGrid.png")
         end
     end
+    self:setColor()
     --[[
     if c == 0 then
         setColor(self.baseBuild.bottom, {255, 0, 0})

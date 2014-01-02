@@ -38,3 +38,6 @@ end
 function ItemShop:getIncWord()
     return "贩卖"
 end
+function ItemShop:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)
+end

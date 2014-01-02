@@ -76,8 +76,18 @@ function MiaoBuild:ctor(m, data)
     self.stone = 0
     --id --> num
     self.product = {}
+    --默认自己的第一个或者当前科技树的最高档次
+    if self.data ~= nil then
+        local maxSearchGoods = nil
+        for k=#self.data.goodsList, 1, -1 do
+            if checkResearchYet(1, self.data.goodsList[k]) then
+                maxSearchGoods = self.data.goodsList[k]   
+                break
+            end
+        end
 
-    self.goodsKind = 1
+        self.goodsKind = data.goodsKind or maxSearchGoods or self.data.goodsList[1]
+    end
     self.maxNum = 10
     self.buildPath = BuildPath.new(self)
 
@@ -129,21 +139,22 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild:initView()
         --采矿场
         elseif self.id == 12 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            print("init MineStore")
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = MineStore.new(self)
             self.funcBuild:initView()
-        elseif self.id == 11 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+        elseif self.id == 28 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Mine.new(self)
             self.funcBuild:initView()
         --铁匠铺
         elseif self.id == 13 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Store.new(self)
             self.funcBuild:initView()
         --其它建筑物
         else
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = FuncBuild.new(self)
             self.funcBuild:initView()
         end
@@ -177,8 +188,7 @@ function MiaoBuild:ctor(m, data)
     end
 
     self.heightNode:addChild(self.changeDirNode)
-    --self.bg:addChild(self.changeDirNode)
-    setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
+    setContentSize(setAnchor(self.bg, {0.5, 0}), {SIZEX*2, SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
     if not DEBUG then
@@ -236,7 +246,7 @@ function MiaoBuild:receiveMsg(msg, param)
 end
 
 function MiaoBuild:doSwitch()
-    if self.data.kind ~= 0 then
+    if self.data.switchable == 0 then
         return
     end
     self.map.mapGridController:clearMap(self)
@@ -273,7 +283,7 @@ function MiaoBuild:touchesBegan(touches)
 
     --self.startPos = getBuildMap(self)
     print("build touch began")
-    if self.lastPos.count == 1 then
+    --if self.lastPos.count == 1 then
         --建筑物 getBuildMap 0.5 0 位置
         --手指是 0.5 0 位置 转化成0.5 0.5 位置
         --local px, py = self.bg:getPosition()
@@ -283,6 +293,7 @@ function MiaoBuild:touchesBegan(touches)
         local ret = true
         --print("checkPointIn", ret)
         if ret then
+            print("check build in self")
             self.inSelf = true
             local setSuc = 0
             if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
@@ -302,7 +313,7 @@ function MiaoBuild:touchesBegan(touches)
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
             end
         end
-    end
+    --end
 
     self.accMove = 0
     self.moveStart = self.lastPos[0]
@@ -329,10 +340,11 @@ function MiaoBuild:touchesMoved(touches)
             self.firstMove = false
         end
         local offY = (self.sx+self.sy)*SIZEY/2
+        --计算点击点 到 屏幕空间的位置
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         
         local ax, ay, height = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask, self.map.scene.cxyToAxyMap)
-        print("touchMoved  !!", ax, ay, height)
+        print("build touchMoved  !!", ax, ay, height)
         --移动不在裂缝里面
         if ax ~= nil and ay ~= nil then
             if ax < self.map.scene.width-1 and ay < self.map.scene.height-1 and ax >= 0 and ay >= 0 then 
@@ -717,7 +729,9 @@ function MiaoBuild:doProduct()
 end
 function MiaoBuild:setGoodsKind(k)
     print("setGoodsKind", k)
-    self.goodsKind = k
-    self.workNum = 0
-    self.funcBuild:updateGoods()
+    if k ~= self.goodsKind then
+        self.goodsKind = k
+        self.workNum = 0
+        self.funcBuild:updateGoods()
+    end
 end

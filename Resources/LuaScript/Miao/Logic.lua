@@ -37,6 +37,8 @@ Logic.inResearch = nil
 --默认割草镰刀
 Logic.ownGoods = {{0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68}}
 
+
+
 --初始化已经研究的物品
 --研究结束更新
 Logic.researchEquip = {}
@@ -143,6 +145,7 @@ StoryWord = {
 "让我们先为追随你而来的村民建造住所吧。\n请选择菜单中的<0000ff建筑>!!",
 }
 
+--不用了
 GoodsName = {
     [1]={name="浊酒", food=1, wood=0, stone=0, price=6},
     [2]={name="白酒", food=2, wood=0, stone=0, price=13},
@@ -258,3 +261,74 @@ Logic.soldiers = {
     [4] = {0, 0},
 }
 
+--每种商品卖出的数量
+--如果条件满足了 就显示可以卖出的物品了
+--判断这个商品的 下一个商品是否已经满足条件可以卖出了
+--判断这个商品所在商店类型 得到列表 检查是否 拥有
+--保存和加载
+Logic.goodsSellNum = {}
+function updateSellNum(k, n)
+    local v = getDefault(Logic.goodsSellNum, k, 0)
+    Logic.goodsSellNum[k] = v+n
+    local me = GoodsName[k]
+    local ng = GoodsName[k+1]
+    if me.store == ng.store then
+        local find = false
+        for tk, v in ipairs(Logic.ownGoods) do
+            if v[1] == 1 and v[2] == (k+1) then
+                find = true
+                break
+            end
+        end
+        if not find then
+            for tk, v in ipairs(Logic.researchGoods) do
+                --print(v[1], v[2], 1, k+1)
+                if v[1] == 1 and v[2] == (k+1) then
+                    find = true
+                    break
+                end
+            end
+        end
+        print("researchGoods", k+1)
+        print(simple.encode(Logic.researchGoods))
+        print(simple.encode(Logic.ownGoods))
+        --研究对话框 里面显示这个物品
+        if not find then
+            table.insert(Logic.researchGoods, {1, k+1})
+            addBanner(ng.name.."可以研究了")
+        end
+    end
+    
+end
+function checkResearchYet(k, v)
+    for tk, tv in ipairs(Logic.ownGoods) do
+        if tv[1] == k and tv[2] == v then
+            return true
+        end
+    end
+    return false
+end
+
+--当前可以研究这个物品 和 当前的研究列表 inResearch 和 researchGoods
+--当前拥有的商品  保存和加载
+--Logic.curOwnGoods = {}
+
+--Logic.goods = {}
+
+--农田类建筑物 IsStore == 2
+function getAllMatNum()
+    local allBuild = global.director.curScene.page.buildLayer.mapGridController.allBuildings
+    local temp = {food=0, wood=0, stone=0}
+    for k, v in pairs(allBuild) do
+        if k.id == 2 then
+            temp.food = temp.food + k.workNum
+        end
+    end
+    return temp
+end
+
+Logic.inSell = {
+    food=true,
+    wood=true,
+    stone=true,
+}

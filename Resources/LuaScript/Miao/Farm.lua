@@ -146,3 +146,7 @@ end
 function Farm:getProductPrice()
     return "3贯"
 end
+
+function Farm:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)   
+end

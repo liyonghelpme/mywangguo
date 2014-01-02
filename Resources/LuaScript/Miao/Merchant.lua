@@ -4,7 +4,7 @@ function Merchant:checkWork(k)
     local ret = false
     print("Merchant checkWork", k.id)
     if k.picName == 'build' and not k.deleted and k.workNum > 0 then
-        if k.id == 2 or k.data.IsStore == 1 then
+        if (k.data.IsStore == 2 and Logic.inSell.food) or k.data.IsStore == 1 then
             ret = true
         end
     end
@@ -208,6 +208,7 @@ function Merchant:handleAction()
                 setPos(num, {50, 0})
                 --+商店的贩卖能力
                 doGain(val)
+                updateSellNum(self.people.predictTarget.goodsKind, bn)
             end
             --商店贩卖能力
         --去农田 每个食材3贯

@@ -53,14 +53,19 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
 
     local allV = cxyToAxyMap[getMapKey(nx,ny)]
     --print("check nx ny", nx, ny)
+    --从屏幕 坐标转化成 世界坐标 接着转化成 45 镜头做的坐标
+    print("screen effect allV", allV)
     if allV ~= nil then
-        --print("allV ", #allV, simple.encode(allV))
+        print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
             local hei = mask[v[2]*width+v[1]+1]
+            print("hei", v[1], v[2], hei)
+            --点击的Y值 向下偏移的高度
             local ncy = cy-hei*103
             --print("cx, ncy ", cx, ncy, cy)
             --点击的位置向下偏移半个网格
             --因为cartesianToNormal 使用的是菱形0.5 0 位置的点来计算normal的
+            print("ncy", cx, ncy-SIZEY)
             local ax, ay = newCartesianToAffine(cx, ncy-SIZEY, width, height, fixX, fixY)
             --print("ax ay is", ax, ay)
             if ax == v[1] and ay == v[2] then
@@ -68,6 +73,7 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
             end
         end
     end
+
     --没有找到包含的 菱形网格 在裂缝里面
     return nil 
 

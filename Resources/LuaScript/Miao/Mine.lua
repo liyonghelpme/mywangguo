@@ -1,13 +1,16 @@
 Mine = class(FuncBuild)
 function Mine:ctor(b)
-    self.maxNum = 15
+    self.maxNum = 20
 end
 function Mine:setColor()
     local s = self:checkSlope()
-    if s then
-        setColor(self.baseBuild.bottom, {0, 255, 0})
-    else
-        setColor(self.baseBuild.bottom, {255, 0, 0})
+    print("Mine setColor")
+    if self.selGrid ~= nil then
+        if s == false then
+            setTexture(self.selGrid, "newRedGrid.png")
+        else
+            setTexture(self.selGrid, "newBlueGrid.png")
+        end
     end
 end
 function Mine:checkSlope()
@@ -27,6 +30,8 @@ function Mine:checkFinish()
     local s = self:checkSlope()
     if s then
         self.baseBuild.map.scene:finishBuild() 
+    else
+        addBanner("必须建造到斜坡上")
     end
 end
 function Mine:checkBuildable()
@@ -34,15 +39,16 @@ function Mine:checkBuildable()
 end
 --如果和斜坡碰撞了 调整图片方向
 function Mine:whenColNow()
+    local scaY = getScaleY(self.baseBuild.changeDirNode)
     if self:checkSlope() then
         print("whenColNow Mine", self.baseBuild.colNow, self.baseBuild.otherBuild)
         local dir = self.baseBuild.otherBuild.dir
         if dir == 0 then
-            self.baseBuild.changeDirNode:setFlipX(true)
+            setScaleX(self.baseBuild.changeDirNode, -scaY)
         else
-            self.baseBuild.changeDirNode:setFlipX(false)
+            setScaleX(self.baseBuild.changeDirNode, scaY)
         end
     else
-        self.baseBuild.changeDirNode:setFlipX(false)
+        setScaleX(self.baseBuild.changeDirNode, scaY)
     end
 end

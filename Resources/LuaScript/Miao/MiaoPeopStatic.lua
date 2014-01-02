@@ -116,6 +116,7 @@ function MiaoPeople:handleHome()
             self:clearStateStack()
             self:resetState()
         else
+            --设定猫的位置 为房间位置 不用了
             local function setNPos()
                 local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
                 setPos(self.bg, np)

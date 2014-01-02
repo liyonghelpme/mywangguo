@@ -167,12 +167,6 @@ function BuildPath:update()
     self.map:updateCells(self.cells, self.map.cells)
 end
 function BuildPath:getAllFreeFactory()
-    --[[
-    if self.target.dirty then
-        return {}
-    end
-    --]]
-
     local temp = {}
     for k, v in pairs(self.nearby) do
         if k.id == 5 and k.owner == nil then
@@ -181,4 +175,20 @@ function BuildPath:getAllFreeFactory()
         end
     end
     return temp
+end
+
+--不同类型的建筑物 考量的目标 是不同的 
+--对于采矿场来讲 只考虑 附近的 工厂 和 矿坑即可
+--不空闲的Mine 也可以
+--后续可以考虑距离因素 最近的矿坑
+function BuildPath:getAllFreeMine()
+    local temp = {}
+    local count = 0
+    for k, v in pairs(self.nearby) do
+        if k.id == 28 and k.owner == nil then
+            temp[k] = true
+            count = count+1
+        end
+    end
+    return temp, count
 end

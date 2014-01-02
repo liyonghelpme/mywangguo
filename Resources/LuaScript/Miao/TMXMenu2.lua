@@ -19,7 +19,7 @@ function TMXMenu2:ctor(s)
         setVisible(self.stateLabel, false)
     end
 
-    local but = ui.newButton({image="buta.png", font='f2', text="地图", size=26})
+    local but = ui.newButton({image="buta.png", font='f2', text="地图", size=26, delegate=self, callback=self.onLeft})
     setPos(addChild(temp, but.bg), {62, fixY(768, 704)})
     self.leftBut = but
     local but = ui.newButton({image="buta.png", text="菜单", font='f2', size=26, delegate=self, callback=self.onMenu})
@@ -57,6 +57,12 @@ function TMXMenu2:update(diff)
     end
 end
 
+function TMXMenu2:onLeft()
+    print("onLeft", self.inBuild)
+    if self.inBuild then
+        global.director.curScene.page.curBuild:doSwitch()
+    end
+end
 
 function TMXMenu2:receiveMsg(msg, para)
     if msg == EVENT_TYPE.UPDATE_RESOURCE then

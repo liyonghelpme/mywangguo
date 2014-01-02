@@ -1,4 +1,5 @@
 require "menu.SellMenu2"
+require "menu.StoreInfo2"
 
 BuildOpMenu = class()
 function BuildOpMenu:adjustPos()
@@ -14,7 +15,7 @@ function BuildOpMenu:ctor(b)
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {0, 0})
-    local but = ui.newButton({image="buta.png", text="详情", font="f2", size=23})
+    local but = ui.newButton({image="buta.png", text="详情", font="f2", size=23, delegate=self, callback=self.onInfo})
     but:setContentSize(87, 87)
     setPos(addChild(self.temp, but.bg), {512-112, fixY(sz.height, 704)})
 
@@ -33,6 +34,11 @@ end
 
 function BuildOpMenu:onSwitch()
     self.build:doSwitch()
+end
+
+function BuildOpMenu:onInfo()
+    global.director:popView()
+    self.build.funcBuild:detailDialog()
 end
 
 

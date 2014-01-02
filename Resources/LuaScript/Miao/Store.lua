@@ -1,4 +1,4 @@
-require "menu.StoreInfo"
+require "menu.StoreInfo2"
 Store = class(FuncBuild)
 function Store:ctor(b)
     self.goodsNum = 0
@@ -57,3 +57,6 @@ function Store:showIncrease(n)
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
 --]]
+function Store:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)
+end

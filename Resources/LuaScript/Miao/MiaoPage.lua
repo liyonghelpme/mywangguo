@@ -310,6 +310,7 @@ function MiaoPage:touchesBegan(touches)
             local allCell = self.buildLayer.mapGridController.mapDict
             local map = getPosMap(1, 1, tp.x, tp.y)
             local key = getMapKey(map[3], map[4])
+            print("allCell state", map[3], map[4], allCell[key])
             --点击到某个建筑物
             if allCell[key] ~= nil then
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
@@ -333,6 +334,7 @@ function MiaoPage:touchesBegan(touches)
     --end
 end
 function MiaoPage:touchesMoved(touches)
+    print("MiaoPage toucesMoved", self.touchBuild)
     if self.touchBuild then
         self.touchBuild:touchesMoved(touches)
     end
