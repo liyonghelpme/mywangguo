@@ -154,6 +154,8 @@ function FuncBuild:takeTool()
 end
 function FuncBuild:putTool()
 end
+function FuncBuild:updateStage(diff)
+end
 function FuncBuild:updateState()
 end
 function FuncBuild:updateGoods()
@@ -180,6 +182,9 @@ function delayShow(sp, w)
 end
 --实现这个接口 用于调整效果
 function FuncBuild:showIncrease(n, waitTime)
+    if self.baseBuild.data.showInc == 0 then
+        return
+    end
     if waitTime == nil then
         waitTime = 0
     end
@@ -195,6 +200,9 @@ function FuncBuild:showIncrease(n, waitTime)
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
 function FuncBuild:showDecrease(n, waitTime)
+    if self.baseBuild.data.showInc == 0 then
+        return
+    end
     if waitTime == nil then
         waitTime = 0
     end

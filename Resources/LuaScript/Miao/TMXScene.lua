@@ -166,7 +166,7 @@ function TMXScene:saveGame(hint)
         local p = getPos(k.bg)
         if k.bid ~= nil then
             print("save Building static !!!!", k.static)
-            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, goodsKind=k.goodsKind})
+            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, goodsKind=k.goodsKind, lifeStage=k.lifeStage})
         end
     end
     

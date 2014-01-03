@@ -23,6 +23,7 @@ function StoreInfo2:ctor(b)
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "storeTable.png"), {629, fixY(sz.height, 424)}), {325, 153}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.des, size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {544, fixY(sz.height, 557)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商品", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {568, fixY(sz.height, 371)})
+    self.goodsW = w 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {733, fixY(sz.height, 371)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="贩卖力", size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {569, fixY(sz.height, 479)})
     self.ability = w
@@ -47,6 +48,7 @@ function StoreInfo2:ctor(b)
     self.pro = sp
     storeProNum(sp, self.build.workNum, self.build.maxNum)
     self:initFarm()
+    self:initFactory()
 
     centerUI(self)
 end

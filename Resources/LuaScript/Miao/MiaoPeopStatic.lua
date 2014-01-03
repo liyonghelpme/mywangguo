@@ -159,7 +159,7 @@ function MiaoPeople:handleQuarry()
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
-                self.realTarget.stone = self.realTarget.stone+self.stone
+                self.realTarget:changeWorkNum(self.stone)
                 self.stone = 0
                 self:popState()
                 self:putGoods()
@@ -169,8 +169,9 @@ function MiaoPeople:handleQuarry()
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
-                self.stone = self.predictTarget.stone
-                self.realTarget.stone = 0
+                self.stone = self.predictTarget.workNum
+                self.realTarget:takeAllWorkNum()
+                self:sendGoods()
                 self:popState()
             end
             self:resetState()
@@ -338,7 +339,22 @@ function MiaoPeople:sendGoods()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
         self.carName = {"e3.png", 'f3.png'}
         self.carGoods = sp
+    elseif self.wood > 0 then
+        local sp = createSprite("d3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"c3.png", 'd3.png'}
+        self.carGoods = sp
+    elseif self.workNum > 0 then
+        local sp = createSprite("h3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"g3.png", 'h3.png'}
+        self.carGoods = sp
     end
+
     setScaleX(self.changeDirNode, sca)
     self.oldCarPos = getPos(self.changeDirNode)
     self.carVirAct = repeatForever(sequence({moveby(0.2, 0, 5), moveby(0.2, 0, -5)}))
@@ -409,7 +425,7 @@ function MiaoPeople:popState()
     if #self.stateStack > 0 then
         for k, v in ipairs(self.stateStack) do
             if type(v) == 'table' then
-                print("state", k, v[1])
+                print("state", k, v[1], v[3])
             else
                 print('state', k, v)
             end
@@ -448,8 +464,17 @@ function MiaoPeople:resetState()
     self.needClearOwner = true
 end
 function MiaoPeople:handleFactory()
+    print("self.actionContext", self.actionContext)
     if self.actionContext ~= nil then
-        if self.actionContext == CAT_ACTION.PUT_FOOD then
+        if self.actionContext == CAT_ACTION.PUT_WOOD then
+            self.realTarget.wood = self.realTarget.wood + self.wood
+            self.wood = 0
+            self:putGoods()
+            self:setDir(1, -1)
+            self:popState()
+            self:resetState()
+            print("popState of wood ")
+        elseif self.actionContext == CAT_ACTION.PUT_FOOD then
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
@@ -461,6 +486,7 @@ function MiaoPeople:handleFactory()
             end
             self:resetState()
         elseif self.actionContext == CAT_ACTION.PRODUCT then
+            print("begin Product ")
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
@@ -475,6 +501,8 @@ function MiaoPeople:handleFactory()
             else
                 self.realTarget.stone = self.realTarget.stone + self.stone
                 self.stone = 0
+                self:putGoods()
+                self:setDir(1, -1)
                 self:popState()
             end
             self:resetState()
@@ -541,7 +569,7 @@ end
 
 
 function MiaoPeople:workInFactory()
-    local le = getLaborEffect(self.labor)
+    local le = self:getMyLaborEffect()
     local totalTime = 10
     local productNum = 5
     local healthCost = 5
@@ -582,60 +610,13 @@ function MiaoPeople:workInFactory()
             if self.realTarget.workNum >= self.realTarget.maxNum or not enough then
                 self.realTarget.funcBuild:stopWork()
                 self.workNum = self.realTarget.workNum
-                self.realTarget.workNum = 0
+                self.realTarget:takeAllWorkNum()
                 self.goodsKind = self.realTarget.goodsKind
                 self:popState()
                 self:sendGoods()
                 self:setDir(1, -1)
                 self:resetState()
                 --self:showSelf()
-            end
-        --生产混合原材料物品
-        elseif self.realTarget.productKind ~= nil then
-            print("product kind 3")
-            if self.realTarget.food > 0 and self.realTarget.stone > 0 then
-                self.realTarget.food = self.realTarget.food - 1
-                self.realTarget.stone = self.realTarget.stone - 1
-                changeTable(self.realTarget.product, 3, 1)
-                if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 or self.realTarget.stone <= 0 then
-                    self.state = PEOPLE_STATE.FREE
-                    self.realTarget:setOwner(nil)
-                    self.product = self.realTarget.product[3]
-                    self.realTarget.product[3] = 0
-                    self.realTarget = nil
-                    self.goTower = true
-                    return
-                end
-            end
-        --生产食物
-        elseif self.realTarget.food > 0 then
-            self.realTarget.food = self.realTarget.food - 1
-            changeTable(self.realTarget.product, 1, 1)
-            --如果工厂生产数量超过上限 就不要生产了
-            --运送生产物到商店里面
-            if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 then
-                self.state = PEOPLE_STATE.FREE
-                self.realTarget:setOwner(nil)
-                self.product = self.realTarget.product[1]
-                self.realTarget.product[1] = 0
-                self.realTarget = nil
-                self.goStore = true
-                return
-            end
-        --生产铁器
-        elseif self.realTarget.stone > 0 then
-            self.realTarget.stone = self.realTarget.stone - 1
-            changeTable(self.realTarget.product, 2, 1)
-            --铁器数量
-            if getDefault(self.realTarget.product, 2, 0) >= 10 or self.realTarget.stone <= 0 then
-                self.state = PEOPLE_STATE.FREE
-                self.realTarget:setOwner(nil)
-                self.product = self.realTarget.product[2]
-                self.realTarget.product[2] = 0
-                self.realTarget = nil
-                --运输铁器到商店里面
-                self.goSmith = true
-                return
             end
         end
         --生产结束 直到运送到工厂
@@ -676,13 +657,14 @@ function MiaoPeople:workInMine()
     if self.workTime > rate then
         self.workTime = self.workTime - rate
         self.health = self.health -cost
-        self.realTarget.workNum = self.realTarget.workNum + 1
+        --self.realTarget.workNum = self.realTarget.workNum + 1
+        self.realTarget:changeWorkNum(1)
         --如果工厂生产数量超过上限 就不要生产了
         --离开矿坑 但是predictQuarry 不会消除
         --print("workInMine", self.goQuarry)
         if self.realTarget.workNum >= self.realTarget.maxNum then
             self.stone = self.realTarget.workNum
-            self.realTarget.workNum = 0
+            self.realTarget:takeAllWorkNum()
             self:popState()
             self:resetState()
             self:sendGoods()
@@ -695,7 +677,7 @@ end
 --10 10 10 10 5 = 5点体力值
 --种植的时间 40s 算在这个生产过程里面的 
 function MiaoPeople:workInFarm()
-    local le = getLaborEffect(self.labor)
+    local le = self:getMyLaborEffect()
     local totalTime = 10
     local productNum = 5
     local healthCost = 5
@@ -793,11 +775,13 @@ function MiaoPeople:checkMeInHouse()
 end
 function MiaoPeople:showState()
     --拿到矿刀
+    --[[
     if self.tempMine ~= nil then
         setTexture(self.statePic, "equip70.png")
     elseif self.stone > 0 then
         setTexture(self.statePic, "herb109.png")
     end
+    --]]
 end
 
 --移动了之后 清理owner
@@ -819,6 +803,7 @@ function MiaoPeople:clearStateStack()
     self.stateStack = {}
     self.stateContext = nil
     self.actionContext = nil
+    self.funcPeople.moveYet = nil
     
     --清理运输状态
     self:putGoods()
@@ -851,12 +836,47 @@ function MiaoPeople:checkMoved()
     local moved = false
     if not self.realTarget.deleted then
         local pxy = self.tempEndPoint 
+        --check tempEndPoint building is same with curBuilding 
         --local txy = getPos(self.realTarget.bg)
+
         local map = getBuildMap(self.realTarget)
-        if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
+        --sx sy nx ny
+        local sx, sy = map[1], map[2]
+        local moveYet = true
+        for x = 0, sx-1, 1 do
+            for y = 0, sy-1, 1 do
+                local ax = x-y
+                local ay = x+y
+                if (map[3]+ax == pxy[1]) and (map[4]+ay == pxy[2]) then
+                    moveYet = false
+                    break
+                end
+            end
+        end
+        if moveYet then
             addBanner("目标被移动了 "..simple.encode(pxy).." "..simple.encode(map))
             moved = true
         end
+        --if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
+        --    moved = true
+        --end
     end
     return moved
+end
+function MiaoPeople:printState()
+    print("printState", self.name)
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            print("state", k, v[1], v[3])
+        else
+            print('state', k, v)
+        end
+    end
+end
+function MiaoPeople:useStateContext()
+    print("useStateContext")
+    self.predictTarget = self.stateContext[2]
+    self.actionContext = self.stateContext[3] 
+    self.needClearOwner = self.stateContext.needClearOwner or true
+    self.stateContext = nil
 end

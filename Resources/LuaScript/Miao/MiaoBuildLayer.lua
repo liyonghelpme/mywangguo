@@ -64,7 +64,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        self:addPeople(8)
+        --self:addPeople(8)
     end
 end
 
@@ -196,7 +196,7 @@ function MiaoBuildLayer:initBuild()
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
-            b:adjustRoad()
+            b.funcBuild:adjustRoad()
             b:finishBuild()
             --调整建筑物方向
             b:doSwitch()
@@ -332,6 +332,7 @@ function MiaoBuildLayer:initPic()
     sf:addSpriteFramesWithFile("skillOne.plist")
     sf:addSpriteFramesWithFile("catOne.plist")
     sf:addSpriteFramesWithFile("goodsOne.plist")
+    sf:addSpriteFramesWithFile("catCut.plist")
 end
 
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road

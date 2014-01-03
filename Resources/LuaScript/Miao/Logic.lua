@@ -270,9 +270,11 @@ Logic.goodsSellNum = {}
 function updateSellNum(k, n)
     local v = getDefault(Logic.goodsSellNum, k, 0)
     Logic.goodsSellNum[k] = v+n
+    local selNum = Logic.goodsSellNum[k]
     local me = GoodsName[k]
     local ng = GoodsName[k+1]
-    if me.store == ng.store then
+    --最后一个商品
+    if ng ~= nil and me.store == ng.store and selNum >= ng.condition then
         local find = false
         for tk, v in ipairs(Logic.ownGoods) do
             if v[1] == 1 and v[2] == (k+1) then
@@ -322,6 +324,10 @@ function getAllMatNum()
     for k, v in pairs(allBuild) do
         if k.id == 2 then
             temp.food = temp.food + k.workNum
+        elseif k.id == 19 then
+            temp.wood = temp.wood + k.workNum
+        elseif k.id == 12 then
+            temp.stone = temp.stone + k.workNum
         end
     end
     return temp

@@ -17,6 +17,16 @@ CAT_ACTION = {
 
     CHECK_ACCESS = 13,
 
+    PUT_WOOD_LUMBER = 14,
+    LOGGING = 15,
+    TAKE_WOOD_TOOL = 16,
+
+    PUT_WOOD = 17,
+    TAKE_WOOD = 18,
+    --WOOD_CENTER=17,
+    --移动到树木位置开始伐木
+    --MOVE_CUT = 17,
+
     --运送矿石到采矿场
     --BACK_STONE = 14,
 }
@@ -122,8 +132,9 @@ function Cat2:checkWork(k)
             print("mine stone", k.stone)
             ret = k.workNum < k.maxNum 
         --铁匠铺可以生产物品
-        elseif k.id == 13 then
-            ret = k.state == BUILD_STATE.FREE and k.workNum < k.maxNum
+        elseif k.id == 19 then
+            print("lumber ")
+            ret = k.workNum < k.maxNum
         elseif k.id == 11 then
             --ret = k.stone ~= nil and k.stone > 0 
         --灯塔可以生产
@@ -145,6 +156,7 @@ function Cat2:findTarget()
     local allBuild
     local allFoodFarm = {}
     local allStoneQuarry = {}
+    local allWoodLumber = {}
     --只要建筑物不移动 这些数据都不会改变的 所以只需要寻路一次即可
     self.allPossible = allPossible
     self.allFreeFactory = allFreeFactory
@@ -154,6 +166,7 @@ function Cat2:findTarget()
     self.allFreeQuarry = allFreeQuarry
     self.allFoodFarm = allFoodFarm
     self.allStoneQuarry = allStoneQuarry
+    self.allWoodLumber = allWoodLumber
 
     --规划一个 附近可能建筑物的列表 和 附近建筑物的寻路方法10*10 的格子
     print("path dirty ", self.people.dirty)
@@ -201,8 +214,12 @@ function Cat2:findTarget()
                 if k.id == 2 and k.workNum > 0 then
                     table.insert(allFoodFarm, k)
                 end
-                if k.id == 12 and k.stone > 0 then
+                --采矿场
+                if k.id == 12 and k.workNum > 0 then
                     table.insert(allStoneQuarry, k)
+                end
+                if k.id == 19 and k.workNum > 0 then
+                    table.insert(allWoodLumber, k)
                 end
                 if k.id == 12 and k.owner == nil then
                     table.insert(allFreeQuarry, k)
@@ -250,6 +267,7 @@ end
 function Cat2:checkAllPossible()
     --按照距离排序的建筑物
     for _, k in ipairs(self.allPossible) do
+        --print("allPossible", k.id)
         --新商店只有 粮食物品
         if k.data.IsStore == 1 then
             local nbuilding = k.buildPath.nearby
@@ -257,6 +275,7 @@ function Cat2:checkAllPossible()
             local allFoodFarm = {}
             local allStoneQuarry = {}
 
+            print("store Factory")
             local storeFactory = k.buildPath:getAllFreeFactory()
 
             local food = GoodsName[k.goodsKind].food
@@ -268,6 +287,7 @@ function Cat2:checkAllPossible()
             local quarryFac = nil
             local lumberFac = nil
             local gotoQuarry = nil
+            local gotoLumber = nil
             --如果工厂 food = 0 且 farm 可以到达工厂则 去这个工厂 ---> PRODUCT　 的时候检查没有产品　 那么就放弃这次工作重新寻路　 找另外一种资源　 
             --farmFactory 包含 food > 0 的工厂
             --quarryFactory 包含 stone > 0 的工厂
@@ -290,8 +310,10 @@ function Cat2:checkAllPossible()
             end
             --如果停止的位置 不能去 采矿 怎么办？
             --findPath Error gotoHome 即可
+            print("stone factory")
             if stone > 0 then
                 self:sortBuildings(self.allStoneQuarry)
+                print("get stone Quarry factory", #self.allStoneQuarry)
                 for nk, nv in ipairs(self.allStoneQuarry) do
                     local tempFactory = nv.buildPath:getAllFreeFactory()
                     local interFac = interSet(tempFactory, storeFactory)  
@@ -304,10 +326,28 @@ function Cat2:checkAllPossible()
                     end
                 end
             end
+
+            if wood > 0 then
+                self:sortBuildings(self.allWoodLumber)
+                print("get wood lumber factory", #self.allWoodLumber)
+                for nk, nv in ipairs(self.allWoodLumber) do
+                    local tempFactory = nv.buildPath:getAllFreeFactory()
+                    local interFac = interSet(tempFactory, storeFactory)  
+                    if interFac.count > 0 then
+                        gotoLumber = nv
+                        lumberFac = interFac
+                        lumberFac.count = nil
+                        table.insert(allPosFac, lumberFac)
+                        break
+                    end
+                end
+            end
+
             --不一定是同一个工厂
             --不求完美方案  可能有 4个 考虑 第一个 对象 或者前几个可能方案
             --可以 考虑 若干个 农田 和 采矿场 的 工厂 不过运算量会增大
             local checkRes = true
+            print("stone and quarryFac", food, farmFac, stone, quarryFac, wood, lumberFac)
             if (food > 0 and farmFac == nil) or (stone > 0 and quarryFac == nil) or (wood > 0 and  lumberFac == nil ) then
                 checkRes = false
             end
@@ -353,8 +393,28 @@ function Cat2:checkAllPossible()
                 self.people.predictStore:setOwner(self.people)
                 table.insert(self.people.stateStack, {PEOPLE_STATE.GO_STORE, self.people.predictStore, CAT_ACTION.PUT_PRODUCT, needClearOwner = true})
                 table.insert(self.people.stateStack, {PEOPLE_STATE.PRODUCT, self.people.predictFactory, CAT_ACTION.PRODUCT, needClearOwner = true})
+                --popStateContext 即可
+                if food > 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, gotoFarm, CAT_ACTION.TAKE_FOOD, needClearOwner = false})
+                end
+                if wood > 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_WOOD, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, gotoLumber, CAT_ACTION.TAKE_WOOD, needClearOwner = false})
+                end
+                if stone > 0 then
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE, needClearOwner = true})
+                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, gotoQuarry, CAT_ACTION.TAKE_STONE, needClearOwner = false})
+                end
+                self.people.goodsKind = k.goodsKind
+                --state == FREE 之后就MiaoPeople 里面就不要根据predictTarget 来进入INIT_FIND 状态
+                self.people.stateContext = table.remove(self.people.stateStack)
+                --不用也可以 predictTarget = nil 会接着循环的
+                self.people:useStateContext()
+
                 --获取资源不用占用 农田 和 采矿场 
                 --cpu 资源调度程序
+                --[[
                 if food > 0 and stone == 0 then
                     table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
                     --self:sortBuildings(allFoodFarm)
@@ -380,7 +440,10 @@ function Cat2:checkAllPossible()
                     self.people.actionContext= CAT_ACTION.TAKE_STONE
                     self.people.goodsKind = k.goodsKind
                 end
+                --]]
+                self.people:printState()
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
+                --记住找完可能建筑物 之后 就return 即可
                 return
             end
         --寻找采矿场附近的空闲 矿坑
@@ -396,6 +459,24 @@ function Cat2:checkAllPossible()
                 self.people.predictTarget = k
                 k:setOwner(self.people)
                 self.people.quarry = k
+                return
+            end
+        --寻找伐木场 附近空闲的 树木
+        elseif k.id == 19 then
+            local freeTree, count = k.buildPath:getAllFreeTree()
+            if count > 0 then
+                local gotoTree = setToArr(freeTree)
+                self:sortBuildings(gotoTree)
+                gotoTree[1]:setOwner(self.people)
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.PUT_WOOD_LUMBER, needClearOwner=true})
+                table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, gotoTree[1], CAT_ACTION.LOGGING, needClearOwner = true})
+                --移动到树林位置 开始伐木动作 93 -9
+                --table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, gotoTree[1], CAT_ACTION.MOVE_CUT, needClearOwner = true})
+                self.people.actionContext = CAT_ACTION.TAKE_WOOD_TOOL
+                self.people.predictTarget = k
+                k:setOwner(self.people)
+                self.people.lumber = k
+                return
             end
         --商店
         elseif k.id == 13 then
@@ -527,5 +608,134 @@ function Cat2:findPathError()
         --store  ------  factory    -----  farm   -----   house  
         --这时候 先去 farm的商店 就不能找到 去矿石商店的路径了
         self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.myHouse, CAT_ACTION.GO_HOME}
+    end
+end
+
+function Cat2:handleAction(diff)
+    local needResetState = true
+    --if self.people.realTarget.deleted then
+    --    self.people:clearStateStack()
+    --else
+        if self.people.actionContext == CAT_ACTION.TAKE_WOOD_TOOL then
+            self.people.realTarget.funcBuild:takeTool()
+            self.people:popState()
+        elseif self.people.actionContext == CAT_ACTION.LOGGING then
+            --moveYet 状态如何reset掉呢
+            if self.moveYet == nil then
+                self.moveCutTime = 0
+                self.moveYet = true
+                local p = getPos(self.people.realTarget.bg)
+                local myP = getPos(self.people.bg)
+                self.people.state = PEOPLE_STATE.WAIT_ANI
+                self.oldMyP = myP
+                --93 -9
+                local function setD(n)
+                    if n == 0 then
+                        self.people:setDir(1, 1)
+                    else
+                        self.people:setDir(1, -1)
+                    end
+                end
+                self.people.bg:runAction(sequence({callfunc(nil, setD, 0), moveto(0.5, myP[1]+84, myP[2]+42), callfunc(nil, setD, 1), moveto(0.5, p[1]+93, p[2]-9)}))
+            else
+                self.moveCutTime = self.moveCutTime+diff
+                print("TestCat2 begin work", self.moveCutTime)
+                if self.moveCutTime >= 1 then
+                    self.moveYet = nil
+                    local ani = createAnimation("cat_cut", "cat_cut_%d.png", 0, 14, 1, 1, true)
+                    self.people:setMoveAction("cat_cut")
+                    local sca = getScaleY(self.people.changeDirNode)
+                    setScaleX(self.people.changeDirNode, sca)
+
+                    self.people.state = PEOPLE_STATE.IN_WORK
+                    self.people.workTime = 0
+                end
+            end
+            needResetState = false
+        elseif self.people.actionContext == CAT_ACTION.PUT_WOOD_LUMBER then
+            print("put wood in lumber", self.people.wood)
+            self.people.realTarget:changeWorkNum(self.people.wood)
+            self.people.wood = 0
+            self.people:popState()
+            self.people:putGoods()
+        --[[
+        elseif self.people.actionContext == CAT_ACTION.WOOD_CENTER then
+            self.moveCutTime = self.moveCutTime+diff
+            if self.moveCutTime >= 1 then
+                self.people.state = PEOPLE_STATE.FREE
+            end
+        --]]
+        --[[
+        elseif self.people.actionContext == CAT_ACTION.PUT_WOOD then
+            self.people.realTarget.wood = self.people.realTarget.wood + self.people.wood
+            self.people.wood = 0
+            self.people:putGoods()
+            self.people:setDir(1, -1)
+            self.people:popState()
+        --]]
+        --运送木材到工厂
+        elseif self.people.actionContext == CAT_ACTION.TAKE_WOOD then
+            self.people.wood = self.people.predictTarget.workNum
+            self.people.realTarget:takeAllWorkNum()
+            self.people:sendGoods()
+            self.people:popState()
+        end
+        print("action Context", self.people.actionContext)
+    --end
+    if needResetState then
+        self.people:resetState()
+    end
+end
+function Cat2:workNow()
+    local le = self.people:getMyLaborEffect()
+    local totalTime = 10
+    local productNum = 5
+    local healthCost = 5
+    if le.time ~= nil then
+        totalTime = totalTime+le.time
+    end
+    if le.product ~= nil then
+        productNum = productNum + le.product
+    end
+    if le.health ~= nil then
+        healthCost = healthCost+le.health
+    end
+    totalTime = math.max(1, totalTime)
+    healthCost = math.max(1, healthCost)
+    --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
+    --计算出1个 的生产时间 和 消耗的 生命值
+    --self.people.myHouse.productNum 花费时间减少  消耗体力不变
+    
+    if self.people.actionContext == CAT_ACTION.LOGGING then
+        local rate = totalTime/(self.people.lumber.productNum/20)/productNum
+        local cost = healthCost/productNum
+        if self.people.workTime > rate then
+            self.people.workTime = self.people.workTime - rate
+            self.people.health = self.people.health -cost
+            self.people.realTarget.workNum = self.people.realTarget.workNum + 1
+            if self.people.realTarget.workNum >= self.people.realTarget.maxNum then
+                self.people.wood = self.people.realTarget.workNum
+                --树木应该将showState = -1 接着将 lifeState = 0 
+                self.people.realTarget:takeAllWorkNum()
+                self.people:popState()
+                self.people:resetState()
+                self.people:sendGoods()
+                self.people:setDir(1, -1)
+                
+                --setPos(self.bg, self.oldMyP)
+                print("finish Logging reset Pos", self.people.wood)
+                --[[
+                self.moveCutTime = 0
+                self.people.actionContext = CAT_ACTION.WOOD_CENTER
+                self.people.state = PEOPLE_STATE.WAIT_ANI
+                self.people.bg:runAction(moveto(0.5, self.oldMyP[1], self.oldMyP[2]))
+                --]]
+
+                setPos(self.people.bg, self.oldMyP)
+                --local sz = self.changeDirNode:getContentSize()
+                --setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
+                return
+            end
+        end
     end
 end

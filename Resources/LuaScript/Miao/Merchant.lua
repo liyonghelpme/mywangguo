@@ -4,7 +4,7 @@ function Merchant:checkWork(k)
     local ret = false
     print("Merchant checkWork", k.id)
     if k.picName == 'build' and not k.deleted and k.workNum > 0 then
-        if (k.data.IsStore == 2 and Logic.inSell.food) or k.data.IsStore == 1 then
+        if (k.data.IsStore == 2 and Logic.inSell.food) or k.data.IsStore == 1 or (k.id == 12 and Logic.inSell.stone) or (k.id == 19 and Logic.inSell.wood) then
             ret = true
         end
     end
@@ -171,6 +171,7 @@ function Merchant:handleAction()
         print("BUY_GOODS", self.people.predictTarget.id)
         if self.people.predictTarget.deleted then
             addBanner("建筑物不见了")
+        --[[
         elseif self.people.predictTarget.stone > 0 then
             local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
@@ -185,7 +186,9 @@ function Merchant:handleAction()
             setPos(num, {50, 0})
             doGain(pay)
             self.people.predictTarget.stone = 0
-        elseif self.people.predictTarget.data.IsStore == 1 then
+        --]]
+        --elseif self.people.predictTarget.data.IsStore == 1 then
+        else
             getNum = self.people.predictTarget.workNum
             if getNum > 0 then
                 local sp = CCSprite:create("silverIcon.png")
@@ -212,6 +215,7 @@ function Merchant:handleAction()
             end
             --商店贩卖能力
         --去农田 每个食材3贯
+        --[[
         elseif self.people.predictTarget.workNum > 0 then
             getNum = self.people.predictTarget.workNum
             local sp = CCSprite:create("silverIcon.png")
@@ -228,6 +232,7 @@ function Merchant:handleAction()
             setPos(num, {50, 0})
             doGain(val)
             self.people.predictTarget.workNum = 0
+        --]]
         end
         if Logic.inNew and not Logic.buyIt then
             Logic.buyIt = true

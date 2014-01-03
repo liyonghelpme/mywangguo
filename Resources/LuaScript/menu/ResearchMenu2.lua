@@ -9,7 +9,7 @@ function ResearchMenu2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="名称", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {333, fixY(sz.height, 240)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {691, fixY(sz.height, 240)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="刀", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {289, fixY(sz.height, 564)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="刀", size=25, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {309, fixY(sz.height, 564)})
     self.ename = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="攻击", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {435, fixY(sz.height, 563)})
     self.firAtt = w
@@ -76,7 +76,13 @@ function ResearchMenu2:setSel(s)
         setColor(word[2], {255, 255, 255})
         setColor(word[3], {255, 255, 255})
 
-        local edata = Logic.allEquip[Logic.researchGoods[self.selPanel][2]] 
+        local rdata = Logic.researchGoods[self.selPanel]
+        local edata 
+        if rdata[1] == 0 then
+            edata = Logic.allEquip[rdata[2]]
+        elseif rdata[1] == 1 then
+            edata = GoodsName[rdata[2]]
+        end
         self:getAllAtt(edata)
     end
 end
@@ -94,8 +100,8 @@ function ResearchMenu2:getAllAtt(edata)
     self.ename:setString(edata.name)
     self.desWord:setString(edata.des)
     
-    local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot'}
-    local allCn = {'防御', '攻击', '体力', '腕力', '劳动', '远程'}
+    local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot', 'food', 'wood', 'stone'}
+    local allCn = {'防御', '攻击', '体力', '腕力', '劳动', '远程', '食材', '木材', '石头'}
 
     local fir = true
     local two = false
@@ -104,7 +110,7 @@ function ResearchMenu2:getAllAtt(edata)
     self.secAtt:setString('')
     self.secNum:setString('')
     for k, v in ipairs(allAtt) do
-        if edata[v] > 0 then
+        if edata[v] ~= nil and edata[v] > 0 then
             if fir then
                 fir = false
                 self.firAtt:setString(allCn[k])
@@ -121,6 +127,7 @@ function ResearchMenu2:getAllAtt(edata)
                 else
                     self.secNum:setString(edata[v])
                 end
+                break
             end
         end
     end

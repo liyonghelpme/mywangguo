@@ -1,9 +1,9 @@
-MineStore = class(FuncBuild)
-function MineStore:ctor(b)
-    self.baseBuild.maxNum = 30
+WoodStore = class(FuncBuild)
+function WoodStore:ctor(b)
+    self.baseBuild.maxNum = 10
     self.goodsNum = 0
 end
-function MineStore:initBottom()
+function WoodStore:initBottom()
     if self.selGrid == nil then
         self.selGrid = CCNode:create()
         self.baseBuild.heightNode:addChild(self.selGrid, -1)
@@ -16,7 +16,7 @@ function MineStore:initBottom()
         end
     end
 end
-function MineStore:initView()
+function WoodStore:initView()
     --local bd = Logic.buildings[self.baseBuild.id]
     --local sz = self.baseBuild.changeDirNode:getContentSize()
     --setPos(setAnchor(self.baseBuild.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height}), {0, SIZEY})
@@ -26,13 +26,13 @@ function MineStore:initView()
     self.tool = setSize(setPos(addSprite(self.baseBuild.changeDirNode, "equip70.png"), {93, fixY(130, 75)}), {40, 40})
 end
 
-function MineStore:takeTool()
+function WoodStore:takeTool()
     setVisible(self.tool, false)
 end
-function MineStore:putTool()
+function WoodStore:putTool()
     setVisible(self.tool, true)
 end
-function MineStore:setBottomColor(c)
+function WoodStore:setBottomColor(c)
     if c == 0 then
         setTexture(self.s1, "newRedGrid.png")
         setTexture(self.s2, "newRedGrid.png")
@@ -42,7 +42,7 @@ function MineStore:setBottomColor(c)
     end
 end
 
-function MineStore:doSwitch()
+function WoodStore:doSwitch()
     if self.s1 ~= nil then
         removeSelf(self.s1)
         removeSelf(self.s2)
@@ -56,7 +56,8 @@ function MineStore:doSwitch()
         self.baseBuild:setColPos()
     end
 end
-function MineStore:updateState()
+function WoodStore:updateState()
+    --[[
     if self.stonePic ~= nil then
         removeSelf(self.stonePic)
     end
@@ -69,11 +70,12 @@ function MineStore:updateState()
         self.stonePic:addChild(sp)
         setPos(sp, {initX+(i-1)*40, 30})
     end
+    --]]
 end
 
-function MineStore:updateGoods()
+function WoodStore:updateGoods()
     local show = math.floor(3*self.baseBuild.workNum/self.baseBuild.maxNum)
-    print("update MineStore Goods", self.baseBuild.workNum, self.baseBuild.maxNum, self.goodsNum, show)
+    print("update WoodStore Goods", self.baseBuild.workNum, self.baseBuild.maxNum, self.goodsNum, show)
     if self.baseBuild.workNum > 0 then
         show = math.max(1, show)
     end
@@ -88,13 +90,13 @@ function MineStore:updateGoods()
     if show == 0 then
         return
     elseif show == 1 then
-        self.goodsObj = createSprite("stone1.png")
+        self.goodsObj = createSprite("wood1.png")
     elseif show == 2 then
-        self.goodsObj = createSprite("stone2.png")
+        self.goodsObj = createSprite("wood2.png")
     elseif show == 3 then
-        self.goodsObj = createSprite("stone3.png")
+        self.goodsObj = createSprite("wood3.png")
     else
-        self.goodsObj = createSprite("stone1.png")
+        self.goodsObj = createSprite("wood1.png")
     end
     self.baseBuild.changeDirNode:addChild(self.goodsObj)
     --local sz = self.baseBuild.changeDirNode:getContentSize()
@@ -102,9 +104,9 @@ function MineStore:updateGoods()
     print("setPos", 512)
 end
 
-function MineStore:detailDialog()
+function WoodStore:detailDialog()
     global.director:pushView(StoreInfo2.new(self.baseBuild), 1)   
 end
-function MineStore:getIncWord()
+function WoodStore:getIncWord()
     return "生产"
 end

@@ -75,3 +75,7 @@ function Factory:stopWork()
 end
 
 
+function Factory:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)
+end
+

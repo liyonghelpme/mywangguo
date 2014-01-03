@@ -29,6 +29,8 @@ PEOPLE_STATE = {
     GO_QUARRY = 16,
 
     GO_TARGET = 17,
+
+    WAIT_ANI = 18,
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
@@ -49,6 +51,7 @@ function MiaoPeople:ctor(m, data)
     self.name = str(math.random(99999))
     self.food = 0
     self.stone = 0
+    self.wood = 0
     self.workNum = 0
     self.lastVisible = true
     self.weapon = data.weapon
@@ -234,6 +237,12 @@ function MiaoPeople:onMerch()
     end
 end
 
+function MiaoPeople:doWaitAni(diff)
+    if self.state == PEOPLE_STATE.WAIT_ANI then
+        self.funcPeople:handleAction(diff)
+    end
+end
+
 function MiaoPeople:update(diff)
     if Logic.paused then
         return
@@ -249,11 +258,12 @@ function MiaoPeople:update(diff)
     self:doMove(diff)
     self:doWork(diff)
     self:doPaused(diff)
+    self:doWaitAni(diff)
     self:setZord()
     local s = ''
     for k, v in ipairs(self.stateStack) do
         if type(v) == 'table' then
-            s = s..v[1]..'\n'
+            s = s..v[1]..' '..str(v[3])..'\n'
         else
             s = s..v..'\n'
         end
@@ -270,6 +280,7 @@ function MiaoPeople:update(diff)
     end
     --]]
 end
+--只有在当前猫为寻路猫的情况下 才可以开始寻路过程
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
         if self.map.curSol == nil or self.map.curSol == self or self.map.curSol.state ~= PEOPLE_STATE.IN_FIND then
@@ -308,10 +319,13 @@ function MiaoPeople:initFind(diff)
         --tired 不能中断操作
         --新系统 stateContext actionContext
         if self.stateContext ~= nil then
+            --[[
             self.predictTarget = self.stateContext[2]
             self.actionContext = self.stateContext[3] 
             self.needClearOwner = self.stateContext.needClearOwner or true
             self.stateContext = nil
+            --]]
+            self:useStateContext()
             if self.predictTarget.deleted then
                 self.predictTarget = nil
                 self:clearStateStack()
@@ -510,27 +524,11 @@ function MiaoPeople:initMove(diff)
     --print("initMove")
     if self.state == PEOPLE_STATE.FIND then
         --开始从房间里面出来了 调整一下初始的位置 people 所在网格靠近附近邻居的位置 中点
-        --[[
-        if self.lastState == PEOPLE_STATE.IN_HOME then
-            print("init Home Pos", #self.path, simple.encode(self.path[2]), simple.encode(self.lastEndPoint))
-            local mx = (self.path[2][1]+self.lastEndPoint[1])/2
-            local my = (self.path[2][2]+self.lastEndPoint[2])/2
-            local np = setBuildMap({1, 1, mx, my})
-            setPos(self.bg, np)
-            self:setZord()
-            --self.bg:setVisible(true)
-            self.lastState = nil
-        end
-        --]]
-
-
         self.state = PEOPLE_STATE.IN_MOVE
         self.curPoint = 1
         self.passTime = 1
-
         self.map:updatePath(self.path)
         self.map:switchPathSol()
-
     end
 end
 function MiaoPeople:onBuy()
@@ -559,7 +557,7 @@ function MiaoPeople:doMove(diff)
                     self.funcPeople:buildMove()
                 elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
-                        self.funcPeople:handleAction()
+                        self.funcPeople:handleAction(diff)
                     --收获农作物 商店资源
                     elseif self.goBack == nil then
                         self.state = PEOPLE_STATE.FREE
@@ -638,6 +636,9 @@ function MiaoPeople:doMove(diff)
                         self:handleSmith()
                     elseif self.realTarget.id == 14 then
                         self:handleTower()
+                    --默认handle
+                    else
+                        self.funcPeople:handleAction(diff)
                     end
                     self:finishHandle()
                 end
@@ -680,7 +681,9 @@ function MiaoPeople:doMove(diff)
                     local goYet = false
 
                     local accMove = false
-                    if self.data.skill == 42 then
+                    local le = self:getMyLaborEffect()
+                    --劳动加速 移动
+                    if self.data.skill == 42 or (le.move ~= nil and le.move > 0)  then
                         accMove = true
                     end
                     --道路是onSlope 
@@ -791,6 +794,8 @@ function MiaoPeople:doWork(diff)
             --农田工作 
             elseif self.realTarget.id == 2 then
                 self:workInFarm()
+            else
+                self.funcPeople:workNow()
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then

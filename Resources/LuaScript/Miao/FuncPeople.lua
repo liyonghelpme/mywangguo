@@ -47,3 +47,7 @@ function FuncPeople:buildMove()
     self.people:resetState()
 end
 
+function FuncPeople:workNow()
+end
+function FuncPeople:handleAction(diff)
+end

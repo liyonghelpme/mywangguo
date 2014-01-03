@@ -168,12 +168,15 @@ function BuildPath:update()
 end
 function BuildPath:getAllFreeFactory()
     local temp = {}
+    local count = 0
     for k, v in pairs(self.nearby) do
         if k.id == 5 and k.owner == nil then
             --table.insert(temp, k)
             temp[k] = true
+            count = count+1
         end
     end
+    print("free factory ", count)
     return temp
 end
 
@@ -192,3 +195,17 @@ function BuildPath:getAllFreeMine()
     end
     return temp, count
 end
+
+function BuildPath:getAllFreeTree()
+    local temp = {}
+    local count = 0
+    for k, v in pairs(self.nearby) do
+        --树木成熟状态
+        if k.id == 29 and k.owner == nil and k.funcBuild.showState == 3 then
+            temp[k] = true
+            count = count+1
+        end
+    end
+    return temp, count
+end
+

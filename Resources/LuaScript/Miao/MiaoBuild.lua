@@ -19,6 +19,8 @@ require "menu.BuildOpMenu"
 require "Miao.Drink"
 require "Miao.BuildPath"
 require "Miao.ItemShop"
+require "Miao.WoodStore"
+require "Miao.Wood"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -62,6 +64,8 @@ function MiaoBuild:ctor(m, data)
     self.rate = 0
     self.dirty = false
     self.data = Logic.buildings[self.id]
+    --记录开始生长的时间
+    self.lifeStage = data.lifeStage or 0
     --篱笆数据
     print("buildkind", self.id)
     if self.data ~= nil then
@@ -143,9 +147,20 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = MineStore.new(self)
             self.funcBuild:initView()
+        --伐木场
+        elseif self.id == 19 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = WoodStore.new(self)
+            self.funcBuild:initView()
+        --坑道
         elseif self.id == 28 then
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Mine.new(self)
+            self.funcBuild:initView()
+        --树木
+        elseif self.id == 29 then
+            self.changeDirNode = setAnchor(createSprite("tree4.png"), {0.5, 0})
+            self.funcBuild = Wood.new(self)
             self.funcBuild:initView()
         --铁匠铺
         elseif self.id == 13 then
@@ -259,7 +274,11 @@ function MiaoBuild:doSwitch()
         setScaleX(self.changeDirNode, -sca)
         --self.changeDirNode:setFlipX(true)
     end
-    self.sy, self.sx = self.sx, self.sy
+    if self.dir == 0 then
+        self.sx, self.sy = self.data.sx, self.data.sy
+    else
+        self.sy, self.sx = self.data.sx, self.data.sy
+    end
 
     local sz = self.changeDirNode:getContentSize()
     --[[
@@ -477,6 +496,7 @@ function MiaoBuild:update(diff)
             self.inRangeLabel:setString(s)
         end
         self:updateState(diff)
+        self.funcBuild:updateStage(diff)
     end
 end
 function MiaoBuild:enterScene()
@@ -678,8 +698,15 @@ function MiaoBuild:setOwner(s)
     end
 end
 
+function MiaoBuild:takeAllWorkNum()
+    self.workNum = 0
+    self.funcBuild:updateGoods()
+end
 function MiaoBuild:changeWorkNum(n)
     self.workNum = self.workNum+n
+    self.workNum = math.min(self.workNum, self.maxNum)
+    print("changeWorkNum", n, self.workNum)
+    self.funcBuild:updateGoods()
 end
 function MiaoBuild:removeSelf()
     print("removeSelf Building", self.picName, self.id)
@@ -725,8 +752,9 @@ function MiaoBuild:doProduct()
     self.food = self.food - gn.food
     self.wood = self.wood - gn.wood
     self.stone = self.stone - gn.stone
-    self.workNum = self.workNum+1
+    self:changeWorkNum(1)
 end
+
 function MiaoBuild:setGoodsKind(k)
     print("setGoodsKind", k)
     if k ~= self.goodsKind then

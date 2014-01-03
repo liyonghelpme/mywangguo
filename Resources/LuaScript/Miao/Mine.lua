@@ -1,6 +1,6 @@
 Mine = class(FuncBuild)
 function Mine:ctor(b)
-    self.maxNum = 20
+    self.baseBuild.maxNum = 20
 end
 function Mine:initView()
     local sz = self.baseBuild.changeDirNode:getContentSize()
@@ -61,3 +61,35 @@ function Mine:adjustRoad()
     print("adjust Mine dir")
     self:whenColNow()
 end
+
+function Mine:updateGoods()
+    local show = math.floor(3*self.baseBuild.workNum/self.baseBuild.maxNum)
+    print("update WoodStore Goods", self.baseBuild.workNum, self.baseBuild.maxNum, self.goodsNum, show)
+    if self.baseBuild.workNum > 0 then
+        show = math.max(1, show)
+    end
+    if show == self.goodsNum then
+        return
+    end
+    self.goodsNum = show
+    if self.goodsObj ~= nil then
+        removeSelf(self.goodsObj)
+    end
+    self.goodsObj = nil
+    if show == 0 then
+        return
+    elseif show == 1 then
+        self.goodsObj = createSprite("buildStone1.png")
+    elseif show == 2 then
+        self.goodsObj = createSprite("buildStone2.png")
+    elseif show == 3 then
+        self.goodsObj = createSprite("buildStone3.png")
+    else
+        self.goodsObj = createSprite("buildStone1.png")
+    end
+    self.baseBuild.changeDirNode:addChild(self.goodsObj)
+    --local sz = self.baseBuild.changeDirNode:getContentSize()
+    setPos(self.goodsObj, {512, 384})
+    print("setPos", 512)
+end
+
