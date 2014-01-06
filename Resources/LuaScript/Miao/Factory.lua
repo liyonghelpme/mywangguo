@@ -67,6 +67,9 @@ function Factory:update(diff)
     if self.passTime > 1 then
         self.passTime = 0
     end
+    if self.baseBuild.owner == nil then
+        self:stopWork()
+    end
 end
 function Factory:stopWork()
     removeSelf(self.banner)

@@ -69,10 +69,11 @@ end
 --在商店里面购买这种建筑物
 --保存游戏
 Logic.buildNum = {
-    [24]=1,
-    [28]=1,
-    [29]=1,
+    [24]=2,
+    [28]=2,
+    [29]=2,
 }
+
 function changeBuildNum(id, n)
     Logic.buildNum[id] = (Logic.buildNum[id] or 0)+n
 end

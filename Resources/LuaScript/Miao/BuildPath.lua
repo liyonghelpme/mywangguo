@@ -85,6 +85,8 @@ function BuildPath:checkNeibor(x, y)
                     hasRoad = true
                     --print("buildCell Kind Road")
                 --同一个建筑物不能多次插入
+                --可以到达工厂
+                --就近的工厂
                 elseif not isStart and bb.picName == 'build' and bb.data.kind == 0 then
                     --是一个可以到达的 去工作的建筑物
                     --建筑物不能贯通周围邻居
@@ -95,8 +97,12 @@ function BuildPath:checkNeibor(x, y)
                     if #bb.belong > 3 then
                         table.remove(bb.belong, 1)
                     end
+                    --是自己建筑物的一个网格  加入寻路中
                 else
                     --print("no road")
+                end
+                if bb == self.target then
+                    hasRoad = true
                 end
             else
                 --print("not Road")

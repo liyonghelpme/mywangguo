@@ -20,14 +20,14 @@ function TMXMenu2:ctor(s)
     end
 
     self.left = addNode(self.bg)
-    local but = ui.newButton({image="buta.png", text="地图", font="f2", size=30, delegate=self, callback=self.onLeft, touchColor=hexToDec('ce4e00'), color={255, 255, 255}, shadowColor={255, 255, 255}})
+    local but = ui.newButton({image="buta.png", text="地图", font="f2", size=30, delegate=self, callback=self.onLeft, color=hexToDec('ce4e00'),  shadowColor={255, 255, 255}})
     but:setContentSize(107, 113)
     setPos(addChild(self.left, but.bg), {76, fixY(sz.height, 706)})
     self.leftBut = but
     leftBottomUI(self.left)
 
     self.right = addNode(self.bg)
-    local but = ui.newButton({image="buta.png", text="菜单", font="f2", size=30, shadowColor={255, 255, 255}, touchColor=hexToDec('ce4e00'), color={255, 255, 255}, delegate=self, callback=self.onMenu})
+    local but = ui.newButton({image="buta.png", text="菜单", font="f2", size=30, shadowColor={255, 255, 255}, color=hexToDec('ce4e00'), delegate=self, callback=self.onMenu})
     but:setContentSize(107, 113)
     setScriptTouchPriority(but.bg, -256)
     setPos(addChild(self.right, but.bg), {945, fixY(sz.height, 706)})

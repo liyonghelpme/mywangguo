@@ -64,7 +64,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        --self:addPeople(8)
+        self:addPeople(8)
     end
 end
 

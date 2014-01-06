@@ -1,6 +1,6 @@
 WoodStore = class(FuncBuild)
 function WoodStore:ctor(b)
-    self.baseBuild.maxNum = 10
+    self.baseBuild.maxNum = 100
     self.goodsNum = 0
 end
 function WoodStore:initBottom()

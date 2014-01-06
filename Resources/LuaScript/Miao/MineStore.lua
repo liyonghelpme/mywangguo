@@ -1,6 +1,6 @@
 MineStore = class(FuncBuild)
 function MineStore:ctor(b)
-    self.baseBuild.maxNum = 30
+    self.baseBuild.maxNum = 100
     self.goodsNum = 0
 end
 function MineStore:initBottom()

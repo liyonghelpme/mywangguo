@@ -195,11 +195,14 @@ function Merchant:handleAction()
                 local p = getPos(self.people.predictTarget.heightNode)
                 local bgPos = getPos(self.people.predictTarget.bg)
                 self.people.map.bg:addChild(sp)
-                setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
+                setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]+50})
                 local rx = math.random(20)-10
                 sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
                 
                 local bn = math.min(2, self.people.predictTarget.workNum) 
+                if self.people.realTarget.data.buyAll == 1 then
+                    bn = self.people.predictTarget.workNum
+                end
                 local wn = self.people.predictTarget.workNum
                 self.people.predictTarget.workNum = wn-bn
                 self.people.predictTarget.funcBuild:updateGoods()
@@ -215,24 +218,6 @@ function Merchant:handleAction()
             end
             --商店贩卖能力
         --去农田 每个食材3贯
-        --[[
-        elseif self.people.predictTarget.workNum > 0 then
-            getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silverIcon.png")
-            local p = getPos(self.people.predictTarget.heightNode)
-            local bgPos = getPos(self.people.predictTarget.bg)
-            self.people.map.bg:addChild(sp)
-            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
-            local rx = math.random(20)-10
-            local val = self.people.predictTarget.workNum*3
-
-            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-            local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
-            sp:addChild(num)
-            setPos(num, {50, 0})
-            doGain(val)
-            self.people.predictTarget.workNum = 0
-        --]]
         end
         if Logic.inNew and not Logic.buyIt then
             Logic.buyIt = true

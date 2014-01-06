@@ -102,6 +102,7 @@ function ResearchMenu2:getAllAtt(edata)
     
     local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot', 'food', 'wood', 'stone'}
     local allCn = {'防御', '攻击', '体力', '腕力', '劳动', '远程', '食材', '木材', '石头'}
+    local showPlus = {true, true,true,true,true,true,false, false, false}
 
     local fir = true
     local two = false
@@ -115,7 +116,11 @@ function ResearchMenu2:getAllAtt(edata)
                 fir = false
                 self.firAtt:setString(allCn[k])
                 if edata[v] > 0 then
-                    self.firNum:setString('+'..edata[v])
+                    if showPlus[k] then
+                        self.firNum:setString('+'..edata[v])
+                    else
+                        self.firNum:setString(edata[v])
+                    end
                 else
                     self.firNum:setString(edata[v])
                 end
@@ -123,7 +128,11 @@ function ResearchMenu2:getAllAtt(edata)
                 two = true
                 self.secAtt:setString(allCn[k])
                 if edata[v] > 0 then
-                    self.secNum:setString('+'..edata[v])
+                    if showPlus[k] then
+                        self.secNum:setString('+'..edata[v])
+                    else
+                        self.secNum:setString(edata[v])
+                    end
                 else
                     self.secNum:setString(edata[v])
                 end

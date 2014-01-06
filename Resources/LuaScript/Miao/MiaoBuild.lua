@@ -276,11 +276,44 @@ function MiaoBuild:receiveMsg(msg, param)
     end
 end
 
+function MiaoBuild:setDir(d)
+    if self.data.switchable == 0 then
+        return
+    end
+    local same = self.dir == d
+    if same then
+        return
+    end
+
+    --self.map.mapGridController:clearMap(self)
+    self.dir = d
+    local sca = getScaleY(self.changeDirNode)
+    if self.dir == 0 then
+        setScale(self.changeDirNode, sca)
+    else
+        setScaleX(self.changeDirNode, -sca)
+    end
+    if self.dir == 0 then
+        self.sx, self.sy = self.data.sx, self.data.sy
+    else
+        self.sy, self.sx = self.data.sx, self.data.sy
+    end
+    --local sz = self.changeDirNode:getContentSize()
+    --self.funcBuild:doSwitch()
+    --self.map.mapGridController:updateMap(self)
+end
+
 function MiaoBuild:doSwitch()
     if self.data.switchable == 0 then
         return
     end
     self.map.mapGridController:clearMap(self)
+    --如果不冲突则oldDir 记录下来
+    if self.colNow == 0 then
+        self.oldDir = self.dir
+        self.oldPos = getPos(self.bg)
+    end
+
     self.dir = 1-self.dir
     local sca = getScaleY(self.changeDirNode)
     if self.dir == 0 then
@@ -305,7 +338,6 @@ function MiaoBuild:doSwitch()
     end
     --]]
     self.funcBuild:doSwitch()
-
     self.map.mapGridController:updateMap(self)
 end
 
@@ -432,7 +464,7 @@ function MiaoBuild:setColPos()
     local pos = getPos(self.bg)
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     
-    if ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= 11 then
+    if not self.static and (ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= self.map.scene.width-4) then
         print("out of range")
         self.colNow = 1
         self:setColor(0)
@@ -488,6 +520,7 @@ function MiaoBuild:touchesEnded(touches)
         local ba = self.funcBuild:checkBuildable()
         if self.colNow == 0 then
             self.oldPos = getPos(self.bg)
+            self.oldDir = self.dir
         end
         if ba then
             if self.accMove < 20 and self.state == BUILD_STATE.MOVE then

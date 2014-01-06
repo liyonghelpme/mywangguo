@@ -92,9 +92,17 @@ function FuncBuild:clearMenu()
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
             self.baseBuild:setPos(self.baseBuild.oldPos)
-
+            self.baseBuild:setDir(self.baseBuild.oldDir)
             self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
             self:adjustHeight()
+            --确定最后冲突的原因是什么 是因为移动还是因为 旋转方向
+            
+            --[[
+            if self.baseBuild.colNow == 1 then
+                self.baseBuild:doSwitch()
+            end
+            --]]
+
             --清理冲突 调整周围道路的value
             self.baseBuild.colNow = 0
             self:finishMove()

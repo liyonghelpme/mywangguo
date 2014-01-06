@@ -107,7 +107,7 @@ function ui.newTTFLabel(params)
     local x, y       = params.x, params.y
     local dimensions = params.dimensions
     local edgeWidth = params.edgeWidth
-    local shadowColor = params.shadowColor or {255, 255, 255}
+    local shadowColor = params.shadowColor or {0, 0, 0}
 
     local label
     --android ios 平台字体处理方法不同
@@ -122,7 +122,11 @@ function ui.newTTFLabel(params)
         end
         --调整阴影的padding 就可以改变切割了  padding＋5
         --label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
-        enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+        if ANDROID == true then 
+            enableShadow(label, CCSizeMake(1, -2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+        else
+            enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+        end
     end
 
     if label then

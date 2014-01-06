@@ -18,14 +18,20 @@ function BuildOpMenu:ctor(b)
     local but = ui.newButton({image="buta.png", text="详情", font="f2", size=23, delegate=self, callback=self.onInfo})
     but:setContentSize(87, 87)
     setPos(addChild(self.temp, but.bg), {512-112, fixY(sz.height, 704)})
-
-    local but = ui.newButton({image="buta.png", text="旋转", font="f2", size=23, delegate=self, callback=self.onSwitch})
-    but:setContentSize(87, 87)
-    setPos(addChild(self.temp, but.bg), {512, fixY(sz.height, 704)})
+    self.infoB = but
 
     local but = ui.newButton({image="buta.png", text="卖出", font="f2", size=23, delegate=self, callback=self.onSell})
     but:setContentSize(87, 87)
     setPos(addChild(self.temp, but.bg), {512+112, fixY(sz.height, 704)})
+    self.sellB = but
+
+    if self.build.data.switchable == 1 then
+        local but = ui.newButton({image="buta.png", text="旋转", font="f2", size=23, delegate=self, callback=self.onSwitch})
+        but:setContentSize(87, 87)
+        setPos(addChild(self.temp, but.bg), {512, fixY(sz.height, 704)})
+    else
+    end
+
     if self.build.data ~= nil then
         local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=30, color=hexToDec('f1d49b'), font="f2"})), {0.50, 0.50}), {512, fixY(sz.height, 625)})
     end
