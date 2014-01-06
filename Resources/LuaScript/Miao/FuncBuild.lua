@@ -18,7 +18,10 @@ function FuncBuild:adjustRoad()
 end
 function FuncBuild:finishBuild()
     --finishMove 没有生效 则 finishBuild生效
-    if not self.baseBuild.moveYet and self.baseBuild.data ~= nil and self.baseBuild.data.kind == 0 then
+    --not self.baseBuild.moveYet and
+    --不管移动是否 建造结束都要 生效
+    if self.baseBuild.data ~= nil and (self.baseBuild.data.kind == 0 or self.baseBuild.data.kind == 5) then
+        print("House finish Build", self.baseBuild.data.kind, self.baseBuild.productNum)
         self.baseBuild:doMyEffect()
     end
 end
@@ -26,17 +29,29 @@ function FuncBuild:beginBuild()
 end
 function FuncBuild:beginMove()
     --第一次移动没有效果所以不清除
+    --[[
     if not self.baseBuild.firstMove and self:checkBuildable() then
         self.baseBuild:clearMyEffect()
     end
+    --]]
 end
 function FuncBuild:finishMove()
+    --[[
     if self:checkBuildable() then
         self.baseBuild:doMyEffect()
     end
+    --]]
 end
+
 function FuncBuild:removeSelf()
+    --卖出建筑物 不用清理 自己的效果了
+    --[[
+    if self.baseBuild.state == BUILD_STATE.FREE then
+        self.baseBuild:clearMyEffect()
+    end
+    --]]
 end
+
 function FuncBuild:setBuyer(b)
 end
 function FuncBuild:clearBuyer(b)
@@ -83,9 +98,15 @@ function FuncBuild:clearMenu()
             --清理冲突 调整周围道路的value
             self.baseBuild.colNow = 0
             self:finishMove()
+            self:doEffect()
+            self.baseBuild:doMyEffect()
+
             setPos(self.baseBuild.bg, np)
             self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
-
+        --移动结束 恢复效果
+        else
+            self:doEffect()
+            self.baseBuild:doMyEffect()
         end
         if #global.director.stack > 0 then
             global.director:popView()

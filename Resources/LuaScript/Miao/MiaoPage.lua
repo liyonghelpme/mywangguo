@@ -413,7 +413,6 @@ function MiaoPage:beginBuild(kind, id, px, py)
         --调整建筑物高度
         self.curBuild:setPos(p)
         --调整bottom 冲突状态
-        --self.curBuild:setColPos()
 
         --初始化道路状态 因为如果建筑物已经加入到building 里面了那么就不能再检测到冲突了
         self.curBuild:beginBuild()

@@ -21,6 +21,10 @@ require "Miao.BuildPath"
 require "Miao.ItemShop"
 require "Miao.WoodStore"
 require "Miao.Wood"
+require "Miao.StreetLight"
+require "Miao.Pool"
+require "Miao.Candle"
+require "Miao.Hub"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -105,7 +109,7 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild = Bridge.new(self)
             self.funcBuild:initView()
         --樱花树
-        elseif self.id == 4 then
+        elseif self.data.kind == 4 then
             self.funcBuild = Tree.new(self)
             --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
@@ -162,10 +166,22 @@ function MiaoBuild:ctor(m, data)
             self.changeDirNode = setAnchor(createSprite("tree4.png"), {0.5, 0})
             self.funcBuild = Wood.new(self)
             self.funcBuild:initView()
-        --铁匠铺
-        elseif self.id == 13 then
-            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
-            self.funcBuild = Store.new(self)
+        --路灯
+        elseif self.data.kind == 11 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = StreetLight.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 12 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Pool.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 13 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Hub.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 14 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Candle.new(self)
             self.funcBuild:initView()
         --其它建筑物
         else
@@ -318,6 +334,7 @@ function MiaoBuild:touchesBegan(touches)
             if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
                 setSuc = self.map.scene:setBuilding(self)
             end
+
             --print("touchesBegan", setSuc, self.state, self.Planing)
             --if setSuc == 1 then
             --选中建筑物成功了 正在建造的时候 就不能选中建筑物
@@ -448,6 +465,10 @@ function MiaoBuild:touchesEnded(touches)
         if not self.doMove and self.map.scene.curBuild == nil then
             if self.accMove < 20 then
                 self.funcBuild:showInfo()
+                --开始移动
+                print("show Info clearEffect")
+                self.funcBuild:clearEffect()
+                self:clearMyEffect()
             end
         end
     end
@@ -463,8 +484,6 @@ function MiaoBuild:touchesEnded(touches)
         end
         
         --建造建筑物在finish的时候 生效
-        --self:doMyEffect()
-        --self:doEffect()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         local ba = self.funcBuild:checkBuildable()
         if self.colNow == 0 then
@@ -518,9 +537,11 @@ function MiaoBuild:setPos(p)
     self.funcBuild:setPos()
     --self:adjustHeight()
 end
+--[[
 function MiaoBuild:adjustRoad()
     --self.funcBuild:adjustRoad()
 end
+--]]
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
 function MiaoBuild:showIncrease(n, waitTime)
@@ -532,7 +553,8 @@ end
 
 --调用公有代码
 function MiaoBuild:doMyEffect()
-    if self.data == nil or self.data.kind ~= 0 then
+    print("doHouse Effect ", self.data.kind)
+    if self.data == nil or (self.data.kind ~= 0 and self.data.kind ~= 5) then
         return
     end
 
@@ -553,13 +575,45 @@ function MiaoBuild:doMyEffect()
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
                 --樱花树建筑物
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showIncrease(2, waitTime)
-                    elseif dist == 4 then
-                        self:showIncrease(1, waitTime)
+                --增加所有属性
+                if ob.data ~= nil then
+                    if ob.data.kind == 4 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    --增加生产力
+                    elseif ob.data.kind == 11 and self.data.isProduct == 1 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 12 and self.data.kind == 5 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 13 and self.data.IsStore == 2 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 14 and self.data.IsStore == 1 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
                     end
-                    waitTime = waitTime+0.6
                 end
             end
 
@@ -572,7 +626,7 @@ end
 --普通建筑物的移动 和放下
 function MiaoBuild:clearMyEffect()
     --不是农田 和 民居
-    if self.data == nil or self.data.kind ~= 0 then
+    if self.data == nil or (self.data.kind ~= 0 and self.data.kind ~= 5) then
         return
     end
 
@@ -592,13 +646,43 @@ function MiaoBuild:clearMyEffect()
                 local ob = mapDict[key][#mapDict[key]][1]
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showDecrease(2, waitTime)
-                    elseif dist == 4 then
-                        self:showDecrease(1, waitTime)
+                if ob.data ~= nil then
+                    if ob.data.kind == 4 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 11 and self.data.isProduct == 1 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 12 and self.data.kind == 5 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 13 and self.data.IsStore == 2 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 14 and self.data.IsStore == 1 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
                     end
-                    waitTime = waitTime+0.6
                 end
             end
 
@@ -612,10 +696,6 @@ end
 function MiaoBuild:clearEffect()
     --不是樱花树
     self.funcBuild:clearEffect()
-end
-function MiaoBuild:doEffect()
-    --不是樱花树 不对周围产生效果
-    --self.funcBuild:doEffect()
 end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
@@ -708,6 +788,7 @@ function MiaoBuild:changeWorkNum(n)
     print("changeWorkNum", n, self.workNum)
     self.funcBuild:updateGoods()
 end
+--如果没有确认建造则不要移除效果
 function MiaoBuild:removeSelf()
     print("removeSelf Building", self.picName, self.id)
     self.funcBuild:removeSelf()

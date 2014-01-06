@@ -107,12 +107,14 @@ function ui.newTTFLabel(params)
     local x, y       = params.x, params.y
     local dimensions = params.dimensions
     local edgeWidth = params.edgeWidth
+    local shadowColor = params.shadowColor or {255, 255, 255}
 
     local label
+    --android ios 平台字体处理方法不同
     if dimensions then
-        label = CCLabelTTF:create(text, font, size, dimensions, textAlign, textValign)
+        label = CCLabelTTF:create(text, "fonts/fang.ttf", size, dimensions, textAlign, textValign)
     else
-        label = CCLabelTTF:create(text, font, size)
+        label = CCLabelTTF:create(text, "fonts/fang.ttf", size)
     end
     if font == 'f2' then
         if edgeWidth == nil then
@@ -120,7 +122,7 @@ function ui.newTTFLabel(params)
         end
         --调整阴影的padding 就可以改变切割了  padding＋5
         --label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
-        enableShadow(label, CCSizeMake(1, 2), 1, 1, true)
+        enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
     end
 
     if label then
@@ -154,37 +156,55 @@ function ui.newButton(params)
     --local sp = display.newScale9Sprite(params.image)
     local sp = CCSprite:create(params.image)
     lay:addChild(sp)
+    --lay:ignoreAnchorPointForPosition(true)
     obj.bg = lay
     local sz = sp:getContentSize()
     lay:setContentSize(sz)
     lay:setAnchorPoint(ccp(0, 0))
-    sp:setAnchorPoint(ccp(0, 0))
+    sp:setAnchorPoint(ccp(0.5, 0.5))
     local text = params.text
     local size = params.size or 18
     local conSize = params.conSize
     local priority = params.priority
     local col = params.color
     local font = params.font
+    local needScale = params.needScale or true
+    local touchColor = params.touchColor
 
     local spSize = {sz.width, sz.height}
+
 
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
         local ret = checkIn(p.x, p.y, sz)
 
         if ret then
+            local scaX = getScaleX(lay)
+            local scaY = getScaleY(lay)
+            self.scaX = scaX
+            self.scaY = scaY
+            if needScale then
+                setScaleY(setScaleX(lay, 0.8), 0.8)
+            end
+            if touchColor ~= nil then
+                setColor(obj.text, touchColor)
+            end
+
             if params.touchBegan ~= nil then
                 params.touchBegan(params.delegate, params.param)
             else
-                local tempSp = CCSprite:create(params.image)
-                lay:addChild(tempSp)
-                local function removeTemp()
-                    removeSelf(tempSp)
+                if needScale then
+                else
+                    local tempSp = CCSprite:create(params.image)
+                    lay:addChild(tempSp)
+                    local function removeTemp()
+                        removeSelf(tempSp)
+                    end
+                    local anchor = sp:getAnchorPoint()
+                    tempSp:setAnchorPoint(anchor)
+                    setSize(tempSp, spSize)
+                    tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
                 end
-                local anchor = sp:getAnchorPoint()
-                tempSp:setAnchorPoint(anchor)
-                setSize(tempSp, spSize)
-                tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
             end
         end
         return ret
@@ -192,6 +212,12 @@ function ui.newButton(params)
     function obj:touchMoved(x, y)
     end
     function obj:touchEnded(x, y)
+        if needScale then
+            setScaleY(setScaleX(lay, 1), 1)
+        end
+        if touchColor ~= nil then
+            setColor(obj.text, col)
+        end
         if params.callback ~= nil then
             params.callback(params.delegate, params.param)
         end
@@ -200,7 +226,8 @@ function ui.newButton(params)
         params.callback = cb
     end
     function obj:setAnchor(x, y)
-        lay:setAnchorPoint(ccp(x, y))
+        --lay 不能AnchorPoint 否则scale的时候就有问题
+        --lay:setAnchorPoint(ccp(x, y))
         sp:setAnchorPoint(ccp(x, y))
         return obj
     end

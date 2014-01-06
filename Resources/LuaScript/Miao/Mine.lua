@@ -62,7 +62,12 @@ function Mine:adjustRoad()
     self:whenColNow()
 end
 
+--放置多个动作 同时出现产生的 位移的问题
 function Mine:updateGoods()
+    self.baseBuild.changeDirNode:runAction(jumpBy(0.5, 0, 0, 8, 1))
+    local scaX = getScaleX(self.baseBuild.changeDirNode)
+    --self.baseBuild.changeDirNode:runAction(sequence({scaleto(0.25, 1.05*scaX, 0.95), scaleto(0.25, 1*scaX, 1)}))
+
     local show = math.floor(3*self.baseBuild.workNum/self.baseBuild.maxNum)
     print("update WoodStore Goods", self.baseBuild.workNum, self.baseBuild.maxNum, self.goodsNum, show)
     if self.baseBuild.workNum > 0 then
@@ -88,6 +93,7 @@ function Mine:updateGoods()
         self.goodsObj = createSprite("buildStone1.png")
     end
     self.baseBuild.changeDirNode:addChild(self.goodsObj)
+    self.goodsObj:runAction(jumpBy(0.5, 0, 0, 10, 1))
     --local sz = self.baseBuild.changeDirNode:getContentSize()
     setPos(self.goodsObj, {512, 384})
     print("setPos", 512)

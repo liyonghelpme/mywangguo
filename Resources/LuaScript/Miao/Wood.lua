@@ -25,6 +25,7 @@ function Wood:updateStage(diff)
     end
 end
 function Wood:updateGoods()
+    self.baseBuild.changeDirNode:runAction(repeatN(sequence({moveby(0.1, -5, 0), moveby(0.1, 5, 0)}), 4))
     if self.baseBuild.workNum == 0 then
         self.showState = -1
         self.baseBuild.lifeStage = 0
@@ -54,8 +55,11 @@ function Wood:updateGoods()
     else
         self.goodsObj = createSprite("fall1.png")
     end
+
     self.baseBuild.changeDirNode:addChild(self.goodsObj)
+    self.goodsObj:runAction(jumpBy(0.5, 0, 0, 10, 1))
     --local sz = self.baseBuild.changeDirNode:getContentSize()
     setPos(self.goodsObj, {512, 384})
     print("setPos", 512)
+
 end

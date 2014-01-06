@@ -48,7 +48,10 @@ static int tolua_Cocos2d_enableShadow00(lua_State* tolua_S)
 		!tolua_isnumber(tolua_S,3,0,&tolua_err) ||
 		!tolua_isnumber(tolua_S,4,0,&tolua_err) ||
         !tolua_isboolean(tolua_S,5,1,&tolua_err) ||
-        !tolua_isnoobj(tolua_S,6,&tolua_err)
+		!tolua_isnumber(tolua_S,6,0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,7,0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,8,0,&tolua_err) ||
+        !tolua_isnoobj(tolua_S,9,&tolua_err)
 	)
 	 goto tolua_lerror;
 	else
@@ -59,7 +62,10 @@ static int tolua_Cocos2d_enableShadow00(lua_State* tolua_S)
         float so = (float)tolua_tonumber(tolua_S, 3, 0);
         float sb = (float)tolua_tonumber(tolua_S, 4, 0);
         bool up = (bool) tolua_toboolean(tolua_S, 5, 0);
-        enableShadow(sp, sz, so, sb, up);
+        int r = (int)tolua_tonumber(tolua_S, 6, 0);
+        int g = (int)tolua_tonumber(tolua_S, 7, 0);
+        int b = (int)tolua_tonumber(tolua_S, 8, 0);
+        enableShadow(sp, sz, so, sb, up, r, g, b);
 	}
 	return 0;
 #ifndef TOLUA_RELEASE

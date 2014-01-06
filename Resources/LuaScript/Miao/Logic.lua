@@ -29,14 +29,81 @@ Logic.allSkill = {}
 Logic.holdNum = {}
 
 --待研究的物品 类型 id
-Logic.researchGoods = {{0, 2}, {0, 3}, {0, 4}}
+Logic.researchGoods = {
+    {0, 2}, {0, 3}, {0, 4},
+}
 --正在研究的物品
 Logic.inResearch = nil
 
 --已经研究的物品 商店可以购买
 --默认割草镰刀
-Logic.ownGoods = {{0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68}}
+--0 装备 
+--1 商店卖出物品
+--[[
+--]]
+Logic.ownGoods = {
+    {0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68},
+}
+Logic.allOwnBuild = {
 
+{2, 1}, {2, 2}, {2, 4}, {2, 5}, {2, 11}, {2, 15},
+{2, 19}, {2, 12},
+{2, 28}, {2, 29},
+
+    {2, 6}, {2, 9}, {2, 7}, {2, 10}, {2, 13}, {2, 16}, {2, 17}, {2, 18},
+    {2, 8}, {2, 14}, 
+    {2, 24}, {2, 25}, {2, 26}, {2, 27}, {2, 30}, {2, 31},
+
+}
+function getBuyableBuild()
+    local temp = {}
+    for k, v in ipairs(Logic.allOwnBuild) do
+        if Logic.buildings[v[2]].buyable == 1 then
+            table.insert(temp, v)
+        end
+    end
+    return temp
+end
+
+--建筑物的数量
+--在商店里面购买这种建筑物
+--保存游戏
+Logic.buildNum = {
+    [24]=1,
+    [28]=1,
+    [29]=1,
+}
+function changeBuildNum(id, n)
+    Logic.buildNum[id] = (Logic.buildNum[id] or 0)+n
+end
+
+function getBuyPrice(id)
+    local t = getTotalBuildNum(id)
+    local bdata = Logic.buildings[id]
+    local add = math.floor(bdata.buyPrice*0.5)
+    return bdata.buyPrice+add*t
+end
+
+function getTotalBuildNum(id)
+    return Logic.buildNum[id] or 0
+end
+function getAvaBuildNum(id)
+    local total = Logic.buildNum[id] or 0
+    local allB = global.director.curScene.page.buildLayer.mapGridController.allBuildings
+    print("getAvaBuildNum", id, allB)
+    for k, v in pairs(allB) do
+        --print("k.id", k.id)
+        if k.id == id then
+            total = total-1
+        end
+    end
+    return total
+end
+
+--某些有数量限制的装饰物的购买数量 * n 
+--只有研究 从商店购买 之后 才能使用
+--树木 和 矿坑也有数量限制
+Logic.buildBuyNum = {}
 
 
 --初始化已经研究的物品

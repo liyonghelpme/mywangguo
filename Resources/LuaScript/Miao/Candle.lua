@@ -1,21 +1,10 @@
-Tree = class(FuncBuild)
+Candle = class(FuncBuild)
+function Candle:ctor(b)
+    --self.inEffect = false
+end
 
-function Tree:initView()
-    --local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    --sf:addSpriteFramesWithFile("build4.plist")
-
-
-    local bd = Logic.buildings[self.baseBuild.id]
-    self.baseBuild.changeDirNode = createSprite("build"..self.baseBuild.id..".png")
-
-    local sz = self.baseBuild.changeDirNode:getContentSize()
+function Candle:initView()
     setPos(setAnchor(self.baseBuild.changeDirNode, {444/1024, (768-559)/768}), {0, SIZEY})
-
-    --[[
-    self.shadow = createSprite("build4_shadow_0.png")
-    setPos(setAnchor(self.shadow, {249/sz.width, (sz.height-253)/sz.height}), {0, SIZEY})
-    self.baseBuild.heightNode:addChild(self.shadow)
-    --]]
     
     local temp = CCSpriteBatchNode:create("white2.png")
     self.baseBuild.heightNode:addChild(temp)
@@ -48,7 +37,7 @@ function Tree:initView()
         end
     end
 end
-function Tree:doEffect()
+function Candle:doEffect()
     print("do Effect of building")
     local map = getBuildMap(self.baseBuild) 
     local initX = 0
@@ -66,7 +55,9 @@ function Tree:doEffect()
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
                 --点数 都是增加4点 1点 不论目标对象
-                if ob.data ~= nil and (ob.data.kind == 0 or ob.data.kind == 5) then
+                --2 == 0.1  
+                --0.3 6
+                if ob.data ~= nil and ob.data.IsStore == 1 then
                     if dist == 2 then
                         ob:showIncrease(self.baseBuild.data.effect)
                     elseif dist == 4 then
@@ -80,7 +71,7 @@ function Tree:doEffect()
         end
     end
 end
-function Tree:clearEffect()
+function Candle:clearEffect()
     local map = getBuildMap(self.baseBuild) 
     local initX = 0
     local initY = -4
@@ -96,7 +87,8 @@ function Tree:clearEffect()
                 local ob = mapDict[key][#mapDict[key]][1]
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
-                if ob.data ~= nil and (ob.data.kind == 0 or ob.data.kind == 5) then
+                if ob.data ~= nil and ob.data.IsStore == 1 then
+                    print("effect is", self.baseBuild.data.effect)
                     if dist == 2 then
                         ob:showDecrease(self.baseBuild.data.effect)
                     elseif dist == 4 then
@@ -110,31 +102,32 @@ function Tree:clearEffect()
         end
     end
 end
-function Tree:finishBuild()
+function Candle:finishBuild()
     removeSelf(self.baseBuild.gridNode)
     self.baseBuild.gridNode = nil
     --建造开始就已经确定效果了
-    --self.baseBuild:doEffect()
     self:doEffect()
 end
-function Tree:removeSelf()
+function Candle:removeSelf()
+    --点中选择的时候 效果就已经被去除掉了 所以不用考虑
+    --但是点击sell 按钮会关闭 移动对话框 效果又会加回去 所以还是需要 再去除效果的
     if self.baseBuild.state == BUILD_STATE.FREE then
         self.baseBuild:clearEffect()
     end
 end
 --当前位置无冲突 清理附近状态
-function Tree:beginMove()
+function Candle:beginMove()
     --[[
     if self:checkBuildable() then
-        self:clearEffect() 
+        --self:clearEffect() 
     end
     --]]
 end
 --clearMenu 的时候是会恢复状态的
-function Tree:finishMove()
+function Candle:finishMove()
     --[[
     if self:checkBuildable() then
-        self:doEffect()
+        --self:doEffect()
     end
     --]]
 end

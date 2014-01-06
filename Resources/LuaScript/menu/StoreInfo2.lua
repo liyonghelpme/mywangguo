@@ -25,6 +25,7 @@ function StoreInfo2:ctor(b)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商品", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {568, fixY(sz.height, 371)})
     self.goodsW = w 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {733, fixY(sz.height, 371)})
+    self.priceW = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="贩卖力", size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {569, fixY(sz.height, 479)})
     self.ability = w
     local gn = '--'
@@ -43,12 +44,15 @@ function StoreInfo2:ctor(b)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.workNum.."个", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {791, fixY(sz.height, 301)})
     self.workNum = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="在库", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {468, fixY(sz.height, 302)})
+    self.inGoods = w
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "probackC.png"), {617, fixY(sz.height, 301)}), {140, 29}), {0.50, 0.50})
+    self.banner = banner
     local sp = setAnchor(setPos(addSprite(banner, "procolC.png"), {4, fixY(29, 24)}), {0.00, 0.00})
     self.pro = sp
     storeProNum(sp, self.build.workNum, self.build.maxNum)
     self:initFarm()
     self:initFactory()
+    self:initHouse()
 
     centerUI(self)
 end

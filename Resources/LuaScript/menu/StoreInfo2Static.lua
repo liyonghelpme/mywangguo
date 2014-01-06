@@ -17,3 +17,24 @@ function StoreInfo2:initFactory()
         self.goodsW:setString("生产")
     end
 end
+function StoreInfo2:initHouse()
+    if self.build.data.kind == 5 then
+        self.changeBut.bg:setVisible(false)
+        self.changeBut:setCallback(nil)
+        self.ability:setString("回复力")
+        self.goodsW:setString("回复")
+        self.goodsW:setString("居民")
+        self.priceW:setString("等级")
+        local uname = '--'
+        local level = '--'
+        if self.build.owner ~= nil then
+            uname = self.build.owner.name
+            level = self.build.owner.level+1
+        end
+        self.goodName:setString(str(uname))
+        self.price:setString(str(level)) 
+        self.banner:setVisible(false)
+        setVisible(self.inGoods, false)
+        setVisible(self.workNum, false)
+    end
+end

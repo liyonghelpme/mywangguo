@@ -68,7 +68,7 @@ function NewBuildMenu2:ctor()
     setPos(self.touch.bg, {0, 0})
 
     self.flowHeight = 0
-    self:updateTab()
+    --self:updateTab()
 
     registerEnterOrExit(self)
 
@@ -79,8 +79,32 @@ function NewBuildMenu2:ctor()
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "silverIcon.png"), {165, fixY(sz.height, 556)}), {34, 34}), {0.50, 0.50})
     self.icon = sp
     self:setSelect(1)
-    self:setSel(1)
+    --self:setSel(1)
 end
+function NewBuildMenu2:setView(s)
+    --[[
+    if self.selPage ~= nil then
+        removeSelf(self.selPage)
+    end
+    --]]
+    --[[
+    if self.selTab == 1 then
+        self:initBaseAttView()
+    elseif self.selTab == 2 then
+        self:initSkillView()
+    end
+    --]]
+    self:updateTab()
+    self.selPanel = nil
+    self:setSel(1)
+    --[[
+    self.total:setString("基本属性"..self.selTab..'/2')
+    --]]
+    if self.scrollPro ~= nil then
+        setPos(self.scrollPro, {0, 315})
+    end
+end
+
 --点击开始
 function NewBuildMenu2:setSel(s)
     if self.selBuild ~= s then
@@ -94,8 +118,9 @@ function NewBuildMenu2:setSel(s)
         self.selBuild = s
         self.data[self.selBuild][1]:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         self.data[self.selBuild][2]:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
-        local n = Logic.buildList[self.selBuild].name
-        local p = Logic.buildList[self.selBuild].silver
+        local bd = Logic.buildList[self.data[self.selBuild][3]]
+        local n = bd.name
+        local p = bd.silver
         self.name:setString(n)
         self.price:setString(p)
         --global.director.curScene.menu.infoWord:setString(n.." "..p.."贯")
@@ -109,13 +134,14 @@ function NewBuildMenu2:onTab(p)
 end
 
 function NewBuildMenu2:setSelect(s)
-    if self.curSel ~= nil then
-        setTexture(self.tabs[self.curSel].sp, "taba.png")
-        self.tabs[self.curSel].bg:setZOrder(-1)
+    if self.selTab ~= nil then
+        setTexture(self.tabs[self.selTab].sp, "taba.png")
+        self.tabs[self.selTab].bg:setZOrder(-1)
     end
-    self.curSel = s
-    setTexture(self.tabs[self.curSel].sp, "tabb.png")
-    self.tabs[self.curSel].bg:setZOrder(0)
+    self.selTab = s
+    setTexture(self.tabs[self.selTab].sp, "tabb.png")
+    self.tabs[self.selTab].bg:setZOrder(0)
+    self:setView(s)
 end
 function NewBuildMenu2:enterScene()
     registerUpdate(self)
@@ -124,35 +150,50 @@ function NewBuildMenu2:update(diff)
 end
 
 function NewBuildMenu2:updateTab()
+    removeSelf(self.flowNode)
+    self.flowNode = addNode(self.cl)
+    setPos(self.flowNode, {0, self.HEIGHT})
+    self.flowHeight = 0
+
     local initX = 92
     local initY = -91
     local offX = 198
     local offY = 185
     self.data = {}
-    print("updateTab", #Logic.buildList)
+    --print("updateTab", #Logic.allOwnBuild)
     local sz = {width=184, height=183}
+    local dataNum = 1
     for k, v in ipairs(Logic.buildList) do
-        local row = math.floor((k-1)/3)
-        local col = (k-1)%3
-        local sp = CCSprite:create("singleGoods.png")
-        self.flowNode:addChild(sp)
-        setPos(sp, {initX+col*offX, initY-offY*row})
-        print("updateTab", row, col)
-        sp:setTag(k)
+        if v.tab == self.selTab-1 then
+            local row = math.floor((dataNum-1)/3)
+            local col = (dataNum-1)%3
+            local sp = CCSprite:create("singleGoods.png")
+            self.flowNode:addChild(sp)
+            setPos(sp, {initX+col*offX, initY-offY*row})
+            print("updateTab", row, col)
+            sp:setTag(dataNum)
+            dataNum = dataNum+1
 
-        local build = CCSprite:create("build"..v.id..".png")
-        sp:addChild(build)
-        setPos(build, {92, fixY(183, 67)})
-        local sca = getSca(build, {134, 100})
-        setScale(build, sca)
+            local build = CCSprite:create("build"..v.id..".png")
+            sp:addChild(build)
+            setPos(build, {92, fixY(183, 67)})
+            local sca = getSca(build, {134, 100})
+            setScale(build, sca)
 
-        local w = setPos(setAnchor(addChild(sp, ui.newTTFLabel({text=v.name, font='f2', size=18, color={0, 255, 255}})), {0.5, 0.5}), {92, fixY(sz.height, 146)})
+            local w = setPos(setAnchor(addChild(sp, ui.newTTFLabel({text=v.name, font='f2', size=18, color={0, 255, 255}})), {0.5, 0.5}), {92, fixY(sz.height, 146)})
 
-        table.insert(self.data, {sp, build})
+            if v.countNum == 1 then
+                local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="X"..(getAvaBuildNum(v.id)), font='bound.fnt', size=18, color={0, 255, 255}})), {0, 0.5}), {122, fixY(sz.height, 36)})
+            end
+
+            table.insert(self.data, {sp, build, k})
+            if col == 0 then
+		        self.flowHeight = self.flowHeight+offY
+            end
+        end
     end
-    local row = math.floor((#Logic.buildList-1)/3)+1
-    self.flowHeight = self.flowHeight+offY*row
-
+    --local row = math.floor((#Logic.buildList-1)/3)+1
+    --self.flowHeight = self.flowHeight+offY*row
 end
 
 --点击对齐网格
@@ -183,23 +224,33 @@ function NewBuildMenu2:touchEnded(x, y)
             if self.selBuild ~= t then
                 self:setSel(t)
             else
-                local buildData = Logic.buildList[self.selBuild]
-                local p = Logic.buildList[self.selBuild].silver
-                if Logic.resource.silver < p then
-                    addBanner("金钱不足!")
-                else
-                    global.director:popView() 
-                    self.btype = t            
-                    if Logic.inNew and not Logic.newBuildYet then
-                        Logic.newBuildYet = true
-                        local w = Welcome2.new(self.onHouse, self)
-                        w:updateWord("请拖拽画面选择建筑场所，点击建筑物可以进行微调。")
-                        global.director:pushView(w, 1, 0)
-                        return
+                local buildData = Logic.buildList[self.data[self.selBuild][3]]
+                local p = buildData.silver
+                local countOk = true
+                if buildData.countNum == 1 then
+                    local count = getAvaBuildNum(buildData.id)
+                    if count <= 0 then
+                        addBanner("剩余数量不足，请去商店购买")
+                        countOk = false
                     end
+                end
+                if countOk then
+                    if Logic.resource.silver < p then
+                        addBanner("金钱不足!")
+                    else
+                        global.director:popView() 
+                        self.btype = t            
+                        if Logic.inNew and not Logic.newBuildYet then
+                            Logic.newBuildYet = true
+                            local w = Welcome2.new(self.onHouse, self)
+                            w:updateWord("请拖拽画面选择建筑场所，点击建筑物可以进行微调。")
+                            global.director:pushView(w, 1, 0)
+                            return
+                        end
 
-                    global.director.curScene.page:beginBuild('build', buildData.id)
-                    return 
+                        global.director.curScene.page:beginBuild('build', buildData.id)
+                        return 
+                    end
                 end
             end
         end

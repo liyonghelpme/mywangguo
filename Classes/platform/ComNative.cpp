@@ -34,6 +34,6 @@ void pauseAction(CCNode *n) {
 void setTextureRect(CCSprite *sp, CCRect rect, bool rotated, CCSize size) {
     sp->setTextureRect(rect, rotated, size);
 }
-void enableShadow(CCLabelTTF *lab, CCSize sz, float so, float sb, bool up) {
-    lab->enableShadow(sz, so, sb, up);
+void enableShadow(CCLabelTTF *lab, CCSize sz, float so, float sb, bool up, int r, int g, int b) {
+    lab->enableShadow(sz, so, sb, up, r, g, b);
 }

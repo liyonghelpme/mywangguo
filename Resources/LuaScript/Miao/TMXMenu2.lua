@@ -1,4 +1,4 @@
-require "Miao.PressMenu2"
+require "Miao.PressMenu3"
 TMXMenu2 = class()
 function TMXMenu2:adjustPos()
 end
@@ -8,7 +8,7 @@ function TMXMenu2:ctor(s)
     self.bg = CCNode:create()
     self.temp = addNode(self.bg)
     local temp = self.temp
-    local sz = vs
+    local sz = {width=1024, height=768}
     self.sz = sz
 
     local stateLabel = ui.newBMFontLabel({text="state", size=15, font="bound.fnt"})
@@ -19,28 +19,43 @@ function TMXMenu2:ctor(s)
         setVisible(self.stateLabel, false)
     end
 
-    local but = ui.newButton({image="buta.png", font='f2', text="地图", size=26, delegate=self, callback=self.onLeft})
-    setPos(addChild(temp, but.bg), {62, fixY(768, 704)})
+    self.left = addNode(self.bg)
+    local but = ui.newButton({image="buta.png", text="地图", font="f2", size=30, delegate=self, callback=self.onLeft, touchColor=hexToDec('ce4e00'), color={255, 255, 255}, shadowColor={255, 255, 255}})
+    but:setContentSize(107, 113)
+    setPos(addChild(self.left, but.bg), {76, fixY(sz.height, 706)})
     self.leftBut = but
-    local but = ui.newButton({image="buta.png", text="菜单", font='f2', size=26, delegate=self, callback=self.onMenu})
+    leftBottomUI(self.left)
+
+    self.right = addNode(self.bg)
+    local but = ui.newButton({image="buta.png", text="菜单", font="f2", size=30, shadowColor={255, 255, 255}, touchColor=hexToDec('ce4e00'), color={255, 255, 255}, delegate=self, callback=self.onMenu})
+    but:setContentSize(107, 113)
     setScriptTouchPriority(but.bg, -256)
-    setPos(addChild(temp, but.bg), {vs.width-fixX(1024, 961), fixY(768, 704)})
+    setPos(addChild(self.right, but.bg), {945, fixY(sz.height, 706)})
     self.mbut = but
-    local sp = setSize(setPos(addSprite(self.temp, "numBack.png"), {110, fixY(sz.height, 72)}), {156, 30})
-    local sp = setSize(setPos(addSprite(self.temp, "silverIcon.png"), {39, fixY(sz.height, 72)}), {50, 50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {79, fixY(sz.height, 70)})
+    rightBottomUI(self.right)
+
+    self.top = addNode(self.temp)
+
+    local sz = {width=1024, height=768} 
+    self.sz = sz
+    local sp = setAnchor(setSize(setPos(addSprite(self.top, "numBack.png"), {818, fixY(sz.height, 32)}), {155, 30}), {0.50, 0.50})
+    local but = ui.newButton({image="chargeIcon.png", delegate=self, callback=self.onCharge})
+    setPos(addChild(self.top, but.bg), {902, fixY(sz.height, 33)})
+    local sp = setAnchor(setSize(setPos(addSprite(self.top, "goldIcon.png"), {748, fixY(sz.height, 35)}), {54, 55}), {0.50, 0.50})
+    local w = setPos(setAnchor(addChild(self.top, ui.newTTFLabel({text="10000", size=25, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {830, fixY(sz.height, 31)})
+    self.gold = w
+    local sp = setAnchor(setSize(setPos(addSprite(self.top, "numBack.png"), {606, fixY(sz.height, 32)}), {155, 30}), {0.50, 0.50})
+    local sp = setAnchor(setSize(setPos(addSprite(self.top, "silverIcon.png"), {536, fixY(sz.height, 34)}), {54, 55}), {0.50, 0.50})
+    local w = setPos(setAnchor(addChild(self.top, ui.newTTFLabel({text="10000", size=25, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {618, fixY(sz.height, 31)})
     self.silver = w
 
-    local sp = setSize(setPos(addSprite(self.temp, "numBack.png"), {288, fixY(sz.height, 72)}), {156, 30})
-    local sp = setSize(setPos(addSprite(self.temp, "chargeIcon.png"), {349, fixY(sz.height, 73)}), {33, 37})
-    local sp = setSize(setPos(addSprite(self.temp, "goldIcon.png"), {217, fixY(sz.height, 73)}), {50, 50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {257, fixY(sz.height, 70)})
-    self.gold = w
-
-
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最长的村落名字", size=25, font='f2', color={255, 255, 255}})), {0, 0.5}), {16, fixY(sz.height, 25)})
+    local w = setPos(setAnchor(addChild(self.top, ui.newTTFLabel({text="喵喵村喵喵村", size=25, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {92, fixY(sz.height, 31)})
     self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG, EVENT_TYPE.UPDATE_RESOURCE}
+
+    centerTop(self.top)
+
+
+
 
     registerEnterOrExit(self)
     self.needUpdate = true
@@ -79,7 +94,7 @@ function TMXMenu2:onMenu()
     if self.inBuild then
         global.director.curScene.page:cancelBuild()
     elseif #global.director.stack == 0 then
-        global.director:pushView(PressMenu2.new(), 1, 0)
+        global.director:pushView(PressMenu3.new(), 1, 0)
     else
         global.director:popView()
     end
@@ -112,8 +127,8 @@ function TMXMenu2:updateYear()
         removeSelf(self.year)
     end
 
-    local word = colorWords({text=string.format("<57b7fd%d><ffffff年><57b7fd%d><ffffff月><57b7fd%d><ffffff周>", y, m, w), size=25, font='f2'})
-    setPos(setAnchor(addChild(self.temp, word), {0, 0.5}), {210, fixY(self.sz.height, 24)})
+    local word = colorWords({text=string.format("<68c8ff%d><ffffff年><68c8ff%d><ffffff月><68c8ff%d><ffffff周>", y, m, w), size=25, font='f2'})
+    setPos(setAnchor(addChild(self.top, word), {0, 0.5}), {300, fixY(self.sz.height, 31)})
     self.year = word
 end
 

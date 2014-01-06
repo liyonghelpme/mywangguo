@@ -712,7 +712,7 @@ function Cat2:workNow()
         if self.people.workTime > rate then
             self.people.workTime = self.people.workTime - rate
             self.people.health = self.people.health -cost
-            self.people.realTarget.workNum = self.people.realTarget.workNum + 1
+            self.people.realTarget:changeWorkNum(1)
             if self.people.realTarget.workNum >= self.people.realTarget.maxNum then
                 self.people.wood = self.people.realTarget.workNum
                 --树木应该将showState = -1 接着将 lifeState = 0 

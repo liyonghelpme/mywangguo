@@ -220,12 +220,16 @@ function addSprite(bg, name)
     if name == nil then
         sp = CCSprite:create()
     else
-        local spc = CCSpriteFrameCache:sharedSpriteFrameCache()
-        local frame = spc:spriteFrameByName(name)
-        if frame ~= nil then
-            sp = CCSprite:createWithSpriteFrameName(name)
+        if string.sub(name, 1, 1) == '#' then
+            sp = CCSprite:create(string.sub(name, 2))
         else
-            sp = CCSprite:create(name)
+            local spc = CCSpriteFrameCache:sharedSpriteFrameCache()
+            local frame = spc:spriteFrameByName(name)
+            if frame ~= nil then
+                sp = CCSprite:createWithSpriteFrameName(name)
+            else
+                sp = CCSprite:create(name)
+            end
         end
     end
     bg:addChild(sp)
@@ -1469,6 +1473,9 @@ end
 function getScaleY(sp)
     return sp:getScaleY()
 end
+function getScaleX(sp)
+    return sp:getScaleX()
+end
 
 function getScale(s)
     return s:getScale()
@@ -1614,6 +1621,44 @@ function centerUI(sp)
         sp.cl:setContentSize(CCSizeMake(sp.listSize.width, sp.HEIGHT*sca))
     end
 end
+
+function centerTop(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local cx = ds[1]/2
+    local nx = vs.width/2-cx*sca
+    local ny = vs.height-ds[2]*sca
+    setScale(sp, sca)
+    setPos(sp, {nx, ny})
+end
+function rightBottomUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local nx = vs.width-ds[1]*sca
+    setScale(sp, sca)
+    setPos(sp, {nx, 0})
+end
+function leftBottomUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+end
+
+--弹出的子菜单 显示向右侧
+function rightTopUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local nx = vs.width-ds[1]*sca
+    local ny = vs.height-ds[2]*sca
+    setScale(sp, sca)
+    setPos(sp, {nx, ny})
+end
+
+
 function dictToTable(t)
     local temp = {}
     for k, v in pairs(t) do
@@ -1628,3 +1673,15 @@ function tableToDict(t)
     end
     return temp
 end
+
+function concateTable(a, b)
+    local temp = {}
+    for k, v in ipairs(a) do
+        table.insert(temp, v)
+    end
+    for k, v in ipairs(b) do
+        table.insert(temp, v)
+    end
+    return temp
+end
+

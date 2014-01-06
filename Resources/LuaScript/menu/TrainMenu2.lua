@@ -88,7 +88,7 @@ function TrainMenu2:updateTab()
         panel:setTag(k)
         setContentSize(panel, {sz.width, sz.height})
         local sp = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {306, fixY(55, 26)}), {479, 52}), {0.50, 0.50})
-        setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {27, fixY(55, 27)}), {50, 55}), {0.50, 0.50})
+        setAnchor(setPos(addSprite(panel, "catHead"..v.id..".png"), {27, fixY(55, 27)}), {0.50, 0.50})
 
         local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color=hexToDec('fff100'), font="f2"})), {0.00, 0.50}), {87, fixY(sz.height, 27)})
         local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=Logic.LevelCost[v.level+1+1].."银币", size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {421, fixY(sz.height, 27)})

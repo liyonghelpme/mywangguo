@@ -62,6 +62,12 @@ function TMXScene:initData(rep, param)
         Logic.inSell = rd
     end
 
+    local r = u:getStringForKey("buildNum")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.buildNum = rd
+    end
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
@@ -221,4 +227,5 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("researchData", simple.encode({researchGoods=Logic.researchGoods, inResearch=Logic.inResearch, ownGoods=Logic.ownGoods}))
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
     u:setStringForKey("inSell", simple.encode(Logic.inSell))
+    u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
 end
