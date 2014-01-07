@@ -38,3 +38,6 @@ void enableShadow(CCLabelTTF *lab, CCSize sz, float so, float sb, bool up, int r
     CCLog("enableShadow %d %d %d", r, g, b);
     lab->enableShadow(sz, so, sb, up, r, g, b);
 }
+void setFontFillColor(CCLabelTTF *lab, ccColor3B c, bool u) {
+    lab->setFontFillColor(c, u);
+}

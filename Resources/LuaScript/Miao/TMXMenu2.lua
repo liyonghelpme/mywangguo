@@ -88,9 +88,11 @@ function TMXMenu2:receiveMsg(msg, para)
     elseif msg == EVENT_TYPE.SHOW_DIALOG then
         self.mbut.text:setString("返回")
         setVisible(self.leftBut.bg, false)
+        self.mbut.shadowWord:setString("返回")
     elseif msg == EVENT_TYPE.CLOSE_DIALOG then
         self.mbut.text:setString("菜单")
         setVisible(self.leftBut.bg, true)
+        self.mbut.shadowWord:setString("菜单")
     end
 end
 function TMXMenu2:onMenu()
@@ -104,13 +106,17 @@ function TMXMenu2:onMenu()
 end
 function TMXMenu2:beginBuild()
     self.mbut.text:setString("返回")
+    self.mbut.shadowWord:setString("返回")
     self.leftBut.text:setString("旋转")
+    self.leftBut.shadowWord:setString("旋转")
     self.inBuild = true
 end
 
 function TMXMenu2:finishBuild()
     self.mbut.text:setString("菜单")
+    self.mbut.shadowWord:setString("菜单")
     self.leftBut.text:setString("地图")
+    self.leftBut.shadowWord:setString("地图")
     self.inBuild = false
 end
 
@@ -138,4 +144,5 @@ end
 function TMXMenu2:setMenu(m)
     self.menu = m
     self.mbut.text:setString("返回")
+    self.mbut.shadowWord:setString("返回")
 end

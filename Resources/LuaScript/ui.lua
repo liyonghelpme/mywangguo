@@ -108,6 +108,7 @@ function ui.newTTFLabel(params)
     local dimensions = params.dimensions
     local edgeWidth = params.edgeWidth
     local shadowColor = params.shadowColor or {0, 0, 0}
+    print("shadow Color is", simple.encode(shadowColor))
 
     local label
     --android ios 平台字体处理方法不同
@@ -116,24 +117,41 @@ function ui.newTTFLabel(params)
     else
         label = CCLabelTTF:create(text, "fonts/fang.ttf", size)
     end
+    local shadowWord
     if font == 'f2' then
         if edgeWidth == nil then
             edgeWidth = 2
         end
         --调整阴影的padding 就可以改变切割了  padding＋5
         --label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
-        if ANDROID == true then 
-            enableShadow(label, CCSizeMake(1, -2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+        local upate = true
+        --if color == nil then
+        --    update = true
+        --end
+        --设定特殊的阴影颜色
+        if shadowColor[1] > 0 or shadowColor[2] > 0 or shadowColor[3] > 0 then
+            local lab = ui.newTTFLabel({text=text, color=shadowColor, size=size})
+            --enableShadow(lab, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+            label:addChild(lab, -1)
+            setAnchor(setPos(lab, {1, -2}), {0, 0})
+            print("set shadow Color")
+            shadowWord = lab
         else
-            --enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
-            --不支持
-            enableShadow(label, CCSizeMake(1, 2), 1, 1, true)
+            if ANDROID == true then 
+                enableShadow(label, CCSizeMake(1, -2), 1, 1, update, shadowColor[1], shadowColor[2], shadowColor[3])
+            else
+                --enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+                --不支持
+                enableShadow(label, CCSizeMake(1, 2), 1, 1, update)
+            end
+            print("set normal shadow color")
         end
     end
 
+    --文字的FillColor 和ShadowColor 不同
     if label then
         label:setColor(color)
-
+        --setFontFillColor(label, color, true)
         function label:realign(x, y)
             if textAlign == ui.TEXT_ALIGN_LEFT then
                 label:setPosition(math.round(x + label:getContentSize().width / 2), y)
@@ -147,7 +165,7 @@ function ui.newTTFLabel(params)
         if x and y then label:realign(x, y) end
     end
 
-    return label
+    return label, shadowWord
 end
 --text
 --delegate
@@ -249,7 +267,8 @@ function ui.newButton(params)
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        obj.text = setAnchor(addChild(obj.bg, ui.newTTFLabel({text=text, font=font, size=size, color=col, shadowColor=shadowColor})), {0.5, 0.5})
+        obj.text, obj.shadowWord = ui.newTTFLabel({text=text, font=font, size=size, color=col, shadowColor=shadowColor})
+        setAnchor(addChild(obj.bg, obj.text), {0.5, 0.5})
     end
     obj:setAnchor(0.5, 0.5)
     return obj
