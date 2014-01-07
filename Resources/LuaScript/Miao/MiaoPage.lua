@@ -482,6 +482,8 @@ function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
         self.buildLayer:adjustLayer(self.curBuild)
         local c = Logic.buildings[self.curBuild.id].silver
+        local needCount = self.curBuild.data.countNum
+        local oid = self.curBuild.id
         doCost(c)
         local bdata = self.curBuild.data
         --if self.curBuild.picName == 't' then
@@ -529,7 +531,13 @@ function MiaoPage:finishBuild()
 
         --根据当前的位置 调整一个新位置
         --oldBuild.picName == 't' and
-        if Logic.resource.silver >= c then
+        local nextOk = true
+        if needCount == 1 and getAvaBuildNum(oid) <= 0 then
+            nextOk = false
+        end
+        print("needCount", needCount, getAvaBuildNum(oid))
+
+        if Logic.resource.silver >= c and nextOk then
             if #self.oldBuildPos == 1 then
                 self:beginBuild('build', bdata.id, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
             else

@@ -1,4 +1,5 @@
 require "Miao.PressMenu3"
+require "myMap.FightMap"
 TMXMenu2 = class()
 function TMXMenu2:adjustPos()
 end
@@ -76,6 +77,8 @@ function TMXMenu2:onLeft()
     print("onLeft", self.inBuild)
     if self.inBuild then
         global.director.curScene.page.curBuild:doSwitch()
+    else
+        global.director:pushScene(FightMap.new())
     end
 end
 

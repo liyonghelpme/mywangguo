@@ -31,7 +31,7 @@ end
 function adjustNewHeight(mask2, width, ax, ay)
     local dk = ay*width+ax+1
     --数组从1开始编号
-    --print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
+    ----print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
     return mask2[dk] or 0
 end
 
@@ -58,30 +58,30 @@ end
 function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     local nx = math.floor(cx/SIZEX)
     local ny = math.floor(cy/SIZEY)
-    print("nx ny is", nx, ny)
+    --print("nx ny is", nx, ny)
 
 
     local allV = cxyToAxyMap[getMapKey(nx,ny)]
-    --print("check nx ny", nx, ny)
+    ----print("check nx ny", nx, ny)
     --从屏幕 坐标转化成 世界坐标 接着转化成 45 镜头做的坐标
-    print("screen effect allV", #allV)
+    --print("screen effect allV", #allV)
     --ax ay 是 地图的Affine 坐标 转化成 cx cy 坐标
     --global.director.curScene.page:showGrid(nx, ny, allV)
 
     if allV ~= nil then
-        print("allV ", #allV, simple.encode(allV))
+        --print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
             local hei = mask[v[2]*width+v[1]+1]
-            print("hei", v[1], v[2], hei)
+            --print("hei", v[1], v[2], hei)
             --点击的Y值 向下偏移的高度
             local ncy = cy-hei*103
-            --print("cx, ncy ", cx, ncy, cy)
+            ----print("cx, ncy ", cx, ncy, cy)
             --点击的位置向下偏移半个网格
             --因为cartesianToNormal 使用的是菱形0.5 0 位置的点来计算normal的
-            print("ncy", cx, ncy)
+            --print("ncy", cx, ncy)
             local ax, ay = newCartesianToAffine(cx, ncy, width, height, fixX, fixY)
-            --print("ax ay is", ax, ay)
-            print("ax ay v1 v2", ax, ay, v[1], v[2])
+            ----print("ax ay is", ax, ay)
+            --print("ax ay v1 v2", ax, ay, v[1], v[2])
             if ax == v[1] and ay == v[2] then
                 return ax, ay, hei
             end
@@ -111,7 +111,7 @@ end
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
-    ----print("axyToCxyWithDepth", ax, ay, cx, cy)
+    ------print("axyToCxyWithDepth", ax, ay, cx, cy)
     cy = cy+103*mask[dk]
     return cx, cy
 end

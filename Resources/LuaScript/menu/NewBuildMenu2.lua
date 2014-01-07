@@ -95,7 +95,7 @@ function NewBuildMenu2:setView(s)
     end
     --]]
     self:updateTab()
-    self.selPanel = nil
+    self.selBuild = nil
     self:setSel(1)
     --[[
     self.total:setString("基本属性"..self.selTab..'/2')
@@ -107,7 +107,7 @@ end
 
 --点击开始
 function NewBuildMenu2:setSel(s)
-    if self.selBuild ~= s then
+    --if self.selBuild ~= s then
         print("self.", self.selBuild)
         if self.selBuild ~= nil then
             self.data[self.selBuild][1]:stopAllActions()
@@ -124,7 +124,7 @@ function NewBuildMenu2:setSel(s)
         self.name:setString(n)
         self.price:setString(p)
         --global.director.curScene.menu.infoWord:setString(n.." "..p.."贯")
-    end
+    --end
 end
 
 function NewBuildMenu2:onTab(p)

@@ -8,10 +8,12 @@ UpdateScene *UpdateScene::create() {
     p->autorelease();
     return p;
 }
+int count = 0;
 bool UpdateScene::init() {
     CCScene::init();
 	CCDirector *pDirector = CCDirector::sharedDirector();
-    CCSprite *lm = CCSprite::create("loadMain.png");
+    //背景黑框和屏幕一样大小
+    CCSprite *lm = CCSprite::create("black.png");
     addChild(lm);
     CCSize vs = pDirector->getVisibleSize();
     lm->setPosition(ccp(vs.width/2, vs.height/2));
@@ -19,6 +21,31 @@ bool UpdateScene::init() {
 
     lm->setScaleX(vs.width/sz.width);
     lm->setScaleY(vs.height/sz.height);
+    
+    CCLabelTTF *lab = CCLabelTTF::create("Loading...", "", 25);
+    lab->setColor(ccc3(255, 255, 255));
+    lab->enableShadow(CCSizeMake(1, 2), 1, 1, true);
+    lab->setAnchorPoint(ccp(0, 0.5));
+    lab->setPosition(ccp(16, 768-743));
+    addChild(lab);
+    
+    CCSpriteFrameCache *sf = CCSpriteFrameCache::sharedSpriteFrameCache();
+    sf->addSpriteFramesWithFile("loadAni.plist");
+    CCAnimation *ani = CCAnimation::create();
+    char name[100];
+    for(int i = 0; i <= 20; i++) {
+        sprintf(name, "load%d.png", i);
+        ani->addSpriteFrame(sf->spriteFrameByName(name));
+    }
+    ani->setDelayPerUnit(2/20.0);
+    ani->setRestoreOriginalFrame(true);
+
+    CCSprite *cat = CCSprite::createWithSpriteFrameName("load0.png");
+    addChild(cat);
+    cat->setPosition(ccp(vs.width-228, 101));
+    cat->runAction(CCRepeatForever::create(CCAnimate::create(ani)));
+
+
 
     updateYet = false;
     scheduleUpdate();
@@ -28,6 +55,7 @@ bool UpdateScene::init() {
 }
 //每10个百分点 增加1个点
 void UpdateScene::loadPoint(int p) {
+    return;
 	CCDirector *pDirector = CCDirector::sharedDirector();
     CCSize vs = pDirector->getVisibleSize();
     int k = p/10;
@@ -56,7 +84,8 @@ void UpdateScene::update(float diff) {
             progress = 200;
         }
     } else {
-		if(progress == 200) {
+        count = count+1;
+		if(progress == 200 && count == 50) {
             CCUserDefault *def = CCUserDefault::sharedUserDefault();
             if(def->getStringForKey("update") != "0") {
                 if(publicAssets != NULL) {
