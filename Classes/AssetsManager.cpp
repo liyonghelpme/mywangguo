@@ -167,16 +167,18 @@ void AssetsManager::updateVersion() {
 //当progress == 200 的时候 下载结束
 static void* assetsManagerDownloadAndUncompress(void *data) {
 	AssetsManager* self = (AssetsManager*)data;
-	string downloadedVersion = CCUserDefault::sharedUserDefault()->getStringForKey(KEY_OF_DOWNLOADED_VERSION);
-    if (downloadedVersion != self->_version)
+	//string downloadedVersion = CCUserDefault::sharedUserDefault()->getStringForKey(KEY_OF_DOWNLOADED_VERSION);
+    //if (downloadedVersion != self->_version)
     {
         if (! self->downLoad()) {
 			progress = 200;
 			return false;
 		}
+        //不应该在这里修改版本信息
+        //主线程才能修改
         // Record downloaded version.
-        CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, self->_version.c_str());
-        CCUserDefault::sharedUserDefault()->flush();
+        //CCUserDefault::sharedUserDefault()->setStringForKey(KEY_OF_DOWNLOADED_VERSION, self->_version.c_str());
+        //CCUserDefault::sharedUserDefault()->flush();
     }
     
     // Uncompress zip file.
@@ -187,7 +189,7 @@ static void* assetsManagerDownloadAndUncompress(void *data) {
     //self->updateVersion();
     //更新结束在主线程调用 updateVersion 写入到 UserDefault 中
     // Set resource search path.
-    self->setSearchPath();
+    //self->setSearchPath();
     
     // Delete unloaded zip file.
     string zipfileName = self->_storagePath + TEMP_PACKAGE_FILE_NAME;
@@ -219,14 +221,16 @@ bool AssetsManager::update()
 		progress = 200;
 		return false;
 	}
+    /*
 	#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
 	pthread_mutex_init(&_message, NULL);
 	_tid = new pthread_t();
 	pthread_create(&(*_tid), NULL, assetsManagerDownloadAndUncompress, this);
 	//下载结束线程通知
 	#else
+    */
 	assetsManagerDownloadAndUncompress(this);
-	#endif
+	//#endif
     return true;
 }
 

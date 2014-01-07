@@ -23,7 +23,8 @@ function MineStore:initView()
     --local bd = Logic.buildings[self.baseBuild.id]
     local sz = self.baseBuild.changeDirNode:getContentSize()
     setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0, SIZEY})
-    self.tool = setSize(setPos(addSprite(self.baseBuild.changeDirNode, "equip70.png"), {93, fixY(130, 75)}), {40, 40})
+    --self.tool = setSize(setPos(addSprite(self.baseBuild.changeDirNode, "equip70.png"), {93, fixY(130, 75)}), {40, 40})
+    self.tool = addNode(self.baseBuild.changeDirNode)
 end
 
 function MineStore:takeTool()

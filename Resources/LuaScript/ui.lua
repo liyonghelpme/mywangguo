@@ -125,7 +125,9 @@ function ui.newTTFLabel(params)
         if ANDROID == true then 
             enableShadow(label, CCSizeMake(1, -2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
         else
-            enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+            --enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+            --不支持
+            enableShadow(label, CCSizeMake(1, 2), 1, 1, true)
         end
     end
 
@@ -174,6 +176,7 @@ function ui.newButton(params)
     local font = params.font
     local needScale = params.needScale or true
     local touchColor = params.touchColor
+    local shadowColor = params.shadowColor
 
     local spSize = {sz.width, sz.height}
 
@@ -246,7 +249,7 @@ function ui.newButton(params)
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        obj.text = setAnchor(addChild(obj.bg, ui.newTTFLabel({text=text, font=font, size=size, color=col})), {0.5, 0.5})
+        obj.text = setAnchor(addChild(obj.bg, ui.newTTFLabel({text=text, font=font, size=size, color=col, shadowColor=shadowColor})), {0.5, 0.5})
     end
     obj:setAnchor(0.5, 0.5)
     return obj
