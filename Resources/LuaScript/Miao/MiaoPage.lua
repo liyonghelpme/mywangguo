@@ -71,12 +71,11 @@ function MiaoPage:ctor(s)
         end
     end
 
-    --[[
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
     self.bg:addChild(debug, 10)
-    --]]
+    self.debug = debug
 
     --屏幕点 范围 到 axy的一个映射范围
     --调整高度值
@@ -288,6 +287,19 @@ function MiaoPage:receiveMsg(name, msg)
     end
 end
 
+function MiaoPage:showGrid(nx, ny, allV)
+    local box = createSprite("whitebox.png")
+    self.debug:addChild(box)
+    setSize(setAnchor(setPos(box, {nx*SIZEX, ny*SIZEY}), {0, 0}), {SIZEX, SIZEY})
+    
+    for k, v in ipairs(allV) do
+        local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+        local arr = createSprite("whiteArrow.png")
+        self.debug:addChild(arr)
+        setColor(setSize(setAnchor(setPos(arr, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {10, 20, 128})
+    end
+end
+
 --移动move 
 --点击某个建筑物 进入移动状态 
 --原地还有这个建筑物 不过 新的 替换成了这个建筑物 的 图像 可以移动 桥梁 普通建筑物   道路不能移动
@@ -305,10 +317,13 @@ function MiaoPage:touchesBegan(touches)
         if ax ~= nil and ay ~= nil then
             --实际对应的建筑物块 向下偏移103个像素
             --偏移计算建筑物的位置
-            tp.y = tp.y-103*height-SIZEY
+            --tp.y = tp.y-103*height-SIZEY
+            --转化成菱形标准基点的 笛卡尔坐标
+            local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
 
+            --将 ax ay 坐标转化成 可以用到地图上的 MapGridController的坐标 直接根据touch 坐标转化map坐标?
             local allCell = self.buildLayer.mapGridController.mapDict
-            local map = getPosMap(1, 1, tp.x, tp.y)
+            local map = getPosMap(1, 1, cx, cy)
             local key = getMapKey(map[3], map[4])
             print("allCell state", map[3], map[4], allCell[key])
             --点击到某个建筑物

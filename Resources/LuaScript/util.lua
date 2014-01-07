@@ -701,6 +701,12 @@ end
 function normalToAffine(nx, ny)
     return round((ny-nx)/2), round((nx+ny)/2)
 end
+--仿射坐标 > 0 取下界 0.57 ---> 1  
+--小于 0  -0.57 ---> -1 取下界
+function normalToAffineFloor(nx, ny)
+    return math.floor((ny-nx)/2), math.floor((nx+ny)/2)
+end
+
 
 --用于计算当前位置和攻击范围的关系
 --返回浮点normal 网格坐标

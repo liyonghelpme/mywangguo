@@ -419,9 +419,11 @@ function MiaoBuild:touchesMoved(touches)
                 --在高地上面 修正位置 屏幕映射到 3D世界坐标
                 --cartesianToNormal 使用菱形 0.5 0 位置来计算normalPos位置点 所以要减去SIZEY
                 --参照MiaoPage 中touchesBegan的处理方法
-                parPos.y = parPos.y-103*height-SIZEY
+                --parPos.y = parPos.y-103*height-SIZEY
+                local cx, cy = newAffineToCartesian(ax, ay, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                 
-                local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+                --local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+                local newPos = {cx, cy}
                 --先判定是否冲突 再 设置位置
                 local curPos = self.lastPos[0]
                 local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
