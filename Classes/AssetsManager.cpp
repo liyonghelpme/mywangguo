@@ -280,6 +280,7 @@ bool AssetsManager::uncompress()
         }
         
         string fullPath = _storagePath + fileName;
+        CCLog("full path of file is %s", fullPath.c_str());
 
         //windows下替换所有/ 为\\ 路径
         #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)

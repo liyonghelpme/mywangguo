@@ -124,7 +124,7 @@ function ui.newTTFLabel(params)
         end
         --调整阴影的padding 就可以改变切割了  padding＋5
         --label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
-        local upate = true
+        local update = true
         --if color == nil then
         --    update = true
         --end
