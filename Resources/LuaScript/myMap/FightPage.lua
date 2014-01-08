@@ -27,7 +27,7 @@ function FightPage:initData()
     self.allCity = {}
     for k, v in pairs(MapNode) do
         if v[3] == true then
-            local ci = MapCity.new(self, v)
+            local ci = MapCity.new(self, v, k)
             self.bg:addChild(ci.bg)
             table.insert(self.allCity, ci)
         end

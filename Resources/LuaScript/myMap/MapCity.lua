@@ -1,6 +1,7 @@
 MapCity = class()
-function MapCity:ctor(s, data)
+function MapCity:ctor(s, data, cid)
     self.scene = s
+    self.cid = cid
     self.data = data
     self.bg = CCNode:create()
     self.changeDirNode = CCSprite:create("myCity.png")
