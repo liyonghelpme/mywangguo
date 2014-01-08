@@ -79,8 +79,9 @@ bool AppDelegate::applicationDidFinishLaunching()
 		def->setStringForKey(it->first.c_str(), it->second);
     }
     delete nm;
-	if(def->getStringForKey("update") != "0")
-	    updateFiles();
+	//UpdateScene 中更新脚本
+    //if(def->getStringForKey("update") != "0")
+	//    updateFiles();
 
     scene = UpdateScene::create();
     scene->ap = this;

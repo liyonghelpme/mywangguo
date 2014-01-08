@@ -223,16 +223,16 @@ bool AssetsManager::update()
 		progress = 200;
 		return false;
 	}
-    /*
+    //UpdateScene 里面更新脚本 
+    //因此不要在AppDelegate 里面调用UpdateFile
 	#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32
 	pthread_mutex_init(&_message, NULL);
 	_tid = new pthread_t();
 	pthread_create(&(*_tid), NULL, assetsManagerDownloadAndUncompress, this);
 	//下载结束线程通知
 	#else
-    */
 	assetsManagerDownloadAndUncompress(this);
-	//#endif
+	#endif
     return true;
 }
 
