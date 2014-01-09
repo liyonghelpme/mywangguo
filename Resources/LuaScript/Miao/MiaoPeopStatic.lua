@@ -30,14 +30,14 @@ function MiaoPeople:setDir(x, y)
                 --self.changeDirNode:stopAllActions()
                 self:setMoveAction("car_rt")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "a3.png")
+                    setDisplayFrame(self.carGoods, self.carName[1])
                 end
                 setDisplayFrame(self.shadow, "shadow0.png")
             elseif dy < 0 then
                 --self.changeDirNode:stopAllActions()
                 self:setMoveAction("car_rb")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "b3.png")
+                    setDisplayFrame(self.carGoods, self.carName[2])
                 end
                 setDisplayFrame(self.shadow, "shadow1.png")
             end
@@ -48,13 +48,13 @@ function MiaoPeople:setDir(x, y)
             if dy > 0 then
                 self:setMoveAction("car_rt")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "a3.png")
+                    setDisplayFrame(self.carGoods, self.carName[1])
                 end
                 setDisplayFrame(self.shadow, "shadow0.png")
             elseif dy < 0 then
                 self:setMoveAction("car_rb")
                 if self.carGoods ~= nil then
-                    setDisplayFrame(self.carGoods, "b3.png")
+                    setDisplayFrame(self.carGoods, self.carName[2])
                 end
                 setDisplayFrame(self.shadow, "shadow1.png")
             end
@@ -89,11 +89,14 @@ function MiaoPeople:clearHouse()
 end
 
 --农田被拆除或者移动了
+--但是应该由人自己检测 来
+--[[
 function MiaoPeople:clearWork()
     if self.state == PEOPLE_STATE.IN_WORK then
         self.state = PEOPLE_STATE.FREE
     end
 end
+--]]
 function MiaoPeople:hideSelf()
     if self.lastVisible then
         self.changeDirNode:runAction(fadeout(0.5))
@@ -116,6 +119,7 @@ function MiaoPeople:handleHome()
             self:clearStateStack()
             self:resetState()
         else
+            --设定猫的位置 为房间位置 不用了
             local function setNPos()
                 local np = setBuildMap({1, 1, self.tempEndPoint[1], self.tempEndPoint[2]})
                 setPos(self.bg, np)
@@ -158,17 +162,19 @@ function MiaoPeople:handleQuarry()
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
-                self.realTarget.stone = self.realTarget.stone+self.stone
+                self.realTarget:changeWorkNum(self.stone)
                 self.stone = 0
                 self:popState()
+                self:putGoods()
             end
             self:resetState()
         elseif self.actionContext == CAT_ACTION.TAKE_STONE then
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
-                self.stone = self.predictTarget.stone
-                self.realTarget.stone = 0
+                self.stone = self.predictTarget.workNum
+                self.realTarget:takeAllWorkNum()
+                self:sendGoods()
                 self:popState()
             end
             self:resetState()
@@ -246,9 +252,13 @@ function MiaoPeople:handleQuarry()
 end
 
 function MiaoPeople:handleMine()
+    print("handleMine now")
+    --if self.actionContext == CAT_ACTION.BACK_STONE then
+    --else
     if self.actionContext == CAT_ACTION.MINE_STONE then
         self.state = PEOPLE_STATE.IN_WORK
         self.workTime = 0
+        self:hideSelf()
     end
 end
 function MiaoPeople:handleSmith()
@@ -323,8 +333,31 @@ function MiaoPeople:sendGoods()
         self.changeDirNode:addChild(sp)
         local sz = self.changeDirNode:getContentSize()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"a3.png", "b3.png"}
+        self.carGoods = sp
+    elseif self.stone > 0 then
+        local sp = createSprite("f3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"e3.png", 'f3.png'}
+        self.carGoods = sp
+    elseif self.wood > 0 then
+        local sp = createSprite("d3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"c3.png", 'd3.png'}
+        self.carGoods = sp
+    elseif self.workNum > 0 then
+        local sp = createSprite("h3.png")
+        self.changeDirNode:addChild(sp)
+        local sz = self.changeDirNode:getContentSize()
+        setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
+        self.carName = {"g3.png", 'h3.png'}
         self.carGoods = sp
     end
+
     setScaleX(self.changeDirNode, sca)
     self.oldCarPos = getPos(self.changeDirNode)
     self.carVirAct = repeatForever(sequence({moveby(0.2, 0, 5), moveby(0.2, 0, -5)}))
@@ -395,7 +428,7 @@ function MiaoPeople:popState()
     if #self.stateStack > 0 then
         for k, v in ipairs(self.stateStack) do
             if type(v) == 'table' then
-                print("state", k, v[1])
+                print("state", k, v[1], v[3])
             else
                 print('state', k, v)
             end
@@ -434,8 +467,17 @@ function MiaoPeople:resetState()
     self.needClearOwner = true
 end
 function MiaoPeople:handleFactory()
+    print("self.actionContext", self.actionContext)
     if self.actionContext ~= nil then
-        if self.actionContext == CAT_ACTION.PUT_FOOD then
+        if self.actionContext == CAT_ACTION.PUT_WOOD then
+            self.realTarget.wood = self.realTarget.wood + self.wood
+            self.wood = 0
+            self:putGoods()
+            self:setDir(1, -1)
+            self:popState()
+            self:resetState()
+            print("popState of wood ")
+        elseif self.actionContext == CAT_ACTION.PUT_FOOD then
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
@@ -447,6 +489,7 @@ function MiaoPeople:handleFactory()
             end
             self:resetState()
         elseif self.actionContext == CAT_ACTION.PRODUCT then
+            print("begin Product ")
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
@@ -461,6 +504,8 @@ function MiaoPeople:handleFactory()
             else
                 self.realTarget.stone = self.realTarget.stone + self.stone
                 self.stone = 0
+                self:putGoods()
+                self:setDir(1, -1)
                 self:popState()
             end
             self:resetState()
@@ -527,7 +572,7 @@ end
 
 
 function MiaoPeople:workInFactory()
-    local le = getLaborEffect(self.labor)
+    local le = self:getMyLaborEffect()
     local totalTime = 10
     local productNum = 5
     local healthCost = 5
@@ -568,7 +613,7 @@ function MiaoPeople:workInFactory()
             if self.realTarget.workNum >= self.realTarget.maxNum or not enough then
                 self.realTarget.funcBuild:stopWork()
                 self.workNum = self.realTarget.workNum
-                self.realTarget.workNum = 0
+                self.realTarget:takeAllWorkNum()
                 self.goodsKind = self.realTarget.goodsKind
                 self:popState()
                 self:sendGoods()
@@ -576,81 +621,66 @@ function MiaoPeople:workInFactory()
                 self:resetState()
                 --self:showSelf()
             end
-        --生产混合原材料物品
-        elseif self.realTarget.productKind ~= nil then
-            print("product kind 3")
-            if self.realTarget.food > 0 and self.realTarget.stone > 0 then
-                self.realTarget.food = self.realTarget.food - 1
-                self.realTarget.stone = self.realTarget.stone - 1
-                changeTable(self.realTarget.product, 3, 1)
-                if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 or self.realTarget.stone <= 0 then
-                    self.state = PEOPLE_STATE.FREE
-                    self.realTarget:setOwner(nil)
-                    self.product = self.realTarget.product[3]
-                    self.realTarget.product[3] = 0
-                    self.realTarget = nil
-                    self.goTower = true
-                    return
-                end
-            end
-        --生产食物
-        elseif self.realTarget.food > 0 then
-            self.realTarget.food = self.realTarget.food - 1
-            changeTable(self.realTarget.product, 1, 1)
-            --如果工厂生产数量超过上限 就不要生产了
-            --运送生产物到商店里面
-            if getDefault(self.realTarget.product, 1, 0) >= 10 or self.realTarget.food <= 0 then
-                self.state = PEOPLE_STATE.FREE
-                self.realTarget:setOwner(nil)
-                self.product = self.realTarget.product[1]
-                self.realTarget.product[1] = 0
-                self.realTarget = nil
-                self.goStore = true
-                return
-            end
-        --生产铁器
-        elseif self.realTarget.stone > 0 then
-            self.realTarget.stone = self.realTarget.stone - 1
-            changeTable(self.realTarget.product, 2, 1)
-            --铁器数量
-            if getDefault(self.realTarget.product, 2, 0) >= 10 or self.realTarget.stone <= 0 then
-                self.state = PEOPLE_STATE.FREE
-                self.realTarget:setOwner(nil)
-                self.product = self.realTarget.product[2]
-                self.realTarget.product[2] = 0
-                self.realTarget = nil
-                --运输铁器到商店里面
-                self.goSmith = true
-                return
-            end
         end
         --生产结束 直到运送到工厂
     end
+end
+function MiaoPeople:getMyLaborEffect()
+    local pdata = calAttr(self.id,  self.level, self)
+    local le = getLaborEffect(pdata.labor)
+    return le
 end
 
 --把actionList 打出来
 --一个action 结束执行下一个action
 function MiaoPeople:workInMine()
-    if self.workTime > 1 then
-        self.workTime = 0
-        self.health = self.health -1
-        self.realTarget.stone = self.realTarget.stone + 1
+    --labor 包括自身和 装备总的劳动力
+    local le = self:getMyLaborEffect()
+    local totalTime = 10
+    local productNum = 5
+    local healthCost = 5
+    if le.time ~= nil then
+        totalTime = totalTime+le.time
+    end
+    if le.product ~= nil then
+        productNum = productNum + le.product
+    end
+    if le.health ~= nil then
+        healthCost = healthCost+le.health
+    end
+    totalTime = math.max(1, totalTime)
+    healthCost = math.max(1, healthCost)
+    --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
+    --计算出1个 的生产时间 和 消耗的 生命值
+    --self.myHouse.productNum 花费时间减少  消耗体力不变
+    local rate = totalTime/(self.quarry.productNum/20)/productNum
+    local cost = healthCost/productNum
+
+    --print("workInMine", self.workTime, rate, totalTime, productNum, healthCost)
+    if self.workTime > rate then
+        self.workTime = self.workTime - rate
+        self.health = self.health -cost
+        --self.realTarget.workNum = self.realTarget.workNum + 1
+        self.realTarget:changeWorkNum(1)
         --如果工厂生产数量超过上限 就不要生产了
         --离开矿坑 但是predictQuarry 不会消除
-        print("workInMine", self.goQuarry)
-        if self.realTarget.stone >= self.realTarget.maxNum then
-            self.stone = self.realTarget.stone
-            self.realTarget.stone = 0
+        --print("workInMine", self.goQuarry)
+        if self.realTarget.workNum >= self.realTarget.maxNum then
+            self.stone = self.realTarget.workNum
+            self.realTarget:takeAllWorkNum()
             self:popState()
             self:resetState()
+            self:sendGoods()
+            self:setDir(1, -1)
             return
         end
     end
 end
+
 --10 10 10 10 5 = 5点体力值
 --种植的时间 40s 算在这个生产过程里面的 
 function MiaoPeople:workInFarm()
-    local le = getLaborEffect(self.labor)
+    local le = self:getMyLaborEffect()
     local totalTime = 10
     local productNum = 5
     local healthCost = 5
@@ -673,14 +703,16 @@ function MiaoPeople:workInFarm()
 
     if self.workTime > rate then
         self.workTime = 0
-        if self.health < cost then
+        --总要消耗掉劳动力 否则 会出现 不停停留在 农田上的情况
+        self.health = self.health-cost
+        if self.health <= 0 then
             self:clearStateStack()
             self:resetState()
             self:setDir(0, 0)
             local sz = self.changeDirNode:getContentSize()
             setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
         else
-            self.health = self.health-cost
+            --self.health = self.health-cost
             if self.realTarget.workNum >= self.realTarget.maxNum then
                 --[[
                 self.state = PEOPLE_STATE.FREE
@@ -746,11 +778,13 @@ function MiaoPeople:checkMeInHouse()
 end
 function MiaoPeople:showState()
     --拿到矿刀
+    --[[
     if self.tempMine ~= nil then
         setTexture(self.statePic, "equip70.png")
     elseif self.stone > 0 then
         setTexture(self.statePic, "herb109.png")
     end
+    --]]
 end
 
 --移动了之后 清理owner
@@ -772,6 +806,7 @@ function MiaoPeople:clearStateStack()
     self.stateStack = {}
     self.stateContext = nil
     self.actionContext = nil
+    self.funcPeople.moveYet = nil
     
     --清理运输状态
     self:putGoods()
@@ -804,12 +839,47 @@ function MiaoPeople:checkMoved()
     local moved = false
     if not self.realTarget.deleted then
         local pxy = self.tempEndPoint 
+        --check tempEndPoint building is same with curBuilding 
         --local txy = getPos(self.realTarget.bg)
+
         local map = getBuildMap(self.realTarget)
-        if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
+        --sx sy nx ny
+        local sx, sy = map[1], map[2]
+        local moveYet = true
+        for x = 0, sx-1, 1 do
+            for y = 0, sy-1, 1 do
+                local ax = x-y
+                local ay = x+y
+                if (map[3]+ax == pxy[1]) and (map[4]+ay == pxy[2]) then
+                    moveYet = false
+                    break
+                end
+            end
+        end
+        if moveYet then
             addBanner("目标被移动了 "..simple.encode(pxy).." "..simple.encode(map))
             moved = true
         end
+        --if map[3] ~= pxy[1] or map[4] ~= pxy[2] then
+        --    moved = true
+        --end
     end
     return moved
+end
+function MiaoPeople:printState()
+    print("printState", self.name)
+    for k, v in ipairs(self.stateStack) do
+        if type(v) == 'table' then
+            print("state", k, v[1], v[3])
+        else
+            print('state', k, v)
+        end
+    end
+end
+function MiaoPeople:useStateContext()
+    print("useStateContext")
+    self.predictTarget = self.stateContext[2]
+    self.actionContext = self.stateContext[3] 
+    self.needClearOwner = self.stateContext.needClearOwner or true
+    self.stateContext = nil
 end

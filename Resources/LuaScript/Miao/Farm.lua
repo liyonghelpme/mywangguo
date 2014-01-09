@@ -94,6 +94,7 @@ function Farm:removeSelf()
 end
 --移动结束 清理持有者的工作状态
 function Farm:finishMove()
+    --[[
     if self:checkBuildable() then
         self.baseBuild:doMyEffect()
     end
@@ -101,6 +102,7 @@ function Farm:finishMove()
         self.owner:clearWork()
         self.owner = nil
     end
+    --]]
 end
 
 function Farm:setBuyer(b)
@@ -145,4 +147,8 @@ function Farm:getProductName()
 end
 function Farm:getProductPrice()
     return "3贯"
+end
+
+function Farm:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)   
 end

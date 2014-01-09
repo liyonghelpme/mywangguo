@@ -4,7 +4,7 @@ function Merchant:checkWork(k)
     local ret = false
     print("Merchant checkWork", k.id)
     if k.picName == 'build' and not k.deleted and k.workNum > 0 then
-        if k.id == 2 or k.data.IsStore == 1 then
+        if (k.data.IsStore == 2 and Logic.inSell.food) or k.data.IsStore == 1 or (k.id == 12 and Logic.inSell.stone) or (k.id == 19 and Logic.inSell.wood) then
             ret = true
         end
     end
@@ -171,6 +171,7 @@ function Merchant:handleAction()
         print("BUY_GOODS", self.people.predictTarget.id)
         if self.people.predictTarget.deleted then
             addBanner("建筑物不见了")
+        --[[
         elseif self.people.predictTarget.stone > 0 then
             local sp = CCSprite:create("silverIcon.png")
             local p = getPos(self.people.predictTarget.heightNode)
@@ -185,18 +186,23 @@ function Merchant:handleAction()
             setPos(num, {50, 0})
             doGain(pay)
             self.people.predictTarget.stone = 0
-        elseif self.people.predictTarget.data.IsStore == 1 then
+        --]]
+        --elseif self.people.predictTarget.data.IsStore == 1 then
+        else
             getNum = self.people.predictTarget.workNum
             if getNum > 0 then
                 local sp = CCSprite:create("silverIcon.png")
                 local p = getPos(self.people.predictTarget.heightNode)
                 local bgPos = getPos(self.people.predictTarget.bg)
                 self.people.map.bg:addChild(sp)
-                setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
+                setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]+50})
                 local rx = math.random(20)-10
                 sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
                 
                 local bn = math.min(2, self.people.predictTarget.workNum) 
+                if self.people.realTarget.data.buyAll == 1 then
+                    bn = self.people.predictTarget.workNum
+                end
                 local wn = self.people.predictTarget.workNum
                 self.people.predictTarget.workNum = wn-bn
                 self.people.predictTarget.funcBuild:updateGoods()
@@ -208,25 +214,10 @@ function Merchant:handleAction()
                 setPos(num, {50, 0})
                 --+商店的贩卖能力
                 doGain(val)
+                updateSellNum(self.people.predictTarget.goodsKind, bn)
             end
             --商店贩卖能力
         --去农田 每个食材3贯
-        elseif self.people.predictTarget.workNum > 0 then
-            getNum = self.people.predictTarget.workNum
-            local sp = CCSprite:create("silverIcon.png")
-            local p = getPos(self.people.predictTarget.heightNode)
-            local bgPos = getPos(self.people.predictTarget.bg)
-            self.people.map.bg:addChild(sp)
-            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
-            local rx = math.random(20)-10
-            local val = self.people.predictTarget.workNum*3
-
-            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-            local num = ui.newBMFontLabel({text=str(val), font="bound.fnt", size=30})
-            sp:addChild(num)
-            setPos(num, {50, 0})
-            doGain(val)
-            self.people.predictTarget.workNum = 0
         end
         if Logic.inNew and not Logic.buyIt then
             Logic.buyIt = true

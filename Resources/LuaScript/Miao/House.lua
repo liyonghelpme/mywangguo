@@ -43,6 +43,7 @@ function House:removeSelf()
     end
 end
 function House:finishMove()
+    --[[
     if self:checkBuildable() then
         self.baseBuild:doMyEffect()
     end
@@ -50,6 +51,7 @@ function House:finishMove()
         self.owner:clearHouse()
         self.owner = nil
     end
+    --]]
 end
 --[[
 function House:showInfo()
@@ -89,4 +91,7 @@ function House:setOwner(s)
     if self.baseBuild.owner ~= nil and self.baseBuild.owner ~= s then
         self.baseBuild.owner.myHouse = nil
     end
+end
+function House:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)
 end

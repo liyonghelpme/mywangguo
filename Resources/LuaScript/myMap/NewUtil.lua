@@ -1,3 +1,4 @@
+--计算菱形网格 中下点的 3d 世界 的平面坐标
 function newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     ax, ay = width-ax-1, height-ay-1 
     local nx, ny = affineToNormal(ax, ay)
@@ -19,8 +20,10 @@ end
 function newCartesianToAffine(cx, cy, width, height, fixX, fixY)
     cx = cx-fixX
     cy = cy-fixY
-    local nx, ny = cartesianToNormal(cx, cy)
-    local ax, ay = normalToAffine(nx, ny)
+    --不要有round 这样转化的坐标才正确 浮点数也考虑进来
+    --bug  点击网格的某些部分不能拖动建筑物
+    local nx, ny = cartesianToNormalFloat(cx, cy)
+    local ax, ay = normalToAffineFloor(nx, ny)
     return width-ax-1, height-ay-1 
 end
 
@@ -28,7 +31,7 @@ end
 function adjustNewHeight(mask2, width, ax, ay)
     local dk = ay*width+ax+1
     --数组从1开始编号
-    --print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
+    ----print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
     return mask2[dk] or 0
 end
 
@@ -47,27 +50,44 @@ end
 --得到当前点击网格 对应的地图网格 列表  
 --根据高度值 修正坐标Y值
 --根据修正后的 坐标计算 是否和该网格的地面网格相交 如果相交则点击的是该位置
+
+
+--屏幕坐标  转化到地图坐标
+--地图坐标 根据所在的 方格  转化成 对应的菱形网格 
+--绘制出 当前点击的 矩形网格 和菱形网格 
 function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     local nx = math.floor(cx/SIZEX)
     local ny = math.floor(cy/SIZEY)
+    --print("nx ny is", nx, ny)
+
 
     local allV = cxyToAxyMap[getMapKey(nx,ny)]
-    --print("check nx ny", nx, ny)
+    ----print("check nx ny", nx, ny)
+    --从屏幕 坐标转化成 世界坐标 接着转化成 45 镜头做的坐标
+    --print("screen effect allV", #allV)
+    --ax ay 是 地图的Affine 坐标 转化成 cx cy 坐标
+    --global.director.curScene.page:showGrid(nx, ny, allV)
+
     if allV ~= nil then
         --print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
             local hei = mask[v[2]*width+v[1]+1]
+            --print("hei", v[1], v[2], hei)
+            --点击的Y值 向下偏移的高度
             local ncy = cy-hei*103
-            --print("cx, ncy ", cx, ncy, cy)
+            ----print("cx, ncy ", cx, ncy, cy)
             --点击的位置向下偏移半个网格
             --因为cartesianToNormal 使用的是菱形0.5 0 位置的点来计算normal的
-            local ax, ay = newCartesianToAffine(cx, ncy-SIZEY, width, height, fixX, fixY)
-            --print("ax ay is", ax, ay)
+            --print("ncy", cx, ncy)
+            local ax, ay = newCartesianToAffine(cx, ncy, width, height, fixX, fixY)
+            ----print("ax ay is", ax, ay)
+            --print("ax ay v1 v2", ax, ay, v[1], v[2])
             if ax == v[1] and ay == v[2] then
                 return ax, ay, hei
             end
         end
     end
+
     --没有找到包含的 菱形网格 在裂缝里面
     return nil 
 
@@ -91,7 +111,7 @@ end
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
-    ----print("axyToCxyWithDepth", ax, ay, cx, cy)
+    ------print("axyToCxyWithDepth", ax, ay, cx, cy)
     cy = cy+103*mask[dk]
     return cx, cy
 end

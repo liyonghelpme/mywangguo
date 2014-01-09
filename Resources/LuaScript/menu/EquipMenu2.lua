@@ -99,7 +99,7 @@ function EquipMenu2:updateTab()
 
         local sp = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {193, fixY(sz.height, 29)}), {263, 52}), {0.50, 0.50})
         local list = sp
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "cat"..v.id..".png"), {25, fixY(sz.height, 30)}), {50, 55}), {0.50, 0.50})
+        local sp = setAnchor(setPos(addSprite(panel, "catHead"..v.id..".png"), {25, fixY(sz.height, 30)}), {0.50, 0.50})
 
         --装备的属性
         local pdata = calAttr(v.id, v.level, v)

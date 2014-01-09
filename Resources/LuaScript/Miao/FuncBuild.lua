@@ -18,7 +18,10 @@ function FuncBuild:adjustRoad()
 end
 function FuncBuild:finishBuild()
     --finishMove 没有生效 则 finishBuild生效
-    if not self.baseBuild.moveYet and self.baseBuild.data ~= nil and self.baseBuild.data.kind == 0 then
+    --not self.baseBuild.moveYet and
+    --不管移动是否 建造结束都要 生效
+    if self.baseBuild.data ~= nil and (self.baseBuild.data.kind == 0 or self.baseBuild.data.kind == 5) then
+        print("House finish Build", self.baseBuild.data.kind, self.baseBuild.productNum)
         self.baseBuild:doMyEffect()
     end
 end
@@ -26,17 +29,29 @@ function FuncBuild:beginBuild()
 end
 function FuncBuild:beginMove()
     --第一次移动没有效果所以不清除
+    --[[
     if not self.baseBuild.firstMove and self:checkBuildable() then
         self.baseBuild:clearMyEffect()
     end
+    --]]
 end
 function FuncBuild:finishMove()
+    --[[
     if self:checkBuildable() then
         self.baseBuild:doMyEffect()
     end
+    --]]
 end
+
 function FuncBuild:removeSelf()
+    --卖出建筑物 不用清理 自己的效果了
+    --[[
+    if self.baseBuild.state == BUILD_STATE.FREE then
+        self.baseBuild:clearMyEffect()
+    end
+    --]]
 end
+
 function FuncBuild:setBuyer(b)
 end
 function FuncBuild:clearBuyer(b)
@@ -77,15 +92,29 @@ function FuncBuild:clearMenu()
             self.baseBuild.map.mapGridController:clearMap(self.baseBuild)
             local np = getPos(self.baseBuild.bg)
             self.baseBuild:setPos(self.baseBuild.oldPos)
-
+            self.baseBuild:setDir(self.baseBuild.oldDir)
             self.baseBuild.map.mapGridController:updateMap(self.baseBuild)
             self:adjustHeight()
+            --确定最后冲突的原因是什么 是因为移动还是因为 旋转方向
+            
+            --[[
+            if self.baseBuild.colNow == 1 then
+                self.baseBuild:doSwitch()
+            end
+            --]]
+
             --清理冲突 调整周围道路的value
             self.baseBuild.colNow = 0
             self:finishMove()
+            self:doEffect()
+            self.baseBuild:doMyEffect()
+
             setPos(self.baseBuild.bg, np)
             self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
-
+        --移动结束 恢复效果
+        else
+            self:doEffect()
+            self.baseBuild:doMyEffect()
         end
         if #global.director.stack > 0 then
             global.director:popView()
@@ -100,6 +129,8 @@ function FuncBuild:clearMenu()
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
         print("finish clear Menu send Msg!!!!!!!!!!!!!")
     end
+end
+function FuncBuild:detailDialog()
 end
 function FuncBuild:showInfo()
     --先清理旧的
@@ -137,6 +168,7 @@ function FuncBuild:setBottomColor(c)
             setTexture(self.selGrid, "newBlueGrid.png")
         end
     end
+    --self:setColor()
     --[[
     if c == 0 then
         setColor(self.baseBuild.bottom, {255, 0, 0})
@@ -150,6 +182,8 @@ end
 function FuncBuild:takeTool()
 end
 function FuncBuild:putTool()
+end
+function FuncBuild:updateStage(diff)
 end
 function FuncBuild:updateState()
 end
@@ -177,6 +211,9 @@ function delayShow(sp, w)
 end
 --实现这个接口 用于调整效果
 function FuncBuild:showIncrease(n, waitTime)
+    if self.baseBuild.data.showInc == 0 then
+        return
+    end
     if waitTime == nil then
         waitTime = 0
     end
@@ -192,6 +229,9 @@ function FuncBuild:showIncrease(n, waitTime)
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
 function FuncBuild:showDecrease(n, waitTime)
+    if self.baseBuild.data.showInc == 0 then
+        return
+    end
     if waitTime == nil then
         waitTime = 0
     end

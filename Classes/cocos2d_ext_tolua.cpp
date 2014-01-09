@@ -48,7 +48,10 @@ static int tolua_Cocos2d_enableShadow00(lua_State* tolua_S)
 		!tolua_isnumber(tolua_S,3,0,&tolua_err) ||
 		!tolua_isnumber(tolua_S,4,0,&tolua_err) ||
         !tolua_isboolean(tolua_S,5,1,&tolua_err) ||
-        !tolua_isnoobj(tolua_S,6,&tolua_err)
+		!tolua_isnumber(tolua_S,6,0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,7,0,&tolua_err) ||
+		!tolua_isnumber(tolua_S,8,0,&tolua_err) ||
+        !tolua_isnoobj(tolua_S,9,&tolua_err)
 	)
 	 goto tolua_lerror;
 	else
@@ -59,12 +62,44 @@ static int tolua_Cocos2d_enableShadow00(lua_State* tolua_S)
         float so = (float)tolua_tonumber(tolua_S, 3, 0);
         float sb = (float)tolua_tonumber(tolua_S, 4, 0);
         bool up = (bool) tolua_toboolean(tolua_S, 5, 0);
-        enableShadow(sp, sz, so, sb, up);
+        int r = (int)tolua_tonumber(tolua_S, 6, 0);
+        int g = (int)tolua_tonumber(tolua_S, 7, 0);
+        int b = (int)tolua_tonumber(tolua_S, 8, 0);
+        enableShadow(sp, sz, so, sb, up, r, g, b);
 	}
 	return 0;
 #ifndef TOLUA_RELEASE
      tolua_lerror:
      tolua_error(tolua_S,"#ferror in function 'enableShadow'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_setFontFillColor00
+static int tolua_Cocos2d_setFontFillColor00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+        !tolua_isusertype(tolua_S,1,"CCLabelTTF",0,&tolua_err) ||
+        !tolua_isusertype(tolua_S,2,"ccColor3B",0,&tolua_err) ||
+        !tolua_isboolean(tolua_S,3,1,&tolua_err) ||
+        !tolua_isnoobj(tolua_S,4,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        CCLabelTTF *sp = (CCLabelTTF*) tolua_tousertype(tolua_S, 1, 0);
+        ccColor3B col = *((ccColor3B*) tolua_tousertype(tolua_S, 2, 0));
+        bool up = (bool) tolua_toboolean(tolua_S, 3, 0);
+        setFontFillColor(sp, col, up);
+	}
+	return 0;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'setFontFillColor'", &tolua_err);
      return 0;
 #endif
 }
@@ -1554,6 +1589,7 @@ TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
 
   tolua_function(tolua_S,"enableShadow", tolua_Cocos2d_enableShadow00);
+  tolua_function(tolua_S,"setFontFillColor", tolua_Cocos2d_setFontFillColor00);
   tolua_function(tolua_S,"setScriptTouchPriority", tolua_Cocos2d_setScriptTouchPriority00);
   tolua_function(tolua_S,"getFileData", tolua_Cocos2d_getFileData00);
   tolua_cclass(tolua_S,"CCExtendNode","CCExtendNode","CCNode",NULL);

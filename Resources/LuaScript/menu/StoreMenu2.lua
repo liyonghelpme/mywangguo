@@ -22,7 +22,7 @@ function StoreMenu2:ctor()
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+18", size=20, color={255, 255, 255}, font="f1"})), {1.00, 0.50}), {740, fixY(sz.height, 564)})
     self.secNum = w
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="准备后可自动回复15%的体力", size=26, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {394, fixY(sz.height, 626)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="准备后可自动回复15%的体力", size=26, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {538, fixY(sz.height, 626)})
     self.desWord = w
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商人家", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {542, fixY(sz.height, 153)})
@@ -73,7 +73,14 @@ function StoreMenu2:setSel(s)
         setColor(word[3], {255, 255, 255})
         setColor(word[4], {255, 255, 255})
 
-        local edata = Logic.equip[Logic.ownGoods[self.selPanel][2]] 
+        local storeData = self.allData[self.data[self.selPanel][5]]
+        local edata
+        if storeData[1] == 0 then
+            edata = Logic.equip[storeData[2]] 
+        elseif storeData[1] == 2 then
+            edata = Logic.buildings[storeData[2]]
+        end
+        print("storeData", simple.encode(storeData))
         self:getAllAtt(edata)
     end
 end
@@ -89,7 +96,7 @@ function StoreMenu2:getAllAtt(edata)
     self.secAtt:setString('')
     self.secNum:setString('')
     for k, v in ipairs(allAtt) do
-        if edata[v] > 0 then
+        if edata[v] ~= nil and edata[v] > 0 then
             if fir then
                 fir = false
                 self.firAtt:setString(allCn[k])
@@ -121,27 +128,49 @@ function StoreMenu2:updateTab()
 	local sz = {width=537, height=58}
 	--local test = {1, 1, 1, 1, 1, 1, 1}
 	local rowWidth = 1
-	for k, v in ipairs(Logic.ownGoods) do
-		local row = math.floor((k-1)/rowWidth)
-		local col = (k-1)%rowWidth
+    local bb = getBuyableBuild()
+    local allData = concateTable(Logic.ownGoods, bb)
+    self.allData = allData
+    local dataNum = 1
+	for k, v in ipairs(allData) do
+		local row = math.floor((dataNum-1)/rowWidth)
+		local col = (dataNum-1)%rowWidth
+        local find = false
+        local head 
+        local num
+        local price
         if v[1] == 0 then
             v = Logic.equip[v[2]]
+            find = true
+            head = 'equip'
+            num = Logic.holdNum[v.id] or 0
+            price = v.silver
+        elseif v[1] == 2 then
+            v = Logic.buildings[v[2]]
+            find = true
+            --必须使用单张图片 而不用sprite
+            head = '#build'
+            num = getTotalBuildNum(v.id)
+            price = getBuyPrice(v.id)
         end
+        --v[1] == 1 商店卖出物品不要显示
+        if find then
+            local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
+            local listback = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {297, fixY(sz.height, 30)}), {479, 52}), {0.50, 0.50})
+            local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
+            
+            local sp = setAnchor(setSize(setPos(addSprite(panel, head..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
 
-        local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
-        local listback = setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {297, fixY(sz.height, 30)}), {479, 52}), {0.50, 0.50})
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "weaponIcon.png"), {27, fixY(sz.height, 31)}), {54, 54}), {0.50, 0.50})
-        local sp = setAnchor(setSize(setPos(addSprite(panel, "equip"..v.id..".png"), {24, fixY(sz.height, 26)}), {48, 53}), {0.50, 0.50})
+            local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
+            local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=num, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
+            local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=price.."银币", size=20, color={240, 196, 92}, font="f1"})), {1.00, 0.50}), {512, fixY(sz.height, 30)})
+            panel:setTag(dataNum)
+            setContentSize(panel, {sz.width, sz.height})
+            dataNum = dataNum+1
 
-        local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {75, fixY(sz.height, 30)})
-        local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=Logic.holdNum[v.id] or 0, size=20, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {273, fixY(sz.height, 30)})
-        local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.silver.."银币", size=20, color={240, 196, 92}, font="f1"})), {1.00, 0.50}), {512, fixY(sz.height, 30)})
-        panel:setTag(k)
-        setContentSize(panel, {sz.width, sz.height})
-
-
-		table.insert(self.data, {listback, w1, w2, w3})
-		self.flowHeight = self.flowHeight+offY
+            table.insert(self.data, {listback, w1, w2, w3, k})
+            self.flowHeight = self.flowHeight+offY
+        end
 	end
 end
 
@@ -180,15 +209,31 @@ function StoreMenu2:touchEnded(x, y)
             if self.selPanel ~= t then
                 self:setSel(t)
             else
-                local edata = Logic.equip[Logic.ownGoods[self.selPanel][2]]
-                local s = edata.silver
+                local storeData = self.allData[self.data[self.selPanel][5]]
+                local edata
+                local s
+                if storeData[1] == 0 then
+                    edata = Logic.equip[storeData[2]]
+                    s = edata.silver
+                elseif storeData[1] == 2 then
+                    edata = Logic.buildings[storeData[2]]
+                    s = getBuyPrice(edata.id)
+                end
+                print("edata", simple.encode(storeData))
+                print('edata', simple.encode(edata))
                 if not checkCost(s) then
                     addBanner("银币不足")
                 else
                     doCost(s)
-                    changeEquip(edata.id, 1)
+                    if storeData[1] == 0 then
+                        changeEquip(edata.id, 1)
+                        self.data[self.selPanel][3]:setString(Logic.holdNum[edata.id])
+                    elseif storeData[1] == 2 then
+                        changeBuildNum(edata.id, 1)
+                        self.data[self.selPanel][3]:setString(getTotalBuildNum(edata.id))
+                        self.data[self.selPanel][4]:setString(getBuyPrice(edata.id).."银币")
+                    end
                     addBanner("购买"..edata.name.."成功")
-                    self.data[self.selPanel][3]:setString(Logic.holdNum[edata.id])
                 end
                 --global.director:popView()
                 --global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)

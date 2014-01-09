@@ -35,6 +35,7 @@ function MoveMap:updateCells(cells, bcells)
         --closedList
         --key:      normal coordinate
         --value:    parent gScore hScore fScore
+        --正在搜索的路径块
         for k, v in pairs(cells) do
             local x, y = getXY(k)
             --local cx, cy = normalToCartesian(x, y)
@@ -42,6 +43,7 @@ function MoveMap:updateCells(cells, bcells)
             local sp = setColor(setAnchor(setPos(setSize(addSprite(self.cellLayer, "white2.png"), {SIZEX, SIZEY}), cxy), {0.5, 0}), {0, 128, 0})
         end
         --路径网格
+        --大地图上面的路径块
         for k, v in pairs(bcells) do
             local x, y = getXY(k)
             --local cx, cy = normalToCartesian(x, y)

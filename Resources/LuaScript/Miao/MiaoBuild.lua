@@ -19,6 +19,12 @@ require "menu.BuildOpMenu"
 require "Miao.Drink"
 require "Miao.BuildPath"
 require "Miao.ItemShop"
+require "Miao.WoodStore"
+require "Miao.Wood"
+require "Miao.StreetLight"
+require "Miao.Pool"
+require "Miao.Candle"
+require "Miao.Hub"
 
 MiaoBuild = class()
 BUILD_STATE = {
@@ -62,6 +68,8 @@ function MiaoBuild:ctor(m, data)
     self.rate = 0
     self.dirty = false
     self.data = Logic.buildings[self.id]
+    --记录开始生长的时间
+    self.lifeStage = data.lifeStage or 0
     --篱笆数据
     print("buildkind", self.id)
     if self.data ~= nil then
@@ -76,8 +84,18 @@ function MiaoBuild:ctor(m, data)
     self.stone = 0
     --id --> num
     self.product = {}
+    --默认自己的第一个或者当前科技树的最高档次
+    if self.data ~= nil then
+        local maxSearchGoods = nil
+        for k=#self.data.goodsList, 1, -1 do
+            if checkResearchYet(1, self.data.goodsList[k]) then
+                maxSearchGoods = self.data.goodsList[k]   
+                break
+            end
+        end
 
-    self.goodsKind = 1
+        self.goodsKind = data.goodsKind or maxSearchGoods or self.data.goodsList[1]
+    end
     self.maxNum = 10
     self.buildPath = BuildPath.new(self)
 
@@ -91,7 +109,7 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild = Bridge.new(self)
             self.funcBuild:initView()
         --樱花树
-        elseif self.id == 4 then
+        elseif self.data.kind == 4 then
             self.funcBuild = Tree.new(self)
             --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
@@ -129,21 +147,45 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild:initView()
         --采矿场
         elseif self.id == 12 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            print("init MineStore")
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = MineStore.new(self)
             self.funcBuild:initView()
-        elseif self.id == 11 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+        --伐木场
+        elseif self.id == 19 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
+            self.funcBuild = WoodStore.new(self)
+            self.funcBuild:initView()
+        --坑道
+        elseif self.id == 28 then
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = Mine.new(self)
             self.funcBuild:initView()
-        --铁匠铺
-        elseif self.id == 13 then
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
-            self.funcBuild = Store.new(self)
+        --树木
+        elseif self.id == 29 then
+            self.changeDirNode = setAnchor(createSprite("tree4.png"), {0.5, 0})
+            self.funcBuild = Wood.new(self)
+            self.funcBuild:initView()
+        --路灯
+        elseif self.data.kind == 11 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = StreetLight.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 12 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Pool.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 13 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Hub.new(self)
+            self.funcBuild:initView()
+        elseif self.data.kind == 14 then
+            self.changeDirNode = createSprite(self.picName..self.id..".png")
+            self.funcBuild = Candle.new(self)
             self.funcBuild:initView()
         --其它建筑物
         else
-            self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
+            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = FuncBuild.new(self)
             self.funcBuild:initView()
         end
@@ -177,8 +219,7 @@ function MiaoBuild:ctor(m, data)
     end
 
     self.heightNode:addChild(self.changeDirNode)
-    --self.bg:addChild(self.changeDirNode)
-    setContentSize(setAnchor(self.bg, {0.5, 0}), {self.sx*SIZEX*2, self.sy*SIZEY*2})
+    setContentSize(setAnchor(self.bg, {0.5, 0}), {SIZEX*2, SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
     if not DEBUG then
@@ -228,18 +269,51 @@ function MiaoBuild:receiveMsg(msg, param)
     elseif msg == EVENT_TYPE.ROAD_CHANGED then
         --self.dirty = true
         --self.dirty = false
-        if self.data and (self.data.IsStore == 1 or self.id == 2) then
+        if self.data and self.data.needFindBuild == 1 then
             --self.dirty = true
             self:findNearby()
         end
     end
 end
 
+function MiaoBuild:setDir(d)
+    if self.data.switchable == 0 then
+        return
+    end
+    local same = self.dir == d
+    if same then
+        return
+    end
+
+    --self.map.mapGridController:clearMap(self)
+    self.dir = d
+    local sca = getScaleY(self.changeDirNode)
+    if self.dir == 0 then
+        setScale(self.changeDirNode, sca)
+    else
+        setScaleX(self.changeDirNode, -sca)
+    end
+    if self.dir == 0 then
+        self.sx, self.sy = self.data.sx, self.data.sy
+    else
+        self.sy, self.sx = self.data.sx, self.data.sy
+    end
+    --local sz = self.changeDirNode:getContentSize()
+    --self.funcBuild:doSwitch()
+    --self.map.mapGridController:updateMap(self)
+end
+
 function MiaoBuild:doSwitch()
-    if self.data.kind ~= 0 then
+    if self.data.switchable == 0 then
         return
     end
     self.map.mapGridController:clearMap(self)
+    --如果不冲突则oldDir 记录下来
+    if self.colNow == 0 then
+        self.oldDir = self.dir
+        self.oldPos = getPos(self.bg)
+    end
+
     self.dir = 1-self.dir
     local sca = getScaleY(self.changeDirNode)
     if self.dir == 0 then
@@ -249,7 +323,11 @@ function MiaoBuild:doSwitch()
         setScaleX(self.changeDirNode, -sca)
         --self.changeDirNode:setFlipX(true)
     end
-    self.sy, self.sx = self.sx, self.sy
+    if self.dir == 0 then
+        self.sx, self.sy = self.data.sx, self.data.sy
+    else
+        self.sy, self.sx = self.data.sx, self.data.sy
+    end
 
     local sz = self.changeDirNode:getContentSize()
     --[[
@@ -260,7 +338,6 @@ function MiaoBuild:doSwitch()
     end
     --]]
     self.funcBuild:doSwitch()
-
     self.map.mapGridController:updateMap(self)
 end
 
@@ -273,7 +350,7 @@ function MiaoBuild:touchesBegan(touches)
 
     --self.startPos = getBuildMap(self)
     print("build touch began")
-    if self.lastPos.count == 1 then
+    --if self.lastPos.count == 1 then
         --建筑物 getBuildMap 0.5 0 位置
         --手指是 0.5 0 位置 转化成0.5 0.5 位置
         --local px, py = self.bg:getPosition()
@@ -283,11 +360,13 @@ function MiaoBuild:touchesBegan(touches)
         local ret = true
         --print("checkPointIn", ret)
         if ret then
+            print("check build in self")
             self.inSelf = true
             local setSuc = 0
             if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
                 setSuc = self.map.scene:setBuilding(self)
             end
+
             --print("touchesBegan", setSuc, self.state, self.Planing)
             --if setSuc == 1 then
             --选中建筑物成功了 正在建造的时候 就不能选中建筑物
@@ -302,7 +381,7 @@ function MiaoBuild:touchesBegan(touches)
                 Event:sendMsg(EVENT_TYPE.DO_MOVE, self)        
             end
         end
-    end
+    --end
 
     self.accMove = 0
     self.moveStart = self.lastPos[0]
@@ -329,19 +408,22 @@ function MiaoBuild:touchesMoved(touches)
             self.firstMove = false
         end
         local offY = (self.sx+self.sy)*SIZEY/2
+        --计算点击点 到 屏幕空间的位置
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         
         local ax, ay, height = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask, self.map.scene.cxyToAxyMap)
-        print("touchMoved  !!", ax, ay, height)
+        print("build touchMoved  !!", ax, ay, height)
         --移动不在裂缝里面
         if ax ~= nil and ay ~= nil then
             if ax < self.map.scene.width-1 and ay < self.map.scene.height-1 and ax >= 0 and ay >= 0 then 
                 --在高地上面 修正位置 屏幕映射到 3D世界坐标
                 --cartesianToNormal 使用菱形 0.5 0 位置来计算normalPos位置点 所以要减去SIZEY
                 --参照MiaoPage 中touchesBegan的处理方法
-                parPos.y = parPos.y-103*height-SIZEY
+                --parPos.y = parPos.y-103*height-SIZEY
+                local cx, cy = newAffineToCartesian(ax, ay, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                 
-                local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+                --local newPos = normalizePos({parPos.x, parPos.y}, self.sx, self.sy)
+                local newPos = {cx, cy}
                 --先判定是否冲突 再 设置位置
                 local curPos = self.lastPos[0]
                 local dx, dy = math.abs(curPos[1]-self.moveStart[1]), math.abs(curPos[2]-self.moveStart[2])
@@ -384,7 +466,7 @@ function MiaoBuild:setColPos()
     local pos = getPos(self.bg)
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     
-    if ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= 11 then
+    if not self.static and (ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= self.map.scene.width-4) then
         print("out of range")
         self.colNow = 1
         self:setColor(0)
@@ -417,6 +499,10 @@ function MiaoBuild:touchesEnded(touches)
         if not self.doMove and self.map.scene.curBuild == nil then
             if self.accMove < 20 then
                 self.funcBuild:showInfo()
+                --开始移动
+                print("show Info clearEffect")
+                self.funcBuild:clearEffect()
+                self:clearMyEffect()
             end
         end
     end
@@ -432,12 +518,11 @@ function MiaoBuild:touchesEnded(touches)
         end
         
         --建造建筑物在finish的时候 生效
-        --self:doMyEffect()
-        --self:doEffect()
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         local ba = self.funcBuild:checkBuildable()
         if self.colNow == 0 then
             self.oldPos = getPos(self.bg)
+            self.oldDir = self.dir
         end
         if ba then
             if self.accMove < 20 and self.state == BUILD_STATE.MOVE then
@@ -465,6 +550,7 @@ function MiaoBuild:update(diff)
             self.inRangeLabel:setString(s)
         end
         self:updateState(diff)
+        self.funcBuild:updateStage(diff)
     end
 end
 function MiaoBuild:enterScene()
@@ -486,9 +572,11 @@ function MiaoBuild:setPos(p)
     self.funcBuild:setPos()
     --self:adjustHeight()
 end
+--[[
 function MiaoBuild:adjustRoad()
     --self.funcBuild:adjustRoad()
 end
+--]]
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
 function MiaoBuild:showIncrease(n, waitTime)
@@ -500,7 +588,8 @@ end
 
 --调用公有代码
 function MiaoBuild:doMyEffect()
-    if self.data == nil or self.data.kind ~= 0 then
+    print("doHouse Effect ", self.data.kind)
+    if self.data == nil or (self.data.kind ~= 0 and self.data.kind ~= 5) then
         return
     end
 
@@ -521,13 +610,45 @@ function MiaoBuild:doMyEffect()
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
                 --樱花树建筑物
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showIncrease(2, waitTime)
-                    elseif dist == 4 then
-                        self:showIncrease(1, waitTime)
+                --增加所有属性
+                if ob.data ~= nil then
+                    if ob.data.kind == 4 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    --增加生产力
+                    elseif ob.data.kind == 11 and self.data.isProduct == 1 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 12 and self.data.kind == 5 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 13 and self.data.IsStore == 2 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 14 and self.data.IsStore == 1 then
+                        if dist == 2 then
+                            self:showIncrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showIncrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
                     end
-                    waitTime = waitTime+0.6
                 end
             end
 
@@ -540,7 +661,7 @@ end
 --普通建筑物的移动 和放下
 function MiaoBuild:clearMyEffect()
     --不是农田 和 民居
-    if self.data == nil or self.data.kind ~= 0 then
+    if self.data == nil or (self.data.kind ~= 0 and self.data.kind ~= 5) then
         return
     end
 
@@ -560,13 +681,43 @@ function MiaoBuild:clearMyEffect()
                 local ob = mapDict[key][#mapDict[key]][1]
                 local dist = math.abs(curX)+math.abs(curY)
                 --周围要是匹配的建筑物才行 农田等
-                if ob.id == 4 then
-                    if dist == 2 then
-                        self:showDecrease(2, waitTime)
-                    elseif dist == 4 then
-                        self:showDecrease(1, waitTime)
+                if ob.data ~= nil then
+                    if ob.data.kind == 4 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 11 and self.data.isProduct == 1 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 12 and self.data.kind == 5 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 13 and self.data.IsStore == 2 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
+                    elseif ob.data.kind == 14 and self.data.IsStore == 1 then
+                        if dist == 2 then
+                            self:showDecrease(ob.data.effect, waitTime)
+                        elseif dist == 4 then
+                            self:showDecrease(math.floor(ob.data.effect/2), waitTime)
+                        end
+                        waitTime = waitTime+0.6
                     end
-                    waitTime = waitTime+0.6
                 end
             end
 
@@ -580,10 +731,6 @@ end
 function MiaoBuild:clearEffect()
     --不是樱花树
     self.funcBuild:clearEffect()
-end
-function MiaoBuild:doEffect()
-    --不是樱花树 不对周围产生效果
-    --self.funcBuild:doEffect()
 end
 --根据当前cell类型决定 图片类型
 --只有拆除路径 铺设路径 
@@ -666,9 +813,17 @@ function MiaoBuild:setOwner(s)
     end
 end
 
+function MiaoBuild:takeAllWorkNum()
+    self.workNum = 0
+    self.funcBuild:updateGoods()
+end
 function MiaoBuild:changeWorkNum(n)
     self.workNum = self.workNum+n
+    self.workNum = math.min(self.workNum, self.maxNum)
+    print("changeWorkNum", n, self.workNum)
+    self.funcBuild:updateGoods()
 end
+--如果没有确认建造则不要移除效果
 function MiaoBuild:removeSelf()
     print("removeSelf Building", self.picName, self.id)
     self.funcBuild:removeSelf()
@@ -713,11 +868,14 @@ function MiaoBuild:doProduct()
     self.food = self.food - gn.food
     self.wood = self.wood - gn.wood
     self.stone = self.stone - gn.stone
-    self.workNum = self.workNum+1
+    self:changeWorkNum(1)
 end
+
 function MiaoBuild:setGoodsKind(k)
     print("setGoodsKind", k)
-    self.goodsKind = k
-    self.workNum = 0
-    self.funcBuild:updateGoods()
+    if k ~= self.goodsKind then
+        self.goodsKind = k
+        self.workNum = 0
+        self.funcBuild:updateGoods()
+    end
 end

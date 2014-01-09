@@ -90,15 +90,18 @@ function TMXMenu:onMenu()
         self.menu = PressMenu.new(self.scene)
         global.director:pushView(self.menu, 1, 0)
         self.mbut.text:setString("返回")
+        self.mbut.shadowWord:setString("返回")
     else
         self.menu = nil
         global.director:popView()
         self.mbut.text:setString("菜单")
+        self.mbut.shadowWord:setString("菜单")
     end
 end
 function TMXMenu:setMenu(m)
     self.menu = m
     self.mbut.text:setString("返回")
+    self.mbut.shadowWord:setString("返回")
 end
 function TMXMenu:beginBuild()
     self.mbut.text:setString("返回")

@@ -5,18 +5,15 @@ require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
-    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
         self:initData(rep, nil)
     else
-    end
-    --]]
-
         sendReq('login', dict(), self.initData, nil, self)
-    --[[
-    --]]
+    end
+
+    --sendReq('login', dict(), self.initData, nil, self)
 end
 function TMXScene:ctor()
     self.bg = CCScene:create()
@@ -56,16 +53,35 @@ function TMXScene:initData(rep, param)
     end
     initResearchEquip() 
 
+    local r = u:getStringForKey("inSell")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.inSell = rd
+    end
+
+    local r = u:getStringForKey("buildNum")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.buildNum = rd
+    end
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
         Logic.soldiers = rd
     end
 
+    GoodsName = {}
+    for k, v in ipairs(rep.goods) do
+        GoodsName[v.id] = v
+    end
+
     Logic.buildings = {}
     for k, v in ipairs(rep.build) do
+        v.goodsList = simple.decode(v.goodsList)
         Logic.buildings[v.id] = v 
     end
+
     Logic.buildList = {}
     for k, v in ipairs(rep.build) do
         if v.deleted == 0 then
@@ -116,6 +132,7 @@ function TMXScene:update(diff)
         return
     end
     self.passTime = self.passTime+diff
+    --暂停状态不要 保存游戏即可
     if self.passTime > 20 then
         self.passTime = 0
         self:saveGame(true)
@@ -125,7 +142,12 @@ function TMXScene:update(diff)
         Logic.inResearch[2] = Logic.inResearch[2]+diff
         if Logic.inResearch[2] > 10 then
             local resG = Logic.researchGoods[Logic.inResearch[1]]
-            local edata = Logic.equip[resG[2]]
+            local edata 
+            if resG[1] == 0 then
+                edata = Logic.equip[resG[2]]
+            elseif resG[1] == 1 then
+                edata = GoodsName[resG[2]]
+            end
             addBanner("研究"..edata.name.."成功")
             table.remove(Logic.researchGoods, Logic.inResearch[1])
             table.insert(Logic.ownGoods, resG)
@@ -148,7 +170,7 @@ function TMXScene:saveGame(hint)
         local p = getPos(k.bg)
         if k.bid ~= nil then
             print("save Building static !!!!", k.static)
-            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static})
+            table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, goodsKind=k.goodsKind, lifeStage=k.lifeStage, dir=k.dir})
         end
     end
     
@@ -202,4 +224,6 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("holdNum", simple.encode(dictToTable(Logic.holdNum)))
     u:setStringForKey("researchData", simple.encode({researchGoods=Logic.researchGoods, inResearch=Logic.inResearch, ownGoods=Logic.ownGoods}))
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
+    u:setStringForKey("inSell", simple.encode(Logic.inSell))
+    u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
 end

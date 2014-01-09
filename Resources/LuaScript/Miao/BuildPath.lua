@@ -85,6 +85,8 @@ function BuildPath:checkNeibor(x, y)
                     hasRoad = true
                     --print("buildCell Kind Road")
                 --同一个建筑物不能多次插入
+                --可以到达工厂
+                --就近的工厂
                 elseif not isStart and bb.picName == 'build' and bb.data.kind == 0 then
                     --是一个可以到达的 去工作的建筑物
                     --建筑物不能贯通周围邻居
@@ -95,8 +97,12 @@ function BuildPath:checkNeibor(x, y)
                     if #bb.belong > 3 then
                         table.remove(bb.belong, 1)
                     end
+                    --是自己建筑物的一个网格  加入寻路中
                 else
                     --print("no road")
+                end
+                if bb == self.target then
+                    hasRoad = true
                 end
             else
                 --print("not Road")
@@ -167,18 +173,45 @@ function BuildPath:update()
     self.map:updateCells(self.cells, self.map.cells)
 end
 function BuildPath:getAllFreeFactory()
-    --[[
-    if self.target.dirty then
-        return {}
-    end
-    --]]
-
     local temp = {}
+    local count = 0
     for k, v in pairs(self.nearby) do
         if k.id == 5 and k.owner == nil then
             --table.insert(temp, k)
             temp[k] = true
+            count = count+1
         end
     end
+    print("free factory ", count)
     return temp
 end
+
+--不同类型的建筑物 考量的目标 是不同的 
+--对于采矿场来讲 只考虑 附近的 工厂 和 矿坑即可
+--不空闲的Mine 也可以
+--后续可以考虑距离因素 最近的矿坑
+function BuildPath:getAllFreeMine()
+    local temp = {}
+    local count = 0
+    for k, v in pairs(self.nearby) do
+        if k.id == 28 and k.owner == nil then
+            temp[k] = true
+            count = count+1
+        end
+    end
+    return temp, count
+end
+
+function BuildPath:getAllFreeTree()
+    local temp = {}
+    local count = 0
+    for k, v in pairs(self.nearby) do
+        --树木成熟状态
+        if k.id == 29 and k.owner == nil and k.funcBuild.showState == 3 then
+            temp[k] = true
+            count = count+1
+        end
+    end
+    return temp, count
+end
+

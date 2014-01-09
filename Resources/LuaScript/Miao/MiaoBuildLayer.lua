@@ -196,6 +196,7 @@ function MiaoBuildLayer:initBuild()
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
             b:setPos(p)
+            b.funcBuild:adjustRoad()
             b:finishBuild()
             --调整建筑物方向
             b:doSwitch()
@@ -322,13 +323,20 @@ function MiaoBuildLayer:initMerchantRoad()
         end
     end
 end
+
 function MiaoBuildLayer:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("buildOne.plist")
     sf:addSpriteFramesWithFile("buildTwo.plist")
+    sf:addSpriteFramesWithFile("buildThree.plist")
+    sf:addSpriteFramesWithFile("buildFour.plist")
     sf:addSpriteFramesWithFile("skillOne.plist")
     sf:addSpriteFramesWithFile("catOne.plist")
+    sf:addSpriteFramesWithFile("goodsOne.plist")
+    sf:addSpriteFramesWithFile("catCut.plist")
+    sf:addSpriteFramesWithFile("catHeadOne.plist")
 end
+
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     self:initPic()

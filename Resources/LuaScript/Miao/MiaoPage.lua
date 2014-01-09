@@ -71,12 +71,11 @@ function MiaoPage:ctor(s)
         end
     end
 
-    --[[
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
     self.bg:addChild(debug, 10)
-    --]]
+    self.debug = debug
 
     --屏幕点 范围 到 axy的一个映射范围
     --调整高度值
@@ -288,6 +287,19 @@ function MiaoPage:receiveMsg(name, msg)
     end
 end
 
+function MiaoPage:showGrid(nx, ny, allV)
+    local box = createSprite("whitebox.png")
+    self.debug:addChild(box)
+    setSize(setAnchor(setPos(box, {nx*SIZEX, ny*SIZEY}), {0, 0}), {SIZEX, SIZEY})
+    
+    for k, v in ipairs(allV) do
+        local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+        local arr = createSprite("whiteArrow.png")
+        self.debug:addChild(arr)
+        setColor(setSize(setAnchor(setPos(arr, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {10, 20, 128})
+    end
+end
+
 --移动move 
 --点击某个建筑物 进入移动状态 
 --原地还有这个建筑物 不过 新的 替换成了这个建筑物 的 图像 可以移动 桥梁 普通建筑物   道路不能移动
@@ -305,11 +317,15 @@ function MiaoPage:touchesBegan(touches)
         if ax ~= nil and ay ~= nil then
             --实际对应的建筑物块 向下偏移103个像素
             --偏移计算建筑物的位置
-            tp.y = tp.y-103*height-SIZEY
+            --tp.y = tp.y-103*height-SIZEY
+            --转化成菱形标准基点的 笛卡尔坐标
+            local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
 
+            --将 ax ay 坐标转化成 可以用到地图上的 MapGridController的坐标 直接根据touch 坐标转化map坐标?
             local allCell = self.buildLayer.mapGridController.mapDict
-            local map = getPosMap(1, 1, tp.x, tp.y)
+            local map = getPosMap(1, 1, cx, cy)
             local key = getMapKey(map[3], map[4])
+            print("allCell state", map[3], map[4], allCell[key])
             --点击到某个建筑物
             if allCell[key] ~= nil then
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
@@ -333,6 +349,7 @@ function MiaoPage:touchesBegan(touches)
     --end
 end
 function MiaoPage:touchesMoved(touches)
+    print("MiaoPage toucesMoved", self.touchBuild)
     if self.touchBuild then
         self.touchBuild:touchesMoved(touches)
     end
@@ -411,7 +428,6 @@ function MiaoPage:beginBuild(kind, id, px, py)
         --调整建筑物高度
         self.curBuild:setPos(p)
         --调整bottom 冲突状态
-        --self.curBuild:setColPos()
 
         --初始化道路状态 因为如果建筑物已经加入到building 里面了那么就不能再检测到冲突了
         self.curBuild:beginBuild()
@@ -466,6 +482,8 @@ function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
         self.buildLayer:adjustLayer(self.curBuild)
         local c = Logic.buildings[self.curBuild.id].silver
+        local needCount = self.curBuild.data.countNum
+        local oid = self.curBuild.id
         doCost(c)
         local bdata = self.curBuild.data
         --if self.curBuild.picName == 't' then
@@ -513,7 +531,13 @@ function MiaoPage:finishBuild()
 
         --根据当前的位置 调整一个新位置
         --oldBuild.picName == 't' and
-        if Logic.resource.silver >= c then
+        local nextOk = true
+        if needCount == 1 and getAvaBuildNum(oid) <= 0 then
+            nextOk = false
+        end
+        print("needCount", needCount, getAvaBuildNum(oid))
+
+        if Logic.resource.silver >= c and nextOk then
             if #self.oldBuildPos == 1 then
                 self:beginBuild('build', bdata.id, self.oldBuildPos[1][1]+SIZEX, self.oldBuildPos[1][2]+SIZEY)
             else

@@ -1,7 +1,6 @@
 Drink = class(FuncBuild)
 function Drink:ctor(b)
-    self.baseBuild.goodsKind = 4
-
+    --self.baseBuild.goodsKind = 4
     self.goodsNum = 0
     self.allGoods = {}
 end
@@ -58,3 +57,6 @@ function Drink:showIncrease(n)
     self.baseBuild.productNum = self.baseBuild.productNum+n
 end
 --]]
+function Drink:detailDialog()
+    global.director:pushView(StoreInfo2.new(self.baseBuild), 1)
+end

@@ -107,26 +107,51 @@ function ui.newTTFLabel(params)
     local x, y       = params.x, params.y
     local dimensions = params.dimensions
     local edgeWidth = params.edgeWidth
+    local shadowColor = params.shadowColor or {0, 0, 0}
+    print("shadow Color is", simple.encode(shadowColor))
 
     local label
+    --android ios 平台字体处理方法不同
     if dimensions then
-        label = CCLabelTTF:create(text, font, size, dimensions, textAlign, textValign)
+        label = CCLabelTTF:create(text, "fonts/fang.ttf", size, dimensions, textAlign, textValign)
     else
-        label = CCLabelTTF:create(text, font, size)
+        label = CCLabelTTF:create(text, "fonts/fang.ttf", size)
     end
+    local shadowWord
     if font == 'f2' then
         if edgeWidth == nil then
             edgeWidth = 2
         end
         --调整阴影的padding 就可以改变切割了  padding＋5
         --label:enableStroke(ccc3(0, 0, 0), edgeWidth, true)
-        --shadowSize opacity blur
-        enableShadow(label, CCSizeMake(1, -2), 1, 1, true)
+        local update = true
+        --if color == nil then
+        --    update = true
+        --end
+        --设定特殊的阴影颜色
+        if shadowColor[1] > 0 or shadowColor[2] > 0 or shadowColor[3] > 0 then
+            local lab = ui.newTTFLabel({text=text, color=shadowColor, size=size})
+            --enableShadow(lab, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+            label:addChild(lab, -1)
+            setAnchor(setPos(lab, {1, -2}), {0, 0})
+            print("set shadow Color")
+            shadowWord = lab
+        else
+            if ANDROID == true then 
+                enableShadow(label, CCSizeMake(1, -2), 1, 1, update, shadowColor[1], shadowColor[2], shadowColor[3])
+            else
+                enableShadow(label, CCSizeMake(1, -2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+                --不支持
+                --enableShadow(label, CCSizeMake(1, 2), 1, 1, update)
+            end
+            print("set normal shadow color")
+        end
     end
 
+    --文字的FillColor 和ShadowColor 不同
     if label then
         label:setColor(color)
-
+        --setFontFillColor(label, color, true)
         function label:realign(x, y)
             if textAlign == ui.TEXT_ALIGN_LEFT then
                 label:setPosition(math.round(x + label:getContentSize().width / 2), y)
@@ -140,7 +165,7 @@ function ui.newTTFLabel(params)
         if x and y then label:realign(x, y) end
     end
 
-    return label
+    return label, shadowWord
 end
 --text
 --delegate
@@ -155,37 +180,56 @@ function ui.newButton(params)
     --local sp = display.newScale9Sprite(params.image)
     local sp = CCSprite:create(params.image)
     lay:addChild(sp)
+    --lay:ignoreAnchorPointForPosition(true)
     obj.bg = lay
     local sz = sp:getContentSize()
     lay:setContentSize(sz)
     lay:setAnchorPoint(ccp(0, 0))
-    sp:setAnchorPoint(ccp(0, 0))
+    sp:setAnchorPoint(ccp(0.5, 0.5))
     local text = params.text
     local size = params.size or 18
     local conSize = params.conSize
     local priority = params.priority
     local col = params.color
     local font = params.font
+    local needScale = params.needScale or true
+    local touchColor = params.touchColor
+    local shadowColor = params.shadowColor
 
     local spSize = {sz.width, sz.height}
+
 
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
         local ret = checkIn(p.x, p.y, sz)
 
         if ret then
+            local scaX = getScaleX(lay)
+            local scaY = getScaleY(lay)
+            self.scaX = scaX
+            self.scaY = scaY
+            if needScale then
+                setScaleY(setScaleX(lay, 0.8), 0.8)
+            end
+            if touchColor ~= nil then
+                setColor(obj.text, touchColor)
+            end
+
             if params.touchBegan ~= nil then
                 params.touchBegan(params.delegate, params.param)
             else
-                local tempSp = CCSprite:create(params.image)
-                lay:addChild(tempSp)
-                local function removeTemp()
-                    removeSelf(tempSp)
+                if needScale then
+                else
+                    local tempSp = CCSprite:create(params.image)
+                    lay:addChild(tempSp)
+                    local function removeTemp()
+                        removeSelf(tempSp)
+                    end
+                    local anchor = sp:getAnchorPoint()
+                    tempSp:setAnchorPoint(anchor)
+                    setSize(tempSp, spSize)
+                    tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
                 end
-                local anchor = sp:getAnchorPoint()
-                tempSp:setAnchorPoint(anchor)
-                setSize(tempSp, spSize)
-                tempSp:runAction(sequence({spawn({scaleby(0.5, 1.2, 1.2), fadeout(0.5)}), callfunc(nil, removeTemp)}))
             end
         end
         return ret
@@ -193,6 +237,12 @@ function ui.newButton(params)
     function obj:touchMoved(x, y)
     end
     function obj:touchEnded(x, y)
+        if needScale then
+            setScaleY(setScaleX(lay, 1), 1)
+        end
+        if touchColor ~= nil then
+            setColor(obj.text, col)
+        end
         if params.callback ~= nil then
             params.callback(params.delegate, params.param)
         end
@@ -201,7 +251,8 @@ function ui.newButton(params)
         params.callback = cb
     end
     function obj:setAnchor(x, y)
-        lay:setAnchorPoint(ccp(x, y))
+        --lay 不能AnchorPoint 否则scale的时候就有问题
+        --lay:setAnchorPoint(ccp(x, y))
         sp:setAnchorPoint(ccp(x, y))
         return obj
     end
@@ -216,7 +267,8 @@ function ui.newButton(params)
         obj:setContentSize(conSize[1], conSize[2])
     end
     if text ~= nil then
-        obj.text = setAnchor(addChild(obj.bg, ui.newTTFLabel({text=text, font=font, size=size, color=col})), {0.5, 0.5})
+        obj.text, obj.shadowWord = ui.newTTFLabel({text=text, font=font, size=size, color=col, shadowColor=shadowColor})
+        setAnchor(addChild(obj.bg, obj.text), {0.5, 0.5})
     end
     obj:setAnchor(0.5, 0.5)
     return obj

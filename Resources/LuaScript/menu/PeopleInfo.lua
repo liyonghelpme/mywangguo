@@ -107,7 +107,8 @@ function PeopleInfo:ctor(p, attribute)
     
 
 
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "headIcon.png"), {292, fixY(sz.height, 292)}), {50, 50}), {0.50, 0.50})
+    local sp = setAnchor(setPos(addSprite(self.temp, "catHead3.png"), {292, fixY(sz.height, 292)}), {0.50, 0.50})
+    self.catHead = sp
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="角色升级1/10", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {538, fixY(sz.height, 153)})
     self.title = w
 
@@ -140,6 +141,7 @@ function PeopleInfo:setPeople()
     self.brawn:setString(att.brawn)
     self.shoot:setString(att.shoot)
     self.labor:setString(att.labor)
+    setDisplayFrame(self.catHead, "catHead"..pdata.id..".png")
 
     if pdata.weapon ~= nil then
         self.weapon:setString(Logic.equip[pdata.weapon].name)

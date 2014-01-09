@@ -32,5 +32,6 @@ std::string getFileData(const char *fname);
 //只停止动作不要停止 更新
 void pauseAction(CCNode *n);
 void setTextureRect(CCSprite *, CCRect, bool, CCSize);
-void enableShadow(CCLabelTTF *, CCSize , float, float, bool);
+void enableShadow(CCLabelTTF *, CCSize , float, float, bool, int r, int g, int b);
+void setFontFillColor(CCLabelTTF *, ccColor3B, bool);
 #endif // __CC_EXTENSION_CCNATIVE_H_
