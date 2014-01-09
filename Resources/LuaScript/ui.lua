@@ -114,7 +114,8 @@ function ui.newTTFLabel(params)
     --android ios 平台字体处理方法不同
     local fontName = 'fonts/fang.ttf'
     if not ANDROID then
-        fontName = 'FZDHTJW--GB1-0'
+        --fontName = 'FZDHTJW--GB1-0'
+        fontName = 'fang'
     end
     if dimensions then
         label = CCLabelTTF:create(text, fontName, size, dimensions, textAlign, textValign)
