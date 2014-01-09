@@ -8,7 +8,7 @@ UpdateScene *UpdateScene::create() {
     p->autorelease();
     return p;
 }
-int count = 0;
+static int localcount = 0;
 bool UpdateScene::init() {
     CCScene::init();
 	CCDirector *pDirector = CCDirector::sharedDirector();
@@ -84,8 +84,9 @@ void UpdateScene::update(float diff) {
             progress = 200;
         }
     } else {
-        count = count+1;
-		if(progress == 200 && count == 50) {
+        localcount = localcount+1;
+		CCLog("progress to load main %d", progress);
+        if(progress == 200 && localcount >= 50) {
             CCUserDefault *def = CCUserDefault::sharedUserDefault();
             if(def->getStringForKey("update") != "0") {
                 if(publicAssets != NULL) {

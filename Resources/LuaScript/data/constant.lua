@@ -3,7 +3,7 @@ MapWidth=3136
 FIX_HEIGHT = 128
 MapHeight=1700+FIX_HEIGHT
 --]]
-ANDROID = true
+ANDROID = false
 MapWidth = 4080
 FIX_HEIGHT = 170
 --两个斜坡的高度

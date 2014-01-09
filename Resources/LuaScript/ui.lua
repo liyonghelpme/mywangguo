@@ -112,10 +112,14 @@ function ui.newTTFLabel(params)
 
     local label
     --android ios 平台字体处理方法不同
+    local fontName = 'fonts/fang.ttf'
+    if not ANDROID then
+        fontName = 'FZDHTJW--GB1-0'
+    end
     if dimensions then
-        label = CCLabelTTF:create(text, "fonts/fang.ttf", size, dimensions, textAlign, textValign)
+        label = CCLabelTTF:create(text, fontName, size, dimensions, textAlign, textValign)
     else
-        label = CCLabelTTF:create(text, "fonts/fang.ttf", size)
+        label = CCLabelTTF:create(text, fontName, size)
     end
     local shadowWord
     if font == 'f2' then
