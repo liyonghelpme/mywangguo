@@ -332,7 +332,7 @@ function MiaoBuildLayer:initEnv()
 
     for dk, dv in ipairs(self.scene.layerName.slop2.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -359,10 +359,27 @@ function MiaoBuildLayer:initEnv()
         end
     end
 
+    --water 对象 在斜坡上面
+    for dk, dv in ipairs(self.scene.layerName.water.data) do
+        if dv ~= 0 then
+            print("water pid", dv)
+            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            print("water pname", pname)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.terrian:addChild(pic)
+            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, MapWidth/2, FIX_HEIGHT, self.scene.mask)
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
+            local zord = MAX_BUILD_ZORD
+            pic:setZOrder(zord)
+        end
+    end
+
     --篱笆 
     for dk, dv in ipairs(self.scene.layerName.fence.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
             
@@ -395,7 +412,7 @@ function MiaoBuildLayer:initRoad()
     local height = self.scene.height
     for dk, dv in ipairs(nlayer.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -423,7 +440,7 @@ function MiaoBuildLayer:initRoad()
     --临时斜坡显示一下 和斜坡的方向 0 1 
     for dk, dv in ipairs(self.scene.layerName.ladder.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 

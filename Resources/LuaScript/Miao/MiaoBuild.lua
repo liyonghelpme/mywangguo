@@ -472,12 +472,21 @@ function MiaoBuild:setColPos()
         self:setColor(0)
         return
     end
+    local layer = self.map.scene.layerName.water
+    local gid = layer.data[ay*self.map.scene.width+ax+1]
+    --有水 不能建造 桥梁除外
+    if gid ~= 0 then
+        self.colNow = 1
+        self:setColor(0)
+        return
+    end
+
     local layer = self.map.scene.layerName.grass
     local gid = layer.data[ay*self.map.scene.width+ax+1]
     print("slop1 gid type ax, ay ", ax, ay, gid)
     --local name = self.map.scene.tileName[gid]
     --基本上全部是草地
-    local name = tidToTile(gid)
+    local name = tidToTile(gid, self.map.scene.normal, self.map.scene.water)
     --草地才检测 是否可以建造建筑物
     if name == 'tile0.png' then
         local other = self.map:checkCollision(self)

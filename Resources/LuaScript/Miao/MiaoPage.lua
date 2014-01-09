@@ -78,15 +78,17 @@ function MiaoPage:ctor(s)
     local tilesets = mj.tilesets
     self.tilesets = tilesets
     -- >= 1 < 65
-    self.normalTile = {}
-    self.waterTile = {}
+    self.normal = {}
+    self.water = {}
     for k, v in ipairs(self.tilesets) do
         if string.find(v.name, 'water') ~= nil then
-            table.insert(self.waterTile, v.firstgid)
+            table.insert(self.water, v.firstgid)
         elseif string.find(v.name, 'tt512') ~= nil then
-            table.insert(self.normalTile, v.firstgid)
+            table.insert(self.normal, v.firstgid)
         end
     end
+    print("normal water", simple.encode(self.normal))
+    print(simple.encode(self.water))
 
     --1-64   --> tile0 tile63
     --65-128 ---> tile0 tile63
@@ -185,35 +187,6 @@ function MiaoPage:ctor(s)
        -- end
     end
     
-    --[[
-    local n = 0
-    for k, v in pairs(self.cxyToAxyMap) do
-        if n == 0  or n == 1 then
-            local x, y = getXY(k)
-            local md =  (x+y)%3
-            local c
-            if md == 0 then
-                c = {255, 0, 0, 128}
-            elseif md == 1 then
-                c = {0, 255, 0, 128}
-            else
-                c = {0, 0, 255, 128}
-            end
-            local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whitebox.png"), c), {SIZEX, SIZEY})
-            debug:addChild(sp)
-            setAnchor(setPos(sp, {x*SIZEX, y*SIZEY}), {0, 0})
-            for _, dv in ipairs(v) do
-                local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whiteArrow.png"), c), {SIZEX*2, SIZEY*2})
-                debug:addChild(sp)
-                local cx, cy = newAffineToCartesian(dv[1], dv[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
-                setAnchor(setPos(sp, {cx, cy}), {0.5, 0})
-            end
-        else
-        end
-        n = n +1
-    end
-    --]]
-
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
             local pname = tidToTile(dv, self.normal, self.water)

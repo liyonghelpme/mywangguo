@@ -112,8 +112,9 @@ function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     ------print("axyToCxyWithDepth", ax, ay, cx, cy)
+    local oldy = cy
     cy = cy+103*(mask[dk] or 0)
-    return cx, cy
+    return cx, cy, oldy
 end
 --检测tid 所在的范围 firstgid == 135 >= < nextRange tid = tid = firstgid
 function tidToTile(tid, normal, water)
@@ -129,11 +130,11 @@ function tidToTile(tid, normal, water)
 
     for i=2, #water, 1 do
         if tid < water[i] then
-            return 'tile'..tid-water[i]..'.png'
+            return 'tile'..(tid-water[i-1]+39)..'.png'
         end
     end
-    if tid < water[#water] then
-        return 'tile'..tid-water[#water]..'.png'
+    if tid < water[#water]+64 then
+        return 'tile'..(tid-water[#water]+39)..'.png'
     end
 
     --[[
