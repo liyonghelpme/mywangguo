@@ -570,13 +570,7 @@ function MiaoBuild:setPos(p)
     end
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
-    --self:adjustHeight()
 end
---[[
-function MiaoBuild:adjustRoad()
-    --self.funcBuild:adjustRoad()
-end
---]]
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
 function MiaoBuild:showIncrease(n, waitTime)

@@ -5,7 +5,10 @@ MapHeight=1700+FIX_HEIGHT
 --]]
 ANDROID = true
 MapWidth = 4080
+--Warning 修改了背景地图大小 就会导致所有建筑物坐标偏移了 使用网格存储建筑物位置
 FIX_HEIGHT = 170
+FIX_WIDTH = 340
+OFF_HEIGHT = 103
 --两个斜坡的高度
 MapHeight = 2040+FIX_HEIGHT+103*2+20 
 
@@ -13,7 +16,7 @@ SIZEX=340/2
 SIZEY=170/2
 MapGX = 23
 MapGY = 26
-DEBUG=false
+DEBUG=true
 MAX_BUILD_ZORD=10000
 
 BIG_MAPX = 50

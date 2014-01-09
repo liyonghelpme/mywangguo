@@ -64,7 +64,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        self:addPeople(8)
+        --self:addPeople(8)
     end
 end
 
@@ -89,32 +89,6 @@ function MiaoBuildLayer:switchPathSol()
     end
 end
 
-function MiaoBuildLayer:initSlope()
-    local initX = 11
-    local initY = 19
-    for i=0, 14, 1 do
-        local curX = initX+i
-        local curY = initY-i
-
-        local b = MiaoBuild.new(self, {picName='build', id=8})
-        local p = normalizePos({curX*SIZEX, curY*SIZEY-SIZEY}, 1, 1)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-
-    end
-
-    local b = MiaoBuild.new(self, {picName='build', id=7})
-    local p = normalizePos({10*SIZEX, 20*SIZEY-SIZEY}, 1, 1)
-    b:setPos(p)
-    b:setColPos()
-    self:addBuilding(b, MAX_BUILD_ZORD)
-    b:setPos(p)
-    b:finishBuild()
-
-end
 function MiaoBuildLayer:initCat()
     if Logic.inNew then
         self:addPeople(3)
@@ -146,7 +120,7 @@ function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
     local width = self.scene.width
     local height = self.scene.height
-    local cx, cy = newAffineToCartesian(10, 0, width, height, MapWidth/2, FIX_HEIGHT)
+    local cx, cy = newAffineToCartesian(self.scene.width-3, 0, width, height, MapWidth/2, FIX_HEIGHT)
     --local cx, cy = affineToCartesian(21, 0)
     local p = normalizePos({cx, cy}, 1, 1)
     b:setPos(p)
@@ -340,20 +314,15 @@ end
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
 function MiaoBuildLayer:initDataOver()
     self:initPic()
-    --[[
-    self:initSea()
-    self:initSlope()
-    self:initRoad()
-    self:initMerchantRoad()
-    --]]
+
     self:initEnv()
     self:initBuild()
     self:initCat()
-    --最后保存道路
     self:initRoad()
-    --backPoint 在道路上面
     self:initBackPoint()
     --[[
+    --最后保存道路
+    --backPoint 在道路上面
     --]]
     self.initYet = true
 end
@@ -368,6 +337,9 @@ function MiaoBuildLayer:initEnv()
             local h = math.floor((dk-1)/width)
 
             --得到affine坐标到笛卡尔坐标的变换
+            --affine to Cartesian 产生了 位置的误差 导致 计算的 格子也有了误差 
+            --FIX_HEIGHT  170  SIZEY
+            --但是产生的 MAP_WIDTH/2 有误差较大
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             local dir = 0
             if pname == 'tile18.png' then
@@ -653,7 +625,7 @@ function MiaoBuildLayer:addPeople(param)
     elseif data.kind == 2 then
         local width = self.scene.width
         local height = self.scene.height
-        local cx, cy = newAffineToCartesian(10, 10, width, height, MapWidth/2, FIX_HEIGHT)
+        local cx, cy = newAffineToCartesian(self.scene.width-3, self.scene.height-2, width, height, MapWidth/2, FIX_HEIGHT)
         --local cx, cy = affineToCartesian(21, 24)
         pos = normalizePos({cx, cy}, 1, 1)
     end

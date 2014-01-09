@@ -71,7 +71,7 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     if allV ~= nil then
         --print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
-            local hei = mask[v[2]*width+v[1]+1]
+            local hei = mask[v[2]*width+v[1]+1] or 0
             --print("hei", v[1], v[2], hei)
             --点击的Y值 向下偏移的高度
             local ncy = cy-hei*103
@@ -112,16 +112,54 @@ function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     ------print("axyToCxyWithDepth", ax, ay, cx, cy)
-    cy = cy+103*mask[dk]
+    cy = cy+103*(mask[dk] or 0)
     return cx, cy
 end
+--检测tid 所在的范围 firstgid == 135 >= < nextRange tid = tid = firstgid
+function tidToTile(tid, normal, water)
+    for i=2, #normal, 1 do
+        if tid < normal[i] then
+            return 'tile'..tid-normal[i-1]..'.png'
+        end
+    end
 
-function tidToTile(tid)
+    if tid < normal[#normal]+64 then
+        return 'tile'..tid-normal[#normal]..'.png'
+    end
+
+    for i=2, #water, 1 do
+        if tid < water[i] then
+            return 'tile'..tid-water[i]..'.png'
+        end
+    end
+    if tid < water[#water] then
+        return 'tile'..tid-water[#water]..'.png'
+    end
+
+    --[[
+    for i=#water, 1, -1 do
+        if tid > water[i] then
+            tid = 
+        end
+    end
     if tid < 65 then
         tid = tid-1
         return 'tile'..tid..'.png'
-    else
+    elseif tid < 130 then
         tid = tid-65
         return 'tile'..tid..".png"
+    elseif tid < 213 then
+        tid = tid-135
+        return 'tile'..tid..'.png'
+    elseif tid < 280 then
+        tid = tid-213
+        return 'tile'..tid..'.png'
+    elseif tid < 345 then
+        tid = tid-280
+        return 'tile'..tid..'.png'
+    else
+        tid = tid-345
+        return 'tile'..tid..'.png'
     end
+    --]]
 end

@@ -6,6 +6,18 @@ MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
+
+    local mj = simple.decode(getFileData("big512.json"))
+    self.mapInfo = mj
+    local width = mj.width
+    local height = mj.height
+    self.width = width
+    self.height = height
+    local maxWH = math.max(self.width, self.height)
+    --矩形地图MapPos 对照
+    MapWidth = SIZEX*(maxWH*2)
+    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*2+20 
+
     setContentSize(self.bg, {MapWidth, MapHeight})
     setAnchor(self.bg, {0, 0})
 
@@ -15,6 +27,7 @@ function MiaoPage:ctor(s)
     self.bg:addChild(self.backpg)
     local col = math.ceil(MapWidth/64)
     local row = math.ceil(MapHeight/32)+1
+    --[[
     for i=0, row-1, 1 do
         local initx = 0
         if i%2 == 1 then
@@ -23,28 +36,57 @@ function MiaoPage:ctor(s)
         for j=0, col-1, 1 do
             local s = CCSprite:create("sea.png")
             self.backpg:addChild(s)
-            setScale(setPos(s, {j*128+initx, i*32}), 1)
+            setPos(s, {j*128+initx, i*32})
         end
     end
+    --]]
+    --[[
+    for i = 0, row-1, 1 do
+        local s = addChild(self.backpg, CCSprite:create("sea.png"))
+        local initx = 0
+        if i % 2 == 1 then
+            initx = 64
+        end
+        for j = 0, col-1, 1 do
+            setPos(s, {j*128+initx, i*32})
+        end
+    end
+    --]]
+    local tex = CCTextureCache:sharedTextureCache():addImage("water.jpg")
+    
+    local param = ccTexParams()
+    param.minFilter = GL_LINEAR
+    param.magFilter = GL_LINEAR
+    param.wrapS = GL_REPEAT
+    param.wrapT = GL_REPEAT
+    tex:setTexParameters(param)
+
+    local sea2 = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    local sea = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    self.bg:addChild(sea)
+    setAnchor(setPos(sea, {0, 0}), {0, 0})
+    self.bg:addChild(sea2)
+    setAnchor(setPos(sea2, {MapWidth, 0}), {0, 0})
+    self.seas = {sea, sea2}
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
     self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
     setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
-    local mj = simple.decode(getFileData("big512.json"))
-    self.mapInfo = mj
-    local width = mj.width
-    local height = mj.height
-    self.width = width
-    self.height = height
+
     local tilesets = mj.tilesets
     self.tilesets = tilesets
-    local gidToImage = {}
+    -- >= 1 < 65
+    self.normalTile = {}
+    self.waterTile = {}
     for k, v in ipairs(self.tilesets) do
-        gidToImage[v.firstgid] = string.gsub(v.name, 'build', '')
+        if string.find(v.name, 'water') ~= nil then
+            table.insert(self.waterTile, v.firstgid)
+        elseif string.find(v.name, 'tt512') ~= nil then
+            table.insert(self.normalTile, v.firstgid)
+        end
     end
-    self.gidToImage = gidToImage
 
     --1-64   --> tile0 tile63
     --65-128 ---> tile0 tile63
@@ -57,10 +99,24 @@ function MiaoPage:ctor(s)
     end
     self.layerName = layerName
 
+    self.mask = {}
+    --所有mask layer 2 ---> 1
+    for k, v in pairs(layerName) do
+        if string.find(k, 'mask') ~= nil then
+            local mv = tonumber(string.sub(k, 5))
+            print("mask Layer mv", mv)
+            for i=1, #v.data, 1 do
+                if v.data[i] ~= 0 then
+                    self.mask[i] = mv-1
+                end
+            end
+        end
+    end
+
+    --[[
     --affine 坐标计算mask2
     local mask2 = layerName.mask2.data
     local mask3 = layerName.mask3.data
-    self.mask = {}
     for i=1, #mask2, 1 do
         if mask2[i] ~= 0 then
             self.mask[i] = 1
@@ -70,6 +126,7 @@ function MiaoPage:ctor(s)
             self.mask[i] = 0
         end
     end
+    --]]
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
@@ -81,7 +138,7 @@ function MiaoPage:ctor(s)
     --调整高度值
     --检查一个小范围的 ax ay 即可 确定属于哪个ax ay
     self.cxyToAxyMap = {}
-    for dk=1, #mask2, 1 do
+    for dk=1, self.width*self.height, 1 do
         --if dk <= 10 and dk >= 1 and dk%2 == 1 then
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
@@ -91,8 +148,8 @@ function MiaoPage:ctor(s)
             --使用菱形的 中下点 对齐的
             local left = cx-SIZEX
             local right = cx+SIZEX
-            local bottom = cy+self.mask[dk]*103
-            local top = cy+SIZEY*2+self.mask[dk]*103
+            local bottom = cy+(self.mask[dk] or 0)*103
+            local top = cy+SIZEY*2+(self.mask[dk] or 0)*103
             
             left = math.floor(left/SIZEX)
             right = math.ceil(right/SIZEX)
@@ -159,7 +216,7 @@ function MiaoPage:ctor(s)
 
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.normal, self.water)
             --print("pname is what?", pname)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
@@ -171,20 +228,13 @@ function MiaoPage:ctor(s)
             self.tileMap:addChild(pic)
             local sz = pic:getContentSize()
             setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
-            pic:setScale(1.01)
-            
-            --[[
-            if w%2 ~= h%2 then
-                pic:setFlipX(true)
-                pic:setFlipY(true)
-            end
-            --]]
+            pic:setScale(1.02)
         end
     end
 
     for dk, dv in ipairs(layerName.slop1.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.normal, self.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -197,7 +247,7 @@ function MiaoPage:ctor(s)
     end
     for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.normal, self.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -271,6 +321,23 @@ function MiaoPage:enterScene()
 end
 function MiaoPage:update(diff)
     self.touchDelegate:update(diff)
+    self:updateSea(diff)
+end
+function MiaoPage:updateSea(diff)
+    local s = diff*50
+    local p1 = getPos(self.seas[1])
+    local p2 = getPos(self.seas[2])
+    if p1[1]+s >= MapWidth then
+        p1[1] = -MapWidth
+    end
+    
+    --print("MapWidth", MapWidth, p2[1])
+    if p2[1]+s >= MapWidth then
+        p2[1] = -MapWidth
+    end
+
+    setPos(self.seas[1], {p1[1]+s, p1[2]})
+    setPos(self.seas[2], {p2[1]+s, p2[2]})
 end
 function MiaoPage:exitScene()
     Event:unregisterEvent(EVENT_TYPE.DO_MOVE, self)
