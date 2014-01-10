@@ -85,7 +85,7 @@ void UpdateScene::update(float diff) {
         }
     } else {
         count = count+1;
-		if(progress == 200 && count == 50) {
+		if(progress == 200 && count >= 50) {
             CCUserDefault *def = CCUserDefault::sharedUserDefault();
             if(def->getStringForKey("update") != "0") {
                 if(publicAssets != NULL) {

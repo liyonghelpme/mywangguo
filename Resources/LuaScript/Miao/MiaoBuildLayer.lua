@@ -463,6 +463,7 @@ function MiaoBuildLayer:initRoad()
     end
 
 
+    --初始化建筑物数据 建筑物id
     for dk, dv in ipairs(self.scene.layerName.build2.data) do
         if dv ~= 0 then
             local pname = self.scene.gidToImage[dv]

@@ -136,6 +136,8 @@ function tidToTile(tid, normal, water)
     if tid < water[#water]+64 then
         return 'tile'..(tid-water[#water]+39)..'.png'
     end
+    local waterPic = global.director.curScene.page.gidToTileName[tid]..'.png'
+    return waterPic
 
     --[[
     for i=#water, 1, -1 do

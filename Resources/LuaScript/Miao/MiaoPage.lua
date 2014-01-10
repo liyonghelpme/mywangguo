@@ -27,31 +27,6 @@ function MiaoPage:ctor(s)
     self.bg:addChild(self.backpg)
     local col = math.ceil(MapWidth/64)
     local row = math.ceil(MapHeight/32)+1
-    --[[
-    for i=0, row-1, 1 do
-        local initx = 0
-        if i%2 == 1 then
-            initx = 64 
-        end
-        for j=0, col-1, 1 do
-            local s = CCSprite:create("sea.png")
-            self.backpg:addChild(s)
-            setPos(s, {j*128+initx, i*32})
-        end
-    end
-    --]]
-    --[[
-    for i = 0, row-1, 1 do
-        local s = addChild(self.backpg, CCSprite:create("sea.png"))
-        local initx = 0
-        if i % 2 == 1 then
-            initx = 64
-        end
-        for j = 0, col-1, 1 do
-            setPos(s, {j*128+initx, i*32})
-        end
-    end
-    --]]
     local tex = CCTextureCache:sharedTextureCache():addImage("water.jpg")
     
     local param = ccTexParams()
@@ -80,11 +55,16 @@ function MiaoPage:ctor(s)
     -- >= 1 < 65
     self.normal = {}
     self.water = {}
+    self.gidToTileName = {}
+    self.gidToImage = {}
     for k, v in ipairs(self.tilesets) do
+        self.gidToImage[v.firstgid] = string.gsub(v.name, 'build', '')
         if string.find(v.name, 'water') ~= nil then
             table.insert(self.water, v.firstgid)
         elseif string.find(v.name, 'tt512') ~= nil then
             table.insert(self.normal, v.firstgid)
+        else
+            self.gidToTileName[v.firstgid] = v.name
         end
     end
     print("normal water", simple.encode(self.normal))
