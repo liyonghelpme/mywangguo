@@ -666,6 +666,9 @@ end
 --getBuildMap ----> setBuildMap
 --根据 nx = 0 ny = 0 的位置放置的网格 
 --使用 0 0 网格的左下角作为对齐的标准
+
+--Warning 不再使用了这里对齐坐标需要考虑 背景地图的大小来做normal网格对齐 但是normal网格已经和 当前的newAffine 网格只是坐标网格对齐但是
+--奇数偶数 性不一定确定
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]

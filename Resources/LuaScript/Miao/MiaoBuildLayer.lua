@@ -32,9 +32,6 @@ function MiaoBuildLayer:ctor(s)
     self.removeLayer = CCNode:create()
     self.bg:addChild(self.removeLayer)
 
-    --self:initData()
-    --self:initTest()
-    --self:initSea()
     
     --寻路功能模块
     self.curSol = nil
@@ -350,7 +347,8 @@ function MiaoBuildLayer:initEnv()
                 dir = 2
             end
             local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname, ax=w, ay=h})
-            local p = normalizePos({cx, cy}, 1, 1)
+            --local p = normalizePos({cx, cy}, 1, 1)
+            local p = {cx, cy}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -387,7 +385,8 @@ function MiaoBuildLayer:initEnv()
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
 
             local b = MiaoBuild.new(self, {picName='fence', id=22, dir=dir, tileName=pname})
-            local p = normalizePos({cx, cy}, 1, 1)
+            --local p = normalizePos({cx, cy}, 1, 1)
+            local p = {cx, cy}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -425,7 +424,10 @@ function MiaoBuildLayer:initRoad()
                 static =true
             end
             local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, pname=pname, bid = getBid(), static=static})
-            local p = normalizePos({cx, cy}, 1, 1)
+            --local p = normalizePos({cx, cy}, 1, 1)
+            --不要经过normal pos 处理 normalpos跟当前的奇数偶数不同了
+            --使用newAffineToCartesian  newCartesianToAffine  withDepth 进行转化
+            local p = {cx, cy}
 
             b:setPos(p)
             b:setColPos()
@@ -452,7 +454,8 @@ function MiaoBuildLayer:initRoad()
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             local b = MiaoBuild.new(self, {picName='build', id=15, setYet=false, ladder=true, dir = 0, static = static, bid=getBid()})
-            local p = normalizePos({cx, cy}, 1, 1)
+            --local p = normalizePos({cx, cy}, 1, 1)
+            p = {cx, cy}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -479,7 +482,8 @@ function MiaoBuildLayer:initRoad()
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
             local b = MiaoBuild.new(self, {picName='build', id=tonumber(pname), static = static, bid=getBid()})
-            local p = normalizePos({cx, cy}, 1, 1)
+            --local p = normalizePos({cx, cy}, 1, 1)
+            local p = {cx, cy}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -494,88 +498,6 @@ function MiaoBuildLayer:initRoad()
     u:setBoolForKey("initRoadYet", true)
 end
 
-function MiaoBuildLayer:initData()
-    --构造16种 类型的 道路连接方式
-    local initX = 60
-    local initY = 60
-    local offX = 300
-    local offY = 300
-    local row = 5
-    local col = 5
-    for i=0, 15, 1 do
-        local n = i
-        local cr = math.floor(i/col)
-        local cc = i%col
-
-        local r1 = i%2
-        i = math.floor(i/2)
-        local r3 = i%2
-        i = math.floor(i/2)
-        local r5 = i%2
-        i = math.floor(i/2)
-        local r7 = i%2
-        
-        
-        local b = MiaoBuild.new(self, {picName='t'})
-        local p = {initX+cc*offX, initY+cr*offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        --调整zord
-        b:setPos(p)
-        b:finishBuild()
-
-        local map = getBuildMap(b)
-        if r1 ~= 0 then
-            local tp = setBuildMap({1, 1, map[3]-1, map[4]+1})
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = tp 
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            --调整zord
-            b:setPos(p)
-            b:finishBuild()
-        end
-
-        if r3 ~= 0 then
-            local tp = setBuildMap({1, 1, map[3]+1, map[4]+1})
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = tp 
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            --调整zord
-            b:setPos(p)
-            b:finishBuild()
-        end
-
-        if r5 ~= 0 then
-            local tp = setBuildMap({1, 1, map[3]+1, map[4]-1})
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = tp 
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            --调整zord
-            b:setPos(p)
-            b:finishBuild()
-        end
-
-        if r7 ~= 0 then
-            local tp = setBuildMap({1, 1, map[3]-1, map[4]-1})
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = tp 
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            --调整zord
-            b:setPos(p)
-            b:finishBuild()
-        end
-    end
-end
 function MiaoBuildLayer:addCat()
     local p = MiaoPeople.new(self, {id=3})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
