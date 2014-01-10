@@ -546,17 +546,19 @@ end
 function MiaoBuild:update(diff)
     if not Logic.paused then 
         if self.id ~= -1 and self.id ~= nil then
-            local map = getBuildMap(self)
-            local p = getPos(self.bg)
-            local ax, ay = self:calAff()
-            self.posLabel:setString(self.id.." "..ax.." "..ay)
-            self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
-            --self.stateLabel:setString(map[3].." "..map[4])
-            local s = ''
-            for k, v in ipairs(self.belong) do
-                s = s..v.." "
+            if DEBUG then
+                local map = getBuildMap(self)
+                local p = getPos(self.bg)
+                local ax, ay = self:calAff()
+                self.posLabel:setString(self.id.." "..ax.." "..ay)
+                self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
+                --self.stateLabel:setString(map[3].." "..map[4])
+                local s = ''
+                for k, v in ipairs(self.belong) do
+                    s = s..v.." "
+                end
+                self.inRangeLabel:setString(s)
             end
-            self.inRangeLabel:setString(s)
         end
         self:updateState(diff)
         self.funcBuild:updateStage(diff)

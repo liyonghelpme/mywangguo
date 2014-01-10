@@ -61,7 +61,7 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        --self:addPeople(8)
+        self:addPeople(8)
     end
 end
 
@@ -220,6 +220,7 @@ end
 function MiaoBuildLayer:initDataOver()
     self:initPic()
 
+    --env 减少 地图
     self:initEnv()
     self:initBuild()
     self:initCat()

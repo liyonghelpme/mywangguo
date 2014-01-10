@@ -23,8 +23,6 @@ function MiaoPage:ctor(s)
 
     self.oldBuildPos = {}
 
-    self.backpg = CCSpriteBatchNode:create("sea.png")
-    self.bg:addChild(self.backpg)
     local col = math.ceil(MapWidth/64)
     local row = math.ceil(MapHeight/32)+1
     local tex = CCTextureCache:sharedTextureCache():addImage("water.jpg")
@@ -43,6 +41,7 @@ function MiaoPage:ctor(s)
     self.bg:addChild(sea2)
     setAnchor(setPos(sea2, {MapWidth, 0}), {0, 0})
     self.seas = {sea, sea2}
+
 
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
     self.tileMap = CCSpriteBatchNode:create("t512.png")

@@ -260,25 +260,21 @@ function MiaoPeople:update(diff)
     self:doPaused(diff)
     self:doWaitAni(diff)
     self:setZord()
-    local s = ''
-    for k, v in ipairs(self.stateStack) do
-        if type(v) == 'table' then
-            s = s..v[1]..' '..str(v[3])..'\n'
-        else
-            s = s..v..'\n'
+
+    if DEBUG then
+        local s = ''
+        for k, v in ipairs(self.stateStack) do
+            if type(v) == 'table' then
+                s = s..v[1]..' '..str(v[3])..'\n'
+            else
+                s = s..v..'\n'
+            end
         end
+        s = s..str(self.needClearOwner)
+        self.stateLabel:setString(s)
+        self.funcPeople:updateState(diff)
+        self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))
     end
-    s = s..str(self.needClearOwner)
-    self.stateLabel:setString(s)
-    self.funcPeople:updateState(diff)
-    self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))
-    --[[
-    if self.predictTarget ~= nil then
-        self.stateLabel:setString(str(self.state).."target  "..str(self.predictTarget.id).." hea "..self.health.." sc "..str(self.stateContext).." ac "..str(self.actionContext))
-    else
-        self.stateLabel:setString(str(self.state).." hea "..self.health)
-    end
-    --]]
 end
 --只有在当前猫为寻路猫的情况下 才可以开始寻路过程
 function MiaoPeople:findPath(diff)
