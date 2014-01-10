@@ -162,7 +162,8 @@ function MiaoBuildLayer:initBuild()
             v.dir = 1-dir
             local b = MiaoBuild.new(self, v)
             b:setWork(v)
-            local p = normalizePos({v.px, v.py}, 1, 1)
+            --local p = normalizePos({v.px, v.py}, 1, 1)
+            local p = {v.px, v.py}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -185,7 +186,8 @@ function MiaoBuildLayer:initBuild()
         for k, v in ipairs(road) do
             local b = MiaoBuild.new(self, v)
             --b:setWork(v)
-            local p = normalizePos({v.px, v.py}, 1, 1)
+            --local p = normalizePos({v.px, v.py}, 1, 1)
+            local p = {v.px, v.py}
             b:setPos(p)
             b:setColPos()
             self:addBuilding(b, MAX_BUILD_ZORD)
@@ -199,100 +201,6 @@ function MiaoBuildLayer:initBuild()
         Logic.maxBid = mbid
     end
 
-end
-function MiaoBuildLayer:initSea()
-    local initX = -128
-    local initY = 500
-    local offX = 64
-    local offY = 47
-    local col = 13
-    for i = 0, col-1, 1 do
-        local b = MiaoBuild.new(self, {picName='s'})
-        local p = {initX+i*offX, initY+i*offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-
-        local b = MiaoBuild.new(self, {picName='s'})
-        local p = {initX+i*offX+offX, initY+i*offY-offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        --调整zord
-        b:setPos(p)
-        b:finishBuild()
-
-        local b = MiaoBuild.new(self, {picName='s'})
-        local p = {initX+i*offX-offX, initY+i*offY+offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        --调整zord
-        b:setPos(p)
-        b:finishBuild()
-    end
-end
-function MiaoBuildLayer:initTest()
-    local initX = 60
-    local initY = 60
-    local offX = 150
-    local offY = 150
-    local row = 5
-    local col = 5
-    for i=0, 15, 1 do
-        local n = i
-        local cr = math.floor(i/col)
-        local cc = i%col
-
-        local b = MiaoBuild.new(self, {picName='s'})
-        local p = {initX+cc*offX, initY+cr*offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        --调整zord
-        b:setPos(p)
-        b:finishBuild()
-        b.value = i
-        b:adjustValue()
-
-
-    end
-end
---初始化商人的路径
-function MiaoBuildLayer:initMerchantRoad()
-    local initX = 200
-    local initY = 0
-    local offX = 64
-    local offY = 47
-    local row = 5
-    local col = 10
-
-    for i=0, col, 1 do
-        local b = MiaoBuild.new(self, {picName='t'})
-        local p = {initX+i*offX, initY+i*offY} 
-        p = normalizePos(p, b.sx, b.sy)
-        b:setPos(p)
-        b:setColPos()
-        self:addBuilding(b, MAX_BUILD_ZORD)
-        b:setPos(p)
-        b:finishBuild()
-        if i == 10 or i == 9 then
-            local b = MiaoBuild.new(self, {picName='t'})
-            local p = {initX+(i+1)*offX, initY+(i-1)*offY} 
-            p = normalizePos(p, b.sx, b.sy)
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            b:setPos(p)
-            b:finishBuild()
-        end
-    end
 end
 
 function MiaoBuildLayer:initPic()
@@ -497,15 +405,6 @@ function MiaoBuildLayer:initRoad()
     global.director.curScene:saveGame(true)
     u:setBoolForKey("initRoadYet", true)
 end
-
-function MiaoBuildLayer:addCat()
-    local p = MiaoPeople.new(self, {id=3})
-    self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
-    local pos = normalizePos({600, 400}, 1, 1)
-    setPos(p.bg, pos)
-    p:setZord()
-    self.mapGridController:addSoldier(p)
-end
 function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
@@ -516,6 +415,12 @@ function MiaoBuildLayer:addPeople(param)
         table.insert(Logic.farmPeople, p)
         local vs = getVS()
         pos = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
+        --计算屏幕中心位置对应的网格坐标
+        --将猫咪限制到地图边界里面才行
+        --超出地图边界的 cxy 如何转化呢？
+        --附近最近的一个有效的网格
+        --local ax, ay = cxyToAxyWithDepth(pos.x, pos.y, self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT, self.scene.mask, self.scene.cxyToAxyMap)
+        --出现位置基本在地图中
         pos = normalizePos({pos.x, pos.y}, 1, 1)
         local p = pos
 
@@ -568,6 +473,8 @@ function MiaoBuildLayer:addPeople(param)
         local cx, cy = newAffineToCartesian(self.scene.width-3, self.scene.height-2, width, height, MapWidth/2, FIX_HEIGHT)
         --local cx, cy = affineToCartesian(21, 24)
         pos = normalizePos({cx, cy}, 1, 1)
+        --如何解决 猫咪坐标需要 normalizePos的问题
+        --pos = {cx, cy}
     end
     --setPos(p.bg, pos)
     p:setPos(pos)

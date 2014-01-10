@@ -430,7 +430,8 @@ function MiaoPage:beginBuild(kind, id, px, py)
         else
             p = {x=px, y=py}
         end
-        p = normalizePos({p.x, p.y}, 1, 1)
+        --p = normalizePos({p.x, p.y}, 1, 1)
+
         --取消左下右下的边
         local ax, ay = newCartesianToAffine(p[1], p[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
         ax = math.max(math.min(ax, self.width-1-1), 0)
@@ -514,19 +515,6 @@ function MiaoPage:finishBuild()
         --end
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
-        --道路和 斜坡冲突 斜坡不能移动
-        --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
-        --矿坑斜坡上
-        ---11 现在是服装店 不再是矿坑了 矿坑建筑物 拥有自己的新的ID
-        --[[
-        if self.curBuild.picName == 'build' and self.curBuild.id == 11 then
-            if self.curBuild.funcBuild:checkSlope() then
-                self.curBuild:finishBuild()
-                self.curBuild = nil
-            else
-                addBanner("必须建造到斜坡上面！")
-            end
-        --]]
         --桥梁建河流上
         if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
@@ -573,35 +561,6 @@ function MiaoPage:finishBuild()
             global.director.curScene.menu:finishBuild()
         end
         Logic.gotoHouse = true
-    end
-end
-
-function MiaoPage:onRemove()
-    if self.curBuild == nil then
-        local vs = getVS()
-        --先确定位置 再加入到 buildLayer里面
-        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='remove'}) 
-        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-        p = normalizePos({p.x, p.y}, 1, 1)
-        self.curBuild:setPos(p)
-        self.curBuild:setState(BUILD_STATE.MOVE)
-        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
-        Logic.paused = true
-    end
-end
---拖动某个建筑物 还是  
---选择某个建筑物 拖动 确定  取消 移动 setCurBuild = '??' 作为最上层一旦和这个建筑物 合体 就一起了 
---点击某个位置 这个建筑物 就被选中了 
-function MiaoPage:onMove()
-    if self.curBuild == nil then
-        local vs = getVS()
-        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='move'})
-        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-        p = normalizePos({p.x, p.y}, 1, 1)
-        self.curBuild:setPos(p)
-        self.curBuild:setState(BUILD_STATE.MOVE)
-        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
-        Logic.paused = true
     end
 end
 

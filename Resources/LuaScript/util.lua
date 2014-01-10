@@ -573,6 +573,12 @@ function getPosMap(sx, sy, px, py)
 end
 
 --得到位置对应的 坐标
+--由坐标计算normalMap  normalizePos 
+--根据 MapWidth/2 对应的网格的编号决定
+--24 * 29 地图块
+-- 0 0 菱形网格中心normal 奇数偶数性决定
+--FIX_HEIGHT 170 = y = 2
+--MapWidth/2  width height 29 
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]
@@ -606,11 +612,6 @@ function getBuildMap(build)
     return getPosMap(sx, sy, px, py)
 end
 --用 normal To Cartesian 来实现的
---[[
-function normalToCartesian(nx, ny)
-    return nx*SIZEX, ny*SIZEY
-end
---]]
 --从寻路的normal 转化成 建筑物的normal 坐标
 function cellNormalToMapNormal(x, y)
 end
@@ -669,19 +670,25 @@ end
 
 --Warning 不再使用了这里对齐坐标需要考虑 背景地图的大小来做normal网格对齐 但是normal网格已经和 当前的newAffine 网格只是坐标网格对齐但是
 --奇数偶数 性不一定确定
+--FIX_HEIGHT == 2
+--MapWidth/2  == 29
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]
-    x = x-SIZEX
     
+    local ty = round(FIX_HEIGHT/SIZEY)
+    local tx = round(MapWidth/2/SIZEX)
+    local ty = ty%2
+    local tx = tx%2
+    local ba = tx == ty
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
-    if (q1+1)%2 == (q2+1)%2 then
+    local bb = (q1)%2 == (q2)%2
+    if ba ~= bb then
         q2 = q2+1
     end
     x = q1*SIZEX
     y = q2*SIZEY
-    x = x+SIZEX
     return {x, y}
 end
 

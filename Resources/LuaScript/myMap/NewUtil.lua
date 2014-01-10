@@ -91,21 +91,6 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     --没有找到包含的 菱形网格 在裂缝里面
     return nil 
 
-    --[[
-    local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
-    local dk = ay*width+ax+1
-    if mask[dk] then
-        --因为裂缝上面的网格都向上偏移了103 所以减去103 如果还在当前高度里面那么就在高地中
-        cy = cy-103
-        local nax, nay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
-        local dk = nay*width+nax+1
-        if mask[dk] then
-            return nax, nay, false, true
-        end
-        return ax, ay, true, false, nax, nay
-    end
-    return ax, ay, false, false
-    --]]
 end
 
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
