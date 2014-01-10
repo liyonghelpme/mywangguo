@@ -660,14 +660,14 @@ function MiaoPeople:doMove(diff)
                 if not moved and not wait and not deleted then
                     --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                     local np = self.path[nextPoint]
+                    local cp = self.path[self.curPoint]
+                    --[[
                     local buildCell = self.map.mapGridController.mapDict
                     local key = getMapKey(np[1], np[2])
                     local bv = buildCell[key]
+                    --]]
 
 
-                    local cp = self.path[self.curPoint]
-                    local key = getMapKey(cp[1], cp[2])
-                    local cv = buildCell[key]
 
                     --行走在有可能是斜坡的道路上面
                     --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
@@ -685,13 +685,43 @@ function MiaoPeople:doMove(diff)
                     --道路是onSlope 
                     --道路下面的斜坡才是真正的地形高度
                     --dir 不是 0 或者 1的斜坡不能行走的 
+                    
+                    --normal to Affine
+                    --normal 是网格的 中心normal坐标么？ YES
+                    local ax, ay = newNormalToAffine(np[1], np[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+                    local nk = newAffKey(self.map.scene.width, ax, ay)
+                    local sd = self.map.scene.slopeData[nk]
+                    if sd ~= nil then
+                        local height = sd[2]
+                        local ons = true
+                        if ons then
+                            goYet = true
+                            local cxy = setBuildMap({1, 1, np[1], np[2]})
+                            self.waitTime = 3
+                            if accMove then
+                                self.waitTime = self.waitTime/2
+                            end
+                            self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
+                            local dx, dy = np[1]-cp[1], np[2]-cp[2]
+                            self:setDir(cxy[1], cxy[2])
+                            self:setZord()
+                            --local nnp = self.path[nextPoint+1]
+                            --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
+                            --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
+                            self:moveSlope(dx, dy, 0, height)
+                            self.curPoint = self.curPoint+1
+                        end
+                    end
+
+                    --[[
                     if bv ~= nil then
                         --计算斜坡的高度
                         local height
                         local ons = bv[#bv][1].onSlope 
                         if ons then
-                            height = bv[#bv-1][1].height
+                            height = bv[#bv][1].height
                         else
+                        --人走在普通的斜坡上面
                             ons = bv[#bv][1].picName == 'slope' 
                             if ons then
                                 height = bv[#bv][1].height
@@ -716,9 +746,21 @@ function MiaoPeople:doMove(diff)
                             self.curPoint = self.curPoint+1
                         end
                     end
+                    --]]
+                    --[[ 
+                    local key = getMapKey(cp[1], cp[2])
+                    local cv = buildCell[key]
+                    --]]
+                    --关键是newNormalToAffine 代码正确
+                    local ax, ay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+                    local nk = newAffKey(self.map.scene.width, ax, ay)
+                    local sd = self.map.scene.slopeData[nk]
+
                     --当前点在 斜坡上 下一个点的高度值
-                    if not goYet and cv ~= nil then
-                        local height 
+                    if not goYet and sd ~= nil then
+                        local height = sd[2]
+                        local ons = true
+                        --[[
                         local ons = cv[#cv][1].onSlope
                         if ons then
                             height = cv[#cv-1][1].height
@@ -728,6 +770,7 @@ function MiaoPeople:doMove(diff)
                                 height = cv[#cv][1].height
                             end
                         end
+                        --]]
 
                         if ons then
                             goYet = true

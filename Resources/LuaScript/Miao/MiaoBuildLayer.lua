@@ -236,6 +236,7 @@ function MiaoBuildLayer:initEnv()
     local width = self.scene.width
     local height = self.scene.height
 
+    --[[
     for dk, dv in ipairs(self.scene.layerName.slop2.data) do
         if dv ~= 0 then
             local pname = tidToTile(dv, self.scene.normal, self.scene.water)
@@ -265,8 +266,10 @@ function MiaoBuildLayer:initEnv()
             b:finishBuild()
         end
     end
+    --]]
 
     --water 对象 在斜坡上面
+    --[[
     for dk, dv in ipairs(self.scene.layerName.water.data) do
         if dv ~= 0 then
             print("water pid", dv)
@@ -282,7 +285,7 @@ function MiaoBuildLayer:initEnv()
             pic:setZOrder(zord)
         end
     end
-
+    --]]
     --篱笆 
     for dk, dv in ipairs(self.scene.layerName.fence.data) do
         if dv ~= 0 then

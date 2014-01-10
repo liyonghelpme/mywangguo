@@ -214,6 +214,51 @@ function MiaoPage:ctor(s)
         end
     end
 
+    
+    self.slopeData = {}
+    for dk, dv in ipairs(layerName.slop2.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv, self.normal, self.water)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            local dir = 0
+            if pname == 'tile18.png' then
+                dir = 0
+            elseif pname == 'tile16.png' then
+                dir = 1
+            else
+                dir = 2
+            end
+            --斜坡方向
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
+            self.slopeData[dk] = {dir, hei*OFF_HEIGHT+OFF_HEIGHT/2}
+            --nil 没有斜坡
+
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            --print("cx cy", cx, cy)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
+
+    --河流图片
+    --调整河流的zord 来进行遮挡
+    for dk, dv in ipairs(layerName.water.data) do
+        if dv ~= 0 then
+            print("water pid", dv)
+            --local pname = tidToTile(dv, self.normal, self.water)
+            local pname = self.gidToTileName[dv]..'.png'
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            print("water pname", pname)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
 
 
     self.touchDelegate = StandardTouchHandler.new()

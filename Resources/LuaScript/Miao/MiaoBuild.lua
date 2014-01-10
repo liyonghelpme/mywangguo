@@ -473,16 +473,23 @@ function MiaoBuild:setColPos()
         return
     end
     local layer = self.map.scene.layerName.water
-    local gid = layer.data[ay*self.map.scene.width+ax+1]
+    local gk = ay*self.map.scene.width+ax+1
+    local gid = layer.data[gk]
     --有水 不能建造 桥梁除外
     if gid ~= 0 then
         self.colNow = 1
         self:setColor(0)
         return
     end
+    local sd = self.map.scene.slopeData[gk]
+    if sd ~= nil then
+        self.colNow = 1
+        self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
+        return
+    end
 
     local layer = self.map.scene.layerName.grass
-    local gid = layer.data[ay*self.map.scene.width+ax+1]
+    local gid = layer.data[gk]
     print("slop1 gid type ax, ay ", ax, ay, gid)
     --local name = self.map.scene.tileName[gid]
     --基本上全部是草地

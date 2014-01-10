@@ -11,6 +11,14 @@ function __G__TRACKBACK__(msg)
     cclog("----------------------------------------")
 end
 
+OldPrint = print
+function print(...)
+    --if DEBUG then
+        OldPrint(...)
+    --end
+end
+
+
 local function main()
     -- avoid memory leak
     collectgarbage("setpause", 100)

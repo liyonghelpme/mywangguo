@@ -34,6 +34,10 @@ function adjustNewHeight(mask2, width, ax, ay)
     ----print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
     return mask2[dk] or 0
 end
+--用于从数组中获取数据的 key
+function newAffKey(width, ax, ay)
+    return ay*width+ax+1
+end
 
 --点击时使用 点击坐标 到 网格坐标转化
 --裂缝区域属于 斜坡区域 属于下一个层的区域 因此 裂缝区域属于下一个层
