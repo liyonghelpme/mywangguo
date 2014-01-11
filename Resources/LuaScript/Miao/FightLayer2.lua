@@ -24,17 +24,56 @@ FightLayer2 = class()
 --将士兵数量转化成 5 列 5 行的士兵
 --单个士兵的战斗力等级[0, 1, 2, 3] 或者战斗力数量
 --阶梯 方式 来表现士兵数量
+--超过2000个最多25个 每个能力平均 
 function FightLayer2:convertNumToSoldier(n)
+    local temp = {}
+    local num
+    local pow
     if n < 100 then
-
+        num = math.floor(n/5)
+        pow = 5
+    --5 * 5 = 25 最多士兵数量
+    elseif n < 250 then
+        num = math.floor(n/10)
+        pow = 10 
+    elseif n < 500 then
+        num = math.floor(n/20)
+        pow = 20
+    elseif n < 1000 then
+        num = math.floor(n/40)
+        pow = 40
+    elseif n < 2000 then
+        num = math.floor(n/80)
+        pow = 80
+    else
+        pow = math.floor(n/25)
+        num = 25
     end
 
+    local curCol
+    for i =0, num-1, 1 do
+        local col = math.floor(i/5)
+        local row = math.floor(i%5)
+        if row == 0 then
+            curCol = {}
+            table.insert(temp, curCol)
+        end
+        --每个士兵实力5
+        table.insert(curCol, pow)
+    end
+    return temp
 end
 
 function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
 
+    self.myFootNum = self:convertNumToSoldier(my[1])
+    self.eneFootNum = self:convertNumToSoldier(ene[1])
+    local leftWidth = #self.myFootNum*FIGHT_OFFX
+    self.leftWidth = leftWidth
+    local rightWidth = #self.eneFootNum*FIGHT_OFFX
+    self.rightWidth = rightWidth
     --单张战斗图调整为 self.HEIGHT
     --战斗场景高度不变 483 高度
     self.HEIGHT = FIGHT_HEIGHT
@@ -46,7 +85,7 @@ function FightLayer2:ctor(s, my, ene)
     --刚开始 1: 0.618 
     --战斗高度不变 但是宽度可以自由增加
     --比屏幕宽一点这样就不能同时看到 左右两边的士兵了
-    self.WIDTH = vs.width+FIGHT_OFFX*2
+    self.WIDTH = vs.width+leftWidth+rightWidth
 
     setContentSize(self.bg, {self.WIDTH, self.HEIGHT})
     local tex = CCTextureCache:sharedTextureCache():addImage("battle_bg5.jpg")
