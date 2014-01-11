@@ -1,3 +1,5 @@
+require "Miao.FightSoldier2"
+
 FIGHT_STATE = {
     FREE=0,
     MOVE=1,
@@ -30,7 +32,7 @@ function FightLayer2:convertNumToSoldier(n)
     local num
     local pow
     if n < 100 then
-        num = math.floor(n/5)
+        num = math.max(math.floor(n/5), 1)
         pow = 5
     --5 * 5 = 25 最多士兵数量
     elseif n < 250 then
@@ -67,6 +69,7 @@ end
 function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
+    print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
     self.eneFootNum = self:convertNumToSoldier(ene[1])
@@ -102,8 +105,26 @@ function FightLayer2:ctor(s, my, ene)
             setAnchor(setScaleX(sp, -scax), {1, 0})
         end
     end
+    self:initPic()
+    self:initSoldier()
+end
+function FightLayer2:initPic()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("cat_foot.plist")
 end
 --输入参数 各种士兵
 function FightLayer2:initSoldier()
+    print("left Num")
+    print(simple.encode(self.myFootNum))
+    print(simple.encode(self.eneFootNum))
+    --每一列 每一行
+    for k, v in ipairs(self.myFootNum) do
+        for ck, cv in ipairs(v) do
+            local sp = FightSoldier2.new(self, 0, k-1, ck-1, cv) 
+            self.battleScene:addChild(sp.bg)
+            --setPos(sp, {self.leftWidth-(k-1)*FIGHT_COL_OFFX, 40+(ck-1)*FIGHT_ROW_OFFY})
+            setPos(ps, {0, 0})
+        end
+    end
 end
 
