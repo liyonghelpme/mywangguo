@@ -321,7 +321,7 @@ Logic.IncCost = {
     {20, 20, 400},
     {10, 20, 500},
 }
---等级 数量
+--等级 数量 当前训练士兵的阶梯
 Logic.soldiers = {
     [1] = {1, 50},
     [2] = {0, 0},
@@ -406,3 +406,4 @@ Logic.inSell = {
     wood=true,
     stone=true,
 }
+

@@ -3,6 +3,13 @@ MapWidth=3136
 FIX_HEIGHT = 128
 MapHeight=1700+FIX_HEIGHT
 --]]
+FIGHT_CUT = 0.3
+FIGHT_HEIGHT = 480
+--FIGHT_MID_WIDTH = 600
+FIGHT_OFFX = 110
+FIGHT_COL_OFFX = 31
+FIGHT_ROW_OFFY = 35
+
 ANDROID = true
 MapWidth = 4080
 --Warning 修改了背景地图大小 就会导致所有建筑物坐标偏移了 使用网格存储建筑物位置
