@@ -27,10 +27,16 @@ function MiaoPage:ctor(s)
         end
     end
 
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("grassOne.plist")
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
     self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
     setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+
+    self.grassMap = CCSpriteBatchNode:create("grassOne.png")
+    self.bg:addChild(self.grassMap)
+    setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
 
     local mj = simple.decode(getFileData("big512.json"))
     self.mapInfo = mj
@@ -71,7 +77,6 @@ function MiaoPage:ctor(s)
         end
     end
 
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
     self.bg:addChild(debug, 10)
@@ -159,7 +164,7 @@ function MiaoPage:ctor(s)
 
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            --local pname = tidToTile(dv)
             --print("pname is what?", pname)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
@@ -167,8 +172,12 @@ function MiaoPage:ctor(s)
             --得到affine坐标到笛卡尔坐标的变换
             local cx, cy = newAffineToCartesian(w, h, width, height, 0, 0)
             local hei = adjustNewHeight(self.mask, self.width, w, h)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
+
+            local wid = w%2
+            local hid = h%2
+            local tid = hid*2+wid
+            local pic = CCSprite:createWithSpriteFrameName('grass'..tid..'.png')
+            self.grassMap:addChild(pic)
             local sz = pic:getContentSize()
             setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
             pic:setScale(1.01)
