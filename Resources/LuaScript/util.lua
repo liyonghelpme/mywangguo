@@ -1219,6 +1219,10 @@ function fixY2(y)
 end
 
 
+function getAnimation(name)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    return animation
+end
 --动画名称
 --动画名字pattern
 --动画开始frame
@@ -1226,6 +1230,27 @@ end
 --动画frame 之间的 间隔
 --动画总时间
 --是否是 SpriteFrame  还是普通的Image
+function createAnimationWithNum(name, format, t, isFrame, num)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    if not animation then
+        animation = CCAnimation:create()
+        --从SpriteFrameCache 中获取动画Frame
+        if isFrame then
+            local cache = CCSpriteFrameCache:sharedSpriteFrameCache()
+            for k, v in ipairs(num) do
+                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, v)))
+            end
+        else
+            for k, v in ipairs(num) do
+                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, v)))
+            end
+        end
+        animation:setDelayPerUnit(t/#num)
+        animation:setRestoreOriginalFrame(true)
+        CCAnimationCache:sharedAnimationCache():addAnimation(animation, name)
+    end
+    return animation
+end
 function createAnimation(name, format, a,b,c,t, isFrame)
     local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
     if not animation then

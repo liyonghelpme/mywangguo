@@ -171,23 +171,6 @@ function Merchant:handleAction()
         print("BUY_GOODS", self.people.predictTarget.id)
         if self.people.predictTarget.deleted then
             addBanner("建筑物不见了")
-        --[[
-        elseif self.people.predictTarget.stone > 0 then
-            local sp = CCSprite:create("silverIcon.png")
-            local p = getPos(self.people.predictTarget.heightNode)
-            local bgPos = getPos(self.people.predictTarget.bg)
-            self.people.map.bg:addChild(sp)
-            setPos(sp, {bgPos[1]+p[1], bgPos[2]+p[2]})
-            local rx = math.random(20)-10
-            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-            local pay = self.people.predictTarget.stone*math.floor(self.people.predictTarget.rate+1)
-            local num = ui.newBMFontLabel({text=str(pay), font="bound.fnt", size=30})
-            sp:addChild(num)
-            setPos(num, {50, 0})
-            doGain(pay)
-            self.people.predictTarget.stone = 0
-        --]]
-        --elseif self.people.predictTarget.data.IsStore == 1 then
         else
             getNum = self.people.predictTarget.workNum
             if getNum > 0 then
