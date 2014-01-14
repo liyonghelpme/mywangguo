@@ -48,6 +48,10 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.stateLabel = ui.newBMFontLabel({text="", font='bound.fnt', size=20, color={0, 0, 0}})
     self.bg:addChild(self.stateLabel)
     setPos(self.stateLabel, {0, 50})
+
+    self.sLabel = ui.newBMFontLabel({text="", font="bound.fnt", size=20, color={255, 0, 0}})
+    self.bg:addChild(self.sLabel)
+    setPos(self.sLabel, {0, 80})
 end
 function FightSoldier2:showPose(x)
     if not self.showYet then
@@ -93,6 +97,12 @@ function FightSoldier2:updateLabel()
     local p = getPos(self.bg)
     s = s..'x:'..math.floor(p[1])..' '..math.floor(p[2])
     self.stateLabel:setString(s)
+
+    local tid
+    if self.attackTarget ~= nil then
+        tid = self.attackTarget.sid
+    end
+    self.sLabel:setString(self.state..' '..str(tid))
 end
 --跟随我前面的 我方士兵
 function FightSoldier2:update(diff)
@@ -230,16 +240,16 @@ function FightSoldier2:doMove(diff)
                 end
                 self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
                 self.oneAttack = false
-                
                 self:showAttackEffect()
             end
         else
-            print("same color just move ", self.moveYet)
+            --print("same color just move ", self.moveYet)
             --前方士兵开始移动之后 我也紧随其移动即可
             local p = getPos(self.bg)
             --local attPos = getPos(self.attackTarget.bg)
             --local dx = math.abs(attPos[1]-p[1])
             --dx > FIGHT_OFFX+10 and
+            --移动 到 attackTarget 后面
             if not self.moveYet then
                 local offX = FIGHT_OFFX
                 if self.color == 0 then
@@ -252,26 +262,109 @@ function FightSoldier2:doMove(diff)
                     print('other midPoint', self.attackTarget.midPoint)
                     local diffx = self.midPoint-p[1]
                     local t = math.abs(diffx/self.speed)
+                    self.moveFin = false
                     local function finishMove()
                         print("soldier finishMove", self.midPoint)
+                        self.moveFin = true
+                        --self.changeDirNode:stopAction(self.moveAni)
+                        --空闲等待状态
+                        --self.changeDirNode:runAction(CCAnimate:create(self.idleAction))
                     end
                     print("bg move action", t, p[2], self.midPoint)
                     self.bg:runAction(sequence({sinein(moveto(t, self.midPoint, p[2])), callfunc(nil, finishMove)}))
                 end
             end
+            --如果同行死亡
+            --后续的同行也要跟进 攻击目标
+            if self.attackTarget.dead then
+                print("my friend dead")
+                if self.color == 0 then
+                    self.right = self.attackTarget.right
+                    self.attackTarget = self.attackTarget.right 
+                else
+                    self.left = self.attackTarget.left
+                    self.attackTarget = self.attackTarget.left
+                end
+                local nap = getPos(self.attackTarget.bg)
+                local mmid 
+                if self.color == 0 then
+                    mmid = nap[1]-80
+                else
+                    mmid = nap[1]+80
+                end
+                self.midPoint = mmid
+                local p = getPos(self.bg)
+                local diffx = self.midPoint-p[1]
+                local t = math.abs(diffx/self.speed)
+                self.bg:runAction(sinein(moveto(t, self.midPoint, p[2])))
+
+
+                --移动过了 并且
+                --if self.moveFin and self.moveYet then
+                --end
+                --切换到 上面的分支 进行攻击了
+                --开始攻击 重新计算midPoint
+                --self.moveYet = false
+                --self.state = FIGHT_SOL_STATE.START_ATTACK
+                --接着向前移动
+                --self.midPoint = nil
+                --self.changeDirNode:stopAction(self.moveAct)
+            end
+            --如果没有同行 攻击 同列
         end
     end
 end
+--调整了我的 左右之后 检查我的敌人距离
 function FightSoldier2:doNext(diff)
+    if self.state == FIGHT_SOL_STATE.NEXT_TARGET then
+        if self.attackTarget ~= nil then
+            local p = getPos(self.attackTarget.bg)
+            local mp = getPos(self.bg)
+            if math.abs(p[1]-mp[1]) < 90 then
+                self.changeDirNode:stopAction(self.idleAction)
+                self.state = FIGHT_SOL_STATE.IN_ATTACK
+                local rd = math.random(2)
+                local aa 
+                if rd == 1 then
+                    aa = self.attackA
+                else
+                    aa = self.attackB
+                end
+                self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
+                self.oneAttack = false
+                self:showAttackEffect()
+                print("next attack target get now attack him!!", self.sid, self.attackTarget.sid)
+            end
+        end
+    end
 end
 function FightSoldier2:doAttack(diff)
     if self.state == FIGHT_SOL_STATE.IN_ATTACK then
         if self.oneAttack then
             self.oneAttack = false
             if self.attackTarget.dead then
+                print("enemy dead now", self.attackTarget.sid)
                 self.state = FIGHT_SOL_STATE.NEXT_TARGET
                 self.idleAction = repeatForever(CCAnimate:create(self.idleAni))
                 self.changeDirNode:runAction(self.idleAction)
+
+                if self.color == 1 then
+                    if self.attackTarget.left ~= nil then
+                        self.left = self.attackTarget.left
+                        self.attackTarget = self.left
+                    else
+                        self.left = nil
+                        self.attackTarget = nil
+                    end
+                else
+                    if self.attackTarget.right ~= nil then
+                        self.right = self.attackTarget.right
+                        self.attackTarget = self.right
+                    else
+                        self.right = nil
+                        self.attackTarget = nil
+                    end
+                end
             else
                 local rd = math.random(2)
                 local aa 

@@ -247,7 +247,7 @@ function FightLayer2:doDay(diff)
         --看一下4对象的位置
         if sp[1] >= math.abs(p[1])+vs.width/2 then
             self.moveTarget = -(sp[1])+vs.width/2
-            print("moveTarget", self.moveTarget)
+            --print("moveTarget", self.moveTarget)
         end
 
         if self.moveTarget ~= nil then
@@ -373,16 +373,20 @@ function FightLayer2:initSoldier()
     --士兵死亡动态调整 左右两侧
 end
 
+--根据 当前双方的 方向决定
 function FightLayer2:getAttackDir(a, b)
     local k = a.sid*a.sid+b.sid*b.sid
     if self.cache[k] == nil then
         local ap = getPos(a.bg)
         local bp = getPos(b.bg)
-        --谁满血就向那边移动
-        if a.health > b.health then
-            self.cache[k] =  Sign(bp[1]-ap[1])
-        elseif a.health < b.health then
-            self.cache[k] = Sign(ap[1]-bp[1])
+        local mid = (ap[1]+bp[1])/2
+        local bp = getPos(self.battleScene)
+        local vs = getVS()
+        local scMid = (-bp[1]-bp[1]+vs.width)/2
+        if mid < scMid then
+            self.cache[k] = 1
+        elseif mid > scMid then
+            self.cache[k] = -1
         else
             local rd = math.random(2)
             if rd == 1 then
