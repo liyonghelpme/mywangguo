@@ -72,7 +72,8 @@ function FightLayer2:convertNumToSoldier(n)
 end
 
 function FightLayer2:testNum()
-    local temp = {{5, 0, 0, 0, 0}, {5, 0, 0, 0, 0}}
+    --几列士兵
+    local temp = {{5, 1, 0, 0, 0}, {5, 1, 0, 0, 0}, {5, 1, 0, 0, 0}, {5, 0, 0, 0, 0}}
     return temp
 end
 function FightLayer2:ctor(s, my, ene)
@@ -303,10 +304,12 @@ function FightLayer2:initSoldier()
     self.allSoldiers = {}
     self.solOffY = 80
     --每一列 每一行
-    for k, v in ipairs(self.myFootNum) do
+    for k, v in ipairs(self.myFootNum) do 
+        --row
         local temp = {}
-        table.insert(self.mySoldiers, temp)
-        for ck, cv in ipairs(v) do
+        table.insert(self.mySoldiers, temp) 
+        for ck, cv in ipairs(v) do 
+            --col
             if cv > 0 then
                 local sp = FightSoldier2.new(self, 0, k-1, ck-1, {level=cv, color=0}, self:getSolId()) 
                 self.battleScene:addChild(sp.bg)

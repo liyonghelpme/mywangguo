@@ -16,6 +16,10 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.map = m
     self.left = nil
     self.right = nil
+    --up low 敌方所在行 我方可能已经没有了士兵
+    self.up = nil
+    self.low = nil
+
     --print('left right', self.left, self.right)
     self.health = 20
     self.attack = 10
@@ -228,6 +232,7 @@ function FightSoldier2:doMove(diff)
         if self.attackTarget.color ~= self.color then
             local p = getPos(self.bg)
             if p[1] == self.midPoint then
+                self.inMove = false
                 self.bg:stopAction(self.moveAct)
                 self.changeDirNode:stopAction(self.moveAni)
                 self.state = FIGHT_SOL_STATE.IN_ATTACK
@@ -274,6 +279,27 @@ function FightSoldier2:doMove(diff)
                     self.bg:runAction(sequence({sinein(moveto(t, self.midPoint, p[2])), callfunc(nil, finishMove)}))
                 end
             end
+            --我方士兵处于移动状态 自己没有在移动状态 前列 士兵跑步向前
+            if self.attackTarget.inMove and not self.inMove then
+                local offX
+                local offX = FIGHT_OFFX
+                if self.color == 0 then
+                    offX = -FIGHT_OFFX
+                end
+                local p = getPos(self.bg)
+                self.midPoint = self.attackTarget.midPoint+offX
+                local diffx = self.midPoint-p[1]
+                local t = math.abs(diffx/self.speed)
+                self.bg:runAction(sinein(moveto(t, self.midPoint, p[2])))
+                --需要几个frame 来广播移动
+                self.inMove = true
+            end
+            if self.inMove then
+                local p = getPos(self.bg)
+                if p[1] == self.midPoint then
+                    self.inMove = false
+                end
+            end
             --如果同行死亡
             --后续的同行也要跟进 攻击目标
             if self.attackTarget.dead then
@@ -297,8 +323,9 @@ function FightSoldier2:doMove(diff)
                 local diffx = self.midPoint-p[1]
                 local t = math.abs(diffx/self.speed)
                 self.bg:runAction(sinein(moveto(t, self.midPoint, p[2])))
-
-
+                --需要几个frame 来广播移动
+                self.inMove = true
+                
                 --移动过了 并且
                 --if self.moveFin and self.moveYet then
                 --end
@@ -314,6 +341,9 @@ function FightSoldier2:doMove(diff)
         end
     end
 end
+--正常直接找同行的 同行的找不到 开始找 最近的 x y 值的
+--先考虑y 方向距离 接着 考虑x 方向距离
+
 --调整了我的 左右之后 检查我的敌人距离
 function FightSoldier2:doNext(diff)
     if self.state == FIGHT_SOL_STATE.NEXT_TARGET then
@@ -334,6 +364,61 @@ function FightSoldier2:doNext(diff)
                 self.oneAttack = false
                 self:showAttackEffect()
                 print("next attack target get now attack him!!", self.sid, self.attackTarget.sid)
+            end
+        --当前行没有目标找相邻行的attackTarget 
+        elseif not self.checkEneYet then
+            --找最近的目标攻击
+            --k-1 ck-1 对应的列
+            local dx = 999999
+            local dy = 999999
+            local p = getPos(self.bg)
+            local ene
+            if self.color == 0 then
+                for k, v in ipairs(self.map.eneSoldiers) do
+                    for ck, cv in ipairs(v) do
+                        if not cv.dead then
+                            local ep = getPos(cv.bg)
+                            local tdisy = math.abs(ep[2]-p[2]) 
+                            local tdisx = math.abs(ep[1]-p[1])
+                            if tdisy < dy then
+                                dy = tdisy
+                                dx = tdisx
+                                ene = cv
+                            elseif tdisy == dy then
+                                if tdisx < dx then
+                                    dx = tdisx
+                                    ene = cv
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                for k, v in ipairs(self.map.mySoldiers) do
+                    for ck, cv in ipairs(v) do
+                        if not cv.dead then
+                            local ep = getPos(cv.bg)
+                            local tdisy = math.abs(ep[2]-p[2]) 
+                            local tdisx = math.abs(ep[1]-p[1])
+                            if tdisy < dy then
+                                dy = tdisy
+                                dx = tdisx
+                                ene = cv
+                            elseif tdisy == dy then
+                                if tdisx < dx then
+                                    dx = tdisx
+                                    ene = cv
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            --等待攻击对方靠近 即可
+            if ene ~= nil then
+                self.attackTarget = ene
+            else
+                self.checkEneYet = true
             end
         end
     end
