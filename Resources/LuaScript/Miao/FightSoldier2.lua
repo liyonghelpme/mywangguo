@@ -1,3 +1,6 @@
+require "Miao.FightFunc"
+require "Miao.FightArrow2"
+require "Miao.FightFoot"
 FIGHT_SOL_STATE = {
     FREE=0,
     START_ATTACK=1,
@@ -6,6 +9,7 @@ FIGHT_SOL_STATE = {
     DEAD = 4,
 
     NEXT_TARGET=5,
+    WAIT_ATTACK=6,
 }
 
 FightSoldier2 = class()
@@ -31,15 +35,15 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.color = data.color
     self.dead = false
     --地图记录每个网格状态 
-    self.attackA = createAnimation("cat_foot_attackA", "cat_foot_attackA_%d.png", 0, 14, 1, 1, true)
-    self.attackB = createAnimation("cat_foot_attackB", "cat_foot_attackB_%d.png", 0, 14, 1, 1, true)
-    self.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 1, 1, true)
-    self.idleAni = createAnimation("cat_foot_idle", 'cat_foot_idle_%d.png', 0, 20, 1, 1, true)
-    self.deadAni = createAnimation("cat_foot_dead", 'cat_foot_dead_%d.png', 0, 10, 1, 1, true)
-    self.deadAni:setRestoreOriginalFrame(false)
+    --士兵类型kind
+    if self.id == 0  then
+        self.funcSoldier = FightFoot.new(self)
+    elseif self.id == 1 then
+        self.funcSoldier = FightArrow2.new(self)
+    end
 
     self.bg = CCNode:create()
-    self.changeDirNode = CCSprite:createWithSpriteFrameName("cat_foot_idle_0.png")
+    self.funcSoldier:initView()
     self.bg:addChild(self.changeDirNode)
     setAnchor(self.changeDirNode, {262/512, (512-352)/512})
     self.state = FIGHT_SOL_STATE.FREE
@@ -84,8 +88,13 @@ function FightSoldier2:setDir()
         setScaleX(self.changeDirNode, 1)
     end
 end
-function FightSoldier2:doRunAndAttack()
-    self.state = FIGHT_SOL_STATE.START_ATTACK
+function FightSoldier2:doRunAndAttack(day)
+    --先弓箭 接着 步兵
+    if day == 0 and self.id == 1 then
+        self.state = FIGHT_SOL_STATE.START_ATTACK
+    elseif day == 1 and self.id == 0 then
+        self.state = FIGHT_SOL_STATE.START_ATTACK
+    end
 end
 function FightSoldier2:updateLabel()
     local s = self.sid..' '
@@ -108,46 +117,63 @@ function FightSoldier2:updateLabel()
     end
     self.sLabel:setString(self.state..' '..str(tid))
 end
+function FightSoldier2:startAttack(diff)
+    if self.state == FIGHT_SOL_STATE.START_ATTACK then
+        --步兵移动
+        if self.id == 0 then
+            self.moveAni = repeatForever(CCAnimate:create(self.runAni))
+            self.changeDirNode:stopAction(self.idleAction)
+            self.idleAction = nil
+            self.changeDirNode:runAction(self.moveAni)
+            self.state = FIGHT_SOL_STATE.IN_MOVE
+            self.velocity = 0
+            self.oldPos = getPos(self.bg)
+            local enePos
+            local offX
+            if self.color == 0 then
+                self.attackTarget = self.right
+                offX = -40
+            else
+                self.attackTarget = self.left
+                offX  = 40
+            end
+            --同行没有士兵可以攻击 寻找最近的士兵
+            if self.attackTarget == nil then
+                self.attackTarget = self:findNearRow()
+            end
+            if self.attackTarget ~= nil then 
+                self.speed = 100
+                if self.attackTarget.color ~= self.color then
+                    enePos = getPos(self.attackTarget.bg)
+                    local midPoint = (self.oldPos[1]+enePos[1])/2
+                    midPoint = midPoint+offX
+                    local t = math.abs(midPoint-self.oldPos[1])/self.speed
+                    self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                    self.bg:runAction(self.moveAct)
+                    self.midPoint = midPoint
+                    print("attack MidPoint", self.midPoint)
+                else
+                    
+                end
+            end
+        else
+            self.funcSoldier:startAttack()
+        end
+    end
+end
+
 --跟随我前面的 我方士兵
 function FightSoldier2:update(diff)
     self:updateLabel()
-    if self.state == FIGHT_SOL_STATE.START_ATTACK then
-        self.moveAni = repeatForever(CCAnimate:create(self.runAni))
-        self.changeDirNode:stopAction(self.idleAction)
-        self.idleAction = nil
-        self.changeDirNode:runAction(self.moveAni)
-        self.state = FIGHT_SOL_STATE.IN_MOVE
-        self.velocity = 0
-        self.oldPos = getPos(self.bg)
-        local enePos
-        local offX
-        if self.color == 0 then
-            self.attackTarget = self.right
-            offX = -40
-        else
-            self.attackTarget = self.left
-            offX  = 40
-        end
-        self.speed = 100
-        if self.attackTarget.color ~= self.color then
-            enePos = getPos(self.attackTarget.bg)
-            local midPoint = (self.oldPos[1]+enePos[1])/2
-            midPoint = midPoint+offX
-            local t = math.abs(midPoint-self.oldPos[1])/self.speed
-            self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
-            self.bg:runAction(self.moveAct)
-            self.midPoint = midPoint
-            print("attack MidPoint", self.midPoint)
-        else
-            
-        end
-    end
+    self:startAttack(diff)
     self:doPose(diff)
     self:doMove(diff)
     self:doAttack(diff)
     self:doDead(diff)
     self:doNext(diff)
+    self:waitAttack(diff)
 end
+
 function FightSoldier2:doPose(diff)
     if self.poseOver then
         self.poseOver = false
@@ -344,10 +370,65 @@ end
 --正常直接找同行的 同行的找不到 开始找 最近的 x y 值的
 --先考虑y 方向距离 接着 考虑x 方向距离
 
+function FightSoldier2:findNearRow()
+    print("find near row enemy")
+    --找最近的目标攻击
+    --k-1 ck-1 对应的列
+    local dx = 999999
+    local dy = 999999
+    local p = getPos(self.bg)
+    local ene
+    if self.color == 0 then
+        for k, v in ipairs(self.map.eneSoldiers) do
+            for ck, cv in ipairs(v) do
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    if tdisy < dy then
+                        dy = tdisy
+                        dx = tdisx
+                        ene = cv
+                    elseif tdisy == dy then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+    else
+        for k, v in ipairs(self.map.mySoldiers) do
+            for ck, cv in ipairs(v) do
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    if tdisy < dy then
+                        dy = tdisy
+                        dx = tdisx
+                        ene = cv
+                    elseif tdisy == dy then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+    end
+    --等待攻击对方靠近 即可
+    return ene
+end
+
 --调整了我的 左右之后 检查我的敌人距离
 function FightSoldier2:doNext(diff)
     if self.state == FIGHT_SOL_STATE.NEXT_TARGET then
         if self.attackTarget ~= nil then
+            --导致相关行错列了
+            self.checkEneYet = false
             local p = getPos(self.attackTarget.bg)
             local mp = getPos(self.bg)
             if math.abs(p[1]-mp[1]) < 90 then
@@ -367,56 +448,14 @@ function FightSoldier2:doNext(diff)
             end
         --当前行没有目标找相邻行的attackTarget 
         elseif not self.checkEneYet then
+            print("find near row enemy")
             --找最近的目标攻击
             --k-1 ck-1 对应的列
-            local dx = 999999
-            local dy = 999999
-            local p = getPos(self.bg)
-            local ene
-            if self.color == 0 then
-                for k, v in ipairs(self.map.eneSoldiers) do
-                    for ck, cv in ipairs(v) do
-                        if not cv.dead then
-                            local ep = getPos(cv.bg)
-                            local tdisy = math.abs(ep[2]-p[2]) 
-                            local tdisx = math.abs(ep[1]-p[1])
-                            if tdisy < dy then
-                                dy = tdisy
-                                dx = tdisx
-                                ene = cv
-                            elseif tdisy == dy then
-                                if tdisx < dx then
-                                    dx = tdisx
-                                    ene = cv
-                                end
-                            end
-                        end
-                    end
-                end
-            else
-                for k, v in ipairs(self.map.mySoldiers) do
-                    for ck, cv in ipairs(v) do
-                        if not cv.dead then
-                            local ep = getPos(cv.bg)
-                            local tdisy = math.abs(ep[2]-p[2]) 
-                            local tdisx = math.abs(ep[1]-p[1])
-                            if tdisy < dy then
-                                dy = tdisy
-                                dx = tdisx
-                                ene = cv
-                            elseif tdisy == dy then
-                                if tdisx < dx then
-                                    dx = tdisx
-                                    ene = cv
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+            local ene = self:findNearRow()
             --等待攻击对方靠近 即可
             if ene ~= nil then
                 self.attackTarget = ene
+            --找了没有找到 证明没有敌人了
             else
                 self.checkEneYet = true
             end
@@ -471,4 +510,6 @@ function FightSoldier2:doDead(diff)
 end
 
 function FightSoldier2:finishAttack()
+end
+function FightSoldier2:waitAttack(diff)
 end

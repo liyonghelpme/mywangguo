@@ -12,3 +12,7 @@ end
 function FightFunc:getMoveTime()
     return 1
 end
+function FightFunc:initView()
+end
+function FightFunc:startAttack()
+end

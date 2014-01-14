@@ -76,20 +76,69 @@ function FightLayer2:testNum()
     local temp = {{5, 1, 0, 0, 0}, {5, 1, 0, 0, 0}, {5, 1, 0, 0, 0}, {5, 0, 0, 0, 0}}
     return temp
 end
+--副作用 如果第一排转移了attackTarget 我就会跟着转移
+function FightLayer2:testNum2(id)
+    local temp
+    if id == 0 then
+        temp = {{5, 0, 0, 0, 0}, {5, 0, 0, 0, 0}, {5, 0, 0, 0, 0}, {5, 0, 0, 0, 0}}
+    else
+        --temp = {{0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}}
+        temp = {{0, 0, 1, 0, 0}, {0, 0, 1, 0, 0}, {0, 0, 1, 0, 0}, {0, 0, 1, 0, 0}}
+    end
+    return temp
+end
+function FightLayer2:testNum3(id)
+    local temp
+    if id == 0 then
+        temp = {{5, 0, 0, 0, 0}, {5, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}
+    else
+        --temp = {{0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}, {0, 1, 0, 0, 0}}
+        temp = {{1, 1, 1, 0, 0}, {1, 1, 1, 0, 0}, {0, 0, 1, 0, 0}, {0, 0, 1, 0, 0}}
+    end
+    return temp
+end
+
+function FightLayer2:testNum4(id)
+    return {{1, 0, 0, 0, 0}}
+end
+function FightLayer2:adjustBattleScene(p)
+    local pos = getPos(self.battleScene)
+    setPos(self.battleScene, {p, pos[2]})
+    pos[1] = p
+    --根据battleScene 位置 调整farScene 位置
+    local fp = getPos(self.farScene)
+    local farPos = {pos[1]*self.farRate, fp[2]}
+    setPos(self.farScene, farPos)
+
+    local np = getPos(self.nearScene)
+    local nearPos = {pos[1]*self.nearRate, np[2]}
+    setPos(self.nearScene, nearPos)
+end
+
 function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum()
-    self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum()
-    local leftWidth = #self.myFootNum*FIGHT_OFFX
-    self.leftWidth = math.max(leftWidth, vs.width*0.618)
+    self.myFootNum = self:testNum3(0)
+    self.myArrowNum = self:testNum4()
 
-    local rightWidth = #self.eneFootNum*FIGHT_OFFX
-    self.rightWidth = rightWidth
+    self.eneFootNum = self:convertNumToSoldier(ene[1])
+    self.eneFootNum = self:testNum3(1)
+    self.eneArrowNum = self:testNum4()
+    
+    --最后留上一列的宽度
+    --最后一种兵至少需要半个屏幕的宽度
+    local leftWidth = #self.myFootNum*FIGHT_OFFX+#self.myArrowNum*FIGHT_OFFX
+    self.solLeftWidth = leftWidth
+    self.leftWidth = leftWidth+vs.width
+    self.leftBack = self.leftWidth-self.solLeftWidth
+
+    local rightWidth = #self.eneFootNum*FIGHT_OFFX+#self.eneArrowNum*FIGHT_OFFX
+    self.solRightWidth = rightWidth
+    self.rightWidth = rightWidth+vs.width
+
     --单张战斗图调整为 self.HEIGHT
     --战斗场景高度不变 483 高度
     self.HEIGHT = FIGHT_HEIGHT
@@ -105,6 +154,9 @@ function FightLayer2:ctor(s, my, ene)
     --比屏幕宽一点这样就不能同时看到 左右两边的士兵了
     --一个屏幕的宽度差值
     self.WIDTH = vs.width*1.5+leftWidth+rightWidth
+    --从左到右面的士兵 宽度
+    self.rightBack = self.WIDTH-self.rightWidth+self.solRightWidth
+
     print("width", self.WIDTH, vs.width, leftWidth, rightWidth)
 
     setContentSize(self.bg, {self.WIDTH, self.HEIGHT})
@@ -134,6 +186,7 @@ function FightLayer2:ctor(s, my, ene)
         self.nearScene:addChild(near)
     end
 
+    self:adjustBattleScene(-self.leftBack)
     self.smooth = 1
     self.solId = 0
     self.state = FIGHT_STATE.FREE
@@ -157,9 +210,10 @@ function FightLayer2:doFree(diff)
         self.moveSpeed = 300
         --使用ease 函数调整move 状态
         local vs = getVS()
-        local endPoint = self.WIDTH-vs.width
+        local p = getPos(self.battleScene)
+        local endPoint = self.rightBack 
         self.endPoint = endPoint
-        self.totalTime = endPoint/self.moveSpeed
+        self.totalTime = (endPoint-p[1])/self.moveSpeed
         self.battleScene:runAction(sinein(moveto(self.totalTime, -endPoint, 0)))
     end
 end
@@ -223,44 +277,17 @@ function FightLayer2:doFastBack(diff)
     end
 end
 --士兵开始跑步 战斗 交给士兵控制
+--步兵剧本
+--弓箭手剧本
+--火枪剧本
+--骑兵剧本
+--单个士兵的剧本
 function FightLayer2:doDay(diff)
     if self.state == FIGHT_STATE.DAY then
-        local p = getPos(self.battleScene)
-        if self.passTime == 0 then
-            self.moveTarget = p[1]
-            for k, v in ipairs(self.allSoldiers) do
-                --开始跑步和攻击
-                v:doRunAndAttack()
-            end
-        end
-        self.passTime = self.passTime+diff
-        if self.passTime >= 5 and not self.finishAttack then
-            self.finishAttack = true
-            for k, v in ipairs(self.allSoldiers) do
-                --开始跑步和攻击
-                v:finishAttack()
-            end
-        end
-
-        local mySolP = self.mySoldiers[1][1]
-        local sp = getPos(mySolP.bg)
-        local vs = getVS()
-        --看一下4对象的位置
-        if sp[1] >= math.abs(p[1])+vs.width/2 then
-            self.moveTarget = -(sp[1])+vs.width/2
-            --print("moveTarget", self.moveTarget)
-        end
-
-        if self.moveTarget ~= nil then
-            local pos = getPos(self.battleScene)
-            local smooth = diff*self.smooth
-            smooth = math.min(smooth, 1)
-            local px = pos[1]*(1-smooth)+self.moveTarget*smooth
-            setPos(self.battleScene, {px, pos[2]}) 
-            local fxy = getPos(self.farScene)
-            setPos(self.farScene, {px*self.farRate, fxy[2]})
-            local nxy = getPos(self.nearScene)
-            setPos(self.nearScene, {px*self.nearRate, nxy[2]})
+        if self.day == 0 then
+            self:arrowScript(diff)
+        else
+            self:footScript(diff)
         end
     end
 end
@@ -275,6 +302,7 @@ end
 function FightLayer2:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("cat_foot.plist")
+    sf:addSpriteFramesWithFile("cat_arrow.plist")
     sf:addSpriteFramesWithFile("attackAni.plist")
     createAnimation("attackSpe1", "attack%d.png", 5, 8, 1, 0.5, true)
     createAnimationWithNum("attackSpe2", "attack%d.png", 0.5, true, {1, 3, 4})
@@ -300,6 +328,8 @@ function FightLayer2:initSoldier()
     print("left Num")
     print(simple.encode(self.myFootNum))
     print(simple.encode(self.eneFootNum))
+    print(simple.encode(self.myArrowNum))
+    print(simple.encode(self.eneArrowNum))
     self.mySoldiers = {}
     self.allSoldiers = {}
     self.solOffY = 80
@@ -374,6 +404,67 @@ function FightLayer2:initSoldier()
         tv.left = self.mySoldiers[1][tk]
     end
     --士兵死亡动态调整 左右两侧
+
+    --新的位置
+    --弓箭手的位置  屏幕的
+    self.myArrowSoldiers = {}
+    self.eneArrowSoldiers = {}
+    local footWidth = #self.myFootNum
+    --leftWidth 士兵所在的列 和 行 全局的 
+    --先考虑 步兵 炮兵 弓箭 最后骑兵
+    for k, v in ipairs(self.myArrowNum) do 
+        --row
+        local temp = {}
+        table.insert(self.myArrowSoldiers, temp) 
+        for ck, cv in ipairs(v) do 
+            --col
+            if cv > 0 then
+                local sp = FightSoldier2.new(self, 1, k-1+footWidth, ck-1, {level=cv, color=0}, self:getSolId()) 
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+            end
+        end
+    end
+    local footWidth = #self.eneFootNum
+    --更新状态 检测 myArrow eneArrowSoldiers
+    for k, v in ipairs(self.eneArrowNum) do
+        local temp = {}
+        table.insert(self.eneArrowSoldiers, temp)
+        for ck, cv in ipairs(v) do
+            if cv > 0 then
+                local sp = FightSoldier2.new(self, 1, k-1+footWidth, ck-1, {level=cv, color=1}, self:getSolId()) 
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1+footWidth)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                sp:setZord()
+                sp:setDir()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+            end
+        end
+    end
+
+    --列  行
+    --最后一列 对齐 敌方士兵 士兵
+    --数据是第一排 第二排
+    --还想知道 每种 士兵 所包含的列数 
+    --如果直到了所有的这种士兵 其实 可以 计算出 包围盒子的
+    --弓箭手直接 打第一排
+    --[[
+    for k, v in ipairs(self.myArrowSoldiers) do
+        for tk, tv in ipairs(v) do
+            if self.mySoldiers[k-1] ~= nil then
+                tv.right = self.myArrowSoldiers[k-1][tk] 
+            end
+            if self.mySoldiers[k+1] ~= nil then
+                tv.left = self.mySoldiers[k+1][tk]
+            end
+        end
+    end
+    --]]
 end
 
 --根据 当前双方的 方向决定
@@ -401,3 +492,5 @@ function FightLayer2:getAttackDir(a, b)
     end
     return self.cache[k]
 end
+
+require "Miao.FightLayer2Static"
