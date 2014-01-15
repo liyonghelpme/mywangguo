@@ -1,3 +1,4 @@
+require "Miao.FightUtil"
 require "Miao.FightSoldier2"
 
 FIGHT_STATE = {
@@ -99,7 +100,7 @@ function FightLayer2:testNum3(id)
 end
 
 function FightLayer2:testNum4(id)
-    return {{1, 0, 0, 0, 0}}
+    return {{1, 1, 1, 0, 0}, {1, 1, 1, 0, 0}}
 end
 function FightLayer2:adjustBattleScene(p)
     local pos = getPos(self.battleScene)
@@ -121,11 +122,11 @@ function FightLayer2:ctor(s, my, ene)
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum3(0)
+    self.myFootNum = self:testNum3(1)
     self.myArrowNum = self:testNum4()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum3(1)
+    self.eneFootNum = self:testNum3(0)
     self.eneArrowNum = self:testNum4()
     
     --最后留上一列的宽度
@@ -153,9 +154,10 @@ function FightLayer2:ctor(s, my, ene)
     --战斗高度不变 但是宽度可以自由增加
     --比屏幕宽一点这样就不能同时看到 左右两边的士兵了
     --一个屏幕的宽度差值
-    self.WIDTH = vs.width*1.5+leftWidth+rightWidth
+    self.WIDTH = vs.width*1.5+self.leftWidth+self.rightWidth
     --从左到右面的士兵 宽度
     self.rightBack = self.WIDTH-self.rightWidth+self.solRightWidth
+    print("self.rightBack", self.rightBack, self.rightWidth, self.WIDTH, self.solRightWidth)
 
     print("width", self.WIDTH, vs.width, leftWidth, rightWidth)
 
@@ -188,6 +190,7 @@ function FightLayer2:ctor(s, my, ene)
 
     self:adjustBattleScene(-self.leftBack)
     self.smooth = 1
+    self.arrowSpeed = 400
     self.solId = 0
     self.state = FIGHT_STATE.FREE
     self.curCol = 0
@@ -207,11 +210,12 @@ function FightLayer2:doFree(diff)
         self.state = FIGHT_STATE.MOVE
         self.passTime = 0
         self.curCol = 1
-        self.moveSpeed = 300
+        self.moveSpeed = 500
         --使用ease 函数调整move 状态
         local vs = getVS()
         local p = getPos(self.battleScene)
-        local endPoint = self.rightBack 
+        local endPoint = self.rightBack-vs.width
+        print("endPoint is", endPoint)
         self.endPoint = endPoint
         self.totalTime = (endPoint-p[1])/self.moveSpeed
         self.battleScene:runAction(sinein(moveto(self.totalTime, -endPoint, 0)))
@@ -286,7 +290,7 @@ function FightLayer2:doDay(diff)
     if self.state == FIGHT_STATE.DAY then
         if self.day == 0 then
             self:arrowScript(diff)
-        else
+        elseif self.day == 1 then
             self:footScript(diff)
         end
     end
@@ -348,6 +352,8 @@ function FightLayer2:initSoldier()
                 sp:setZord()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+            else
+                table.insert(temp, false)
             end
         end
     end
@@ -359,10 +365,10 @@ function FightLayer2:initSoldier()
     self:printSoldier(self.mySoldiers)
     for k, v in ipairs(self.mySoldiers) do
         for tk, tv in ipairs(v) do
-            if self.mySoldiers[k-1] ~= nil then
+            if self.mySoldiers[k-1] then
                 tv.right = self.mySoldiers[k-1][tk] 
             end
-            if self.mySoldiers[k+1] ~= nil then
+            if self.mySoldiers[k+1] then
                 tv.left = self.mySoldiers[k+1][tk]
             end
         end
@@ -381,16 +387,18 @@ function FightLayer2:initSoldier()
                 sp:setDir()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+            else
+                table.insert(temp, false)
             end
         end
     end
     self:printSoldier(self.eneSoldiers)
     for k, v in ipairs(self.eneSoldiers) do
         for tk, tv in ipairs(v) do
-            if self.eneSoldiers[k-1] ~= nil then
+            if self.eneSoldiers[k-1] then
                 tv.left = self.eneSoldiers[k-1][tk]
             end
-            if self.eneSoldiers[k+1] ~= nil then
+            if self.eneSoldiers[k+1] then
                 tv.right = self.eneSoldiers[k+1][tk]
             end
             print("set left right", tk, tv.sid, tv.left, tv.right)
@@ -426,9 +434,34 @@ function FightLayer2:initSoldier()
                 sp:setZord()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+            else
+                table.insert(temp, false)
             end
         end
     end
+
+    for k, v in ipairs(self.myArrowSoldiers) do
+        for tk, tv in ipairs(v) do
+            if self.myArrowSoldiers[k-1] ~= nil then
+                tv.right = self.myArrowSoldiers[k-1][tk] 
+            end
+            if self.myArrowSoldiers[k+1] ~= nil then
+                tv.left = self.myArrowSoldiers[k+1][tk]
+            end
+        end
+    end
+    --调整弓箭手的 相邻 部队的联系
+    --该行最后的 网格数据结构 table 构建grid 网格 周围四个 邻居都能快速的 找到
+    --网格的 left right up down 4个方向快速找到邻居
+    --通过相邻邻居快速找打攻击目标
+    for tk, tv in ipairs(self.myArrowSoldiers[1]) do
+        --tv 不是nil 或者 false
+        if tv then
+            --步兵的最左侧
+            tv.right = getRowMost(self.mySoldiers, tk, 'left')
+        end
+    end
+
     local footWidth = #self.eneFootNum
     --更新状态 检测 myArrow eneArrowSoldiers
     for k, v in ipairs(self.eneArrowNum) do
@@ -443,7 +476,31 @@ function FightLayer2:initSoldier()
                 sp:setDir()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+            else
+                table.insert(temp, false)
             end
+        end
+    end
+
+    for k, v in ipairs(self.eneArrowSoldiers) do
+        for tk, tv in ipairs(v) do
+            if tv then
+                if self.eneArrowSoldiers[k-1] then
+                    tv.left = self.eneArrowSoldiers[k-1][tk]
+                end
+                if self.eneArrowSoldiers[k+1] then
+                    tv.right = self.eneArrowSoldiers[k+1][tk]
+                end
+            end
+            --print("set left right", tk, tv.sid, tv.left, tv.right)
+        end
+    end
+
+    for tk, tv in ipairs(self.eneArrowSoldiers[1]) do
+        --tv 不是nil 或者 false
+        if tv then
+            --步兵的最左侧
+            tv.left = getRowMost(self.eneSoldiers, tk, 'right')
         end
     end
 
@@ -453,18 +510,6 @@ function FightLayer2:initSoldier()
     --还想知道 每种 士兵 所包含的列数 
     --如果直到了所有的这种士兵 其实 可以 计算出 包围盒子的
     --弓箭手直接 打第一排
-    --[[
-    for k, v in ipairs(self.myArrowSoldiers) do
-        for tk, tv in ipairs(v) do
-            if self.mySoldiers[k-1] ~= nil then
-                tv.right = self.myArrowSoldiers[k-1][tk] 
-            end
-            if self.mySoldiers[k+1] ~= nil then
-                tv.left = self.mySoldiers[k+1][tk]
-            end
-        end
-    end
-    --]]
 end
 
 --根据 当前双方的 方向决定

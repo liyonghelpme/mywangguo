@@ -16,3 +16,8 @@ function FightFunc:initView()
 end
 function FightFunc:startAttack()
 end
+function FightFunc:waitAttack(diff)
+end
+
+function FightFunc:doFightBack(diff)
+end
