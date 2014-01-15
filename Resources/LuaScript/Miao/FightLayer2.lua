@@ -108,6 +108,22 @@ end
 function FightLayer2:testNum6()
     return {{1, 1, 0, 0, 0}}
 end
+
+
+function FightLayer2:testNum7()
+    return {{1, 0, 0, 0, 0}}
+end
+function FightLayer2:testNum8()
+    return {{1, 0, 0, 0, 0}, {1, 0, 0, 0, 0}, {1, 0, 0, 0, 0}}
+end
+function FightLayer2:testNum9()
+    return {{1, 0, 0, 0, 0}}
+end
+function FightLayer2:testNum10()
+    return {{1, 0, 0, 0, 0}, {1, 0, 0, 0, 0}}
+end
+
+
 function FightLayer2:adjustBattleScene(p)
     local pos = getPos(self.battleScene)
     setPos(self.battleScene, {p, pos[2]})
@@ -128,12 +144,12 @@ function FightLayer2:ctor(s, my, ene)
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum6(1)
-    self.myArrowNum = self:testNum5()
+    self.myFootNum = self:testNum8(1)
+    self.myArrowNum = self:testNum7()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum5(0)
-    self.eneArrowNum = self:testNum5()
+    self.eneFootNum = self:testNum9(0)
+    self.eneArrowNum = self:testNum10()
     
     --最后留上一列的宽度
     --最后一种兵至少需要半个屏幕的宽度

@@ -21,3 +21,9 @@ end
 
 function FightFunc:doFightBack(diff)
 end
+function FightFunc:doNearAttack(diff)
+end
+function FightFunc:doNext(diff)
+end
+function FightFunc:doNearMove(diff)
+end
