@@ -15,6 +15,7 @@ FIGHT_SOL_STATE = {
     FIGHT_BACK=9,
     NEAR_ATTACK=10,
     NEAR_MOVE = 11,
+    WAIT_MOVE= 12,
 }
 
 FightSoldier2 = class()
@@ -39,7 +40,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.data = data
     self.color = data.color
     self.dead = false
-    self.speed = 100
+    self.speed = 200
     --地图记录每个网格状态 
     --士兵类型kind
     if self.id == 0  then
@@ -99,11 +100,13 @@ function FightSoldier2:setDir()
     end
 end
 function FightSoldier2:doRunAndAttack(day)
-    --先弓箭 接着 步兵
-    if day == 0 and self.id == 1 then
-        self.state = FIGHT_SOL_STATE.START_ATTACK
-    elseif day == 1 and self.id == 0 then
-        self.state = FIGHT_SOL_STATE.START_ATTACK
+    if not self.dead then
+        --先弓箭 接着 步兵
+        if day == 0 and self.id == 1 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
+        elseif day == 1 and self.id == 0 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
+        end
     end
 end
 function FightSoldier2:updateLabel()
@@ -128,6 +131,15 @@ function FightSoldier2:updateLabel()
 
     self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
 end
+function FightSoldier2:findFastTarget()
+    local temp
+    if self.color == 0 then
+        temp = getFirstNotDead(self, 'right') 
+    else
+        temp = getFirstNotDead(self, 'left')
+    end
+    return temp
+end
 function FightSoldier2:startAttack(diff)
     if self.state == FIGHT_SOL_STATE.START_ATTACK then
         --步兵移动
@@ -141,29 +153,47 @@ function FightSoldier2:startAttack(diff)
             self.oldPos = getPos(self.bg)
             local enePos
             local offX
+
+            --因为 不是head 所以不能攻击这
+            --寻找第一个非死亡对象 步兵  同行
+            self.attackTarget = self:findFastTarget()
             if self.color == 0 then
-                self.attackTarget = self.right
                 offX = -40
             else
-                self.attackTarget = self.left
                 offX  = 40
             end
-            --同行没有士兵可以攻击 寻找最近的士兵
-            if self.attackTarget == nil or self.attackTarget.dead then
+
+            --同行没有
+            if self.attackTarget == nil then
+                print("start Attack find near row")
                 self.attackTarget = self:findNearRow()
             end
+            --同行没有士兵可以攻击 寻找最近的士兵
             if self.attackTarget ~= nil then 
                 if self.attackTarget.color ~= self.color then
                     enePos = getPos(self.attackTarget.bg)
-                    local midPoint = (self.oldPos[1]+enePos[1])/2
-                    midPoint = midPoint+offX
-                    local t = math.abs(midPoint-self.oldPos[1])/self.speed
-                    self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
-                    self.bg:runAction(self.moveAct)
-                    self.midPoint = midPoint
-                    print("attack MidPoint", self.midPoint)
+                    if self.attackTarget.id == 0 then
+                        local midPoint = (self.oldPos[1]+enePos[1])/2
+                        midPoint = midPoint+offX
+                        local t = math.abs(midPoint-self.oldPos[1])/self.speed
+                        self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                        self.bg:runAction(self.moveAct)
+                        self.midPoint = midPoint
+                        print("attack MidPoint", self.midPoint)
+                    else
+                        local offE = -90
+                        if self.color == 1 then
+                            offE = 90
+                        end
+                        local midPoint = enePos[1]+offE
+                        local t = math.abs(midPoint-self.oldPos[1])/self.speed
+                        self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                        self.bg:runAction(self.moveAct)
+                        self.midPoint = midPoint
+                        print("foot attack arrow")
+                    end
                 else
-                    
+                    print("no enemy to attack same color")
                 end
             end
         else
@@ -186,6 +216,7 @@ function FightSoldier2:update(diff)
     self:doFightBack(diff)
     self:doNearAttack(diff)
     self:doNearMove(diff)
+    self.funcSoldier:doWaitMove(diff)
 end
 
 function FightSoldier2:doPose(diff)
@@ -200,7 +231,11 @@ function FightSoldier2:doHarm()
     --自己没死才能造成伤害
     if not self.dead then
         self.oneAttack = true
-        self:showAttackEffect()
+        --开始攻击一段时间后 才出现这个 action
+        if not self.attackTarget.dead then
+            --敌人没挂 才出攻击动作
+            self:showAttackEffect()
+        end
         self.attackTarget:doHurt(self.attack)
         local dir = self.map:getAttackDir(self, self.attackTarget)
         local rd = math.random(2)+2
@@ -228,6 +263,9 @@ function FightSoldier2:doHurt(harm, showBomb)
     setPos(num, {p[1], p[2]+50})
     num:runAction(sequence({fadein(0.2), moveby(0.5, 0, 20), fadeout(0.2), callfunc(nil, removeSelf, num)}))
 
+    --attackDir
+    if not self.dead then
+    end
     --没有受到攻击动作
     if self.health <= 0 and not self.dead then
         self.dead = true
@@ -259,7 +297,7 @@ function FightSoldier2:showAttackEffect()
         setScaleX(sp, -1)
     end
     sp:setZOrder(MAX_BUILD_ZORD)
-    sp:runAction(sequence({delaytime(0.2), CCAnimate:create(getAnimation("attackSpe1"))}))
+    sp:runAction(sequence({delaytime(0.5), CCAnimate:create(getAnimation("attackSpe1"))}))
     sp:runAction(sequence({fadeout(0.8), callfunc(nil, removeSelf, sp)}))
 end
 function FightSoldier2:showBombEffect()
@@ -352,17 +390,7 @@ function FightSoldier2:doMove(diff)
             --同行死亡自己没有在移动才可以移动
             if self.attackTarget.dead and not self.inMove then
                 print("my friend dead then find my friend's enemy to attack if exists ")
-                if self.color == 0 then
-                    self.right = self.attackTarget.right
-                    self.attackTarget = self.attackTarget.right 
-                else
-                    self.left = self.attackTarget.left
-                    self.attackTarget = self.attackTarget.left
-                end
-                --if self.attackTarget ~= nil and not self.attackTarget.dead then
-                if self.attackTarget == nil or self.attackTarget.dead then
-                    self.attackTarget = self:findNearRow()
-                end
+                self.attackTarget = self:findNearRow()
                 if self.attackTarget ~= nil then
                     local nap = getPos(self.attackTarget.bg)
                     local mmid 
@@ -382,16 +410,6 @@ function FightSoldier2:doMove(diff)
                     print("my Friend's attackTarget dead and I can't find attackTarget ")
                     self.state = FIGHT_SOL_STATE.KILL_ALL 
                 end
-                --移动过了 并且
-                --if self.moveFin and self.moveYet then
-                --end
-                --切换到 上面的分支 进行攻击了
-                --开始攻击 重新计算midPoint
-                --self.moveYet = false
-                --self.state = FIGHT_SOL_STATE.START_ATTACK
-                --接着向前移动
-                --self.midPoint = nil
-                --self.changeDirNode:stopAction(self.moveAct)
             end
             --如果没有同行 攻击 同列
         end
@@ -648,6 +666,7 @@ function FightSoldier2:doDead(diff)
 end
 
 function FightSoldier2:finishAttack()
+    self.funcSoldier:finishAttack()
 end
 
 function FightSoldier2:waitAttack(diff)
@@ -662,4 +681,23 @@ end
 
 function FightSoldier2:doNearMove(diff)
     self.funcSoldier:doNearMove(diff)
+end
+function FightSoldier2:doWinMove(left, right)
+    if not self.dead then
+        print("doWinMove", left, right)
+        if self.color == 0 and left > 0 then
+            self.bg:stopAllActions()
+            self.changeDirNode:stopAllActions()
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.runAni)))
+            local vs = getVS()
+            local t = vs.width/self.speed
+            self.bg:runAction(moveby(t, vs.width, 0))
+        elseif self.color == 1 and right > 0 then
+            self.changeDirNode:stopAllActions()
+            self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.runAni)))
+            local vs = getVS()
+            local t = vs.width/self.speed
+            self.bg:runAction(moveby(t, -vs.width, 0))
+        end
+    end
 end

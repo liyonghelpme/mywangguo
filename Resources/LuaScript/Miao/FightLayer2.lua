@@ -123,6 +123,21 @@ function FightLayer2:testNum10()
     return {{1, 0, 0, 0, 0}, {1, 0, 0, 0, 0}}
 end
 
+--case
+function FightLayer2:testNum11()
+    return {{1, 0, 0, 0, 0}}
+end
+function FightLayer2:testNum12()
+    return {{1, 0, 0, 0, 0}, {1, 0, 0, 0, 0},{1, 0, 0, 0, 0},}
+end
+function FightLayer2:testNum13()
+    return {{1, 0, 0, 0, 0}, }
+end
+function FightLayer2:testNum14()
+    return {{1, 1, 0, 0, 0}, {1, 1, 0, 0, 0}}
+end
+
+
 
 function FightLayer2:adjustBattleScene(p)
     local pos = getPos(self.battleScene)
@@ -144,12 +159,12 @@ function FightLayer2:ctor(s, my, ene)
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum8(1)
-    self.myArrowNum = self:testNum7()
+    self.myFootNum = self:testNum12(1)
+    self.myArrowNum = self:testNum11()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum9(0)
-    self.eneArrowNum = self:testNum10()
+    self.eneFootNum = self:testNum13(0)
+    self.eneArrowNum = self:testNum14()
     
     --最后留上一列的宽度
     --最后一种兵至少需要半个屏幕的宽度
@@ -177,6 +192,11 @@ function FightLayer2:ctor(s, my, ene)
     --比屏幕宽一点这样就不能同时看到 左右两边的士兵了
     --一个屏幕的宽度差值
     self.WIDTH = vs.width*1.5+self.leftWidth+self.rightWidth
+    --test 
+    --[[
+    self.bg:setScale(0.3)
+    setPos(setContentSize(setAnchor(self.bg, {0, 0}), {0, 0}), {400, 400})
+    --]]
     --从左到右面的士兵 宽度
     self.rightBack = self.WIDTH-self.rightWidth+self.solRightWidth
     print("self.rightBack", self.rightBack, self.rightWidth, self.WIDTH, self.solRightWidth)

@@ -11,3 +11,30 @@ function FightFoot:initView()
     self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_foot_idle_0.png")
 end
 
+--清理一些状态变量
+--恢复士兵位置
+--快速移动屏幕
+function FightFoot:finishAttack()
+    self.soldier.state = FIGHT_SOL_STATE.FREE
+    self.soldier.moveYet = false 
+    self.soldier.inMove = false
+    self.soldier.oneAttack = false 
+    self.soldier.checkEneYet = false
+
+    if self.soldier.dead then
+        setVisible(self.soldier.bg, false)
+    else
+        self.soldier.changeDirNode:stopAllActions()
+        self.soldier.bg:stopAllActions()
+        self.soldier.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
+        self.soldier.changeDirNode:runAction(self.soldier.idleAction)
+    end
+end
+
+function FightFoot:resetPos()
+    if not self.soldier.dead then
+        print("reset Pos", self.soldier.sid, self.soldier.oldPos)
+        setPos(self.soldier.bg, self.soldier.oldPos)
+    end
+end
+

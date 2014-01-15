@@ -27,3 +27,9 @@ function FightFunc:doNext(diff)
 end
 function FightFunc:doNearMove(diff)
 end
+function FightFunc:doWaitMove(diff)
+end
+function FightFunc:finishAttack(diff)
+end
+function FightFunc:resetPos()
+end

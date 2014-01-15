@@ -10,7 +10,7 @@ function getRowFirst(data, row)
     return nil
 end
 
---第一个非死亡的士兵
+--最后一个非死亡的士兵
 function getSidest(sol, s)
     --第一个对象就是 nil false
     if not sol then
@@ -35,5 +35,16 @@ function getRowMost(data, row, side)
         return getSidest(rf, side)
     end
     return nil
+end
+
+function getFirstNotDead(sol, side)
+    while sol[side] ~= nil do
+        if sol[side].dead then
+            sol[side] = sol[side][side]
+        else
+            break
+        end
+    end
+    return sol[side]
 end
 
