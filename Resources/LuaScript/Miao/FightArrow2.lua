@@ -150,36 +150,50 @@ function FightArrow2:checkSide(s)
     return self.soldier[s]
 end
 function FightArrow2:waitAttack(diff)
-    if self.state == FIGHT_SOL_STATE.WAIT_ATTACK then
+    if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
         --目标不存在或者目标已经死亡了
         --我是当前 部队 的 头部 
         --检测 地方不对 是否向我开进了
         --left = nil left.dead = true
         --还要考虑我方步兵的 是否是我的left
         local isHead = false
-        --考虑 我的 right 是否阵亡了 checkSide and fix Side
-        if self.soldier.color == 0 then
-            if self:checkSide('right') == nil then
-                isHead = true
+        if not self.isHead then
+            --考虑 我的 right 是否阵亡了 checkSide and fix Side
+            --全部挂掉了则没有 isHead 的意义了
+            --print("self. sid check head", self.isHead)
+            if self.soldier.color == 0 then
+                self:checkSide('right')
+                if self.soldier.right ~= nil and self.soldier.right.color ~= self.soldier.color then
+                    isHead = true
+                end
+            else
+                --步兵数量比较少 没有占够1列导致 我的前方没有士兵么 dead 士兵也行呀
+                self:checkSide('left')
+                if self.soldier.left ~= nil and self.soldier.left.color ~= self.soldier.color then
+                    isHead = true
+                end
             end
-        else
-            if self:checkSide('left') == nil then
-                isHead = true
+            print("isHead", isHead, self.soldier.sid)
+            if isHead then
+                local ene = self:findSameRow()
+                if ene ~= nil then
+                    self.soldier.attackTarget = ene
+                end
             end
+            self.isHead = isHead
         end
+        isHead = self.isHead
 
-        if isHead then
-            local ene = self:findSameRow()
-            if ene ~= nil then
-                self.soldier.attackTarget = ene
-            end
-        end
         --对方向我移动中检测 一下距离 步兵正在向我靠近么 不一定可能正在向 地方
         --对方也在向我攻击移动
-        if isHead and self.soldier.attackTarget.attackTarget == self.soldier  then
-            local ap = getPos(self.soldier.attackTarget)
+        --对方颜色 不同
+        --整个部队的头部 所以敌方 必然是 color 不同
+        if isHead then
+            local ap = getPos(self.soldier.attackTarget.bg)
             local mp = getPos(self.soldier.bg)
-            if math.abs(ap[1]-mp[1]) < 100 then
+            local dx = math.abs(ap[1]-mp[1])
+            print("other is not my color so attack it!", dx)
+            if dx <= 400 then
                 self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
             end
         end
@@ -189,23 +203,29 @@ end
 
 function FightArrow2:doFightBack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.FIGHT_BACK then
+        print("doFightBack now")
         if not self.shootYet then
             self.shootYet = true
-            local p = getPos(self.soldier.bg)
-            local a = Arrow2.new(self.soldier, self.soldier.attackTarget)
-            local abg = a.bg
-            local offX = 20
-            if self.soldier.color == 1 then
-                offX = -20
+            local function addArrow()
+                local p = getPos(self.soldier.bg)
+                local a = Arrow2.new(self.soldier, self.soldier.attackTarget)
+                self.soldier.map.battleScene:addChild(a.bg)
+                local abg = a.bg
+                local offX = 20
+                if self.soldier.color == 1 then
+                    offX = -20
+                end
+                setPos(abg, {p[1]+offX, p[2]})
+                if self.soldier.color == 1 then
+                    setScaleX(a.changeDirNode, -1)
+                end
+                local as = self.soldier.map.arrowSpeed
+                local tpos = getPos(self.soldier.attackTarget.bg)
+                local tt = math.abs(tpos[1]-p[1])/as
+                a.bg:runAction(moveto(tt, tpos[1], tpos[2]))
             end
-            setPos(abg, {p[1]+offX, p[2]})
-            if self.color == 1 then
-                setScaleX(a.changeDirNode, -1)
-            end
-            local as = self.soldier.map.arrowSpeed
-            local tpos = getPos(self.soldier.attackTarget.bg)
-            local tt = math.abs(tpos[1]-p[1])/as
-            a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]+34)}, callfunc(a, a.doHarm)))
+            self.soldier.changeDirNode:runAction(CCAnimate:create(self.soldier.attackA))
+            self.soldier.changeDirNode:runAction(sequence({delaytime(0.2), callfunc(nil, addArrow)}))
         end
     end
 end

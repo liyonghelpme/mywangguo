@@ -56,13 +56,17 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.needUpdate = true
     registerEnterOrExit(self)
 
-    self.stateLabel = ui.newBMFontLabel({text="", font='bound.fnt', size=20, color={0, 0, 0}})
+    self.stateLabel = ui.newBMFontLabel({text="", font='bound.fnt', size=14, color={0, 0, 0}})
     self.bg:addChild(self.stateLabel)
     setPos(self.stateLabel, {0, 50})
 
     self.sLabel = ui.newBMFontLabel({text="", font="bound.fnt", size=20, color={255, 0, 0}})
     self.bg:addChild(self.sLabel)
     setPos(self.sLabel, {0, 80})
+    
+    self.sidLabel = ui.newBMFontLabel({text=self.sid, font="bound.fnt", size=20, color={0, 255, 0}})
+    self.bg:addChild(self.sidLabel)
+    setPos(self.sidLabel, {0, 100})
 end
 function FightSoldier2:showPose(x)
     if not self.showYet then
@@ -118,7 +122,8 @@ function FightSoldier2:updateLabel()
     if self.attackTarget ~= nil then
         tid = self.attackTarget.sid
     end
-    self.sLabel:setString(self.state..' '..str(tid))
+
+    self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
 end
 function FightSoldier2:startAttack(diff)
     if self.state == FIGHT_SOL_STATE.START_ATTACK then
@@ -269,7 +274,8 @@ function FightSoldier2:doMove(diff)
     if self.state == FIGHT_SOL_STATE.IN_MOVE then
         if self.attackTarget.color ~= self.color then
             local p = getPos(self.bg)
-            if p[1] == self.midPoint then
+            print("not same color move", p[1], self.midPoint)
+            if math.abs(p[1]-self.midPoint) < 5 then
                 self.inMove = false
                 self.bg:stopAction(self.moveAct)
                 self.changeDirNode:stopAction(self.moveAni)
@@ -564,6 +570,7 @@ function FightSoldier2:doNext(diff)
                 --攻击弓箭手 则 跑过去攻击 对手是进入 近战状态 还是 远程状态
                 --对手 补位 还是 自己补位
                 else
+                    --步兵自己跑过去 补位
                     self:moveToTarget()
                 end
             --找了没有找到 证明没有敌人了
@@ -588,7 +595,7 @@ function FightSoldier2:doAttack(diff)
 
                 if self.color == 1 then
                     if self.attackTarget.left ~= nil then
-                        self.left = self.attackTarget.left
+                        self.left = getSidest(self.attackTarget, 'left')
                         self.attackTarget = self.left
                     else
                         self.left = nil
@@ -596,7 +603,7 @@ function FightSoldier2:doAttack(diff)
                     end
                 else
                     if self.attackTarget.right ~= nil then
-                        self.right = self.attackTarget.right
+                        self.right = getSidest(self.attackTarget, 'right')
                         self.attackTarget = self.right
                     else
                         self.right = nil

@@ -102,6 +102,12 @@ end
 function FightLayer2:testNum4(id)
     return {{1, 1, 1, 0, 0}, {1, 1, 1, 0, 0}}
 end
+function FightLayer2:testNum5(id)
+    return {{1, 0, 0, 0, 0}}
+end
+function FightLayer2:testNum6()
+    return {{1, 1, 0, 0, 0}}
+end
 function FightLayer2:adjustBattleScene(p)
     local pos = getPos(self.battleScene)
     setPos(self.battleScene, {p, pos[2]})
@@ -122,12 +128,12 @@ function FightLayer2:ctor(s, my, ene)
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum3(1)
-    self.myArrowNum = self:testNum4()
+    self.myFootNum = self:testNum6(1)
+    self.myArrowNum = self:testNum5()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum3(0)
-    self.eneArrowNum = self:testNum4()
+    self.eneFootNum = self:testNum5(0)
+    self.eneArrowNum = self:testNum5()
     
     --最后留上一列的宽度
     --最后一种兵至少需要半个屏幕的宽度
@@ -321,7 +327,9 @@ function FightLayer2:printSoldier(sol)
     local s = ''
     for k, v in ipairs(sol) do
         for tk, tv in ipairs(v) do
-            s = s..tv.sid..' '
+            if tv then
+                s = s..tv.sid..' '
+            end
         end
         s = s ..'\n'
     end
@@ -353,7 +361,8 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
             else
-                table.insert(temp, false)
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
             end
         end
     end
@@ -365,11 +374,13 @@ function FightLayer2:initSoldier()
     self:printSoldier(self.mySoldiers)
     for k, v in ipairs(self.mySoldiers) do
         for tk, tv in ipairs(v) do
-            if self.mySoldiers[k-1] then
-                tv.right = self.mySoldiers[k-1][tk] 
-            end
-            if self.mySoldiers[k+1] then
-                tv.left = self.mySoldiers[k+1][tk]
+            if tv then
+                if self.mySoldiers[k-1] then
+                    tv.right = self.mySoldiers[k-1][tk] 
+                end
+                if self.mySoldiers[k+1] then
+                    tv.left = self.mySoldiers[k+1][tk]
+                end
             end
         end
     end
@@ -388,28 +399,35 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
             else
-                table.insert(temp, false)
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
             end
         end
     end
     self:printSoldier(self.eneSoldiers)
     for k, v in ipairs(self.eneSoldiers) do
         for tk, tv in ipairs(v) do
-            if self.eneSoldiers[k-1] then
-                tv.left = self.eneSoldiers[k-1][tk]
-            end
-            if self.eneSoldiers[k+1] then
-                tv.right = self.eneSoldiers[k+1][tk]
-            end
+            if tv then
+                if self.eneSoldiers[k-1] then
+                    tv.left = self.eneSoldiers[k-1][tk]
+                end
+                if self.eneSoldiers[k+1] then
+                    tv.right = self.eneSoldiers[k+1][tk]
+                end
             print("set left right", tk, tv.sid, tv.left, tv.right)
+            end
         end
     end
 
     for tk, tv in ipairs(self.mySoldiers[1]) do
-        tv.right = self.eneSoldiers[1][tk]
+        if tv then
+            tv.right = self.eneSoldiers[1][tk]
+        end
     end
     for tk, tv in ipairs(self.eneSoldiers[1]) do
-        tv.left = self.mySoldiers[1][tk]
+        if tv then
+            tv.left = self.mySoldiers[1][tk]
+        end
     end
     --士兵死亡动态调整 左右两侧
 
@@ -435,18 +453,21 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
             else
-                table.insert(temp, false)
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
             end
         end
     end
 
     for k, v in ipairs(self.myArrowSoldiers) do
         for tk, tv in ipairs(v) do
-            if self.myArrowSoldiers[k-1] ~= nil then
-                tv.right = self.myArrowSoldiers[k-1][tk] 
-            end
-            if self.myArrowSoldiers[k+1] ~= nil then
-                tv.left = self.myArrowSoldiers[k+1][tk]
+            if tv then
+                if self.myArrowSoldiers[k-1] ~= nil then
+                    tv.right = self.myArrowSoldiers[k-1][tk] 
+                end
+                if self.myArrowSoldiers[k+1] ~= nil then
+                    tv.left = self.myArrowSoldiers[k+1][tk]
+                end
             end
         end
     end
@@ -477,7 +498,8 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
             else
-                table.insert(temp, false)
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
             end
         end
     end
