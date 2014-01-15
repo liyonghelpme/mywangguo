@@ -1698,6 +1698,26 @@ function rightTopUI(sp)
     setScale(sp, sca)
     setPos(sp, {nx, ny})
 end
+function centerBottom(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+    local cx = ds[1]/2
+    local nx = vs.width/2-cx*sca
+    setPos(sp, {nx, 0})
+end
+--左右居中 bottom Y 比例
+function centerYRate(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local scaY = math.min(vs.width/ds[1], vs.height/ds[2])
+    local scaX = 1
+    setScaleY(sp, scaY)
+    local cx = ds[1]/2
+    local nx = vs.width/2-cx*scaX
+    setPos(sp, {nx, 0})
+end
 
 
 function dictToTable(t)

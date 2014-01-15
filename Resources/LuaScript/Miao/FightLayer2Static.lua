@@ -114,10 +114,13 @@ function FightLayer2:footScript(diff)
         smooth = math.min(smooth, 1)
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
         setPos(self.battleScene, {px, pos[2]}) 
+        self:adjustBattleScene(px)
+        --[[
         local fxy = getPos(self.farScene)
         setPos(self.farScene, {px*self.farRate, fxy[2]})
         local nxy = getPos(self.nearScene)
         setPos(self.nearScene, {px*self.nearRate, nxy[2]})
+        --]]
     end
 end
 
@@ -148,11 +151,13 @@ function FightLayer2:arrowScript(diff)
         local dx = math.abs(pos[1]-self.moveTarget)
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
         setPos(self.battleScene, {px, pos[2]})
-        
+        self:adjustBattleScene(px)
+        --[[
         local fxy = getPos(self.farScene)
         setPos(self.farScene, {px*self.farRate, fxy[2]})
         local nxy = getPos(self.nearScene)
         setPos(self.nearScene, {px*self.nearRate, nxy[2]})
+        --]]
 
         if self.prepareFoot and dx <= 5 then
             self.prepareFoot = false

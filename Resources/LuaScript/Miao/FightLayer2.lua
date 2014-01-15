@@ -151,6 +151,10 @@ function FightLayer2:adjustBattleScene(p)
     local np = getPos(self.nearScene)
     local nearPos = {pos[1]*self.nearRate, np[2]}
     setPos(self.nearScene, nearPos)
+
+    local gp = getPos(self.grass)
+    local ggp = {pos[1]*self.grassRate, gp[2]}
+    setPos(self.grass, ggp)
 end
 
 function FightLayer2:ctor(s, my, ene)
@@ -183,6 +187,8 @@ function FightLayer2:ctor(s, my, ene)
     self.bg = setPos(CCLayer:create(), {0, vs.height-self.HEIGHT})
     self.battleScene = CCNode:create()
     self.farScene = addNode(self.bg)
+    self.grass = addNode(self.bg)
+    setPos(self.grass, {0, 267})
     self.bg:addChild(self.battleScene)
     self.nearScene = addNode(self.bg)
 
@@ -210,23 +216,34 @@ function FightLayer2:ctor(s, my, ene)
     self.oneWidth = tsca*tsz.width
     self.farRate = 0.2
     self.nearRate = 1.0
+    self.grassRate = 0.5
 
     local n = math.ceil(self.WIDTH/self.oneWidth)
     for i=1, n, 1 do
         local sp = setAnchor(setPos(setSize(CCSprite:create("battle_mid.png"), {self.oneWidth, self.HEIGHT}), {(i-1)*self.oneWidth, 0}), {0, 0})
         self.battleScene:addChild(sp)
+        local far = setAnchor(setPos(setScale(CCSprite:create("battle_far.png"), tsca), {(i-1)*self.oneWidth, 258}), {0, 0})
+        self.farScene:addChild(far)
+
         if (i-1)%2 == 1 then
             local scax = sp:getScaleX()
             setAnchor(setScaleX(sp, -scax), {1, 0})
+            setAnchor(setScaleX(far, -scax), {1, 0})
         end
-        local far = setAnchor(setPos(setScale(CCSprite:create("battle_far.png"), tsca), {(i-1)*self.oneWidth, 268}), {0, 0})
-        self.farScene:addChild(far)
-
     end
+    local tex = CCTextureCache:sharedTextureCache():addImage("battle_grass.png")
+    local tsz = tex:getContentSize()
+    local grassN = math.ceil(self.WIDTH/tsz.width)
+    for i=1, grassN, 1 do
+        local sp = setScale(createSprite("battle_grass.png"), tsca)
+        setAnchor(setPos(sp, {(i-1)*tsz.width*tsca, 0}), {0, 0})
+        self.grass:addChild(sp)
+    end
+
     --nearScene 1.5 比例
     local nearN = math.ceil(self.WIDTH*1.5/self.oneWidth) 
     for i=1, nearN, 1 do
-        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 0}), {0, 0})
+        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 40}), {0, 0})
         self.nearScene:addChild(near)
     end
 
@@ -267,6 +284,8 @@ end
 function FightLayer2:doMove(diff)
     if self.state == FIGHT_STATE.MOVE then
         local pos = getPos(self.battleScene)
+        self:adjustBattleScene(pos[1])
+        --[[
         --根据battleScene 位置 调整farScene 位置
         local fp = getPos(self.farScene)
         local farPos = {pos[1]*self.farRate, fp[2]}
@@ -275,6 +294,11 @@ function FightLayer2:doMove(diff)
         local np = getPos(self.nearScene)
         local nearPos = {pos[1]*self.nearRate, np[2]}
         setPos(self.nearScene, nearPos)
+
+        local gp = getPos(self.grass)
+        local ggp = {pos[1]*self.grassRate, gp[2]}
+        setPos(self.grass, ggp)
+        --]]
 
         for k, v in ipairs(self.allSoldiers) do
             v:showPose(pos[1])  
@@ -296,6 +320,8 @@ end
 function FightLayer2:doFastBack(diff)
     if self.state == FIGHT_STATE.FAST_BACK then
         local pos = getPos(self.battleScene)
+        self:adjustBattleScene(pos[1])
+        --[[
         --根据battleScene 位置 调整farScene 位置
         local fp = getPos(self.farScene)
         local farPos = {pos[1]*self.farRate, fp[2]}
@@ -304,6 +330,12 @@ function FightLayer2:doFastBack(diff)
         local np = getPos(self.nearScene)
         local nearPos = {pos[1]*self.nearRate, np[2]}
         setPos(self.nearScene, nearPos)
+
+        local gp = getPos(self.grass)
+        local ggp = {pos[1]*self.grassRate, gp[2]}
+        setPos(self.grass, ggp)
+        --]]
+
         if self.finShow then
             self.state = FIGHT_STATE.DAY
             self.day = 0
