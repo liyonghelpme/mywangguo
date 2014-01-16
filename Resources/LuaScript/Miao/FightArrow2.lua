@@ -46,7 +46,7 @@ function FightArrow2:startAttack()
             setPos(a.changeDirNode, {0, 34})
 
             if self.soldier.color == 1 then
-                setScaleX(a.changeDirNode, -1)
+                --setScaleX(a.changeDirNode, -1)
             end
             local as = self.soldier.map.arrowSpeed
             local tpos = getPos(ene.bg)

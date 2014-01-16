@@ -164,6 +164,14 @@ function ui.newTTFLabel(params)
 
         if x and y then label:realign(x, y) end
     end
+    --替换旧的setS函数tring
+    if shadowWord ~= nil then
+        local oldSet = label.setString
+        function label:setString(s)
+            oldSet(label, s)
+            shadowWord:setString(s)
+        end
+    end
 
     return label, shadowWord
 end

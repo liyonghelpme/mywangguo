@@ -24,7 +24,7 @@ function Arrow:update(diff)
     self.lastPos = p
 end
 function Arrow:doHarm()
-    self.target:doHurt(10, true)
+    self.target:doHurt(self.soldier.attack, true)
     self.dead = true
     removeSelf(self.bg)
 end
@@ -50,7 +50,7 @@ function Arrow2:update(diff)
     end
 end
 function Arrow2:doHarm()
-    self.target:doHurt(10, true)
+    self.target:doHurt(self.soldier.attack, true)
     self.dead = true
     removeSelf(self.bg)
 end

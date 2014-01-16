@@ -39,7 +39,11 @@ function FightLayer2:convertNumToSoldier(n)
     local pow
     if n < 100 then
         num = math.max(math.floor(n/5), 1)
-        pow = 5
+        if n > 5 then
+            pow = 5
+        else
+            pow = n
+        end
     --5 * 5 = 25 最多士兵数量
     elseif n < 250 then
         num = math.floor(n/10)
@@ -163,12 +167,14 @@ function FightLayer2:ctor(s, my, ene)
     print("FightLayer2")
 
     self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myFootNum = self:testNum12(1)
-    self.myArrowNum = self:testNum11()
+    self.myArrowNum = self:convertNumToSoldier(my[2])
+    --self.myFootNum = self:testNum12(1)
+    --self.myArrowNum = self:testNum11()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneFootNum = self:testNum13(0)
-    self.eneArrowNum = self:testNum14()
+    self.eneArrowNum = self:convertNumToSoldier(ene[2])
+    --self.eneFootNum = self:testNum13(0)
+    --self.eneArrowNum = self:testNum14()
     
     --最后留上一列的宽度
     --最后一种兵至少需要半个屏幕的宽度
@@ -467,7 +473,7 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=1, sid=-1, id=-1}
                 table.insert(temp, sp)
             end
         end

@@ -41,6 +41,12 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.color = data.color
     self.dead = false
     self.speed = 200
+
+    local myab = getSolAbility(self.id+1, self.data.level, self.map.scene.maxSoldier[self.color+1][self.id+1])
+    self.health = myab.health
+    self.maxHealth = myab.health
+    self.attack = myab.attack
+    self.defense = myab.defense
     --地图记录每个网格状态 
     --士兵类型kind
     if self.id == 0  then
@@ -256,12 +262,30 @@ function FightSoldier2:doHurt(harm, showBomb)
     if rd == 1 or showBomb then
         self:showBombEffect()
     end
+    print("doHurt", harm, self.defense, self.health)
+    local harm = harm-self.defense
+    harm = math.max(harm, 1)
+    --伤害小于 生命值上限
+    harm = math.min(self.health, harm)
+    print("real hurt", harm)
+    local lastHealth = self.health
     self.health = self.health-harm
+    --平均每人的生命值
+    local eachHealth = math.floor(self.maxHealth/self.data.level) 
+    --之前剩余的人数量
+    local lastNum = math.ceil(lastHealth/eachHealth)
+    local nowNum = math.ceil(self.health/eachHealth)
+    local dnum = lastNum-nowNum
+    print("hurt soldier Num", lastNum, nowNum, dnum)
+    --损失的士兵数量 损失的生命值数量
+    self.map.scene.menu:killSoldier(self, dnum, harm)
+
     local num = ui.newBMFontLabel({text=harm, font='bound.fnt', size=25, color={128, 0, 0}})
     local p = getPos(self.bg)
     self.map.battleScene:addChild(num, MAX_BUILD_ZORD)
     setPos(num, {p[1], p[2]+50})
     num:runAction(sequence({fadein(0.2), moveby(0.5, 0, 20), fadeout(0.2), callfunc(nil, removeSelf, num)}))
+
 
     --attackDir
     if not self.dead then

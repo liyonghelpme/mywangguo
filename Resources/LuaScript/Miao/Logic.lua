@@ -407,3 +407,34 @@ Logic.inSell = {
     stone=true,
 }
 
+SoldierAbility = {
+    {attack=40, defense=30, health=30},
+    {attack=35, defense=10, health=15},
+    {attack=50, defense=10, health=10},
+    {attack=40, defense=30, health=30},
+}
+IncEffect = {
+    {attack=2, defense=1, health=1},
+    {attack=3, defense=0, health=0},
+    {attack=4, defense=0, health=1},
+    {attack=4, defense=1, health=1},
+}
+
+--计算单个士兵能力
+--计算增益效果
+--计算多个士兵在增益下的实际能力
+
+function getSolAbility(kind, num, total)
+    local addEffect = math.floor(total/50)
+    local se = SoldierAbility[kind]
+    local ae = IncEffect[kind]
+    local temp = {}
+    temp.attack = se.attack+ae.attack*addEffect
+    temp.defense = se.defense+ae.defense*addEffect
+    temp.health = se.health+ae.health*addEffect
+
+    temp.attack = temp.attack*num
+    temp.defense = temp.defense*num
+    temp.health = temp.health*num
+    return temp
+end
