@@ -64,12 +64,6 @@ function FightLayer2:footScript(diff)
         self.moveTarget = p[1]
         --快速移动镜头 分镜头
         --再显示animate动画
-        --[[
-        for k, v in ipairs(self.allSoldiers) do
-            --开始跑步和攻击
-            v:doRunAndAttack(self.day)
-        end
-        --]]
         local p = getPos(self.battleScene)
         local vs = getVS()
         local bp = self.leftWidth
@@ -101,6 +95,38 @@ function FightLayer2:footScript(diff)
                 end
             end
         end
+
+        local vs = getVS()
+        local ls = -self.leftCamera.startPoint[1]
+        local rs = -self.rightCamera.startPoint[1]
+        local lw = self.leftCamera.width
+        local rw = self.rightCamera.width
+        local lp = getPos(self.leftCamera.renderTexture)
+        local rp = getPos(self.rightCamera.renderTexture)
+        print("leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
+        --镜头相交
+        if not self.mergeYet and not self.clone then
+            if ls < rs+rw and ls+lw > rs then
+                self:mergeCamera()
+            end
+        end
+        --拆分镜头 步兵移动
+        if self.mergeYet then
+            print("splitCamera foot check", ls, rs+rw, ls+lw, rs, rw, lw)
+            print("soldier merge only show one soldier view all Foot killed")
+            print('left live or right live')
+            if (ls+lw) > (rs+rw) then
+                if self.mySol ~= nil and not self.mySol.dead then
+                    --main clone left move
+                    self:cloneLeftCamera()
+                elseif self.eneSol ~= nil and not self.eneSol.dead then
+                    --main clone rightMove
+                    self:cloneRightCamera()
+                end
+                --print("splitCamera for foot soldier")
+                --self:splitCamera()
+            end
+        end
     end
 
     --第一天结束之后 场景应该回到那个位置呢？
@@ -118,8 +144,10 @@ function FightLayer2:footScript(diff)
         --等上一会才士兵回到初始位置
         self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishFoot)}))
     end
+
     --屏幕重新回到开始位置 
-    if not self.finishAttack then
+    --FIXME 优化性能只在 镜头设置后 才 设定镜头的object
+    if not self.finishAttack and self.animateYet then
         local mySol
         --从外列 逐行搜索
         if self.mySol == nil or self.mySol.dead then
@@ -139,31 +167,49 @@ function FightLayer2:footScript(diff)
                     end
                 end
             end
-        else
-            mySol = self.mySol
+            self.mySol = mySol
+        end
+        if self.mySol ~= nil then
+            self.leftCamera:trace(self.mySol, FIGHT_OFFX*2)
         end
         --寻找影子步兵
-        if  mySol ~= nil then
-            self.mySol = mySol
-            local sp = getPos(mySol.bg)
-            local vs = getVS()
-            --看一下4对象的位置
-            --查看一下 当前最前端的步兵的 位置 如果步兵死亡了 那么 就使用影子步兵来移动
-            --shadow 所有步兵移动都会 影响 
-            if sp[1] >= math.abs(p[1])+vs.width/2 then
-                self.moveTarget = -(sp[1])+vs.width/2
-                --print("moveTarget", self.moveTarget)
+        --local sp = getPos(mySol.bg)
+        --local vs = getVS()
+        --看一下4对象的位置
+        --查看一下 当前最前端的步兵的 位置 如果步兵死亡了 那么 就使用影子步兵来移动
+        --shadow 所有步兵移动都会 影响 
+        if self.eneSol == nil or self.eneSol.dead then
+            local maxX = 0
+            --从下行到上行 应该从上到下 
+            --随便了 足够的空隙即可
+            for k, v in ipairs(self.eneSoldiers) do
+                for tk, tv in ipairs(v) do
+                    --活着的士兵
+                    if not tv.dead then
+                        --local p = getPos(tv.bg)
+                        --if p[1] > maxX then 
+                            self.eneSol = tv
+                            --maxX = p[1]
+                            break
+                        --end
+                    end
+                end
             end
+        end
+        if self.eneSol ~= nil then
+            self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*2)
         end
     end
 
     if self.moveTarget ~= nil then
+        --[[
         local pos = getPos(self.battleScene)
         local smooth = diff*5
         smooth = math.min(smooth, 1)
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
         setPos(self.battleScene, {px, pos[2]}) 
         self:adjustBattleScene(px)
+        --]]
         --[[
         local fxy = getPos(self.farScene)
         setPos(self.farScene, {px*self.farRate, fxy[2]})
@@ -171,6 +217,26 @@ function FightLayer2:footScript(diff)
         setPos(self.nearScene, {px*self.nearRate, nxy[2]})
         --]]
     end
+    if self.clone then
+        if self.cloneWho == 0 then
+            self.mainCamera.moveTarget = self.leftCamera.moveTarget 
+            self.mainCamera.startPoint = self.leftCamera.startPoint
+        else
+            self.mainCamera.moveTarget = self.rightCamera.moveTarget
+            self.mainCamera.startPoint = self.rightCamera.startPoint
+        end
+    end
+end
+--主镜头 clone 某个分镜头的 moveTarget 和 位置行为
+function FightLayer2:cloneLeftCamera()
+    self.mergeYet = false
+    self.clone = true
+    self.cloneWho = 0
+end
+function FightLayer2:cloneRightCamera()
+    self.mergeYet = false
+    self.clone = true
+    self.cloneWho = 1
 end
 
 function FightLayer2:switchArrow()
@@ -185,6 +251,7 @@ function FightLayer2:showLeftCamera()
     local vs = getVS()
     setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setVisible(self.mainCamera.renderTexture, false)
+    self.mergeYet = false
 end
 function FightLayer2:showRightCamera()
     setVisible(self.rightCamera.renderTexture, true)
@@ -192,6 +259,7 @@ function FightLayer2:showRightCamera()
     local vs = getVS()
     setPos(self.rightCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
     setVisible(self.mainCamera.renderTexture, false)
+    self.mergeYet = false
 end
 
 function FightLayer2:mergeCamera()
@@ -386,7 +454,7 @@ function FightLayer2:traceArrow(arr)
             self.arrow = arr
         end
         --startPoint 应该
-        self.leftCamera:trace(self.arrow, 100)
+        self.leftCamera:trace(self.arrow, 200)
     else
         if self.rightArrow ~= nil then
             local ap = getPos(self.rightArrow.bg)
@@ -397,6 +465,6 @@ function FightLayer2:traceArrow(arr)
         else
             self.rightArrow = arr
         end
-        self.rightCamera:trace(self.rightArrow, -100)
+        self.rightCamera:trace(self.rightArrow, -200)
     end
 end

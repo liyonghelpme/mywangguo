@@ -26,6 +26,7 @@ end
 function Camera:adjustMoveTarget()
     if self.object ~= nil then
         if self.object.dead then
+            --追踪对象死亡了
         else
             local vs = getVS()
             local ap = getPos(self.object.changeDirNode)
@@ -49,7 +50,7 @@ function Camera:update(diff)
     self:adjustMoveTarget()
     if self.moveTarget ~= nil then
         local pos = self.startPoint
-        local smooth = diff*5
+        local smooth = diff*10
         smooth = math.min(smooth, 1)
         local dx = math.abs(pos[1]-self.moveTarget)
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
