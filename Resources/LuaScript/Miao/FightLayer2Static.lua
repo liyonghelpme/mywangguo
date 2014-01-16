@@ -1,5 +1,6 @@
 function FightLayer2:finishFoot()
     print("finish Foot attack")
+    self:clearMenu()
     local ret, left, right = self:oneFail()
     if ret then
     else
@@ -18,6 +19,9 @@ function FightLayer2:countFoot()
         end
     end
     return 0
+end
+function FightLayer2:clearMenu()
+    self.scene.menu:finishRound()
 end
 function FightLayer2:oneFail()
     local left = 0
@@ -38,6 +42,13 @@ function FightLayer2:oneFail()
     --只是士兵 跑动 一会大概几秒钟吧
     for k, v in ipairs(self.allSoldiers) do
         v:doWinMove(left, right)
+    end
+    if left == right then
+        addBanner("平局")
+    elseif left > 0 then
+        addBanner("胜利")
+    else
+        addBanner("失败")
     end
     return true, left, right
 end
@@ -204,6 +215,7 @@ function FightLayer2:finishArrow()
     --self.day = 1
     --左侧屏幕宽度 第一排 步兵的位置
     --游戏开始就记录了步兵的位置
+    self:clearMenu()
     local ret, left, right = self:oneFail()
     if ret then
     else

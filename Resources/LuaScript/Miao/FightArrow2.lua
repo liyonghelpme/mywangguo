@@ -203,7 +203,7 @@ function FightArrow2:waitAttack(diff)
             --第一次测试距离就小于400则已经进入了近身肉搏战状态
             if not self.firstCheckYet then
                 self.firstCheckYet = true
-                if self.soldier.attackTarget ~= nil then
+                if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
                     local ap = getPos(self.soldier.attackTarget.bg)
                     local mp = getPos(self.soldier.bg)
                     local dx = math.abs(ap[1]-mp[1])
@@ -231,7 +231,7 @@ function FightArrow2:waitAttack(diff)
                     end
                 end
             else
-                if self.soldier.attackTarget ~= nil then
+                if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
                     local ap = getPos(self.soldier.attackTarget.bg)
                     local mp = getPos(self.soldier.bg)
                     local dx = math.abs(ap[1]-mp[1])
@@ -331,18 +331,26 @@ function FightArrow2:doFightBack(diff)
             end
             if not self.dead then
                 self.soldier.changeDirNode:stopAllActions()
-                self.soldier.changeDirNode:runAction(CCAnimate:create(self.soldier.attackA))
+                self.inFightBack = true
+                local function clearFightBack()
+                    self.inFightBack = false
+                end
+                self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(nil, clearFightBack)}))
                 self.soldier.changeDirNode:runAction(sequence({delaytime(0.2), callfunc(nil, addArrow)}))
             end
         else
             local p = getPos(self.soldier.bg)
             local ap = getPos(self.soldier.attackTarget.bg)
-            if math.abs(p[1]-ap[1]) < 90 then
-                self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
-                print('FIGHT_BACK NEAR_ATTACK')
-                self.shootYet = false
-                self.oneAttack = false
-                self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
+            --控制动画频率
+            if not self.inFightBack then
+                if math.abs(p[1]-ap[1]) < 90 then
+                    self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                    print('FIGHT_BACK NEAR_ATTACK')
+                    self.shootYet = false
+                    self.oneAttack = false
+                    --又开始执行另外的攻击动作了 执行的太多了
+                    self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
+                end
             end
         end
     end
@@ -366,13 +374,16 @@ function FightArrow2:doNearAttack(diff)
         if self.oneAttack then
             self.oneAttack = false
             --nearAttack 结束的时候 才会找下一个
+            --近战攻击 等待下一个 靠近
             if self.soldier.attackTarget.dead then
                 self.soldier.state = FIGHT_SOL_STATE.NEXT_TARGET
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
+                self.soldier.changeDirNode:stopAllActions()
                 self.soldier.changeDirNode:runAction(self.idleAction)
                 local ene = self:findNearFoot()
                 self.soldier.attackTarget = ene
             else
+                print("near enemy is", self.soldier.attackTarget.sid)
                 self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
             end
         end
@@ -420,9 +431,11 @@ function FightArrow2:findNearFoot()
 end
 
 --只能找 步兵 findNear enemy
+--如果下一个目标也死亡掉了 则 不再攻击
+--没有找到next 那么就结束了
 function FightArrow2:doNext(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEXT_TARGET then
-        if self.soldier.attackTarget ~= nil then
+        if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
             local p = getPos(self.soldier.attackTarget.bg)
             local mp = getPos(self.soldier.bg)
             if math.abs(p[1]-mp[1]) < 90 then
@@ -435,6 +448,10 @@ function FightArrow2:doNext(diff)
                 --self:showAttackEffect()
                 --print("next attack target get now attack him!!", self.sid, self.attackTarget.sid)
             end
+        else
+            --等待下一个士兵 但是 没有了
+            --如果没有下一个士兵则不在搜索了
+            self.soldier.attackTarget = self:findNearEnemy()
         end
     end
 end
@@ -445,6 +462,7 @@ function FightArrow2:finishAttack()
     self.isHead = false 
     self.oneAttack = false
     self.firstCheckYet = false
+    self.inFightBack = false
 
     if self.soldier.dead then
         setVisible(self.soldier.bg, false)

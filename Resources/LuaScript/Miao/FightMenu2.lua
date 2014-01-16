@@ -2,8 +2,9 @@ FightMenu2 = class()
 function FightMenu2:adjustPos()
     local vs = getVS()
     local ds = global.director.designSize
-    local realHeight = vs.height-FIGHT_HEIGHT+80
-    local scaY = realHeight/self.tsz.height
+    --local realHeight = vs.height-FIGHT_HEIGHT
+    --+80
+    local scaY = self.realHeight/self.tsz.height
     local scaX = scaY
     --缩放Y 方向
     setScale(self.temp, scaY)
@@ -19,17 +20,29 @@ function FightMenu2:ctor(s)
     local sz = {width=1024, height=768}
     local bc = addNode(self.bg)
     local sp = CCSprite:create("battleUI.png")
+    self.bui = sp
     bc:addChild(sp)
+    local vs = getVS()
+    setAnchor(setPos(sp, {vs.width/2, 0}), {0.5, 0})
+    local tsz = sp:getContentSize()
+    self.tsz =tsz
+    --bottom center cust height
+    local nh = vs.height-FIGHT_HEIGHT+10
+    self.realHeight = nh
+    print("ui height", nh)
+    setScaleY(sp, nh/tsz.height)
+    --[[
     setPos(sp, {512, fixY(sz.height, 592)})
     centerYRate(bc)  
     local vs = getVS()
-    local tsz = sp:getContentSize()
-    self.tsz =tsz
     setScaleY(bc, (vs.height-FIGHT_HEIGHT+80)/tsz.height)
+    --]]
+
 
 
     --高度缩放但是X 位置 基本根据宽度重新布局
     self.temp = addNode(self.bg)
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "upTitle.png"), {512, fixY(sz.height, 449)}), {932, 74}), {0.50, 0.50})
     --local sz = {width=97, height=46}
     --self.temp = setPos(addNode(self.bg), {579, fixY(sz.height, 487+sz.height)+0})
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "battleNumBar.png"), {627, fixY(sz.height, 510)}), {97, 46}), {0.50, 0.50})
@@ -58,18 +71,6 @@ function FightMenu2:ctor(s)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="50", size=35, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {691, fixY(sz.height, 683)})
     self.eneCavNum = w
 
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "battleWord.png"), {717, fixY(sz.height, 444)}), {116, 83}), {0.50, 0.50})
-    self.eneWord = sp
-    setVisible(sp, false)
-    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="0", size=35, color={128, 0, 0}, font="bound.fnt"})), {0.50, 0.50}), {56, 40})
-    self.eneNum = w
-
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "battleWord.png"), {317, fixY(sz.height, 444)}), {116, 83}), {0.50, 0.50})
-    self.myWord = sp
-    setVisible(sp, false)
-    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="0", size=35, color={128, 0, 0}, font="bound.fnt"})), {0.50, 0.50}), {56, 40})
-    self.myNum = w
-
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "battleNumBar.png"), {391, fixY(sz.height, 510)}), {97, 46}), {0.50, 0.50})
     local pro = setAnchor(setPos(addSprite(banner, "battleNumCol.png"), {3, 2}), {0.0, 0.0})
     self.myFoot = pro
@@ -91,6 +92,50 @@ function FightMenu2:ctor(s)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="50", size=35, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {1.00, 0.50}), {331, fixY(sz.height, 683)})
     self.myCavNum = w
 
+    --分离battle 的血条背景
+    --local scaX = getScaleX(self.bui)
+    --self.scaX = scaX
+    --self.realSizeX = self.scaX*888
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "vsbloodA.png"), {508, fixY(sz.height, 474)}), {888, 13}), {0.50, 0.50})
+    self.leftBlood = sp
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "vsbloodB.png"), {953, fixY(sz.height, 474)}), {443, 13}), {1.00, 0.50})
+    self.rightBlood = sp
+    self.totalLeft = 0
+    self.totalRight = 0
+    self.leftAll = 0
+    self.rightAll = 0
+    for k, v in ipairs(self.scene.layer.allSoldiers) do
+        if not v.dead then
+            if v.color == 0 then
+                self.leftAll = self.leftAll+v.health
+            elseif v.color == 1 then
+                self.rightAll = self.rightAll+v.health
+            end
+        end
+    end
+
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "battleWord.png"), {717, fixY(sz.height, 444)}), {116, 83}), {0.50, 0.50})
+    self.eneWord = sp
+    setVisible(sp, false)
+    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="0", size=35, color={128, 0, 0}, font="bound.fnt"})), {0.50, 0.50}), {56, 40})
+    self.eneNum = w
+
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "battleWord.png"), {317, fixY(sz.height, 444)}), {116, 83}), {0.50, 0.50})
+    self.myWord = sp
+    setVisible(sp, false)
+    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="0", size=35, color={128, 0, 0}, font="bound.fnt"})), {0.50, 0.50}), {56, 40})
+    self.myNum = w
+
+
+    self.leftBottom = addNode(self.bg)
+    local but = ui.newButton({image="buta.png", text="返回", font="f2", size=30, delegate=self, callback=self.onBut, shadowColor={255, 255, 255}, color={206, 78, 0}})
+    but:setContentSize(107, 113)
+    setPos(addChild(self.leftBottom, but.bg), {76, fixY(sz.height, 706)})
+    leftBottomUI(self.leftBottom)
+
+
+
+
     self.leftHurt = 0
     self.rightHurt = 0
 
@@ -111,6 +156,9 @@ function fightNumPro(banner, n, max)
         wid = math.max(0, wid)
         setSize(banner, {wid, 39})
     end
+end
+
+function FightMenu2:onBut()
 end
 
 --初始化的时候 根据 
@@ -183,6 +231,19 @@ function FightMenu2:update(diff)
             self.rightInS = true
         end
     end
+
+    local leftLeft = self.leftAll - self.totalLeft
+    local leftRight = self.rightAll - self.totalRight
+    if leftLeft > 0 then
+        print("total left ", self.leftAll, self.rightAll, leftLeft, leftRight)
+        local rate = (leftRight/self.rightAll)/(leftLeft/self.leftAll)
+        local size = rate/(1+rate)
+        setSize(self.rightBlood, {888*size, 13})
+    elseif leftLeft <= 0 and leftRight <= 0 then
+        setSize(self.rightBlood, {444, 13})
+    else
+        setSize(self.rightBlood, {888, 13})
+    end
 end
 
 function FightMenu2:killSoldier(soldier, killNum, healthHurt)
@@ -194,7 +255,7 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
             sol[1][1] = sol[1][1]-killNum
             fightNumPro(self.myFoot, sol[1][1], maxSol[1][1])
             self.myFootNum:setString(sol[1][1])
-        elseif sol.id == 1 then
+        elseif soldier.id == 1 then
             sol[1][2] = sol[1][2]-killNum
             fightNumPro(self.myArrow, sol[1][2], maxSol[1][2])
             self.myArrowNum:setString(sol[1][2])
@@ -204,6 +265,7 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
         --1s 跳动一下 显示当前的伤害
         --出现的时候 突然出现
         self.leftHurt = self.leftHurt+healthHurt
+        self.totalLeft = self.totalLeft+healthHurt
     else
         if soldier.id == 0 then
             sol[2][1] = sol[2][1]-killNum
@@ -215,7 +277,18 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
             self.eneArrowNum:setString(sol[2][2])
         end
         self.rightHurt = self.rightHurt+healthHurt
+        self.totalRight = self.totalRight+healthHurt
     end
+end
+
+function FightMenu2:finishRound()
+    self.rightHurt = 0
+    self.leftHurt = 0
+    self.oldLeft = 0
+    self.oldRight = 0
+    self.passTime = 0
+    setVisible(self.myWord, false)
+    setVisible(self.eneWord, false)
 end
 
 

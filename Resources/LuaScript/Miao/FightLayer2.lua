@@ -1,5 +1,6 @@
 require "Miao.FightUtil"
 require "Miao.FightSoldier2"
+require "Miao.Camera"
 
 FIGHT_STATE = {
     FREE=0,
@@ -161,6 +162,12 @@ function FightLayer2:adjustBattleScene(p)
     setPos(self.grass, ggp)
 end
 
+function FightLayer2:initCamera()
+    self.leftCamera = Camera.new(self)
+    self.bg:addChild(self.leftCamera.bg)
+    self.rightCamera = Camera.new(self)
+    self.bg:addChild(self.rightCamera.bg)
+end
 function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
@@ -191,11 +198,13 @@ function FightLayer2:ctor(s, my, ene)
     --战斗场景高度不变 483 高度
     self.HEIGHT = FIGHT_HEIGHT
     self.bg = setPos(CCLayer:create(), {0, vs.height-self.HEIGHT})
-    self.battleScene = CCNode:create()
-    self.farScene = addNode(self.bg)
-    self.grass = addNode(self.bg)
+    self.physicScene = addNode(self.bg)
+
+    self.farScene = addNode(self.physicScene)
+    self.grass = addNode(self.physicScene)
     setPos(self.grass, {0, 267})
-    self.bg:addChild(self.battleScene)
+    self.battleScene = CCNode:create()
+    addChild(self.physicScene, self.battleScene)
     self.nearScene = addNode(self.bg)
 
     --场景宽度受士兵的数量决定 1:1的士兵
@@ -249,7 +258,7 @@ function FightLayer2:ctor(s, my, ene)
     --nearScene 1.5 比例
     local nearN = math.ceil(self.WIDTH*1.5/self.oneWidth) 
     for i=1, nearN, 1 do
-        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 40}), {0, 0})
+        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 20}), {0, 0})
         self.nearScene:addChild(near)
     end
 
@@ -263,6 +272,7 @@ function FightLayer2:ctor(s, my, ene)
 
     self:initPic()
     self:initSoldier()
+    self:initCamera()
 
     self.needUpdate = true
     registerEnterOrExit(self)
@@ -291,20 +301,6 @@ function FightLayer2:doMove(diff)
     if self.state == FIGHT_STATE.MOVE then
         local pos = getPos(self.battleScene)
         self:adjustBattleScene(pos[1])
-        --[[
-        --根据battleScene 位置 调整farScene 位置
-        local fp = getPos(self.farScene)
-        local farPos = {pos[1]*self.farRate, fp[2]}
-        setPos(self.farScene, farPos)
-
-        local np = getPos(self.nearScene)
-        local nearPos = {pos[1]*self.nearRate, np[2]}
-        setPos(self.nearScene, nearPos)
-
-        local gp = getPos(self.grass)
-        local ggp = {pos[1]*self.grassRate, gp[2]}
-        setPos(self.grass, ggp)
-        --]]
 
         for k, v in ipairs(self.allSoldiers) do
             v:showPose(pos[1])  
