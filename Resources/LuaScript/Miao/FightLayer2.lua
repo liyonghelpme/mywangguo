@@ -163,11 +163,23 @@ function FightLayer2:adjustBattleScene(p)
 end
 
 function FightLayer2:initCamera()
-    self.leftCamera = Camera.new(self)
+    local vs = getVS()
+    self.leftCamera = Camera.new(self, vs.width/2-1)
     self.bg:addChild(self.leftCamera.bg)
-    self.rightCamera = Camera.new(self)
+    setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
+    setVisible(self.leftCamera.renderTexture, false)
+
+    self.rightCamera = Camera.new(self, vs.width/2-1)
     self.bg:addChild(self.rightCamera.bg)
+    setPos(self.rightCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
+    setVisible(self.rightCamera.renderTexture, false)
+
+    self.mainCamera = Camera.new(self, vs.width)
+    self.bg:addChild(self.mainCamera.bg)
+    setPos(self.mainCamera.renderTexture, {vs.width/2, FIGHT_HEIGHT/2})
+    setVisible(self.mainCamera.renderTexture, false)
 end
+
 function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
@@ -198,14 +210,17 @@ function FightLayer2:ctor(s, my, ene)
     --战斗场景高度不变 483 高度
     self.HEIGHT = FIGHT_HEIGHT
     self.bg = setPos(CCLayer:create(), {0, vs.height-self.HEIGHT})
-    self.physicScene = addNode(self.bg)
+    --tempNode not visible
+    --规避 not visible的顶点 调用visit 失效的情况
+    self.tempNode = addNode(self.bg)
+    self.physicScene = addNode(self.tempNode)
 
     self.farScene = addNode(self.physicScene)
     self.grass = addNode(self.physicScene)
     setPos(self.grass, {0, 267})
     self.battleScene = CCNode:create()
     addChild(self.physicScene, self.battleScene)
-    self.nearScene = addNode(self.bg)
+    self.nearScene = addNode(self.physicScene)
 
     --场景宽度受士兵的数量决定 1:1的士兵
     --刚开始 1: 0.618 
@@ -315,45 +330,24 @@ function FightLayer2:doMove(diff)
             local function showOver()
                 self.finShow = true
             end
-            self.battleScene:runAction(sequence({delaytime(1), sinein(moveto(self.totalTime, -self.leftWidth+100, 0)), callfunc(nil, showOver)}))
+            local vs = getVS()
+            local lw = self.leftWidth+vs.width*1.5/2-vs.width/2
+            print("fastBack position", self.leftWidth, self.rightWidth, lw, self.totalTime)
+            self.battleScene:runAction(sequence({delaytime(1), sinein(moveto(0.5, -lw, 0)), callfunc(nil, showOver)}))
         end
     end
 end
 function FightLayer2:doFastBack(diff)
     if self.state == FIGHT_STATE.FAST_BACK then
+        print("fast back scene")
         local pos = getPos(self.battleScene)
         self:adjustBattleScene(pos[1])
-        --[[
-        --根据battleScene 位置 调整farScene 位置
-        local fp = getPos(self.farScene)
-        local farPos = {pos[1]*self.farRate, fp[2]}
-        setPos(self.farScene, farPos)
-
-        local np = getPos(self.nearScene)
-        local nearPos = {pos[1]*self.nearRate, np[2]}
-        setPos(self.nearScene, nearPos)
-
-        local gp = getPos(self.grass)
-        local ggp = {pos[1]*self.grassRate, gp[2]}
-        setPos(self.grass, ggp)
-        --]]
 
         if self.finShow then
             self.state = FIGHT_STATE.DAY
             self.day = 0
             self.passTime = 0
-
         end
-        --[[
-        local pos = getPos(self.bg)
-        local mx = 200*diff
-        pos[1] = math.min(pos[1]+mx, 0)
-        setPos(self.bg, pos)
-        if pos[1] == 0 then
-            self.state = FIGHT_STATE.WAIT 
-            self.passTime = 0
-        end
-        --]]
     end
 end
 --士兵开始跑步 战斗 交给士兵控制
