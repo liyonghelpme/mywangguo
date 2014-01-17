@@ -1687,6 +1687,16 @@ function leftBottomUI(sp)
     local sca = math.min(vs.width/ds[1], vs.height/ds[2])
     setScale(sp, sca)
 end
+function leftCenterUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+
+    local cy = ds[2]/2
+    local ny = vs.height/2-cy*sca
+    setPos(sp, {0, ny})
+end
 
 --弹出的子菜单 显示向右侧
 function rightTopUI(sp)
@@ -1746,3 +1756,13 @@ function concateTable(a, b)
     return temp
 end
 
+function lerp(a, b, wei)
+    if type(a) == 'table' then
+        local temp = {}
+        for i=1, #a, 1 do
+            temp[i] = a[i]*(1-wei)+b[i]*wei
+        end
+        return temp
+    end
+    return a*(1-wei)+b*wei
+end

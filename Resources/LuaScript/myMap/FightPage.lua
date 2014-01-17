@@ -1,7 +1,12 @@
+--inkScape 导出的路径信息
 require "mapData"
 require "myMap.MapCity"
 require "myMap.MapCat"
+--gimp 导出的城堡位置
 require "MapCoord"
+--CityData 每个城堡的 士兵初始数据 
+require 'cityData'
+
 FightPage = class()
 function FightPage:ctor()
     self.bg = CCLayer:create()
@@ -24,10 +29,13 @@ function FightPage:ctor()
 end
 function FightPage:initData()
     if not MapDataInitYet then
+        MapDataInitYet = true
         local sz = getContentSize(self.bg)
         MapNode = tableToDict(MapNode)
         for k, v in pairs(MapNode) do
+            print("MapNode is", k, v)
             v[2] = sz[2]-v[2] 
+            --x y  city or path  kind(mainCity village fightPoint)
             if v[4] ~= nil then
                 local md = 9999
                 local minNode
@@ -40,6 +48,8 @@ function FightPage:initData()
                 end
                 v[1] = minNode[1]
                 v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
             end
         end
         print("allNode")
@@ -47,6 +57,8 @@ function FightPage:initData()
         MapEdge = tableToDict(MapEdge)
     end
     self.allCity = {}
+    --根据城堡id 查找城堡对象
+    self.cidToCity = {}
     for k, v in pairs(MapNode) do
         if v[3] == true then
             local ci = MapCity.new(self, v, k)
@@ -55,9 +67,14 @@ function FightPage:initData()
             if ci.kind == 3 then
                 self.mainCity = ci
             end
+            self.cidToCity[ci.cid] = ci
         end
     end
+    if Logic.catData ~= nil then
+        self:sendCat(self.cidToCity[Logic.catData.cid])
+    end
 end
+
 function FightPage:updateDebugNode(p)
     removeSelf(self.debugNode)
     self.debugNode = addNode(self.bg)
@@ -70,16 +87,8 @@ function FightPage:updateDebugNode(p)
 end
 --从主城到其它城市
 function FightPage:sendCat(city)
-    local target
-    --[[
-    for k, v in ipairs(self.allCity) do
-        if v ~= city then
-            target = v
-            break
-        end
-    end
-    --]]
     local cat = MapCat.new(self, self.mainCity, city, false)
+    self.cat = cat
     self.bg:addChild(cat.bg)
 end
 
@@ -89,6 +98,7 @@ end
 
 function FightPage:touchesBegan(touches)
     self.touchDelegate:tBegan(touches)
+    global.director.curScene.menu:closeMenu()
 end
 function FightPage:touchesMoved(touches)
     self.touchDelegate:tMoved(touches)

@@ -24,6 +24,7 @@ function MapCat:ctor(s, st, ed, fake)
         self.fightPath = FightPath.new(self)
         registerEnterOrExit(self)
         Logic.challengeCity = self.endCity.cid
+        Logic.challengeNum = self.endCity.cityData
     else
         self.bg = CCNode:create()
     end
@@ -34,6 +35,59 @@ function MapCat:doFind(diff)
     if self.fightPath.searchYet then
         self.path = self.fightPath:getPath()
         self.state = MAP_STATE.MOVE
+    end
+end
+
+--退出场景
+--经营页面的伪造猫咪 退出场景 也要保存数据 到catData 中这样在pushScene的时候加载这个数据
+--经营页面push 的时候 主动保存数据即可
+function MapCat:exitScene()
+    --没有到达目的地呢
+    if not self.showYet then
+        self:storeData()
+    end
+end
+function MapCat:storeData()
+    Logic.catData = {path=self.path, curPoint=self.curPoint, moveTime=self.moveTime}
+end
+
+function MapCat:restoreData()
+    local lc = Logic.catData
+    self.path = lc.path
+    self.curPoint = lc.curPoint
+    self.moveTime = lc.moveTime
+    --计算位置 初始化位置
+    --加载一个移动函数
+    --可能的bug 当前目标点 moveTime > dis 怎么办呢？
+    if self.curPoint > 1 and self.curPoint <= #self.path then
+        local lastPos = self.path[self.curPoint-1]
+        lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+        local xy =  self.path[self.curPoint]
+        xy = {MapNode[xy][1], MapNode[xy][2]}
+        local dis = distance(lastPos, xy)/self.speed
+        self.moveTime = math.min(self.moveTime, dis)
+        local np = lerp(lastPos, xy, self.moveTime/dis)
+        setPos(self.bg, np)
+        self.bg:runAction(moveto(self.moveTime, xy[1], xy[2]))
+        self.state = MAP_STATE.MOVE
+    elseif self.curPoint == 1 then
+        local lastPos =  self.path[self.curPoint]
+        lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+        self.curPoint = self.curPoint+1
+        local xy =  self.path[self.curPoint]
+        xy = {MapNode[xy][1], MapNode[xy][2]}
+        local dis = distance(lastPos, xy)/self.speed
+        self.moveTime = math.min(self.moveTime, dis)
+        setPos(self.bg, lastPos)
+        self.bg:runAction(moveto(self.moveTime, xy[1], xy[2]))
+        self.state = MAP_STATE.MOVE 
+    else
+        self.curPoint = #self.path
+        local lastPos =  self.path[self.curPoint]
+        lastPos = {MapNode[xy][1], MapNode[xy][2]}
+        self.moveTime = 0
+        setPos(self.bg, lastPos)
+        self.state = MAP_STATE.MOVE 
     end
 end
 function MapCat:update(diff)
@@ -74,8 +128,12 @@ function MapCat:update(diff)
         end
     else
         if self.state == MAP_STATE.FREE then
-            self.state = MAP_STATE.IN_FIND
-            self.fightPath:init(self.start.cid, self.endCity.cid)
+            if Logic.catData ~= nil then
+                self:restoreData()
+            else
+                self.state = MAP_STATE.IN_FIND
+                self.fightPath:init(self.start.cid, self.endCity.cid)
+            end
         elseif self.state == MAP_STATE.IN_FIND then
             self:doFind(diff)
         elseif self.state == MAP_STATE.MOVE then

@@ -273,7 +273,7 @@ function FightLayer2:ctor(s, my, ene)
     --nearScene 1.5 比例
     local nearN = math.ceil(self.WIDTH*1.5/self.oneWidth) 
     for i=1, nearN, 1 do
-        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 20}), {0, 0})
+        local near = setAnchor(setPos(setScale(CCSprite:create("battle_near.png"), tsca), {(i-1)*self.oneWidth, 10}), {0, 0})
         self.nearScene:addChild(near)
     end
 

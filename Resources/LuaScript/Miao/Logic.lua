@@ -440,7 +440,8 @@ function getSolAbility(kind, num, total)
 end
 --根据moveTime 计算位置 
 --根据 path 和 curPoint 计算方向
-Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2}
+--test CatData
+Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
 
 --保存挑战数据
 Logic.challengeNum = {
@@ -456,11 +457,45 @@ Logic.cityNum = {}
 
 --占领的城市
 Logic.ownCity = {}
+
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
-    table.insert(Logic.ownCity, Logic.challengeCity)
+    print("winCity of scene", Logic.challengeCity)
+    Logic.ownCity[Logic.challengeCity] = true
+    --table.insert(Logic.ownCity, Logic.challengeCity)
 end
 function clearFight()
     Logic.catData = nil
 end
 
+function initCityData()
+    if not MapDataInitYet then
+        local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
+        local sz = getContentSize(tex)
+        MapDataInitYet = true
+        MapNode = tableToDict(MapNode)
+        for k, v in pairs(MapNode) do
+            print("MapNode is", k, v)
+            v[2] = sz[2]-v[2] 
+            --x y  city or path  kind(mainCity village fightPoint)
+            if v[4] ~= nil then
+                local md = 9999
+                local minNode
+                for ck, cv in ipairs(MapCoord) do
+                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
+                    if dis < md then
+                        md = dis
+                        minNode = cv
+                    end
+                end
+                v[1] = minNode[1]
+                v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
+            end
+        end
+        print("allNode")
+        print(simple.encode(MapNode))
+        MapEdge = tableToDict(MapEdge)
+    end
+end

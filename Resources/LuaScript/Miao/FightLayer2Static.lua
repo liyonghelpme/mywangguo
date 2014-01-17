@@ -15,20 +15,54 @@ function FightLayer2:finishFoot()
         self.rightCamera:clearCamera()
     end
 end
+--我方或者敌方步兵死光
 function FightLayer2:countFoot()
+    local left = 0
+    local right = 0
     for k, v in ipairs(self.allSoldiers) do
         if v.id == 0 and not v.dead then
-            return 1
+            if v.color == 0 then
+                left = 1
+            else
+                right = 1
+            end
+            if left > 0 and right > 0 then
+                break
+            end
         end
     end
-    return 0
+    return left, right
 end
 function FightLayer2:clearMenu()
     self.scene.menu:finishRound()
 end
+
+function FightLayer2:checkOneDead()
+    local left = 0
+    local right = 0
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead then
+            if v.color == 0 then
+                left = left+1
+            elseif v.color == 1 then
+                right = right+1
+            end
+            if left > 0 and right > 0 then
+                return false
+            end
+        end
+    end
+    print("check OneDead", left, right)
+    return true
+end
+
 function FightLayer2:oneFail()
     local left = 0
     local right = 0
+    --清理相机 状态
+    self.clone = false
+    self.mergeYet = false
+
     for k, v in ipairs(self.allSoldiers) do
         if not v.dead then
             if v.color == 0 then
@@ -54,12 +88,25 @@ function FightLayer2:oneFail()
     else
         addBanner("失败")
     end
-    local function fightOver()
-        global.director:popScene()
+
+    local function checkWin()
+        print("oneFail checkWin")
         if global.director.curScene.checkWin == nil then
             global.director:pushScene(FightMap.new())
         end
         global.director.curScene:checkWin()
+    end
+    local function fightOver()
+        --如果scene 退出完了 则 push一个新的scene
+        global.director:popScene()
+        --global.director.curScene.bg:runAction(sequence({delaytime(0.5), callfunc(nil, checkWin)}))
+        delayCall(0.5, checkWin)
+        --[[
+        if global.director.curScene.checkWin == nil then
+            global.director:pushScene(FightMap.new())
+        end
+        global.director.curScene:checkWin()
+        --]]
     end
     self.bg:runAction(sequence({delaytime(2), callfunc(nil, fightOver)}))
     return true, left, right
@@ -141,8 +188,12 @@ function FightLayer2:footScript(diff)
     --第一天结束之后 场景应该回到那个位置呢？
     --开始的弓箭手位置
     self.passTime = self.passTime+diff
-    local cf = self:countFoot()
-    if (cf == 0 or self.passTime >= 20) and not self.finishAttack then
+    --print("foot passTime", self.passTime)
+    --local left, right = self:countFoot()
+    --一方士兵死光的话
+    local oneDead = self:checkOneDead()
+    print("oneDead?", oneDead)
+    if (oneDead or self.passTime >= 20) and not self.finishAttack then
         print("finish foot attack now", cf, self.passTime)
         self.finishAttack = true
         for k, v in ipairs(self.allSoldiers) do
@@ -179,7 +230,7 @@ function FightLayer2:footScript(diff)
             self.mySol = mySol
         end
         if self.mySol ~= nil then
-            self.leftCamera:trace(self.mySol, FIGHT_OFFX*2)
+            self.leftCamera:trace(self.mySol, FIGHT_OFFX*3)
         end
         --寻找影子步兵
         --local sp = getPos(mySol.bg)
@@ -206,33 +257,18 @@ function FightLayer2:footScript(diff)
             end
         end
         if self.eneSol ~= nil then
-            self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*2)
+            self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*3)
         end
     end
 
-    if self.moveTarget ~= nil then
-        --[[
-        local pos = getPos(self.battleScene)
-        local smooth = diff*5
-        smooth = math.min(smooth, 1)
-        local px = pos[1]*(1-smooth)+self.moveTarget*smooth
-        setPos(self.battleScene, {px, pos[2]}) 
-        self:adjustBattleScene(px)
-        --]]
-        --[[
-        local fxy = getPos(self.farScene)
-        setPos(self.farScene, {px*self.farRate, fxy[2]})
-        local nxy = getPos(self.nearScene)
-        setPos(self.nearScene, {px*self.nearRate, nxy[2]})
-        --]]
-    end
     if self.clone then
+        print("start clone", self.cloneWho)
         if self.cloneWho == 0 then
             self.mainCamera.moveTarget = self.leftCamera.moveTarget 
-            self.mainCamera.startPoint = self.leftCamera.startPoint
+            self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
         else
             self.mainCamera.moveTarget = self.rightCamera.moveTarget
-            self.mainCamera.startPoint = self.rightCamera.startPoint
+            self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
         end
     end
 end
@@ -246,6 +282,7 @@ function FightLayer2:cloneRightCamera()
     self.mergeYet = false
     self.clone = true
     self.cloneWho = 1
+    print("cloneRightCamera")
 end
 
 function FightLayer2:switchArrow()
@@ -279,9 +316,22 @@ function FightLayer2:mergeCamera()
     setVisible(self.tempNode, false)
     --对镜头位置
     self.mainCamera.moveTarget = self.leftCamera.moveTarget
-    self.mainCamera.startPoint = self.leftCamera.startPoint
+    self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
     self.mergeYet = true
 end
+function FightLayer2:mergeRightCamera()
+    setVisible(self.leftCamera.renderTexture, false)
+    setVisible(self.rightCamera.renderTexture, false)
+    setVisible(self.mainCamera.renderTexture, true)
+    setVisible(self.tempNode, false)
+
+    local vs = getVS()
+    self.mainCamera.moveTarget = self.rightCamera.moveTarget+vs.width/2
+    local rs = self.rightCamera.startPoint
+    self.mainCamera.startPoint = {rs[1]+vs.width/2, rs[2]}
+    self.mergeYet = true
+end
+
 --根据mainCamera 属性重新设定两个镜头的位置和 startPoint 和 已经追踪的对象交换
 --交换镜头的position 即可
 function FightLayer2:splitCamera()
@@ -295,6 +345,20 @@ function FightLayer2:splitCamera()
     --交换镜头位置
     setPos(self.rightCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setPos(self.leftCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
+end
+function FightLayer2:checkArrow()
+    local left
+    local right
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.id == 1 then
+            if v.color == 0 then
+                left = true
+            else
+                right = true
+            end
+        end
+    end
+    return left, right
 end
 
 --屏幕左侧宽度 要是 保证最后面的有半个屏幕可以显示 至少 
@@ -331,41 +395,47 @@ function FightLayer2:arrowScript(diff)
         local lp = getPos(self.leftCamera.renderTexture)
         local rp = getPos(self.rightCamera.renderTexture)
         print("leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
-        --镜头相交
-        if not self.mergeYet then
-            if ls < rs+rw and ls+lw > rs then
-                self:mergeCamera()
+        --当一方没有 弓箭手剩余的时候 则 等待另外一侧镜头到达屏幕中央则 clone这个镜头即可
+        local left, right = self:checkArrow()
+        if not left then
+            print("rightCamera ", rs, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
+            if not self.mergeYet then
+                if rs <= self.WIDTH/2 and rs > self.WIDTH/2-vs.width/2 then
+                    self:mergeRightCamera()
+                end
+            else
+                if rs <= self.WIDTH/2-vs.width/2 then
+                    print("begin clone Right Camera")
+                    self:cloneRightCamera()
+                end
             end
-        end
-        --拆分镜头
-        if self.mergeYet then
-            if ls > rs+rw or ls+lw < rs then
-                self:splitCamera()
+        elseif not right then
+            if not self.mergeYet then
+                if (ls+lw) >= self.WIDTH/2 and (ls+lw) < self.WIDTH/2+vs.width/2 then
+                    self:mergeCamera()
+                end
+            else
+                if (ls+lw) >= self.WIDTH/2+vs.width/2 then
+                    self:cloneLeftCamera()
+                end
+            end
+        else
+            --镜头相交
+            if not self.mergeYet then
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
+            end
+            --拆分镜头
+            if self.mergeYet then
+                if ls > rs+rw or ls+lw < rs then
+                    self:splitCamera()
+                end
             end
         end
     end
 
     --如何制作一个合体的镜头呢？
-    if self.moveTarget ~= nil then
-        --[[
-        local pos = getPos(self.battleScene)
-        local dx = math.abs(pos[1]-self.moveTarget)
-        local smooth = diff*5
-        smooth = math.min(smooth, 1)
-        local px = pos[1]*(1-smooth)+self.moveTarget*smooth
-        setPos(self.battleScene, {px, pos[2]})
-        self:adjustBattleScene(px)
-
-        if self.prepareFoot and dx <= 5 then
-            self.prepareFoot = false
-            for k, v in ipairs(self.allSoldiers) do
-                v:finishAttack()
-            end
-            self.bg:runAction(sequence({delaytime(0.5), callfunc(self, self.switchArrow)}))
-            print("begin Foot Script")
-        end
-        --]]
-    end
     --进入 动画状态
     local p = getPos(self.battleScene)
     --print("battleScene pos and moveTarget", p[1], self.moveTarget)
@@ -391,25 +461,16 @@ function FightLayer2:arrowScript(diff)
                 self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
             end
         end
-
-        --弓箭死亡了 准备进入第二个节点
-        --[[
-        if self.arrow.dead then
-            self.arrow = nil
-            self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
+    end
+    if self.clone then
+        print("start clone", self.cloneWho)
+        if self.cloneWho == 0 then
+            self.mainCamera.moveTarget = self.leftCamera.moveTarget 
+            self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
         else
-            local vs = getVS()
-            local ap = getPos(self.arrow.changeDirNode)
-            local abp = getPos(self.arrow.bg)
-            ap[1] = abp[1]+ap[1]
-            ap[2] = abp[2]+ap[2]
-            local cp = getPos(self.battleScene)
-            if (ap[1]+100) >= (-cp[1]+vs.width/2) then
-                self.moveTarget = -(ap[1]+100-vs.width/2)
-                --self.leftCamera:fastMoveTo(p, self.moveTarget) 
-            end
+            self.mainCamera.moveTarget = self.rightCamera.moveTarget
+            self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
         end
-        --]]
     end
 end
 --进入步兵回合 

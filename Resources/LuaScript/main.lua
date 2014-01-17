@@ -34,9 +34,9 @@ local function main()
     require 'Miao.FightScene'
     require 'myMap.FightMap'
 
+    local director = CCDirector:sharedDirector()
     --global.director:runWithScene(TMXScene.new())
 
-    local director = CCDirector:sharedDirector()
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
@@ -49,6 +49,7 @@ local function main()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
     --]]
+
 
     --[[ 
     local sc = FightMap.new()
