@@ -118,6 +118,7 @@ function FightPath:update()
     --self.map:updateCells(self.cells, self.map.cells)
 end
 
+--到该点的路径
 function FightPath:getPath()
     if self.endPoint ~= nil then
         local path = {self.endPoint}
@@ -133,7 +134,8 @@ function FightPath:getPath()
         for i =#path, 1, -1 do
             table.insert(self.path, path[i])
         end
-        print("get Map Cat Path", simple.encode(self.endPoint), simple.encode(path))
+        print("get Map Cat Path", simple.encode(self.endPoint), simple.encode(self.path))
+        self.target.scene:updateDebugNode(self.path)
     end
     return self.path
 end

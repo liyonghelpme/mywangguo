@@ -438,3 +438,29 @@ function getSolAbility(kind, num, total)
     temp.health = temp.health*num
     return temp
 end
+--根据moveTime 计算位置 
+--根据 path 和 curPoint 计算方向
+Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2}
+
+--保存挑战数据
+Logic.challengeNum = {
+    10, 10, 0, 0
+}
+Logic.challengeCity = nil
+
+--保存每个城市的士兵发展的数据
+--城市士兵数据
+--基础数据 和城市发展时间 以及城市是否出来过
+--cid = [0, 0, 0, 0]
+Logic.cityNum = {}
+
+--占领的城市
+Logic.ownCity = {}
+--退出Fight 场景之后 Map 上面提示奖励
+function winCity()
+    table.insert(Logic.ownCity, Logic.challengeCity)
+end
+function clearFight()
+    Logic.catData = nil
+end
+

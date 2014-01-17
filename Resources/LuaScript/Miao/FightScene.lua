@@ -2,7 +2,9 @@ require "Miao.FightLayer2"
 require "Miao.FightMenu2"
 FightScene = class()
 function FightScene:ctor()
-    self.soldiers = {{10, 10, 0, 0}, {10, 10, 0, 0}}
+    local ms = Logic.soldiers 
+    self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
+    --self.soldiers = {{Logic., 10, 0, 0}, {10, 10, 0, 0}}
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 
     self.bg = CCScene:create()

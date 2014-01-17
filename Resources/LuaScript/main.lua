@@ -30,24 +30,31 @@ local function main()
     --require "Miao.MiaoScene"
     require "Miao.TMXScene"
 
-    require "myMap.MapScene"
+    --require "myMap.MapScene"
     require 'Miao.FightScene'
+    require 'myMap.FightMap'
 
     --global.director:runWithScene(TMXScene.new())
 
     local director = CCDirector:sharedDirector()
-    --[[
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-    --]]
 
     --require "Miao.TestScene"
     --global.director:runWithScene(TestScene.new())
     
+    --[[
     local sc = FightScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
+    --]]
+
+    --[[ 
+    local sc = FightMap.new()
+    director:replaceScene(sc.bg)
+    global.director:onlyRun(sc)
+    --]]
 
     --require "Menu.TestMenu"
     --global.director:runWithScene(TestMenu.new())

@@ -50,9 +50,18 @@ function FightLayer2:oneFail()
         addBanner("平局")
     elseif left > 0 then
         addBanner("胜利")
+        winCity()
     else
         addBanner("失败")
     end
+    local function fightOver()
+        global.director:popScene()
+        if global.director.curScene.checkWin == nil then
+            global.director:pushScene(FightMap.new())
+        end
+        global.director.curScene:checkWin()
+    end
+    self.bg:runAction(sequence({delaytime(2), callfunc(nil, fightOver)}))
     return true, left, right
 end
 
