@@ -1698,6 +1698,15 @@ function leftCenterUI(sp)
     setPos(sp, {0, ny})
 end
 
+function leftTopUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+    local ny = vs.height-ds[2]*sca
+    setPos(sp, {0, ny})
+end
+
 --弹出的子菜单 显示向右侧
 function rightTopUI(sp)
     local vs = getVS()

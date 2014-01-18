@@ -159,14 +159,18 @@ Logic.getNewRegion = false
 --每周 1 分钟
 --每个月 4周
 --每年 12个月
-function getDate()
-    local t = Logic.date
+--
+function convertTimeToWeek(t)
     local w = math.floor(t/10)
     local m = math.floor(w/4)
     w = w%4
     local y = math.floor(m/12)
     m = m%12
     return y+1, m+1, w+1
+end
+function getDate()
+    local t = Logic.date
+    return convertTimeToWeek(t)
 end
 local function yearUpdate(diff)
     if not Logic.paused then
@@ -442,6 +446,43 @@ end
 --根据 path 和 curPoint 计算方向
 --test CatData
 Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+
+--计算合战剩余时间
+function getLeftTime()
+    if Logic.catData ~= nil then
+        if Logic.catData.totalTime == nil then
+            local ttime = {}
+            local path = Logic.catData.path
+            for k, v in ipairs(path) do
+                if k > 1 then
+                    local lastPos = path[k-1]
+                    lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+                    local xy = v
+                    xy = {MapNode[xy][1], MapNode[xy][2]}
+                    local dis = distance(lastPos, xy)/CAT_SPEED
+                    table.insert(ttime, dis)
+                end
+            end
+            Logic.catData.totalTime = ttime
+            print("path need time", simple.encode(ttime))
+        end
+        --后面路段的时间
+        local tt = 0
+        local ttime = Logic.catData.totalTime
+        for k, v in ipairs(Logic.catData.totalTime) do
+            if k >= Logic.catData.curPoint then
+                tt = tt+v
+            end
+        end
+        --当前路段剩余的时间
+        if Logic.catData.curPoint > 1 then
+            tt = tt+ttime[Logic.catData.curPoint-1]-Logic.catData.moveTime
+        end
+        return tt
+    end
+    return 0
+end
+
 
 --保存挑战数据
 Logic.challengeNum = {

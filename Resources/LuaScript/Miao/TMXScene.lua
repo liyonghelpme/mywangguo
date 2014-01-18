@@ -70,7 +70,8 @@ function TMXScene:initData(rep, param)
         Logic.ownCity = rd
     end
     local r = u:getStringForKey("catData")
-    if r ~= "" then
+    if r ~= "" and r ~= "null" then
+        print("catData", r)
         local rd = tableToDict(simple.decode(r))
         Logic.catData = rd
     else
@@ -135,14 +136,59 @@ function TMXScene:initData(rep, param)
         global.director:pushView(NewGame.new(), 1, 0)
     end
 end
+
+function TMXScene:checkBattleTime(diff)
+    if Logic.catData ~= nil then
+        --print("checkBattleTime")
+        local lc = Logic.catData
+        local path = lc.path
+        local curPoint = lc.curPoint
+        local moveTime = lc.moveTime
+        lc.moveTime = lc.moveTime - diff
+        if lc.moveTime <= 0 then
+            local nextPoint = curPoint+1
+            if nextPoint > #lc.path then
+                addBanner("部队到达了！")
+                global.director:pushScene(FightScene.new())
+                clearFight()
+            else
+                local lastPos = path[curPoint]
+                lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+                local xy =  path[nextPoint]
+                xy = {MapNode[xy][1], MapNode[xy][2]}
+                local dis = distance(lastPos, xy)/CAT_SPEED
+                lc.moveTime = dis
+                lc.curPoint = nextPoint
+            end
+        end
+    end
+end
+
 function TMXScene:enterScene()
     registerUpdate(self)
+    --[[
+    if Logic.catData ~= nil then
+        local lc = Logic.catData
+        local cid = lc.path[#lc.path]
+        
+        --全局战斗计算时间的对象 一直存活的node对象
+        if self.fakeCat == nil then
+            self.fakeCat = MapCat.new(nil, nil, cid, true)
+            self.bg:addChild(self.fakeCat)
+        --updateFake Cat data
+        else
+        end
+    else
+    end
+    --]]
 end
+
 
 function TMXScene:update(diff)
     if Logic.paused then
         return
     end
+    self:checkBattleTime(diff)
     self.passTime = self.passTime+diff
     --暂停状态不要 保存游戏即可
     if self.passTime > 20 then

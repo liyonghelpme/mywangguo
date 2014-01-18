@@ -11,7 +11,7 @@ function MapCat:ctor(s, st, ed, fake)
     self.endCity = ed
     self.fake = fake
     self.state = MAP_STATE.FREE
-    self.speed = 20
+    self.speed = CAT_SPEED
 
     if not self.fake then
         self.bg = CCSprite:create("soldier3.png")
@@ -21,12 +21,14 @@ function MapCat:ctor(s, st, ed, fake)
         self.curPoint = 1
         self.path = {self.start.cid, self.endCity.cid}
         self.needUpdate = true
+        self.endCid = self.endCity.cid
         self.fightPath = FightPath.new(self)
         registerEnterOrExit(self)
         Logic.challengeCity = self.endCity.cid
         Logic.challengeNum = self.endCity.cityData
     else
-        self.bg = CCNode:create()
+        --self.bg = CCNode:create()
+        self.endCid = self.endCity
     end
 end
 
@@ -43,9 +45,9 @@ end
 --经营页面push 的时候 主动保存数据即可
 function MapCat:exitScene()
     --没有到达目的地呢
-    if not self.showYet then
-        self:storeData()
-    end
+    --if not self.showYet then
+    --    self:storeData()
+    --end
 end
 function MapCat:storeData()
     Logic.catData = {path=self.path, curPoint=self.curPoint, moveTime=self.moveTime}
@@ -132,7 +134,7 @@ function MapCat:update(diff)
                 self:restoreData()
             else
                 self.state = MAP_STATE.IN_FIND
-                self.fightPath:init(self.start.cid, self.endCity.cid)
+                self.fightPath:init(self.start.cid, self.endCid)
             end
         elseif self.state == MAP_STATE.IN_FIND then
             self:doFind(diff)
@@ -161,6 +163,10 @@ function MapCat:update(diff)
                     self.moveTime = dis
                     self.curPoint = nextPoint
                 end
+            end
+            --没有到达终点则 保存猫咪数据
+            if not self.showYet then
+                self:storeData()
             end
         end
     end
