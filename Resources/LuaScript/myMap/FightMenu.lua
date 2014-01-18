@@ -45,7 +45,7 @@ function FightMenu:onBut(p)
     if p == 0 then
         global.director:popScene()
     else
-        if Logic.challengeCity ~= nil then
+        if Logic.catData ~= nil then
             addBanner("已经派出部队啦！")
         else
             if self.city ~= nil then

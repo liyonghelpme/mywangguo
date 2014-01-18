@@ -28,12 +28,15 @@ function TMXScene:ctor()
     delayCall(0.3, self.initDataNow, self)
     registerEnterOrExit(self)
     self.passTime = 0
+    self.checkTime = 0
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("equipOne.plist")
 end
 
 function TMXScene:initData(rep, param)
+    initCityData()
+
     local u = CCUserDefault:sharedUserDefault()
     local r = u:getStringForKey("resource")
     if r ~= "" then
@@ -72,8 +75,9 @@ function TMXScene:initData(rep, param)
     local r = u:getStringForKey("catData")
     if r ~= "" and r ~= "null" then
         print("catData", r)
-        local rd = tableToDict(simple.decode(r))
+        local rd = simple.decode(r)
         Logic.catData = rd
+        print("encode catData", simple.encode(Logic.catData))
     else
         Logic.catData = nil
     end
@@ -139,12 +143,21 @@ end
 
 function TMXScene:checkBattleTime(diff)
     if Logic.catData ~= nil then
-        --print("checkBattleTime")
+        self.checkTime = self.checkTime+diff
+        if self.checkTime < 1 then
+            return
+        end
         local lc = Logic.catData
+        --print("checkBattleTime", simple.encode(lc), lc)
         local path = lc.path
         local curPoint = lc.curPoint
-        local moveTime = lc.moveTime
-        lc.moveTime = lc.moveTime - diff
+        lc.moveTime = lc.moveTime - self.checkTime
+        self.checkTime = 0
+
+        --cid inkScape 边关系中的id信息
+        --realId gimp 中的id信息
+        Logic.challengeCity = path[#path]
+        Logic.challengeNum = CityData[MapNode[Logic.challengeCity][5]]
         if lc.moveTime <= 0 then
             local nextPoint = curPoint+1
             if nextPoint > #lc.path then

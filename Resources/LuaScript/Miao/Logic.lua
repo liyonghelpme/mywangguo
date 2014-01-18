@@ -445,14 +445,15 @@ end
 --根据moveTime 计算位置 
 --根据 path 和 curPoint 计算方向
 --test CatData
-Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+--Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+Logic.catData = nil
 
 --计算合战剩余时间
 function getLeftTime()
     if Logic.catData ~= nil then
+        local path = Logic.catData.path
         if Logic.catData.totalTime == nil then
             local ttime = {}
-            local path = Logic.catData.path
             for k, v in ipairs(path) do
                 if k > 1 then
                     local lastPos = path[k-1]
@@ -475,7 +476,7 @@ function getLeftTime()
             end
         end
         --当前路段剩余的时间
-        if Logic.catData.curPoint > 1 then
+        if Logic.catData.curPoint > 1 and Logic.catData.curPoint <= #path then
             tt = tt+ttime[Logic.catData.curPoint-1]-Logic.catData.moveTime
         end
         return tt
