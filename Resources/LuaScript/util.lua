@@ -1591,6 +1591,17 @@ function createSprite(n)
         return CCSprite:create(n)
     end
 end
+function createSpriteFrame(tex, rect, name)
+    local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
+    local f = ca:spriteFrameByName(name)
+    if f ~= nil then
+        return f
+    end
+    local r = rect 
+    local left = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(left, name)
+    return left
+end
 function interSet(a, b)
     local temp = {}
     local count = 0

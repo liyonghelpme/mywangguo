@@ -6,9 +6,11 @@ end
 -- for CCLuaEngine traceback
 function __G__TRACKBACK__(msg)
     cclog("----------------------------------------")
-    cclog("LUA ERROR: " .. tostring(msg) .. "\n")
-    cclog(debug.traceback())
+    local err = "LUA ERROR: " .. tostring(msg) .. "\n"
+    err = err..debug.traceback()
+    cclog(err)
     cclog("----------------------------------------")
+    sendReq('synError', dict({{"error", err}})) 
 end
 
 OldPrint = print

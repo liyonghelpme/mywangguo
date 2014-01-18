@@ -173,6 +173,7 @@ function Merchant:handleAction()
             addBanner("建筑物不见了")
         else
             getNum = self.people.predictTarget.workNum
+            print("getNum is", getNum)
             if getNum > 0 then
                 local sp = CCSprite:create("silverIcon.png")
                 local p = getPos(self.people.predictTarget.heightNode)
@@ -198,6 +199,8 @@ function Merchant:handleAction()
                 --+商店的贩卖能力
                 doGain(val)
                 updateSellNum(self.people.predictTarget.goodsKind, bn)
+            else
+                self.people.predictTarget:showNoGoods()
             end
             --商店贩卖能力
         --去农田 每个食材3贯

@@ -30,6 +30,8 @@ function BuildOpMenu:ctor(b)
         but:setContentSize(87, 87)
         setPos(addChild(self.temp, but.bg), {512, fixY(sz.height, 704)})
     else
+        setPos(self.infoB.bg, {512-56, fixY(sz.height, 704)})
+        setPos(self.sellB.bg, {512+56, fixY(sz.height, 704)})
     end
 
     if self.build.data ~= nil then

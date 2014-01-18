@@ -26,6 +26,7 @@ function MapCity:ctor(s, data, cid)
         self.changeDirNode = CCSprite:create("village.png")
     end
 
+    print("city cid ownCity data", self.cid, simple.encode(Logic.ownCity))
     if Logic.ownCity[self.cid] then
         self:setColor(0)
     end
@@ -36,7 +37,7 @@ function MapCity:ctor(s, data, cid)
     setPos(self.bg, {data[1], data[2]})
 
     print('myCity', simple.encode(data))
-    local sz = {78, 51}
+    local sz = getContentSize(self.changeDirNode)
     self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     self.changeDirNode:addChild(self.touch.bg)
 

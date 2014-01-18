@@ -477,7 +477,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
         --p = normalizePos({p.x, p.y}, 1, 1)
 
         --取消左下右下的边
-        local ax, ay = newCartesianToAffine(p[1], p[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
+        local ax, ay = newCartesianToAffine(p.x, p.y, self.width, self.height, MapWidth/2, FIX_HEIGHT)
         ax = math.max(math.min(ax, self.width-1-1), 0)
         ay = math.max(math.min(ay, self.height-1-1), 0)
         local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)

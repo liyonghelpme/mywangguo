@@ -69,7 +69,8 @@ function TMXScene:initData(rep, param)
     end
     local r = u:getStringForKey("ownCity")
     if r ~= "" then
-        local rd = tableToDict(simple.decode(r))
+        print("ownCity", r)
+        local rd = simple.decode(r)
         Logic.ownCity = rd
     end
     local r = u:getStringForKey("catData")

@@ -68,10 +68,12 @@ function MapCat:restoreData()
         xy = {MapNode[xy][1], MapNode[xy][2]}
         local dis = distance(lastPos, xy)/self.speed
         self.moveTime = math.min(self.moveTime, dis)
-        local np = lerp(lastPos, xy, self.moveTime/dis)
+        --moveTime 是剩余的移动时间 leftTime 所以应该是
+        local np = lerp(lastPos, xy, 1-self.moveTime/dis)
         setPos(self.bg, np)
         self.bg:runAction(moveto(self.moveTime, xy[1], xy[2]))
         self.state = MAP_STATE.MOVE
+    --一开始就保存了游戏 退出了战斗场景
     elseif self.curPoint == 1 then
         local lastPos =  self.path[self.curPoint]
         lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
@@ -83,14 +85,16 @@ function MapCat:restoreData()
         setPos(self.bg, lastPos)
         self.bg:runAction(moveto(self.moveTime, xy[1], xy[2]))
         self.state = MAP_STATE.MOVE 
+    --最后一个点
     else
         self.curPoint = #self.path
         local lastPos =  self.path[self.curPoint]
-        lastPos = {MapNode[xy][1], MapNode[xy][2]}
+        lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
         self.moveTime = 0
         setPos(self.bg, lastPos)
         self.state = MAP_STATE.MOVE 
     end
+    print("restoreData finish", self.state, self.moveTime, self.curPoint, simple.encode(self.path), simple.encode(Logic.catData))
 end
 function MapCat:update(diff)
     --只更新猫位置 

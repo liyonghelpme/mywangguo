@@ -891,3 +891,25 @@ function MiaoBuild:setGoodsKind(k)
         self.funcBuild:updateGoods()
     end
 end
+function MiaoBuild:showNoGoods()
+    print("showNoGoods")
+    if self.infoBack == nil then
+        local sp = createSprite("newInfoBack.png")
+        self.infoBack = sp
+        local lab = ui.newTTFLabel({text="断货", size=25, color={251, 6, 41}})
+        local sz = {width=224, height=83}
+        sp:addChild(lab)
+        setPos(lab, {111, fixY(sz.height, 32)})
+        local function rinfo()
+            sp:runAction(fadeout(0.2))
+            lab:runAction(fadeout(0.2))
+        end
+        local function clearR()
+            removeSelf(sp)
+            self.infoBack = nil
+        end
+        self.infoBack:runAction(sequence({delaytime(1), callfunc(nil, rinfo), delaytime(0.2), callfunc(nil, clearR)}))
+        self.heightNode:addChild(sp)
+        setPos(sp, {0, 240})
+    end
+end

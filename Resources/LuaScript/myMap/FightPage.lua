@@ -71,7 +71,8 @@ function FightPage:initData()
         end
     end
     if Logic.catData ~= nil then
-        self:sendCat(self.cidToCity[Logic.catData.cid])
+        local path = Logic.catData.path
+        self:sendCat(self.cidToCity[path[#path]])
     end
 end
 

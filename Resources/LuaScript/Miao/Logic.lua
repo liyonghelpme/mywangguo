@@ -472,13 +472,20 @@ function getLeftTime()
         local ttime = Logic.catData.totalTime
         for k, v in ipairs(Logic.catData.totalTime) do
             if k >= Logic.catData.curPoint then
+                print("add Time", tt, k, v)
                 tt = tt+v
             end
         end
+        print("before time", tt, Logic.catData.curPoint)
+        local cp = Logic.catData.curPoint
+        local mt = Logic.catData.moveTime
         --当前路段剩余的时间
         if Logic.catData.curPoint > 1 and Logic.catData.curPoint <= #path then
-            tt = tt+ttime[Logic.catData.curPoint-1]-Logic.catData.moveTime
+            print("tt is", tt, ttime[cp-1], mt)
+            tt = tt+Logic.catData.moveTime
         end
+        print("after time", tt, Logic.catData.moveTime)
+        print("tttime", simple.encode(ttime))
         return tt
     end
     return 0
