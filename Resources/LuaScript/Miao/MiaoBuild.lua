@@ -895,11 +895,11 @@ function MiaoBuild:showNoGoods()
     print("showNoGoods")
     if self.infoBack == nil then
         local sp = createSprite("newInfoBack.png")
-        self.infoBack = sp
-        local lab = ui.newTTFLabel({text="断货", size=25, color={251, 6, 41}})
+        local lab = ui.newTTFLabel({text='断货', size=25, color={251, 6, 41}})
         local sz = {width=224, height=83}
         sp:addChild(lab)
         setPos(lab, {111, fixY(sz.height, 32)})
+        self.infoBack = sp
         local function rinfo()
             sp:runAction(fadeout(0.2))
             lab:runAction(fadeout(0.2))
