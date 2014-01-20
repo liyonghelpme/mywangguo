@@ -19,6 +19,7 @@ function MapCity:ctor(s, data, cid)
         self.changeDirNode = CCSprite:create("fightPoint.png")
     elseif self.kind == 1 then 
         self.changeDirNode = CCSprite:create("castle.png")
+    --其它村庄
     elseif self.kind == 2 then
         self.changeDirNode = CCSprite:create("village.png")
     --main city

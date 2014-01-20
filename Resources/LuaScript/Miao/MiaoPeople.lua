@@ -679,7 +679,8 @@ function MiaoPeople:doMove(diff)
                     local accMove = false
                     local le = self:getMyLaborEffect()
                     --劳动加速 移动
-                    if self.data.skill == 42 or (le.move ~= nil and le.move > 0)  then
+                    local sk = getPeopleSkill(self.id, self.level)
+                    if sk == 42 or (le.move ~= nil and le.move > 0)  then
                         accMove = true
                     end
                     --道路是onSlope 

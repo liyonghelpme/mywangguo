@@ -1790,3 +1790,11 @@ function lerp(a, b, wei)
     end
     return a*(1-wei)+b*wei
 end
+
+function dictKeyToNum(d)
+    local temp = {}
+    for k, v in pairs(d) do
+        temp[tonumber(k)] = v
+    end
+    return temp
+end

@@ -72,7 +72,7 @@ function TMXScene:initData(rep, param)
     local r = u:getStringForKey("ownCity")
     if r ~= "" then
         print("ownCity", r)
-        local rd = simple.decode(r)
+        local rd = dictKeyToNum(simple.decode(r))
         Logic.ownCity = rd
     end
     local r = u:getStringForKey("catData")
@@ -83,6 +83,12 @@ function TMXScene:initData(rep, param)
         print("encode catData", simple.encode(Logic.catData))
     else
         Logic.catData = nil
+    end
+
+    local r = u:getStringForKey("ownPeople")
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownPeople = rd
     end
 
     local r = u:getStringForKey("soldiers")
@@ -108,12 +114,27 @@ function TMXScene:initData(rep, param)
             table.insert(Logic.buildList, v)
         end
     end
-
+    --城堡
+    Logic.castlePeople = {}
+    --村庄
+    Logic.villagePeople = {}
+    --新手村
+    Logic.newPeople = {}
     Logic.people = {}
     Logic.allPeople = rep.people
     print("allPeople", #Logic.allPeople)
     for k, v in ipairs(rep.people) do
         Logic.people[v.id] = v
+        if v.cityKind == 0 then
+            local df = getDefault(Logic.castlePeople, v.appear, {} )
+            table.insert(df, v.id)
+        elseif v.cityKind == 1 then
+            local df = getDefault(Logic.villagePeople, v.appear, {} )
+            table.insert(df, v.id)
+        else
+            local df = getDefault(Logic.newPeople, v.appear, {} )
+            table.insert(df, v.id)
+        end
     end
 
     Logic.allEquip = rep.equip
@@ -302,4 +323,5 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
     u:setStringForKey("ownCity", simple.encode(Logic.ownCity)) 
     u:setStringForKey("catData", simple.encode(Logic.catData)) 
+    u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
 end
