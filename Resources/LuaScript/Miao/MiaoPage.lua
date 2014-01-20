@@ -218,7 +218,7 @@ function MiaoPage:ctor(s)
     self.slopeData = {}
     for dk, dv in ipairs(layerName.slop2.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv, self.normal, self.water)
+            local pname = tidToTile(dv, self.normal, self.water, self.gidToTileName)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -239,6 +239,18 @@ function MiaoPage:ctor(s)
             self.tileMap:addChild(pic)
             local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             --print("cx cy", cx, cy)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
+
+    for dk, dv in ipairs(layerName.slope3.data) do
+        if dv ~= 0 then
+            local pname = self.gidToTileName[dv]..'.png'
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
         end
     end

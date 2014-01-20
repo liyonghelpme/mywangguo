@@ -106,7 +106,7 @@ function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     return cx, cy, oldy
 end
 --检测tid 所在的范围 firstgid == 135 >= < nextRange tid = tid = firstgid
-function tidToTile(tid, normal, water)
+function tidToTile(tid, normal, water, gidToTileName)
     for i=2, #normal, 1 do
         if tid < normal[i] then
             return 'tile'..tid-normal[i-1]..'.png'
@@ -125,7 +125,12 @@ function tidToTile(tid, normal, water)
     if tid < water[#water]+64 then
         return 'tile'..(tid-water[#water]+39)..'.png'
     end
-    local waterPic = global.director.curScene.page.gidToTileName[tid]..'.png'
+    local waterPic
+    if gidToTileName == nil then
+        waterPic = global.director.curScene.page.gidToTileName[tid]..'.png'
+    else
+        waterPic = gidToTileName[tid]..'.png'
+    end
     return waterPic
 
     --[[

@@ -236,56 +236,7 @@ function MiaoBuildLayer:initEnv()
     local width = self.scene.width
     local height = self.scene.height
 
-    --[[
-    for dk, dv in ipairs(self.scene.layerName.slop2.data) do
-        if dv ~= 0 then
-            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
 
-            --得到affine坐标到笛卡尔坐标的变换
-            --affine to Cartesian 产生了 位置的误差 导致 计算的 格子也有了误差 
-            --FIX_HEIGHT  170  SIZEY
-            --但是产生的 MAP_WIDTH/2 有误差较大
-            local cx, cy = newAffineToCartesian(w, h, width, height, MapWidth/2, FIX_HEIGHT)
-            local dir = 0
-            if pname == 'tile18.png' then
-                dir = 0
-            elseif pname == 'tile16.png' then
-                dir = 1
-            else
-                dir = 2
-            end
-            local b = MiaoBuild.new(self, {picName='slope', id=-1, dir=dir, slopeName=pname, ax=w, ay=h})
-            --local p = normalizePos({cx, cy}, 1, 1)
-            local p = {cx, cy}
-            b:setPos(p)
-            b:setColPos()
-            self:addBuilding(b, MAX_BUILD_ZORD)
-            b:setPos(p)
-            b:finishBuild()
-        end
-    end
-    --]]
-
-    --water 对象 在斜坡上面
-    --[[
-    for dk, dv in ipairs(self.scene.layerName.water.data) do
-        if dv ~= 0 then
-            print("water pid", dv)
-            local pname = tidToTile(dv, self.scene.normal, self.scene.water)
-            local w = (dk-1)%width
-            local h = math.floor((dk-1)/width)
-            print("water pname", pname)
-            local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.terrian:addChild(pic)
-            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, MapWidth/2, FIX_HEIGHT, self.scene.mask)
-            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
-            local zord = MAX_BUILD_ZORD
-            pic:setZOrder(zord)
-        end
-    end
-    --]]
     --篱笆 
     for dk, dv in ipairs(self.scene.layerName.fence.data) do
         if dv ~= 0 then
