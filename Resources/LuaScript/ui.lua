@@ -205,7 +205,10 @@ function ui.newButton(params)
     local priority = params.priority
     local col = params.color
     local font = params.font
-    local needScale = params.needScale or true
+    local needScale = true
+    if params.needScale ~= nil then
+        needScale = params.needScale
+    end
     local touchColor = params.touchColor
     local shadowColor = params.shadowColor
 

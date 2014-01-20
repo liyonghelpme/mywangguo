@@ -27,7 +27,6 @@ function AttributeMenu:ctor()
 
 
 
-
     local listSize = {width=546, height=318}
     self.listSize = listSize
     self.HEIGHT = 318

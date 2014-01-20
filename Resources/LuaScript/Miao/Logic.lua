@@ -548,3 +548,29 @@ function initCityData()
         MapEdge = tableToDict(MapEdge)
     end
 end
+
+function getPeopleSkill(id, level)
+    local pdata = Logic.people[id]
+    if pdata.levelSkill ~= '[]' then
+        local ls = simple.decode(pdata.levelSkill)
+        for i=#ls, 1, -1 do
+            if ls[i][1] <= (level+1) then
+                return ls[i][2]        
+            end
+        end
+        --升到一定等级才能开启新的技能
+        return 0
+    end
+    return pdata.skill
+end
+function getSkillIcon(sid)
+    local sdata = Logic.allSkill[sid]
+    --local skillBoard = setAnchor(setSize(setPos(createSprite("skillBoard.png"), {385, fixY(sz.height, 24)}), {47, 46}), {0.50, 0.50})
+    if sdata.hasLevel > 0 then
+        --local sp = setAnchor(setPos(addSprite(skillBoard, "skill"..(sid-(sdata.hasLevel-1))..".png"), {23, 23}), {0.50, 0.50})
+        --local w = setPos(setAnchor(addChild(skillBoard, ui.newBMFontLabel({text=sdata.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})
+        return sid-sdata.hasLevel+1
+    else
+        return sid
+    end
+end

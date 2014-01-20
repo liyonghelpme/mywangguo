@@ -215,6 +215,10 @@ function setColor(sp, color)
     end
     return sp
 end
+function setOpacity(sp, o)
+    sp:setOpacity(o)
+    return sp
+end
 function addSprite(bg, name)
     local sp
     if name == nil then
