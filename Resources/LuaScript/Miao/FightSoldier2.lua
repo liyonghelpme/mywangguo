@@ -41,6 +41,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.color = data.color
     self.dead = false
     self.speed = 200
+    self.arrowHurt = 0
 
     local myab = getSolAbility(self.id+1, self.data.level, self.map.scene.maxSoldier[self.color+1][self.id+1])
     self.health = myab.health
@@ -135,7 +136,8 @@ function FightSoldier2:updateLabel()
         tid = self.attackTarget.sid
     end
 
-    self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
+    --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
+    self.sLabel:setString(self.arrowHurt.." "..self.health)
 end
 function FightSoldier2:findFastTarget()
     local temp
@@ -164,9 +166,9 @@ function FightSoldier2:startAttack(diff)
             --寻找第一个非死亡对象 步兵  同行
             self.attackTarget = self:findFastTarget()
             if self.color == 0 then
-                offX = -40
+                offX = -40+self.row*5
             else
-                offX  = 40
+                offX  = 40-self.row*5
             end
 
             --同行没有
@@ -180,7 +182,7 @@ function FightSoldier2:startAttack(diff)
                     enePos = getPos(self.attackTarget.bg)
                     if self.attackTarget.id == 0 then
                         local midPoint = (self.oldPos[1]+enePos[1])/2
-                        midPoint = midPoint+offX
+                        midPoint = midPoint+offX+math.random(20)-10
                         local t = math.abs(midPoint-self.oldPos[1])/self.speed
                         self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
                         self.bg:runAction(self.moveAct)
@@ -242,9 +244,12 @@ function FightSoldier2:doHarm()
             --敌人没挂 才出攻击动作
             self:showAttackEffect()
         end
-        self.attackTarget:doHurt(self.attack)
-        local dir = self.map:getAttackDir(self, self.attackTarget)
-        local rd = math.random(2)+2
+        self.attackTarget:doHurt(self.attack, false, self)
+        local dir = 1
+        if self.color == 1 then
+            dir = -1
+        end
+        local rd = math.random(10)+5
         self.bg:runAction(moveby(0.2, dir*rd, 0))
     end
 end
@@ -256,12 +261,20 @@ function FightSoldier2:runAction(act)
     end
     self.changeDirNode:runAction(act)
 end
+function FightSoldier2:calHurt(harm)
+    return math.max(1, harm-self.defense)
+end
 --谁攻击高 对方就受到 被动伤害
-function FightSoldier2:doHurt(harm, showBomb)
+function FightSoldier2:doHurt(harm, showBomb, whoAttack)
+    --死亡了就不接受 伤害了
+    if self.dead then
+        return
+    end
     local rd = math.random(2)
     if rd == 1 or showBomb then
         self:showBombEffect()
     end
+
     print("doHurt", harm, self.defense, self.health)
     local harm = harm-self.defense
     harm = math.max(harm, 1)
@@ -285,27 +298,37 @@ function FightSoldier2:doHurt(harm, showBomb)
     self.map.battleScene:addChild(num, MAX_BUILD_ZORD)
     setPos(num, {p[1], p[2]+50})
     num:runAction(sequence({fadein(0.2), moveby(0.5, 0, 20), fadeout(0.2), callfunc(nil, removeSelf, num)}))
-
+    
+    local dir = 1 
+    if self.color == 0 then
+        dir = -1
+    end
+    local rd = math.random(10)+5
+    self.bg:runAction(moveby(0.2, dir*rd, 0))
 
     --attackDir
     if not self.dead then
     end
     --没有受到攻击动作
     if self.health <= 0 and not self.dead then
+        print("doDead action", self.color)
         self.dead = true
         self.state = FIGHT_SOL_STATE.DEAD
         self.changeDirNode:stopAllActions()
         self.changeDirNode:runAction(CCAnimate:create(self.deadAni)) 
         local vs = getVS()
         if self.color == 0 then
+            print("jump0")
             self.changeDirNode:runAction(jumpBy(2, -vs.width/2, 100, 200, 1))
             self.changeDirNode:runAction(sequence({delaytime(1), fadeout(1)}))
             self.shadow:runAction(sequence({delaytime(1), fadeout(1)}))
         else
+            print("jump1")
             self.changeDirNode:runAction(jumpBy(2, vs.width/2, 100, 200, 1))
             self.changeDirNode:runAction(sequence({delaytime(1), fadeout(1)}))
             self.shadow:runAction(sequence({delaytime(1), fadeout(1)}))
         end
+        self.bg:runAction(sequence({delaytime(3), disappear(self.bg)}))
     end
 end
 
@@ -593,7 +616,7 @@ function FightSoldier2:doNext(diff)
                 local mp = getPos(self.bg)
                 --因为双方攻击的都是 不同行 而行之间存在移动的 偏移 导致 超出了攻击范围 超出了90范围
                 --少量一方移动即可
-                if math.abs(p[1]-mp[1]) < 90 then
+                if math.abs(p[1]-mp[1]) < 100 then
                     self.changeDirNode:stopAction(self.idleAction)
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     local rd = math.random(2)
@@ -724,7 +747,7 @@ function FightSoldier2:doWinMove(left, right)
     if not self.dead then
         print("doWinMove", left, right)
         if self.color == 0 and left > 0 then
-            self.bg:stopAllActions()
+            --self.bg:stopAllActions()
             self.changeDirNode:stopAllActions()
             self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.runAni)))
             local vs = getVS()

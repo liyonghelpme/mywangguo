@@ -210,6 +210,9 @@ function FightLayer2:footScript(diff)
         self.moveTarget = p[1]
 
         local footDead, left, right = self:checkOneFootDead()
+        if left == 0 and right == 0 then
+            self.day = 0
+        end
         --快速移动镜头 分镜头
         --再显示animate动画
         local p = getPos(self.battleScene)
@@ -321,7 +324,8 @@ function FightLayer2:footScript(diff)
     --一方士兵死光的话
     local oneDead = self:checkOneDead()
     print("oneDead?", oneDead)
-    if (oneDead or self.passTime >= 20) and not self.finishAttack then
+    local footDead, left, right = self:checkOneFootDead()
+    if (oneDead or self.passTime >= 20 or (left == 0 and right == 0)) and not self.finishAttack then
         print("finish foot attack now", cf, self.passTime)
         self.finishAttack = true
         for k, v in ipairs(self.allSoldiers) do
@@ -531,6 +535,10 @@ end
 function FightLayer2:arrowScript(diff)
     if self.passTime == 0 then
         local ad, left, right = self:checkOneArrowDead()
+        if left == 0 and right == 0 then
+            self.day = 1
+            return
+        end
 
         local p = getPos(self.battleScene)
         local vs = getVS()
@@ -551,7 +559,7 @@ function FightLayer2:arrowScript(diff)
         end
         if right == 0 then
             self:showRightCamera()
-            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(sef.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
         else
             --右侧镜头位置当前屏幕的左侧
             self:showRightCamera()

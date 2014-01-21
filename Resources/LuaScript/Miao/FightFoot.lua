@@ -20,9 +20,11 @@ function FightFoot:finishAttack()
     self.soldier.inMove = false
     self.soldier.oneAttack = false 
     self.soldier.checkEneYet = false
+    self.soldier.arrowHurt = 0
 
     if self.soldier.dead then
-        setVisible(self.soldier.bg, false)
+        --setVisible(self.soldier.bg, false)
+        --要等飞走之后 才invisible的
     else
         self.soldier.changeDirNode:stopAllActions()
         self.soldier.bg:stopAllActions()

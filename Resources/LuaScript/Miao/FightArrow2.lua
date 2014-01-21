@@ -25,8 +25,11 @@ end
 --调用某段剧本
 function FightArrow2:startAttack()
     print("Arrow start Attack")
-    local ene = self:findNearEnemy()
+    local ene, firstEnable = self:findNearEnemy()
     self.soldier.attackTarget = ene
+    if ene == nil then
+        ene = firstEnable
+    end
     print("near ene", ene)
     if ene ~= nil then
         self.soldier.changeDirNode:stopAllActions()
@@ -52,7 +55,7 @@ function FightArrow2:startAttack()
             local tpos = getPos(ene.bg)
             local tt = math.abs(tpos[1]-p[1])/as
             --y 方向相对偏移
-            a.changeDirNode:runAction(sequence({jumpBy(tt, tpos[1]-p[1], tpos[2]-p[2], 300, 1), callfunc(a, a.doHarm)}))
+            a.changeDirNode:runAction(sequence({jumpBy(tt, tpos[1]-p[1], tpos[2]-p[2], 150+math.random(30), 1), callfunc(a, a.doHarm)}))
             a.color = self.soldier.color
             a.soldier = self.soldier
             a.target = ene
@@ -87,10 +90,13 @@ function FightArrow2:findNearEnemy()
         table.insert(eneList, self.soldier.map.mySoldiers)
         table.insert(eneList, self.soldier.map.myArrowSoldiers)
     end
+    local inNext = (self.state == FIGHT_SOL_STATE.NEXT_TARGET)
+    local firstEnable
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do
             for ck, cv in ipairs(v) do
-                if not cv.dead then
+                --没有在近战中 才考虑arrowHurt问题
+                if not cv.dead and (inNext or cv.arrowHurt < cv.health) then
                     local ep = getPos(cv.bg)
                     local tdisy = math.abs(ep[2]-p[2]) 
                     local tdisx = math.abs(ep[1]-p[1])
@@ -105,13 +111,17 @@ function FightArrow2:findNearEnemy()
                         end
                     end
                 end
+                if not cv.dead and firstEnable == nil then
+                    firstEnable = cv
+                end
             end
         end
         if ene ~= nil then
-            return ene
+            ene.arrowHurt = ene.arrowHurt+ene:calHurt(self.soldier.attack)
+            return ene, firstEnable
         end
     end
-    return ene
+    return ene, firstEnable
 end
 
 --步兵正在靠近攻击我
@@ -128,16 +138,17 @@ function FightArrow2:findSameRow()
     else
         table.insert(eneList, self.soldier.map.mySoldiers)
     end
-
+    --近战的时候 多个弓箭手可以 攻击同一个步兵
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do
             for ck, cv in ipairs(v) do
-                if not cv.dead then
+                if not cv.dead and cv.arrowHurt < cv.health then
                     local ep = getPos(cv.bg)
                     local tdisy = math.abs(ep[2]-p[2]) 
                     --同行 第一个 
                     if tdisy == 0 then
                         ene = cv
+                        ene.arrowHurt = ene.arrowHurt+ene:calHurt(self.soldier.attack)
                         return ene
                     end
                 end
@@ -291,7 +302,7 @@ function FightArrow2:doWaitMove(diff)
             else
                 local p = getPos(self.soldier.bg)
                 local ap = getPos(self.soldier.attackTarget.bg)
-                if math.abs(ap[1]-p[1]) < 90 then
+                if math.abs(ap[1]-p[1]) < 100 then
                     --self.soldier.changeDirNode:stopAction(self.idleAction)
                     self.soldier.changeDirNode:stopAllActions()
                     self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
@@ -463,9 +474,11 @@ function FightArrow2:finishAttack()
     self.oneAttack = false
     self.firstCheckYet = false
     self.inFightBack = false
+    self.soldier.arrowHurt = 0
 
     if self.soldier.dead then
-        setVisible(self.soldier.bg, false)
+        --setVisible(self.soldier.bg, false)
+        --fly away invisible
     else
         self.soldier.changeDirNode:stopAllActions()
         self.soldier.bg:stopAllActions()

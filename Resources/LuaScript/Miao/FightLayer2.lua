@@ -414,11 +414,13 @@ function FightLayer2:initSoldier()
     self.mySoldiers = {}
     self.allSoldiers = {}
     self.solOffY = 80
+    self.scaleCoff = 0.05
     --每一列 每一行
     for k, v in ipairs(self.myFootNum) do 
         --row
         local temp = {}
         table.insert(self.mySoldiers, temp) 
+        --所在行
         for ck, cv in ipairs(v) do 
             --col
             if cv > 0 then
@@ -429,6 +431,8 @@ function FightLayer2:initSoldier()
                 sp:setZord()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
             else
                 local sp = {dead=true, color=0, sid=-1, id=-1}
                 table.insert(temp, sp)
@@ -467,6 +471,9 @@ function FightLayer2:initSoldier()
                 sp:setDir()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
             else
                 local sp = {dead=true, color=1, sid=-1, id=-1}
                 table.insert(temp, sp)
@@ -521,6 +528,9 @@ function FightLayer2:initSoldier()
                 sp:setZord()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
             else
                 local sp = {dead=true, color=0, sid=-1, id=-1}
                 table.insert(temp, sp)
@@ -566,6 +576,8 @@ function FightLayer2:initSoldier()
                 sp:setDir()
                 table.insert(temp, sp)
                 table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
             else
                 local sp = {dead=true, color=0, sid=-1, id=-1}
                 table.insert(temp, sp)
