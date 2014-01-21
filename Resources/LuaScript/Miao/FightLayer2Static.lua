@@ -641,8 +641,9 @@ function FightLayer2:arrowScript(diff)
             --开始跑步和攻击
             v:doRunAndAttack(self.day)
         end
-        print("animation state")
+        print("arrow animation state doRunAndAttack", self.animateYet)
     end
+
     --trace Arrow 位置
     if self.arrow ~= nil or self.rightArrow ~= nil then
         if not self.arrowOver then

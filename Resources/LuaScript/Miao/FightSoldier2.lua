@@ -111,8 +111,11 @@ function FightSoldier2:doRunAndAttack(day)
         --先弓箭 接着 步兵
         if day == 0 and self.id == 1 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
+            self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
         elseif day == 1 and self.id == 0 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
+            print("Arrow start Attack")
+            self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
         end
     end
 end
@@ -234,6 +237,31 @@ function FightSoldier2:doPose(diff)
         self.poseOver = false
         self.idleAction = repeatForever(CCAnimate:create(self.idleAni))
         self.changeDirNode:runAction(self.idleAction)
+    end
+end
+--需要直到这个action 循环不循环 idle
+function FightSoldier2:runAction(act, loop)
+    if self.curActName ~= nil then
+        --攻击动作一下就结束了
+        if self.curActName ~= actName then
+            local act
+            if loop then
+                act = repeatForever(CCAnimate:create(getAnimation(actName)))
+            else
+                act = CCAnimate:create(getAnimation(actName))
+            end
+            self.changeDirNode:runAction(act)
+            self.curActName = actName
+        end
+    else
+        local act
+        if loop then
+            act = repeatForever(CCAnimate:create(getAnimation(actName)))
+        else
+            act = CCAnimate:create(getAnimation(actName))
+        end
+        self.changeDirNode:runAction(act)
+        self.curActName = actName
     end
 end
 
@@ -635,7 +663,7 @@ function FightSoldier2:doNext(diff)
                 --处理对方也在发呆的情况
                 else
                     self.nextTime = self.nextTime+diff
-                    if self.nextTime >= 0.4 and self.attackTarget.state == FIGHT_SOL_STATE.NEXT_TARGET then
+                    if self.nextTime >= 0.4 and (self.attackTarget.state == FIGHT_SOL_STATE.NEXT_TARGET or self.attackTarget.state == FIGHT_SOL_STATE.WAIT_MOVE) then
                         self:moveToTarget() 
                     end
                 end

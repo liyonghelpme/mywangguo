@@ -34,9 +34,11 @@ function FightArrow2:startAttack()
     if ene ~= nil then
         print("ene sid", ene.sid)
         self.soldier.changeDirNode:stopAllActions()
+        --self.soldier.changeDirNode:stopAction(self.soldier.idleAction)
         self.soldier.changeDirNode:runAction(CCAnimate:create(self.soldier.attackA))
         --自动追踪 屏幕移动镜头 根据弓箭位置
         local function addArrow()
+            print("addArrow", self.soldier.sid, self.soldier.attackTarget.sid)
             local a = Arrow.new()
             local abg = a.bg
             self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
@@ -227,6 +229,8 @@ function FightArrow2:waitAttack(diff)
             --距离
             --第一次测试距离就小于400则已经进入了近身肉搏战状态
             print("arrow is head do what", self.firstCheckYet, self.soldier.attackTarget)
+            --若同行存在 步兵则等待fightback
+
             if not self.firstCheckYet then
                 self.firstCheckYet = true
                 if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
@@ -250,8 +254,9 @@ function FightArrow2:waitAttack(diff)
                         if dx <= 400 then
                             print("firstCheckYet no attackTarget ", self.soldier.attackTarget.sid)
                             self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
-                        --等待步兵移动过来攻击之 不在同一排
+                        --等待步兵移动过来攻击之 不在同一排  确信是在等待步兵 但是状态没有调整过来为什么？
                         else
+                            print("firstCheck not find attackTarget then search all Enemy if far away then wait enemy move here")
                             self.soldier.state = FIGHT_SOL_STATE.WAIT_MOVE
                         end
                     end
@@ -266,6 +271,8 @@ function FightArrow2:waitAttack(diff)
                         self.firstCheckYet = false
                         self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
                     end
+                --WAIT_MOVE 状态
+                --或者NEAR_MOVE 状态 等待对方靠近
                 end
             end
         end
@@ -319,7 +326,8 @@ function FightArrow2:doWaitMove(diff)
             else
                 local p = getPos(self.soldier.bg)
                 local ap = getPos(self.soldier.attackTarget.bg)
-                if math.abs(ap[1]-p[1]) < 100 then
+                local dis = math.abs(ap[1]-p[1])
+                if dis < FIGHT_NEAR_RANGE then
                     --self.soldier.changeDirNode:stopAction(self.idleAction)
                     self.soldier.changeDirNode:stopAllActions()
                     self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
@@ -327,6 +335,15 @@ function FightArrow2:doWaitMove(diff)
                     self.oneAttack = false
                     self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
                     self.soldier.changeDirNode:runAction(self.attackAni)
+                --等待对方靠近
+                else
+                    --步兵也在等待 没有移动 可能在攻击等其它状态
+                    --尝试靠近目标攻击
+                    --我方自己的士兵就别攻击了
+                    --小于200 再尝试移动过去 攻击对方
+                    if self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE and self.soldier.attackTarget.color ~= self.soldier.color and dis < 200 then
+                        self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
+                    end
                 end
             end
         end
@@ -496,6 +513,7 @@ function FightArrow2:finishAttack()
     self.oneAttack = false
     self.firstCheckYet = false
     self.inFightBack = false
+    self.inMove = false
     print("clear arrow Hurt for arrow")
     self.soldier.arrowHurt = 0
 
