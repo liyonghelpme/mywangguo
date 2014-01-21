@@ -87,7 +87,11 @@ function Camera:update(diff)
         --渲染physic scene 对象
         local vs = self.renderTexture:isVisible()
         --setVisible(self.renderNode, vs)
-        self.coord:setString(math.floor(self.moveTarget).." "..math.floor(self.startPoint[1])..' '..math.floor(self.startPoint[2]))
+        local col 
+        if self.object ~= nil then
+            col = self.object.color 
+        end
+        self.coord:setString(math.floor(self.moveTarget).." "..math.floor(self.startPoint[1])..' '..math.floor(self.startPoint[2]).." "..str(col).." "..math.floor(self.mainOff))
         if vs then
             local rn
             if self.map.clone then

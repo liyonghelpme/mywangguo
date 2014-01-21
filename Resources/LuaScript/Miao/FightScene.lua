@@ -6,7 +6,7 @@ function FightScene:ctor()
     local testData = CityData[3]
     local ms = Logic.soldiers 
     --self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
-    self.soldiers = {{20, 0, 0, 0}, testData}
+    self.soldiers = {{testData[1], testData[2]-5, testData[3], testData[4]}, testData}
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 

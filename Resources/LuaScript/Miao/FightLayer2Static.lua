@@ -11,9 +11,15 @@ function FightLayer2:finishFoot()
         for k, v in ipairs(self.allSoldiers) do
             v.funcSoldier:resetPos()
         end
-        self.leftCamera:clearCamera()
-        self.rightCamera:clearCamera()
+        self:clearAllCamera()
     end
+end
+--只有在处理完 游戏是否结束后 再清理是否split的状态
+function FightLayer2:clearAllCamera()
+    self.split = false
+    self.leftCamera:clearCamera()
+    self.rightCamera:clearCamera()
+    self.mainCamera:clearCamera()
 end
 --我方或者敌方步兵死光
 function FightLayer2:countFoot()
@@ -73,7 +79,39 @@ function FightLayer2:checkOneDead()
     print("check OneDead", left, right)
     return true
 end
-
+function FightLayer2:stopCameraMove(left, right)
+    local vs = self.mainCamera.renderTexture:isVisible()
+    if not vs then
+        --显示胜利的一方
+        --平局 
+        --胜利 
+        --失败
+        self:mergeCamera()
+        local sz = getVS()
+        --可能弓箭 left right Camera 交换了位置
+        if left == 0 then
+            if not self.split then
+                --参考右侧镜头
+                print("stopCameraMove")
+                --参照 右侧镜头位置布局
+                local rs = self.rightCamera.startPoint
+                self.mainCamera.moveTarget = rs[1]+sz.width/2
+                self.mainCamera.startPoint = {rs[1]+sz.width/2, rs[2]}
+            --参考左侧镜头位置即可
+            else
+            end
+        else
+            --left 胜利 参考 左侧镜头 如果 弓箭split 了 则参考右侧镜头
+            --测试
+            if self.split then
+                local rs = self.rightCamera.startPoint
+                self.mainCamera.moveTarget = rs[1]+sz.width/2
+                self.mainCamera.startPoint = {rs[1]+sz.width/2, rs[2]}
+            end
+        end
+    end
+end
+--获取当前的 主镜头位置 不要移动 然后 展示双方的 移动
 function FightLayer2:oneFail()
     local left = 0
     local right = 0
@@ -98,6 +136,11 @@ function FightLayer2:oneFail()
     for k, v in ipairs(self.allSoldiers) do
         v:doWinMove(left, right)
     end
+    --主镜头不要移动
+    self.day = -1
+    self:stopCameraMove(left, right)
+    --self.clone = false
+
     if left == right then
         addBanner("平局")
     elseif left > 0 then
@@ -126,8 +169,37 @@ function FightLayer2:oneFail()
         global.director.curScene:checkWin()
         --]]
     end
-    self.bg:runAction(sequence({delaytime(2), callfunc(nil, fightOver)}))
+    self.bg:runAction(sequence({delaytime(5), callfunc(nil, fightOver)}))
     return true, left, right
+end
+
+function FightLayer2:getMyRight()
+    local maxX = 0
+    local myT
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.color == 0 then
+            local p = getPos(v.bg)
+            if p[1] > maxX then
+                maxX = p[1]
+                myT = v
+            end
+        end
+    end
+    return maxX, myT
+end
+function FightLayer2:getEneLeft()
+    local minX = 0
+    local myT
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.color == 1 then
+            local p = getPos(v.bg)
+            if p[1] < minX then
+                minX = p[1]
+                myT = v
+            end
+        end
+    end
+    return minX, myT
 end
 
 --不同士兵类型执行不同的剧本
@@ -136,26 +208,41 @@ function FightLayer2:footScript(diff)
     local p = getPos(self.battleScene)
     if self.passTime == 0 then
         self.moveTarget = p[1]
+
+        local footDead, left, right = self:checkOneFootDead()
         --快速移动镜头 分镜头
         --再显示animate动画
         local p = getPos(self.battleScene)
         local vs = getVS()
         local bp = self.leftWidth
-        --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
-        self.moveTarget = -(bp-(vs.width/2-FIGHT_OFFX))
-        --trace Soldier if soldier dead trace other first soldier
-        --front line soldier
-        print("foot left Width ", self.moveTarget)
-        self:showLeftCamera() 
-        --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置
-        --然后恢复场景位置
-        self.leftCamera:fastMoveTo(p, self.moveTarget) 
-
+        --self.footDead = footDead
+        if left == 0 then
+            local mr = self:getMyRight()
+            self.moveTarget = -(mr-(vs.width/2-FIGHT_HEAD_OFF))
+            self:showLeftCamera() 
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        else
+            --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
+            self.moveTarget = -(bp-(vs.width/2-FIGHT_OFFX))
+            --trace Soldier if soldier dead trace other first soldier
+            --front line soldier
+            print("foot left Width ", self.moveTarget)
+            self:showLeftCamera() 
+            --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置
+            --然后恢复场景位置
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        end
+        if right == 0 then
+            self:showRightCamera()
+            local er = self:getEneLeft()
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(er-FIGHT_HEAD_OFF))
+        else
         --右侧镜头位置当前屏幕的左侧
-        self:showRightCamera()
-        --local fw = #self.eneFootNum*FIGHT_OFFX
-        local ahead = self.WIDTH-self.rightWidth
-        self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_OFFX))
+            self:showRightCamera()
+            --local fw = #self.eneFootNum*FIGHT_OFFX
+            local ahead = self.WIDTH-self.rightWidth
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_OFFX))
+        end
     end
 
     if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil then
@@ -181,12 +268,16 @@ function FightLayer2:footScript(diff)
         print("leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
         --镜头相交
         if not self.mergeYet and not self.clone then
-            if ls < rs+rw and ls+lw > rs then
+            if ls <= rs+rw and ls+lw >= rs then
+                print("merge left right in foot")
                 self:mergeCamera()
+                self.mergeTime = 0
+                --self.footCenter = -self.mainCamera.moveTarget+vs.width/2
             end
         end
         --拆分镜头 步兵移动
-        if self.mergeYet then
+        --只merge 了 但是 没有clone
+        if self.mergeYet and not self.clone then
             --1907  2370--
             print("splitCamera foot check", ls, rs, ls+lw, rs+rw, rw, lw)
             print("soldier merge only show one soldier view all Foot killed")
@@ -194,7 +285,15 @@ function FightLayer2:footScript(diff)
             --这个条件判断有问题
             --一方全部死亡才行
             local footDead, left, right = self:checkOneFootDead()
-            if footDead then
+            --if rs+rw >= 
+            --我方士兵都阵亡了 战斗中
+            --并且是 之前已经打过一架之后才阵亡的 而不是 立即就clone的 
+            --应该在 超出了 镜头位置才clone 而不是一死亡就 clone
+            --本回合开始 不是某方 步兵都死了
+            --则不用clone 一方的镜头移动么？ 但是也要 追随后续的 魔法和骑兵 去攻击呀
+            self.mergeTime = self.mergeTime+diff
+            --等待一会merge 移动 等移动到 屏幕中心位置 再clone 追随位置
+            if footDead and self.mergeTime > 1 then
                 print("camera cross now foot")
                 --if self.mySol ~= nil and not self.mySol.dead then
                 if right == 0 then
@@ -202,6 +301,7 @@ function FightLayer2:footScript(diff)
                     --main clone left move
                     self:cloneLeftCamera()
                 --elseif self.eneSol ~= nil and not self.eneSol.dead then
+                --merge 镜头 结束 之后 我方士兵都死亡了 才clone RightCamera
                 else
                     print("all my soldier dead clone ene right foot")
                     --main clone rightMove
@@ -270,7 +370,7 @@ function FightLayer2:footScript(diff)
             --self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
         else
             print("foot clone right camera")
-            self.mainCamera.moveTarget = self.rightCamera.moveTarget
+            self.mainCamera.moveTarget = self.rightCamera.moveTarget+self.mainCamera.mainOff
             --self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
         end
     end
@@ -319,6 +419,8 @@ function FightLayer2:cloneLeftCamera()
     print("cloneLeftCamera")
 end
 function FightLayer2:cloneRightCamera()
+    local moff = self.mainCamera.moveTarget-self.rightCamera.moveTarget
+    self.mainCamera.mainOff = moff
     self.mergeYet = false
     self.clone = true
     self.cloneWho = 1
@@ -335,6 +437,7 @@ function FightLayer2:showLeftCamera()
     setVisible(self.leftCamera.renderTexture, true)
     setVisible(self.tempNode, false)
     local vs = getVS()
+    --self.leftCamera.object = nil
     setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setVisible(self.mainCamera.renderTexture, false)
     self.mergeYet = false
@@ -349,12 +452,14 @@ function FightLayer2:showRightCamera()
 end
 
 function FightLayer2:mergeCamera()
-    print("merge camera")
     setVisible(self.leftCamera.renderTexture, false)
     setVisible(self.rightCamera.renderTexture, false)
     setVisible(self.mainCamera.renderTexture, true)
     setVisible(self.tempNode, false)
     --对镜头位置
+    --清理镜头的object 追踪
+    --self.mainCamera.object = nil
+    print("merge camera", self.leftCamera.moveTarget, simple.encode(self.leftCamera.startPoint))
     self.mainCamera.moveTarget = self.leftCamera.moveTarget
     self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
     self.mergeYet = true
@@ -385,6 +490,7 @@ function FightLayer2:splitCamera()
     --交换镜头位置
     setPos(self.rightCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setPos(self.leftCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
+    self.split = true
 end
 function FightLayer2:checkArrow()
     local left
@@ -501,7 +607,7 @@ function FightLayer2:arrowScript(diff)
                     self:mergeCamera()
                 end
             end
-            --拆分镜头
+            --拆分镜头 交错弓箭镜头
             if self.mergeYet then
                 if ls > rs+rw or ls+lw < rs then
                     self:splitCamera()
@@ -525,16 +631,23 @@ function FightLayer2:arrowScript(diff)
     --trace Arrow 位置
     if self.arrow ~= nil or self.rightArrow ~= nil then
         if not self.arrowOver then
+            print("check arrow Over one arrow dead", self.arrow, self.rightArrow)
             if self.arrow ~= nil and self.arrow.dead then
+                print("left Arrow dead")
                 self.arrow = nil
+                --需要清理双方的 弓箭
+                self.rightArrow = nil
                 self.arrowOver = true
                 --进入分屏幕状态 下一个 回合
                 self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
             elseif self.rightArrow ~= nil and self.rightArrow.dead then
+                print("right Arrow dead")
                 self.rightArrow = nil
+                self.arrow = nil
                 self.arrowOver = true
                 self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
             end
+            print("arrow over", self.arrowOver)
         end
     end
     if self.clone then
@@ -562,25 +675,14 @@ function FightLayer2:finishArrow()
     if ret then
     else
         --进入步兵开始状态 屏幕分割 和 屏幕设定位置
-        --[[
-        local vs = getVS()
-        local mv = self.leftWidth-vs.width/2
-        self.moveTarget = -mv
-        self.prepareFoot = true
-        print("finishArrow", -mv)
-        --]]
-        --self.day = 1
-        --self.passTime = 0
         for k, v in ipairs(self.allSoldiers) do
             v:finishAttack()
         end
         self.day = 1
+        self.arrowOver = false
         self.animateYet = false
         self.passTime = 0
-        self.leftCamera:clearCamera()
-        self.rightCamera:clearCamera()
-
-        --self.bg:runAction(sequence({delaytime(0.5), callfunc(self, self.switchArrow)}))
+        self:clearAllCamera()
     end
 end
 
@@ -620,6 +722,7 @@ function FightLayer2:traceArrow(arr)
             self.rightArrow = arr
             setColor(self.rightArrow.changeDirNode, {0, 255, 0})
         end
+        print("right traceing")
         self.rightCamera:trace(self.rightArrow, -200)
     end
 end
