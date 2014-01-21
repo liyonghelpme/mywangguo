@@ -187,9 +187,9 @@ function FightSoldier2:startAttack(diff)
                         self.midPoint = midPoint
                         print("attack MidPoint", self.midPoint)
                     else
-                        local offE = -90
+                        local offE = -110
                         if self.color == 1 then
-                            offE = 90
+                            offE = 110
                         end
                         local midPoint = enePos[1]+offE
                         local t = math.abs(midPoint-self.oldPos[1])/self.speed
@@ -556,15 +556,17 @@ function FightSoldier2:findNearRow()
     return ene
     --等待攻击对方靠近 即可
 end
+--自己移动对方不移动 所以 距离要大一些 
 function FightSoldier2:moveToTarget()
     local tp = getPos(self.attackTarget.bg)
     local mp = getPos(self.bg)
-    self.changeDirNode:stopAction(self.idleAction)
+    --self.changeDirNode:stopAction(self.idleAction)
+    self.changeDirNode:stopAllActions()
     self.moveAni = repeatForever(CCAnimate:create(self.runAni))
     self.changeDirNode:runAction(self.moveAni)
-    local offX = 40
+    local offX = 80
     if self.color == 0 then
-        offX = -40
+        offX = -80
     end
     local midPoint = tp[1]+offX
     self.midPoint = midPoint
@@ -579,6 +581,8 @@ function FightSoldier2:moveToTarget()
 end
 
 --调整了我的 左右之后 检查我的敌人距离
+--bug 两者 都杀死了 同行的目标 然后 等待 对方靠近
+--两者 不同行  并且距离太大就导致无法攻击了
 function FightSoldier2:doNext(diff)
     if self.state == FIGHT_SOL_STATE.NEXT_TARGET then
         if self.id == 0 then
@@ -587,6 +591,8 @@ function FightSoldier2:doNext(diff)
                 self.checkEneYet = false
                 local p = getPos(self.attackTarget.bg)
                 local mp = getPos(self.bg)
+                --因为双方攻击的都是 不同行 而行之间存在移动的 偏移 导致 超出了攻击范围 超出了90范围
+                --少量一方移动即可
                 if math.abs(p[1]-mp[1]) < 90 then
                     self.changeDirNode:stopAction(self.idleAction)
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
@@ -601,6 +607,12 @@ function FightSoldier2:doNext(diff)
                     self.oneAttack = false
                     self:showAttackEffect()
                     print("next attack target get now attack him!!", self.sid, self.attackTarget.sid)
+                --处理对方也在发呆的情况
+                else
+                    self.nextTime = self.nextTime+diff
+                    if self.nextTime >= 0.4 and self.attackTarget.state == FIGHT_SOL_STATE.NEXT_TARGET then
+                        self:moveToTarget() 
+                    end
                 end
             --当前行没有目标找相邻行的attackTarget 
             elseif not self.checkEneYet then
@@ -610,6 +622,7 @@ function FightSoldier2:doNext(diff)
                 print("find near row enemy", ene)
                 --没有找到 步兵 则开始 寻找弓箭手 所有的 士兵 最近的 
                 --等待攻击对方靠近 即可
+                --找到弓箭手 之后要相距 80的距离攻击 不能冲太近了
                 if ene ~= nil then
                     print("find attackTarget ok")
                     self.attackTarget = ene
@@ -649,6 +662,7 @@ function FightSoldier2:doAttack(diff)
             if self.attackTarget.dead then
                 print("enemy dead now", self.attackTarget.sid)
                 self.state = FIGHT_SOL_STATE.NEXT_TARGET
+                self.nextTime = 0
                 self.idleAction = repeatForever(CCAnimate:create(self.idleAni))
                 self.changeDirNode:runAction(self.idleAction)
 

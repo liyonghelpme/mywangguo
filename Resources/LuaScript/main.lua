@@ -38,19 +38,18 @@ local function main()
 
     local director = CCDirector:sharedDirector()
     --global.director:runWithScene(TMXScene.new())
-
+    --[[
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
+    --]]
 
     --require "Miao.TestScene"
     --global.director:runWithScene(TestScene.new())
     
-    --[[
     local sc = FightScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-    --]]
 
 
     --[[ 

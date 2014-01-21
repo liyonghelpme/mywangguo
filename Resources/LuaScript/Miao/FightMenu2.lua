@@ -159,6 +159,7 @@ function fightNumPro(banner, n, max)
 end
 
 function FightMenu2:onBut()
+    CAMERA_SMOOTH = 1
 end
 
 --初始化的时候 根据 

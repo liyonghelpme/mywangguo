@@ -1,4 +1,6 @@
 Camera = class()
+local cid = 0
+CAMERA_SMOOTH = 10
 function Camera:ctor(m, width)
     self.map = m
     self.width = width
@@ -14,6 +16,30 @@ function Camera:ctor(m, width)
     self.moveNode = addNode(self.bg)
     --local test = setVisible(addSprite(self.bg, "water.jpg"), true)
     --self.test =test
+    self.renderNode = createSprite("whitebox.png")
+    self.map.physicScene:addChild(self.renderNode)
+    setAnchor(self.renderNode, {0, 0})
+    setPos(self.renderNode, {0, 0})
+    local coord = ui.newBMFontLabel({text='', font='bound.fnt', color={0, 0, 0}, size=25})
+    self.coord = coord
+    setAnchor(coord, {0, 0})
+    self.renderNode:addChild(coord)
+    self.cid = cid
+    --主镜头相对于 目标镜头的偏移值
+    self.mainOff = 0
+
+    cid = cid+1
+    if self.cid == 0 then
+        setColor(self.renderNode, {255, 0, 0})
+        setPos(self.renderNode, {0, 100})
+    elseif self.cid == 1 then
+        setColor(self.renderNode, {0, 255, 0})
+        setPos(self.renderNode, {0, 200})
+    else
+        setColor(self.renderNode, {0, 0, 255})
+        setPos(self.renderNode, {0, 300})
+    end
+    setVisible(self.renderNode, false)
 
     self.needUpdate = true
     registerEnterOrExit(self)
@@ -29,6 +55,7 @@ function Camera:adjustMoveTarget()
             --追踪对象死亡了
         else
             local vs = getVS()
+            --弓箭就要考虑 changeDirNode 和 bg 不同因素
             local ap = getPos(self.object.changeDirNode)
             local abp = getPos(self.object.bg)
             ap[1] = abp[1]+ap[1]
@@ -50,7 +77,7 @@ function Camera:update(diff)
     self:adjustMoveTarget()
     if self.moveTarget ~= nil then
         local pos = self.startPoint
-        local smooth = diff*10
+        local smooth = diff*CAMERA_SMOOTH
         smooth = math.min(smooth, 1)
         local dx = math.abs(pos[1]-self.moveTarget)
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
@@ -59,11 +86,29 @@ function Camera:update(diff)
         self.map:adjustBattleScene(px)
         --渲染physic scene 对象
         local vs = self.renderTexture:isVisible()
+        --setVisible(self.renderNode, vs)
+        self.coord:setString(math.floor(self.moveTarget).." "..math.floor(self.startPoint[1])..' '..math.floor(self.startPoint[2]))
         if vs then
+            local rn
+            if self.map.clone then
+                if self.map.cloneWho == 0 then
+                    rn = self.map.leftCamera.renderNode
+                    setVisible(rn, true)
+                else
+                    rn = self.map.rightCamera.renderNode
+                    setVisible(rn, true)
+                end
+            end
+
+            setVisible(self.renderNode, true)
             self.renderTexture:beginWithClear(0, 0, 0, 1)
             self.map.physicScene:visit()
             --self.test:visit()
             self.renderTexture:endToLua()
+            setVisible(self.renderNode, false)
+            if rn then
+                setVisible(rn, false)
+            end
         end
     end
 end

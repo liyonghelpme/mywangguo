@@ -184,6 +184,7 @@ function FightLayer2:ctor(s, my, ene)
     self.scene = s 
     local vs = getVS()
     print("FightLayer2")
+    self.passTime = 0
 
     self.myFootNum = self:convertNumToSoldier(my[1])
     self.myArrowNum = self:convertNumToSoldier(my[2])
@@ -222,6 +223,9 @@ function FightLayer2:ctor(s, my, ene)
     addChild(self.physicScene, self.battleScene)
     self.nearScene = addNode(self.physicScene)
 
+    self.stateLabel = ui.newBMFontLabel({text="", color={0, 0, 0}, size=25})
+    self.physicScene:addChild(self.stateLabel)
+    setAnchor(setPos(self.stateLabel, {10, FIGHT_HEIGHT-40}), {0, 0})
     --场景宽度受士兵的数量决定 1:1的士兵
     --刚开始 1: 0.618 
     --战斗高度不变 但是宽度可以自由增加
@@ -367,6 +371,7 @@ function FightLayer2:doDay(diff)
 end
 
 function FightLayer2:update(diff)
+    self.stateLabel:setString(str(self.finishAttack).." "..str(math.floor(self.passTime)))
     self:doFree(diff)
     self:doMove(diff)
     self:doFastBack(diff)

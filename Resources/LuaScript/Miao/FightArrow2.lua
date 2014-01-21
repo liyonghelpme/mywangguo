@@ -35,7 +35,7 @@ function FightArrow2:startAttack()
         local function addArrow()
             local a = Arrow.new()
             local abg = a.bg
-            self.soldier.map.battleScene:addChild(a.bg)
+            self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
             local p = getPos(self.soldier.bg)
             local offX = 20
             if self.soldier.color == 1 then
@@ -314,7 +314,7 @@ function FightArrow2:doFightBack(diff)
             local function addArrow()
                 local p = getPos(self.soldier.bg)
                 local a = Arrow2.new(self.soldier, self.soldier.attackTarget)
-                self.soldier.map.battleScene:addChild(a.bg)
+                self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
                 local abg = a.bg
                 local offX = 20
                 if self.soldier.color == 1 then
@@ -327,7 +327,7 @@ function FightArrow2:doFightBack(diff)
                 local as = self.soldier.map.arrowSpeed
                 local tpos = getPos(self.soldier.attackTarget.bg)
                 local tt = math.abs(tpos[1]-p[1])/as
-                a.bg:runAction(moveto(tt, tpos[1], tpos[2]))
+                a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(nil, removeSelf, a.bg)}))
             end
             if not self.dead then
                 self.soldier.changeDirNode:stopAllActions()
