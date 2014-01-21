@@ -236,25 +236,12 @@ function FightLayer2:footScript(diff)
     --屏幕重新回到开始位置 
     --FIXME 优化性能只在 镜头设置后 才 设定镜头的object
     if not self.finishAttack and self.animateYet then
-        local mySol
         --从外列 逐行搜索
         if self.mySol == nil or self.mySol.dead then
-            local maxX = 0
-            --从下行到上行 应该从上到下 
-            --随便了 足够的空隙即可
-            for k, v in ipairs(self.mySoldiers) do
-                for tk, tv in ipairs(v) do
-                    --活着的士兵
-                    if not tv.dead then
-                            mySol = tv
-                            break
-                    end
-                end
-            end
-            self.mySol = mySol
-            setColor(self.mySol.changeDirNode, {0, 255, 0})
+            self.mySol = self:findMyRightMostFoot()
         end
         if self.mySol ~= nil then
+            setColor(self.mySol.changeDirNode, {0, 255, 0})
             self.leftCamera:trace(self.mySol, FIGHT_OFFX*3)
         end
         --寻找影子步兵
@@ -264,21 +251,10 @@ function FightLayer2:footScript(diff)
         --查看一下 当前最前端的步兵的 位置 如果步兵死亡了 那么 就使用影子步兵来移动
         --shadow 所有步兵移动都会 影响 
         if self.eneSol == nil or self.eneSol.dead then
-            local maxX = 0
-            --从下行到上行 应该从上到下 
-            --随便了 足够的空隙即可
-            for k, v in ipairs(self.eneSoldiers) do
-                for tk, tv in ipairs(v) do
-                    --活着的士兵
-                    if not tv.dead then
-                        self.eneSol = tv
-                        break
-                    end
-                end
-            end
-            setColor(self.eneSol.changeDirNode, {0, 255, 0})
+            self.eneSol = self:findEneLeftFoot()
         end
         if self.eneSol ~= nil then
+            setColor(self.eneSol.changeDirNode, {0, 255, 0})
             self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*3)
         end
     end
@@ -298,6 +274,40 @@ function FightLayer2:footScript(diff)
             --self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
         end
     end
+end
+function FightLayer2:findMyRightMostFoot()
+    local maxX = 0
+    local mySol 
+    for k, v in ipairs(self.mySoldiers) do
+        for tk, tv in ipairs(v) do
+            --活着的士兵
+            if not tv.dead then
+                local p = getPos(tv.bg)
+                if p[1] > maxX then
+                    mySol = tv
+                    maxX = p[1]
+                end
+            end
+        end
+    end
+    return mySol
+end
+function FightLayer2:findEneLeftFoot()
+    local minX = 999999
+    local eneSol 
+    for k, v in ipairs(self.eneSoldiers) do
+        for tk, tv in ipairs(v) do
+            --活着的士兵
+            if not tv.dead then
+                local p = getPos(tv.bg)
+                if p[1] < minX then
+                    eneSol = tv
+                    minX = p[1]
+                end
+            end
+        end
+    end
+    return eneSol
 end
 --主镜头 clone 某个分镜头的 moveTarget 和 位置行为
 function FightLayer2:cloneLeftCamera()
@@ -458,25 +468,29 @@ function FightLayer2:arrowScript(diff)
         --当一方没有 弓箭手剩余的时候 则 等待另外一侧镜头到达屏幕中央则 clone这个镜头即可
         local left, right = self:checkArrow()
         --只有单侧士兵
+        --左侧没有弓箭手
+        --战场中心不是 WIDTH/2 而是 LEFTWIDHT + vs.width*1.5/2 的位置
+        local bmid = self.leftWidth+vs.width*1.5/2
         if not left then
-            print("rightCamera ", rs, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
+            print("left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
             if not self.mergeYet then
-                if rs <= self.WIDTH/2 and rs > self.WIDTH/2-vs.width/2 then
+                if rs <= bmid and rs > bmid-vs.width/2 then
+                    print("no left arrow so merge Right Camera ")
                     self:mergeRightCamera()
                 end
             else
-                if rs <= self.WIDTH/2-vs.width/2 then
-                    print("arrow begin clone Right Camera")
+                if rs <= bmid-vs.width/2 then
+                    print("no left arrow begin clone Right Camera")
                     self:cloneRightCamera()
                 end
             end
         elseif not right then
             if not self.mergeYet then
-                if (ls+lw) >= self.WIDTH/2 and (ls+lw) < self.WIDTH/2+vs.width/2 then
+                if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
                     self:mergeCamera()
                 end
             else
-                if (ls+lw) >= self.WIDTH/2+vs.width/2 then
+                if (ls+lw) >= bmid+vs.width/2 then
                     self:cloneLeftCamera()
                 end
             end
@@ -582,10 +596,14 @@ function FightLayer2:traceArrow(arr)
             local np = getPos(arr.bg)
             --按照左侧追踪 我方镜头表现
             if np[1] > ap[1] then
+                setColor(self.arrow.changeDirNode, {255, 0, 0})
                 self.arrow = arr
+                setColor(self.arrow.changeDirNode, {0, 255, 0})
+            else
             end
         else
             self.arrow = arr
+            setColor(self.arrow.changeDirNode, {0, 255, 0})
         end
         --startPoint 应该
         self.leftCamera:trace(self.arrow, 200)
@@ -594,10 +612,13 @@ function FightLayer2:traceArrow(arr)
             local ap = getPos(self.rightArrow.bg)
             local np = getPos(arr.bg)
             if np[1] < ap[1] then
+                setColor(self.rightArrow.changeDirNode, {255, 0, 0})
                 self.rightArrow = arr
+                setColor(self.rightArrow.changeDirNode, {0, 255, 0})
             end
         else
             self.rightArrow = arr
+            setColor(self.rightArrow.changeDirNode, {0, 255, 0})
         end
         self.rightCamera:trace(self.rightArrow, -200)
     end
