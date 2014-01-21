@@ -557,7 +557,7 @@ function FightLayer2:arrowScript(diff)
             local fw = #self.myFootNum*FIGHT_OFFX
             local bp = self.leftWidth-fw
             --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
-            self.moveTarget = -(bp-(vs.width/2-FIGHT_OFFX))
+            self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
             print("self.leftWidth ", self.moveTarget)
             self:showLeftCamera() 
             --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置

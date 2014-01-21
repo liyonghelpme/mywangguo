@@ -24,12 +24,13 @@ end
 --挨个调用函数 接着 stop 函数
 --调用某段剧本
 function FightArrow2:startAttack()
-    print("Arrow start Attack", self.soldier.sid)
     local ene, firstEnable = self:findNearEnemy()
+    print("Arrow start Attack", self.soldier.sid, ene, firstEnable)
     self.soldier.attackTarget = ene
     if ene == nil then
         ene = firstEnable
     end
+
     print("near ene", ene, firstEnable)
     if ene ~= nil then
         print("ene sid", ene.sid)
@@ -96,7 +97,8 @@ function FightArrow2:findNearEnemy()
     end
     --这两个状态 不累计arrowHurt数值
     --local inNext = (self.state == FIGHT_SOL_STATE.NEXT_TARGET or self.state == FIGHT_SOL_STATE.WAIT_ATTACK)
-    local isStart = (self.state == FIGHT_SOL_STATE.START_ATTACK)
+    local isStart = (self.soldier.state == FIGHT_SOL_STATE.START_ATTACK)
+    print("findNearEnemy isStart", isStart)
     local firstEnable
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do
