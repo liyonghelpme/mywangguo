@@ -510,7 +510,9 @@ Logic.ownCity = {}
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
     print("winCity of scene", Logic.challengeCity)
-    Logic.ownCity[Logic.challengeCity] = true
+    if Logic.challengeCity ~= nil then
+        Logic.ownCity[Logic.challengeCity] = true
+    end
     --table.insert(Logic.ownCity, Logic.challengeCity)
 end
 function clearFight()

@@ -45,8 +45,14 @@ end
 function Arrow2:update(diff)
     local p = getPos(self.bg)
     local tp = getPos(self.target.bg)
-    if math.abs(p[1]-tp[1]) <= 20 then
-        self:doHarm()
+    if self.soldier.color == 0 then
+        if p[1] >= tp[1]-20 then
+            self:doHarm()
+        end
+    else
+        if p[1] <= tp[1]+20 then
+            self:doHarm()
+        end
     end
 end
 function Arrow2:doHarm()

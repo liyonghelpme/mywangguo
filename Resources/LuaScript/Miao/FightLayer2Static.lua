@@ -20,6 +20,9 @@ function FightLayer2:clearAllCamera()
     self.leftCamera:clearCamera()
     self.rightCamera:clearCamera()
     self.mainCamera:clearCamera()
+    --还原位置
+    setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
+    setPos(self.rightCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
 end
 --我方或者敌方步兵死光
 function FightLayer2:countFoot()
@@ -158,6 +161,7 @@ function FightLayer2:oneFail()
         global.director.curScene:checkWin()
     end
     local function fightOver()
+        print("fightOver")
         --如果scene 退出完了 则 push一个新的scene
         global.director:popScene()
         --global.director.curScene.bg:runAction(sequence({delaytime(0.5), callfunc(nil, checkWin)}))
@@ -169,6 +173,7 @@ function FightLayer2:oneFail()
         global.director.curScene:checkWin()
         --]]
     end
+    print("why not call fightOver function here")
     self.bg:runAction(sequence({delaytime(5), callfunc(nil, fightOver)}))
     return true, left, right
 end
@@ -188,7 +193,7 @@ function FightLayer2:getMyRight()
     return maxX, myT
 end
 function FightLayer2:getEneLeft()
-    local minX = 0
+    local minX = 999999
     local myT
     for k, v in ipairs(self.allSoldiers) do
         if not v.dead and v.color == 1 then
@@ -445,6 +450,7 @@ function FightLayer2:showLeftCamera()
     setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setVisible(self.mainCamera.renderTexture, false)
     self.mergeYet = false
+    self.split = false
 end
 function FightLayer2:showRightCamera()
     setVisible(self.rightCamera.renderTexture, true)
@@ -453,6 +459,7 @@ function FightLayer2:showRightCamera()
     setPos(self.rightCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
     setVisible(self.mainCamera.renderTexture, false)
     self.mergeYet = false
+    self.split = false
 end
 
 function FightLayer2:mergeCamera()
@@ -639,7 +646,7 @@ function FightLayer2:arrowScript(diff)
     --trace Arrow 位置
     if self.arrow ~= nil or self.rightArrow ~= nil then
         if not self.arrowOver then
-            print("check arrow Over one arrow dead", self.arrow, self.rightArrow)
+            print("check arrow Over one arrow dead", self.arrow, self.rightArrow, self.arrowOver)
             if self.arrow ~= nil and self.arrow.dead then
                 print("left Arrow dead")
                 self.arrow = nil
@@ -647,13 +654,13 @@ function FightLayer2:arrowScript(diff)
                 self.rightArrow = nil
                 self.arrowOver = true
                 --进入分屏幕状态 下一个 回合
-                self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
+                self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishArrow)}))
             elseif self.rightArrow ~= nil and self.rightArrow.dead then
                 print("right Arrow dead")
                 self.rightArrow = nil
                 self.arrow = nil
                 self.arrowOver = true
-                self.bg:runAction(sequence({delaytime(1), callfunc(self, self.finishArrow)}))
+                self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishArrow)}))
             end
             print("arrow over", self.arrowOver)
         end
@@ -675,6 +682,7 @@ end
 --进入步兵回合 
 --插入好多动作
 function FightLayer2:finishArrow()
+    print("finish Arrow")
     --self.day = 1
     --左侧屏幕宽度 第一排 步兵的位置
     --游戏开始就记录了步兵的位置

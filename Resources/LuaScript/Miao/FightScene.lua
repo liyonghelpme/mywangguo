@@ -11,7 +11,11 @@ function FightScene:ctor()
     --找到一排的感觉
     --self.soldiers = {{25, 0, 0, 0}, {25, 0, 0, 0}}
     --self.soldiers = {{0, 5, 0, 0}, {0, 5, 0, 0}}
-    self.soldiers = {testData, testData}
+    --self.soldiers = {testData, testData}
+    --self.soldiers = {{10, 40, 0, 0}, {15, 5, 0, 0}}
+    self.soldiers = {{50, 40, 0, 0}, {40, 50, 0, 0}}
+    --self.soldiers = {{50, 40, 0, 0}, {40, 50, 0, 0}}
+
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 

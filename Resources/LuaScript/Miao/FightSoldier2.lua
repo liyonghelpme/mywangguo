@@ -129,12 +129,14 @@ function FightSoldier2:updateLabel()
     end
     local p = getPos(self.bg)
     s = s..'x:'..math.floor(p[1])..' '..math.floor(p[2])
-    self.stateLabel:setString(s)
+    --self.stateLabel:setString(s)
 
     local tid
     if self.attackTarget ~= nil then
         tid = self.attackTarget.sid
     end
+    self.stateLabel:setString(self.state.." "..str(tid).." "..str(self.funcSoldier.isHead))
+
 
     --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
     self.sLabel:setString(self.arrowHurt.." "..self.health)
@@ -616,7 +618,7 @@ function FightSoldier2:doNext(diff)
                 local mp = getPos(self.bg)
                 --因为双方攻击的都是 不同行 而行之间存在移动的 偏移 导致 超出了攻击范围 超出了90范围
                 --少量一方移动即可
-                if math.abs(p[1]-mp[1]) < 100 then
+                if math.abs(p[1]-mp[1]) < FIGHT_NEAR_RANGE then
                     self.changeDirNode:stopAction(self.idleAction)
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     local rd = math.random(2)
