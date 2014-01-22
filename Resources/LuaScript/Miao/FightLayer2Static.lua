@@ -21,6 +21,7 @@ function FightLayer2:clearAllCamera()
     self.rightCamera:clearCamera()
     self.mainCamera:clearCamera()
     --还原位置
+    local vs = getVS()
     setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
     setPos(self.rightCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
 end

@@ -260,6 +260,7 @@ function FightArrow2:waitAttack(diff)
                         else
                             print("firstCheck not find attackTarget then search all Enemy if far away then wait enemy move here")
                             self.soldier.state = FIGHT_SOL_STATE.WAIT_MOVE
+                            self.nearTime = 0
                         end
                     end
                 end
@@ -343,8 +344,14 @@ function FightArrow2:doWaitMove(diff)
                     --尝试靠近目标攻击
                     --我方自己的士兵就别攻击了
                     --小于200 再尝试移动过去 攻击对方
-                    if self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE and self.soldier.attackTarget.color ~= self.soldier.color and dis < 200 then
-                        self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
+                    --步兵回合
+                    --并且步兵回合没有结束
+                    self.nearTime = self.nearTime+diff
+                    if self.nearTime > 1 and self.soldier.map.day == 1 and not self.soldier.map.finishAttack then
+                        if self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE and self.soldier.attackTarget.color ~= self.soldier.color and dis < 200 then
+                            print("enemy is nearing so move to attack him")
+                            self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
+                        end
                     end
                 end
             end

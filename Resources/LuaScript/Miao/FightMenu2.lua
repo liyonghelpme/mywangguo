@@ -280,6 +280,7 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
         self.rightHurt = self.rightHurt+healthHurt
         self.totalRight = self.totalRight+healthHurt
     end
+    print("left solNum", simple.encode(sol))
 end
 
 function FightMenu2:finishRound()

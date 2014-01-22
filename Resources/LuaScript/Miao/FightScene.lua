@@ -3,7 +3,7 @@ require "Miao.FightMenu2"
 FightScene = class()
 function FightScene:ctor()
     initCityData()
-    local testData = CityData[4]
+    local testData = CityData[5]
     local ms = Logic.soldiers 
     --self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
     --self.soldiers = {{testData[1], testData[2]-5, testData[3], testData[4]}, testData}
@@ -13,8 +13,10 @@ function FightScene:ctor()
     --self.soldiers = {{0, 5, 0, 0}, {0, 5, 0, 0}}
     --self.soldiers = {testData, testData}
     --self.soldiers = {{10, 40, 0, 0}, {15, 5, 0, 0}}
-    self.soldiers = {{50, 40, 0, 0}, {40, 50, 0, 0}}
     --self.soldiers = {{50, 40, 0, 0}, {40, 50, 0, 0}}
+    --self.soldiers = {{50, 40, 0, 0}, {40, 50, 0, 0}}
+    --是因为左右使用了相同的数据修改的数组导致的问题
+    self.soldiers = {copyTable(testData), copyTable(testData)}
 
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))

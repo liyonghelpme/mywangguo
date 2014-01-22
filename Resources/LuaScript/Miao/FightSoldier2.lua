@@ -319,7 +319,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack)
     local lastNum = math.ceil(lastHealth/eachHealth)
     local nowNum = math.ceil(self.health/eachHealth)
     local dnum = lastNum-nowNum
-    print("hurt soldier Num", lastNum, nowNum, dnum)
+    print("hurt soldier Num", eachHealth, lastNum, nowNum, dnum)
     --损失的士兵数量 损失的生命值数量
     self.map.scene.menu:killSoldier(self, dnum, harm)
 
@@ -646,7 +646,12 @@ function FightSoldier2:doNext(diff)
                 local mp = getPos(self.bg)
                 --因为双方攻击的都是 不同行 而行之间存在移动的 偏移 导致 超出了攻击范围 超出了90范围
                 --少量一方移动即可
-                if math.abs(p[1]-mp[1]) < FIGHT_NEAR_RANGE then
+                local isFoot = self.attackTarget.id == 0
+                local isOther = self.attackTarget.color ~= self.color
+                local isInAttack = self.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK
+                local dis = math.abs(p[1]-mp[1])
+                --or (isFoot and isOther and isInAttack) 
+                if dis < FIGHT_NEAR_RANGE  then
                     self.changeDirNode:stopAction(self.idleAction)
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     local rd = math.random(2)
@@ -663,7 +668,7 @@ function FightSoldier2:doNext(diff)
                 --处理对方也在发呆的情况
                 else
                     self.nextTime = self.nextTime+diff
-                    if self.nextTime >= 0.4 and (self.attackTarget.state == FIGHT_SOL_STATE.NEXT_TARGET or self.attackTarget.state == FIGHT_SOL_STATE.WAIT_MOVE) then
+                    if self.nextTime >= 0.1 and (self.attackTarget.state == FIGHT_SOL_STATE.NEXT_TARGET or self.attackTarget.state == FIGHT_SOL_STATE.WAIT_MOVE) then
                         self:moveToTarget() 
                     end
                 end

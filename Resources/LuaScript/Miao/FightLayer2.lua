@@ -62,6 +62,8 @@ function FightLayer2:convertNumToSoldier(n)
         pow = math.floor(n/25)
         num = 25
     end
+    local leftNum = n-num*pow
+    print("left Number is", n, num, pow, leftNum)
 
     local curCol
     for i =0, num-1, 1 do
@@ -74,6 +76,16 @@ function FightLayer2:convertNumToSoldier(n)
         --每个士兵实力5
         table.insert(curCol, pow)
     end
+    if leftNum > 0 then
+        local col = math.floor(num/5)
+        local row = math.floor(num%5)
+        if row == 0 then
+            curCol = {}
+            table.insert(temp, curCol)
+        end
+        table.insert(curCol, leftNum)
+    end
+
     return temp
 end
 
