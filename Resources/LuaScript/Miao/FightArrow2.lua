@@ -525,6 +525,7 @@ function FightArrow2:finishAttack()
     self.inMove = false
     print("clear arrow Hurt for arrow")
     self.soldier.arrowHurt = 0
+    self.soldier.midPoint = nil
 
     if self.soldier.dead then
         --setVisible(self.soldier.bg, false)

@@ -351,7 +351,9 @@ function FightLayer2:footScript(diff)
             self.mySol = self:findMyRightMostFoot()
         end
         if self.mySol ~= nil then
-            setColor(self.mySol.changeDirNode, {0, 255, 0})
+            if DEBUG_FIGHT then
+                setColor(self.mySol.changeDirNode, {0, 255, 0})
+            end
             self.leftCamera:trace(self.mySol, FIGHT_OFFX*3)
         end
         --寻找影子步兵
@@ -364,7 +366,9 @@ function FightLayer2:footScript(diff)
             self.eneSol = self:findEneLeftFoot()
         end
         if self.eneSol ~= nil then
-            setColor(self.eneSol.changeDirNode, {0, 255, 0})
+            if DEBUG_FIGHT then
+                setColor(self.eneSol.changeDirNode, {0, 255, 0})
+            end
             self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*3)
         end
     end
@@ -716,14 +720,20 @@ function FightLayer2:traceArrow(arr)
             local np = getPos(arr.bg)
             --按照左侧追踪 我方镜头表现
             if np[1] > ap[1] then
-                setColor(self.arrow.changeDirNode, {255, 0, 0})
+                if DEBUG_FIGHT then
+                    setColor(self.arrow.changeDirNode, {255, 0, 0})
+                end
                 self.arrow = arr
-                setColor(self.arrow.changeDirNode, {0, 255, 0})
+                if DEBUG_FIGHT then
+                    setColor(self.arrow.changeDirNode, {0, 255, 0})
+                end
             else
             end
         else
             self.arrow = arr
-            setColor(self.arrow.changeDirNode, {0, 255, 0})
+            if DEBUG_FIGHT then
+                setColor(self.arrow.changeDirNode, {0, 255, 0})
+            end
         end
         --startPoint 应该
         self.leftCamera:trace(self.arrow, 200)
@@ -732,13 +742,19 @@ function FightLayer2:traceArrow(arr)
             local ap = getPos(self.rightArrow.bg)
             local np = getPos(arr.bg)
             if np[1] < ap[1] then
-                setColor(self.rightArrow.changeDirNode, {255, 0, 0})
+                if DEBUG_FIGHT then
+                    setColor(self.rightArrow.changeDirNode, {255, 0, 0})
+                end
                 self.rightArrow = arr
-                setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+                if DEBUG_FIGHT then
+                    setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+                end
             end
         else
             self.rightArrow = arr
-            setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+            if DEBUG_FIGHT then
+                setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+            end
         end
         print("right traceing")
         self.rightCamera:trace(self.rightArrow, -200)

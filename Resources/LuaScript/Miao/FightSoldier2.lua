@@ -66,18 +66,20 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     setSize(self.shadow, {70, 44})
     self.needUpdate = true
     registerEnterOrExit(self)
-
-    self.stateLabel = ui.newBMFontLabel({text="", font='bound.fnt', size=14, color={0, 0, 0}})
-    self.bg:addChild(self.stateLabel)
-    setPos(self.stateLabel, {0, 50})
-
-    self.sLabel = ui.newBMFontLabel({text="", font="bound.fnt", size=20, color={255, 0, 0}})
-    self.bg:addChild(self.sLabel)
-    setPos(self.sLabel, {0, 80})
     
-    self.sidLabel = ui.newBMFontLabel({text=self.sid, font="bound.fnt", size=20, color={0, 255, 0}})
-    self.bg:addChild(self.sidLabel)
-    setPos(self.sidLabel, {0, 100})
+    if DEBUG_FIGHT then
+        self.stateLabel = ui.newBMFontLabel({text="", font='bound.fnt', size=14, color={0, 0, 0}})
+        self.bg:addChild(self.stateLabel)
+        setPos(self.stateLabel, {0, 50})
+
+        self.sLabel = ui.newBMFontLabel({text="", font="bound.fnt", size=20, color={255, 0, 0}})
+        self.bg:addChild(self.sLabel)
+        setPos(self.sLabel, {0, 80})
+        
+        self.sidLabel = ui.newBMFontLabel({text=self.sid, font="bound.fnt", size=20, color={0, 255, 0}})
+        self.bg:addChild(self.sidLabel)
+        setPos(self.sidLabel, {0, 100})
+    end
 end
 function FightSoldier2:showPose(x)
     if not self.showYet then
@@ -111,15 +113,22 @@ function FightSoldier2:doRunAndAttack(day)
         --先弓箭 接着 步兵
         if day == 0 and self.id == 1 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
-            self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
         elseif day == 1 and self.id == 0 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
             print("Arrow start Attack")
-            self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
         end
     end
 end
 function FightSoldier2:updateLabel()
+    if not DEBUG_FIGHT then
+        return
+    end
     local s = self.sid..' '
     if self.left ~= nil then
         s = s..'l '..self.left.sid
@@ -189,7 +198,7 @@ function FightSoldier2:startAttack(diff)
                         local midPoint = (self.oldPos[1]+enePos[1])/2
                         midPoint = midPoint+offX+math.random(20)-10
                         local t = math.abs(midPoint-self.oldPos[1])/self.speed
-                        self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                        self.moveAct = moveto(t, midPoint, self.oldPos[2])
                         self.bg:runAction(self.moveAct)
                         self.midPoint = midPoint
                         print("attack MidPoint", self.midPoint)
@@ -200,7 +209,7 @@ function FightSoldier2:startAttack(diff)
                         end
                         local midPoint = enePos[1]+offE
                         local t = math.abs(midPoint-self.oldPos[1])/self.speed
-                        self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                        self.moveAct = moveto(t, midPoint, self.oldPos[2])
                         self.bg:runAction(self.moveAct)
                         self.midPoint = midPoint
                         print("foot attack arrow")
@@ -438,7 +447,7 @@ function FightSoldier2:doMove(diff)
                         --self.changeDirNode:runAction(CCAnimate:create(self.idleAction))
                     end
                     print("bg move action", t, p[2], self.midPoint)
-                    self.bg:runAction(sequence({sinein(moveto(t, self.midPoint, p[2])), callfunc(nil, finishMove)}))
+                    self.bg:runAction(sequence({moveto(t, self.midPoint, p[2]), callfunc(nil, finishMove)}))
                 end
             end
             --我方士兵处于移动状态 自己没有在移动状态 前列 士兵跑步向前
@@ -452,7 +461,7 @@ function FightSoldier2:doMove(diff)
                 self.midPoint = self.attackTarget.midPoint+offX
                 local diffx = self.midPoint-p[1]
                 local t = math.abs(diffx/self.speed)
-                self.bg:runAction(sinein(moveto(t, self.midPoint, p[2])))
+                self.bg:runAction(moveto(t, self.midPoint, p[2]))
                 --需要几个frame 来广播移动
                 self.inMove = true
             end
@@ -480,7 +489,7 @@ function FightSoldier2:doMove(diff)
                     local p = getPos(self.bg)
                     local diffx = self.midPoint-p[1]
                     local t = math.abs(diffx/self.speed)
-                    self.bg:runAction(sinein(moveto(t, self.midPoint, p[2])))
+                    self.bg:runAction(moveto(t, self.midPoint, p[2]))
                     --需要几个frame 来广播移动
                     self.inMove = true
                 else
@@ -551,7 +560,7 @@ function FightSoldier2:doKillAll(diff)
                 self.midPoint = midPoint
                 local t = math.abs(midPoint-mp[1])/self.speed
                 print("kill all move point", t, midPoint)
-                self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+                self.moveAct = moveto(t, midPoint, self.oldPos[2])
                 self.bg:runAction(self.moveAct)
             --通知弓箭手警戒
             --即便不是目标也要警戒
@@ -625,7 +634,7 @@ function FightSoldier2:moveToTarget()
     self.midPoint = midPoint
     local t = math.abs(midPoint-mp[1])/self.speed
     print("kill all move point", t, midPoint)
-    self.moveAct = sinein(moveto(t, midPoint, self.oldPos[2]))
+    self.moveAct = moveto(t, midPoint, self.oldPos[2])
     self.bg:runAction(self.moveAct)
     --通知弓箭手警戒
     --即便不是目标也要警戒
@@ -651,7 +660,7 @@ function FightSoldier2:doNext(diff)
                 local isInAttack = self.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK
                 local dis = math.abs(p[1]-mp[1])
                 --or (isFoot and isOther and isInAttack) 
-                if dis < FIGHT_NEAR_RANGE  then
+                if dis <= FIGHT_NEAR_RANGE*1.2  then
                     self.changeDirNode:stopAction(self.idleAction)
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     local rd = math.random(2)

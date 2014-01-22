@@ -16,30 +16,33 @@ function Camera:ctor(m, width)
     self.moveNode = addNode(self.bg)
     --local test = setVisible(addSprite(self.bg, "water.jpg"), true)
     --self.test =test
-    self.renderNode = createSprite("whitebox.png")
-    self.map.physicScene:addChild(self.renderNode)
-    setAnchor(self.renderNode, {0, 0})
-    setPos(self.renderNode, {0, 0})
-    local coord = ui.newBMFontLabel({text='', font='bound.fnt', color={0, 0, 0}, size=25})
-    self.coord = coord
-    setAnchor(coord, {0, 0})
-    self.renderNode:addChild(coord)
     self.cid = cid
     --主镜头相对于 目标镜头的偏移值
     self.mainOff = 0
-
     cid = cid+1
-    if self.cid == 0 then
-        setColor(self.renderNode, {255, 0, 0})
-        setPos(self.renderNode, {0, 100})
-    elseif self.cid == 1 then
-        setColor(self.renderNode, {0, 255, 0})
-        setPos(self.renderNode, {0, 200})
-    else
-        setColor(self.renderNode, {0, 0, 255})
-        setPos(self.renderNode, {0, 300})
+    if DEBUG_FIGHT then
+        self.renderNode = createSprite("whitebox.png")
+        self.map.physicScene:addChild(self.renderNode)
+        setAnchor(self.renderNode, {0, 0})
+        setPos(self.renderNode, {0, 0})
+        local coord = ui.newBMFontLabel({text='', font='bound.fnt', color={0, 0, 0}, size=25})
+        self.coord = coord
+        setAnchor(coord, {0, 0})
+        self.renderNode:addChild(coord)
+
+        if self.cid == 0 then
+            setColor(self.renderNode, {255, 0, 0})
+            setPos(self.renderNode, {0, 100})
+        elseif self.cid == 1 then
+            setColor(self.renderNode, {0, 255, 0})
+            setPos(self.renderNode, {0, 200})
+        else
+            setColor(self.renderNode, {0, 0, 255})
+            setPos(self.renderNode, {0, 300})
+        end
+        setVisible(self.renderNode, false)
     end
-    setVisible(self.renderNode, false)
+
 
     self.needUpdate = true
     registerEnterOrExit(self)
@@ -87,31 +90,38 @@ function Camera:update(diff)
         --渲染physic scene 对象
         local vs = self.renderTexture:isVisible()
         --setVisible(self.renderNode, vs)
-        local col 
-        if self.object ~= nil then
-            col = self.object.color 
+
+        if DEBUG_FIGHT then
+            local col 
+            if self.object ~= nil then
+                col = self.object.color 
+            end
+            self.coord:setString(math.floor(self.moveTarget).." "..math.floor(self.startPoint[1])..' '..math.floor(self.startPoint[2]).." "..str(col).." "..math.floor(self.mainOff))
         end
-        self.coord:setString(math.floor(self.moveTarget).." "..math.floor(self.startPoint[1])..' '..math.floor(self.startPoint[2]).." "..str(col).." "..math.floor(self.mainOff))
         if vs then
             local rn
-            if self.map.clone then
-                if self.map.cloneWho == 0 then
-                    rn = self.map.leftCamera.renderNode
-                    setVisible(rn, true)
-                else
-                    rn = self.map.rightCamera.renderNode
-                    setVisible(rn, true)
+            if DEBUG_FIGHT then
+                if self.map.clone then
+                    if self.map.cloneWho == 0 then
+                        rn = self.map.leftCamera.renderNode
+                        setVisible(rn, true)
+                    else
+                        rn = self.map.rightCamera.renderNode
+                        setVisible(rn, true)
+                    end
                 end
+                setVisible(self.renderNode, true)
             end
 
-            setVisible(self.renderNode, true)
             self.renderTexture:beginWithClear(0, 0, 0, 1)
             self.map.physicScene:visit()
             --self.test:visit()
             self.renderTexture:endToLua()
-            setVisible(self.renderNode, false)
-            if rn then
-                setVisible(rn, false)
+            if DEBUG_FIGHT then
+                setVisible(self.renderNode, false)
+                if rn then
+                    setVisible(rn, false)
+                end
             end
         end
     end

@@ -21,6 +21,7 @@ function FightFoot:finishAttack()
     self.soldier.oneAttack = false 
     self.soldier.checkEneYet = false
     self.soldier.arrowHurt = 0
+    self.soldier.midPoint = nil
 
     if self.soldier.dead then
         --setVisible(self.soldier.bg, false)

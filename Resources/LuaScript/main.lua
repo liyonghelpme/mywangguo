@@ -37,26 +37,22 @@ local function main()
     require 'myMap.FightMap'
 
     local director = CCDirector:sharedDirector()
-    --global.director:runWithScene(TMXScene.new())
+
     --[[
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
     --]]
 
-    --require "Miao.TestScene"
-    --global.director:runWithScene(TestScene.new())
-    
+    --[[
     local sc = FightScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
+    --]]
 
-
-    --[[ 
     local sc = FightMap.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-    --]]
 
     --require "Menu.TestMenu"
     --global.director:runWithScene(TestMenu.new())

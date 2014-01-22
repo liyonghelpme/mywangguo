@@ -13,8 +13,25 @@ function MapCat:ctor(s, st, ed, fake)
     self.state = MAP_STATE.FREE
     self.speed = CAT_SPEED
 
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("cat_foot.plist")
+    self.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 1, 1, true)
+
     if not self.fake then
-        self.bg = CCSprite:create("soldier3.png")
+        --self.bg = CCSprite:create("soldier3.png")
+        self.bg = CCNode:create()
+        self.changeDirNode = CCSprite:createWithSpriteFrameName("cat_foot_run_0.png")
+        addChild(self.bg, self.changeDirNode)
+        self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.runAni)))
+        setAnchor(self.changeDirNode, {262/512, (512-352)/512})
+
+        self.shadow = CCSprite:create("roleShadow2.png")
+        self.bg:addChild(self.shadow,  -1)
+        setSize(self.shadow, {70, 44})
+
+        --setAnchor(self.bg, {0.5, 0})
+        setScale(self.bg, 0.5)
+
         local p = getPos(self.start.bg)
         setPos(self.bg, p)
         self.moveTime = 0
@@ -96,7 +113,22 @@ function MapCat:restoreData()
     end
     print("restoreData finish", self.state, self.moveTime, self.curPoint, simple.encode(self.path), simple.encode(Logic.catData))
 end
+function MapCat:doDir(oldPos, newPos)
+    local sca = getScaleY(self.bg)
+    if oldPos[1] > newPos[1] then
+        setScaleX(self.bg, -sca)
+    elseif oldPos[1] < newPos[1] then
+        setScaleX(self.bg, sca)
+    end
+end
 function MapCat:update(diff)
+    if self.lastPos ~= nil then
+        local oldPos = self.lastPos
+        self.lastPos = getPos(self.bg)
+        self:doDir(oldPos, self.lastPos)
+    else
+        self.lastPos = getPos(self.bg)
+    end
     --只更新猫位置 
     if self.fake then
         --load data from Logic 

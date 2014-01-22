@@ -3,7 +3,7 @@ require "Miao.FightMenu2"
 FightScene = class()
 function FightScene:ctor()
     initCityData()
-    local testData = CityData[5]
+    local testData = CityData[17]
     local ms = Logic.soldiers 
     --self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
     --self.soldiers = {{testData[1], testData[2]-5, testData[3], testData[4]}, testData}

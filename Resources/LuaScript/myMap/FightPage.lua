@@ -77,6 +77,9 @@ function FightPage:initData()
 end
 
 function FightPage:updateDebugNode(p)
+    if not DEBUG_FIGHT then
+        return
+    end
     removeSelf(self.debugNode)
     self.debugNode = addNode(self.bg)
     for k, v in ipairs(p) do
