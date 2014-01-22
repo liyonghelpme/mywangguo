@@ -38,11 +38,9 @@ local function main()
 
     local director = CCDirector:sharedDirector()
 
-    --[[
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-    --]]
 
     --[[
     local sc = FightScene.new()
@@ -50,9 +48,11 @@ local function main()
     global.director:onlyRun(sc)
     --]]
 
+    --[[
     local sc = FightMap.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
+    --]]
 
     --require "Menu.TestMenu"
     --global.director:runWithScene(TestMenu.new())
