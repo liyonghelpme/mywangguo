@@ -355,8 +355,11 @@ function MiaoBuildLayer:initRoad()
             b:finishBuild()
         end
     end
-
-
+    self:addPeople(14)
+    self:addPeople(18)
+    self:addPeople(20)
+    self:addPeople(23)
+    
     global.director.curScene:saveGame(true)
     u:setBoolForKey("initRoadYet", true)
 end
