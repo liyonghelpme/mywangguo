@@ -46,13 +46,15 @@ function MiaoPage:ctor(s)
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("grassOne.plist")
     CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
-    self.tileMap = CCSpriteBatchNode:create("t512.png")
-    self.bg:addChild(self.tileMap)
-    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
     self.grassMap = CCSpriteBatchNode:create("grassOne.png")
     self.bg:addChild(self.grassMap)
     setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
+
+    self.tileMap = CCSpriteBatchNode:create("t512.png")
+    self.bg:addChild(self.tileMap)
+    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+
 
     local mj = simple.decode(getFileData("big512.json"))
     self.mapInfo = mj
