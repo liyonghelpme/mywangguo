@@ -215,6 +215,10 @@ function setColor(sp, color)
     end
     return sp
 end
+function setOpacity(sp, o)
+    sp:setOpacity(o)
+    return sp
+end
 function addSprite(bg, name)
     local sp
     if name == nil then
@@ -573,6 +577,12 @@ function getPosMap(sx, sy, px, py)
 end
 
 --得到位置对应的 坐标
+--由坐标计算normalMap  normalizePos 
+--根据 MapWidth/2 对应的网格的编号决定
+--24 * 29 地图块
+-- 0 0 菱形网格中心normal 奇数偶数性决定
+--FIX_HEIGHT 170 = y = 2
+--MapWidth/2  width height 29 
 function getPosMapFloat(sx, sy, px, py)
     local np = normalizePos({px,py},sx, sy)
     px = np[1]
@@ -606,11 +616,6 @@ function getBuildMap(build)
     return getPosMap(sx, sy, px, py)
 end
 --用 normal To Cartesian 来实现的
---[[
-function normalToCartesian(nx, ny)
-    return nx*SIZEX, ny*SIZEY
-end
---]]
 --从寻路的normal 转化成 建筑物的normal 坐标
 function cellNormalToMapNormal(x, y)
 end
@@ -666,19 +671,28 @@ end
 --getBuildMap ----> setBuildMap
 --根据 nx = 0 ny = 0 的位置放置的网格 
 --使用 0 0 网格的左下角作为对齐的标准
+
+--Warning 不再使用了这里对齐坐标需要考虑 背景地图的大小来做normal网格对齐 但是normal网格已经和 当前的newAffine 网格只是坐标网格对齐但是
+--奇数偶数 性不一定确定
+--FIX_HEIGHT == 2
+--MapWidth/2  == 29
 function normalizePos(p, sx, sy)
     local x = p[1]
     local y = p[2]
-    x = x-SIZEX
     
+    local ty = round(FIX_HEIGHT/SIZEY)
+    local tx = round(MapWidth/2/SIZEX)
+    local ty = ty%2
+    local tx = tx%2
+    local ba = tx == ty
     local q1 = round(x/SIZEX)
     local q2 = round(y/SIZEY)
-    if (q1+1)%2 == (q2+1)%2 then
+    local bb = (q1)%2 == (q2)%2
+    if ba ~= bb then
         q2 = q2+1
     end
     x = q1*SIZEX
     y = q2*SIZEY
-    x = x+SIZEX
     return {x, y}
 end
 
@@ -1209,6 +1223,10 @@ function fixY2(y)
 end
 
 
+function getAnimation(name)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    return animation
+end
 --动画名称
 --动画名字pattern
 --动画开始frame
@@ -1216,6 +1234,27 @@ end
 --动画frame 之间的 间隔
 --动画总时间
 --是否是 SpriteFrame  还是普通的Image
+function createAnimationWithNum(name, format, t, isFrame, num)
+    local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
+    if not animation then
+        animation = CCAnimation:create()
+        --从SpriteFrameCache 中获取动画Frame
+        if isFrame then
+            local cache = CCSpriteFrameCache:sharedSpriteFrameCache()
+            for k, v in ipairs(num) do
+                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, v)))
+            end
+        else
+            for k, v in ipairs(num) do
+                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, v)))
+            end
+        end
+        animation:setDelayPerUnit(t/#num)
+        animation:setRestoreOriginalFrame(true)
+        CCAnimationCache:sharedAnimationCache():addAnimation(animation, name)
+    end
+    return animation
+end
 function createAnimation(name, format, a,b,c,t, isFrame)
     local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
     if not animation then
@@ -1556,6 +1595,17 @@ function createSprite(n)
         return CCSprite:create(n)
     end
 end
+function createSpriteFrame(tex, rect, name)
+    local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
+    local f = ca:spriteFrameByName(name)
+    if f ~= nil then
+        return f
+    end
+    local r = rect 
+    local left = CCSpriteFrame:createWithTexture(tex, r)
+    ca:addSpriteFrame(left, name)
+    return left
+end
 function interSet(a, b)
     local temp = {}
     local count = 0
@@ -1652,6 +1702,25 @@ function leftBottomUI(sp)
     local sca = math.min(vs.width/ds[1], vs.height/ds[2])
     setScale(sp, sca)
 end
+function leftCenterUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+
+    local cy = ds[2]/2
+    local ny = vs.height/2-cy*sca
+    setPos(sp, {0, ny})
+end
+
+function leftTopUI(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+    local ny = vs.height-ds[2]*sca
+    setPos(sp, {0, ny})
+end
 
 --弹出的子菜单 显示向右侧
 function rightTopUI(sp)
@@ -1662,6 +1731,26 @@ function rightTopUI(sp)
     local ny = vs.height-ds[2]*sca
     setScale(sp, sca)
     setPos(sp, {nx, ny})
+end
+function centerBottom(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    setScale(sp, sca)
+    local cx = ds[1]/2
+    local nx = vs.width/2-cx*sca
+    setPos(sp, {nx, 0})
+end
+--左右居中 bottom Y 比例
+function centerYRate(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local scaY = math.min(vs.width/ds[1], vs.height/ds[2])
+    local scaX = 1
+    setScaleY(sp, scaY)
+    local cx = ds[1]/2
+    local nx = vs.width/2-cx*scaX
+    setPos(sp, {nx, 0})
 end
 
 
@@ -1691,3 +1780,21 @@ function concateTable(a, b)
     return temp
 end
 
+function lerp(a, b, wei)
+    if type(a) == 'table' then
+        local temp = {}
+        for i=1, #a, 1 do
+            temp[i] = a[i]*(1-wei)+b[i]*wei
+        end
+        return temp
+    end
+    return a*(1-wei)+b*wei
+end
+
+function dictKeyToNum(d)
+    local temp = {}
+    for k, v in pairs(d) do
+        temp[tonumber(k)] = v
+    end
+    return temp
+end

@@ -6,10 +6,20 @@ end
 -- for CCLuaEngine traceback
 function __G__TRACKBACK__(msg)
     cclog("----------------------------------------")
-    cclog("LUA ERROR: " .. tostring(msg) .. "\n")
-    cclog(debug.traceback())
+    local err = "LUA ERROR: " .. tostring(msg) .. "\n"
+    err = err..debug.traceback()
+    cclog(err)
     cclog("----------------------------------------")
+    sendReq('synError', dict({{"error", err}})) 
 end
+
+OldPrint = print
+function print(...)
+    --if DEBUG then
+        OldPrint(...)
+    --end
+end
+
 
 local function main()
     -- avoid memory leak
@@ -22,19 +32,28 @@ local function main()
     --require "Miao.MiaoScene"
     require "Miao.TMXScene"
 
-    require "myMap.MapScene"
-
-    --global.director:runWithScene(TMXScene.new())
+    --require "myMap.MapScene"
+    require 'Miao.FightScene'
+    require 'myMap.FightMap'
 
     local director = CCDirector:sharedDirector()
+
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
 
-    --require "Miao.TestScene"
-    --global.director:runWithScene(TestScene.new())
-    
-    --global.director:runWithScene(FightScene.new())
+    --[[
+    local sc = FightScene.new()
+    director:replaceScene(sc.bg)
+    global.director:onlyRun(sc)
+    --]]
+
+    --[[
+    local sc = FightMap.new()
+    director:replaceScene(sc.bg)
+    global.director:onlyRun(sc)
+    --]]
+
     --require "Menu.TestMenu"
     --global.director:runWithScene(TestMenu.new())
     

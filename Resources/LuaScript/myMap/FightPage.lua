@@ -1,6 +1,12 @@
+--inkScape 导出的路径信息
 require "mapData"
 require "myMap.MapCity"
 require "myMap.MapCat"
+--gimp 导出的城堡位置
+require "MapCoord"
+--CityData 每个城堡的 士兵初始数据 
+require 'cityData'
+
 FightPage = class()
 function FightPage:ctor()
     self.bg = CCLayer:create()
@@ -14,6 +20,8 @@ function FightPage:ctor()
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate:setBg(self.bg)
 
+    self.debugNode = addNode(self.bg)
+
     self.needUpdate = true
     registerEnterOrExit(self)
     registerMultiTouch(self)
@@ -21,27 +29,70 @@ function FightPage:ctor()
 end
 function FightPage:initData()
     if not MapDataInitYet then
+        MapDataInitYet = true
+        local sz = getContentSize(self.bg)
         MapNode = tableToDict(MapNode)
+        for k, v in pairs(MapNode) do
+            print("MapNode is", k, v)
+            v[2] = sz[2]-v[2] 
+            --x y  city or path  kind(mainCity village fightPoint)
+            if v[4] ~= nil then
+                local md = 9999
+                local minNode
+                for ck, cv in ipairs(MapCoord) do
+                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
+                    if dis < md then
+                        md = dis
+                        minNode = cv
+                    end
+                end
+                v[1] = minNode[1]
+                v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
+            end
+        end
+        print("allNode")
+        print(simple.encode(MapNode))
         MapEdge = tableToDict(MapEdge)
     end
     self.allCity = {}
+    --根据城堡id 查找城堡对象
+    self.cidToCity = {}
     for k, v in pairs(MapNode) do
         if v[3] == true then
             local ci = MapCity.new(self, v, k)
             self.bg:addChild(ci.bg)
             table.insert(self.allCity, ci)
+            if ci.kind == 3 then
+                self.mainCity = ci
+            end
+            self.cidToCity[ci.cid] = ci
         end
+    end
+    if Logic.catData ~= nil then
+        local path = Logic.catData.path
+        self:sendCat(self.cidToCity[path[#path]])
     end
 end
-function FightPage:sendCat(city)
-    local target
-    for k, v in ipairs(self.allCity) do
-        if v ~= city then
-            target = v
-            break
-        end
+
+function FightPage:updateDebugNode(p)
+    if not DEBUG_FIGHT then
+        return
     end
-    local cat = MapCat.new(self, city, target)
+    removeSelf(self.debugNode)
+    self.debugNode = addNode(self.bg)
+    for k, v in ipairs(p) do
+        local n = ui.newBMFontLabel({text=v, size=18, color={128, 128, 128}, font='bound.fnt'})
+        local xy = {MapNode[v][1], MapNode[v][2]}
+        setPos(n, xy)
+        addChild(self.debugNode, n)
+    end
+end
+--从主城到其它城市
+function FightPage:sendCat(city)
+    local cat = MapCat.new(self, self.mainCity, city, false)
+    self.cat = cat
     self.bg:addChild(cat.bg)
 end
 
@@ -51,6 +102,7 @@ end
 
 function FightPage:touchesBegan(touches)
     self.touchDelegate:tBegan(touches)
+    global.director.curScene.menu:closeMenu()
 end
 function FightPage:touchesMoved(touches)
     self.touchDelegate:tMoved(touches)

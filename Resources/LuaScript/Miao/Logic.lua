@@ -159,14 +159,18 @@ Logic.getNewRegion = false
 --每周 1 分钟
 --每个月 4周
 --每年 12个月
-function getDate()
-    local t = Logic.date
+--
+function convertTimeToWeek(t)
     local w = math.floor(t/10)
     local m = math.floor(w/4)
     w = w%4
     local y = math.floor(m/12)
     m = m%12
     return y+1, m+1, w+1
+end
+function getDate()
+    local t = Logic.date
+    return convertTimeToWeek(t)
 end
 local function yearUpdate(diff)
     if not Logic.paused then
@@ -321,7 +325,7 @@ Logic.IncCost = {
     {20, 20, 400},
     {10, 20, 500},
 }
---等级 数量
+--等级 数量 当前训练士兵的阶梯
 Logic.soldiers = {
     [1] = {1, 50},
     [2] = {0, 0},
@@ -406,3 +410,169 @@ Logic.inSell = {
     wood=true,
     stone=true,
 }
+
+SoldierAbility = {
+    {attack=40, defense=30, health=30},
+    {attack=35, defense=10, health=15},
+    {attack=50, defense=10, health=10},
+    {attack=40, defense=30, health=30},
+}
+IncEffect = {
+    {attack=2, defense=1, health=1},
+    {attack=3, defense=0, health=0},
+    {attack=4, defense=0, health=1},
+    {attack=4, defense=1, health=1},
+}
+
+--计算单个士兵能力
+--计算增益效果
+--计算多个士兵在增益下的实际能力
+
+function getSolAbility(kind, num, total)
+    local addEffect = math.floor(total/50)
+    local se = SoldierAbility[kind]
+    local ae = IncEffect[kind]
+    local temp = {}
+    temp.attack = se.attack+ae.attack*addEffect
+    temp.defense = se.defense+ae.defense*addEffect
+    temp.health = se.health+ae.health*addEffect
+
+    temp.attack = temp.attack*num
+    temp.defense = temp.defense*num
+    temp.health = temp.health*num
+    return temp
+end
+--根据moveTime 计算位置 
+--根据 path 和 curPoint 计算方向
+--test CatData
+--Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+Logic.catData = nil
+
+--计算合战剩余时间
+function getLeftTime()
+    if Logic.catData ~= nil then
+        local path = Logic.catData.path
+        if Logic.catData.totalTime == nil then
+            local ttime = {}
+            for k, v in ipairs(path) do
+                if k > 1 then
+                    local lastPos = path[k-1]
+                    lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+                    local xy = v
+                    xy = {MapNode[xy][1], MapNode[xy][2]}
+                    local dis = distance(lastPos, xy)/CAT_SPEED
+                    table.insert(ttime, dis)
+                end
+            end
+            Logic.catData.totalTime = ttime
+            print("path need time", simple.encode(ttime))
+        end
+        --后面路段的时间
+        local tt = 0
+        local ttime = Logic.catData.totalTime
+        for k, v in ipairs(Logic.catData.totalTime) do
+            if k >= Logic.catData.curPoint then
+                print("add Time", tt, k, v)
+                tt = tt+v
+            end
+        end
+        print("before time", tt, Logic.catData.curPoint)
+        local cp = Logic.catData.curPoint
+        local mt = Logic.catData.moveTime
+        --当前路段剩余的时间
+        if Logic.catData.curPoint > 1 and Logic.catData.curPoint <= #path then
+            print("tt is", tt, ttime[cp-1], mt)
+            tt = tt+Logic.catData.moveTime
+        end
+        print("after time", tt, Logic.catData.moveTime)
+        print("tttime", simple.encode(ttime))
+        return tt
+    end
+    return 0
+end
+
+
+--保存挑战数据
+Logic.challengeNum = {
+    10, 10, 0, 0
+}
+Logic.challengeCity = nil
+
+--保存每个城市的士兵发展的数据
+--城市士兵数据
+--基础数据 和城市发展时间 以及城市是否出来过
+--cid = [0, 0, 0, 0]
+Logic.cityNum = {}
+
+--占领的城市
+Logic.ownCity = {}
+
+--退出Fight 场景之后 Map 上面提示奖励
+function winCity()
+    print("winCity of scene", Logic.challengeCity)
+    if Logic.challengeCity ~= nil then
+        Logic.ownCity[Logic.challengeCity] = true
+    end
+    --table.insert(Logic.ownCity, Logic.challengeCity)
+end
+function clearFight()
+    Logic.catData = nil
+end
+
+function initCityData()
+    if not MapDataInitYet then
+        local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
+        local sz = getContentSize(tex)
+        MapDataInitYet = true
+        MapNode = tableToDict(MapNode)
+        for k, v in pairs(MapNode) do
+            print("MapNode is", k, v)
+            v[2] = sz[2]-v[2] 
+            --x y  city or path  kind(mainCity village fightPoint)
+            if v[4] ~= nil then
+                local md = 9999
+                local minNode
+                for ck, cv in ipairs(MapCoord) do
+                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
+                    if dis < md then
+                        md = dis
+                        minNode = cv
+                    end
+                end
+                v[1] = minNode[1]
+                v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
+            end
+        end
+        print("allNode")
+        print(simple.encode(MapNode))
+        MapEdge = tableToDict(MapEdge)
+    end
+end
+
+function getPeopleSkill(id, level)
+    local pdata = Logic.people[id]
+    if pdata.levelSkill ~= '[]' then
+        local ls = simple.decode(pdata.levelSkill)
+        for i=#ls, 1, -1 do
+            if ls[i][1] <= (level+1) then
+                return ls[i][2]        
+            end
+        end
+        --升到一定等级才能开启新的技能
+        return 0
+    end
+    return pdata.skill
+end
+function getSkillIcon(sid)
+    local sdata = Logic.allSkill[sid]
+    if sdata.hasLevel > 0 then
+        return sid-sdata.hasLevel+1
+    else
+        return sid
+    end
+end
+
+--当前可以启用的村民
+Logic.ownPeople = {}

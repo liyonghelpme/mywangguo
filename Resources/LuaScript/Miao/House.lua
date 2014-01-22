@@ -2,10 +2,7 @@ House = class(FuncBuild)
 
 function House:initWork()
     self.bg = CCNode:create()
-    local banner = setSize(CCSprite:create("probg.png"), {200, 38})
-    local pro = display.newScale9Sprite("pro1.png")
-    banner:addChild(pro)
-    setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
+    local banner, pro = createFacBanner()
     self.pro = pro
     self.banner = banner
     self.banner:setVisible(false)
@@ -24,12 +21,7 @@ function House:update(diff)
         local owner = self.baseBuild.owner
         if owner.state == PEOPLE_STATE.IN_HOME then
             self.banner:setVisible(true)
-            setProNum(self.pro, owner.health, owner.maxHealth)
-            --[[
-            local l = owner.health/owner.maxHealth*339
-            l = math.max(0, l)
-            setContentSize(self.pro, {l, 29})
-            --]]
+            setFacProNum(self.pro, owner.health, owner.maxHealth)
         else
             self.banner:setVisible(false)
         end

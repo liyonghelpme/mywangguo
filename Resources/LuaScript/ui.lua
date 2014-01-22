@@ -164,6 +164,14 @@ function ui.newTTFLabel(params)
 
         if x and y then label:realign(x, y) end
     end
+    --替换旧的setS函数tring
+    if shadowWord ~= nil then
+        local oldSet = label.setString
+        function label:setString(s)
+            oldSet(label, s)
+            shadowWord:setString(s)
+        end
+    end
 
     return label, shadowWord
 end
@@ -177,8 +185,13 @@ end
 function ui.newButton(params)
     local obj = {}
     local lay = CCLayer:create()
-    --local sp = display.newScale9Sprite(params.image)
-    local sp = CCSprite:create(params.image)
+    local sprOr9 = params.spr or true
+    local sp
+    if sprOr9 then
+        sp = CCSprite:create(params.image)
+    else
+        sp = display.newScale9Sprite(params.image)
+    end
     lay:addChild(sp)
     --lay:ignoreAnchorPointForPosition(true)
     obj.bg = lay
@@ -192,7 +205,10 @@ function ui.newButton(params)
     local priority = params.priority
     local col = params.color
     local font = params.font
-    local needScale = params.needScale or true
+    local needScale = true
+    if params.needScale ~= nil then
+        needScale = params.needScale
+    end
     local touchColor = params.touchColor
     local shadowColor = params.shadowColor
 
@@ -259,7 +275,11 @@ function ui.newButton(params)
     function obj:setContentSize(w, h)
         spSize = {w, h}
         lay:setContentSize(CCSizeMake(w, h))
-        setSize(sp, {w, h})
+        if sprOr9 then
+            setSize(sp, {w, h})
+        else
+            setContentSize(sp, {w, h})
+        end
     end
     obj.sp = sp
     registerTouch(obj, priority)

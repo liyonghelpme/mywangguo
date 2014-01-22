@@ -54,8 +54,13 @@ function TMXMenu2:ctor(s)
     self.events = {EVENT_TYPE.SHOW_DIALOG, EVENT_TYPE.CLOSE_DIALOG, EVENT_TYPE.UPDATE_RESOURCE}
 
     centerTop(self.top)
-
-
+    
+    self.leftTop = addNode(self.bg)
+    self.battleLabel = ui.newButton({image="info.png", conSize={250, 50}, text="距离合战开始还有1周", color={0, 0, 0}, size=18, spr=false})
+    addChild(self.leftTop, self.battleLabel.bg)
+    setPos(self.battleLabel.bg, {133, fixY(sz.height, 96)})
+    leftTopUI(self.leftTop)
+    setVisible(self.battleLabel.bg, false)
 
 
     registerEnterOrExit(self)
@@ -69,6 +74,15 @@ function TMXMenu2:update(diff)
         if self.passTime > 1 then
             self.passTime = 0
             self:updateYear()
+            if Logic.catData ~= nil then
+                setVisible(self.battleLabel.bg, true)
+                local tt = math.ceil(getLeftTime())
+                --local y, m, w = convertTimeToWeek(tt)
+                print("update battle data", tt, y, m, w)
+                self.battleLabel.text:setString(string.format("距离合战开始还有%d秒", tt))
+            else
+                setVisible(self.battleLabel.bg, false)
+            end
         end
     end
 end

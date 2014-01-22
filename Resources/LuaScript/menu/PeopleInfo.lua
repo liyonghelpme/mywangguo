@@ -40,6 +40,9 @@ function PeopleInfo:ctor(p, attribute)
     self.speIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 542)}), {32, 35}), {0.50, 0.50})
     self.skillIcon = sp
+    local w = setPos(setAnchor(addChild(self.skillIcon, ui.newBMFontLabel({text='', size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})
+    self.skillLevel = w
+
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="武", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {268, fixY(sz.height, 349)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {269, fixY(sz.height, 396)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="体", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {266, fixY(sz.height, 446)})
@@ -176,15 +179,21 @@ function PeopleInfo:setPeople()
         setVisible(self.speIcon, false)
         self.spe:setString('')
     end
-    if pdata.data.skillName ~= nil and pdata.data.skillName ~= '' and pdata.data.skill ~= 0 then
-        self.skill:setString(pdata.data.skillName)
-        setDisplayFrame(self.skillIcon, "skill"..pdata.data.skill..'.png')
-        setVisible(self.skillIcon, true)
-    else
+    local sid = getPeopleSkill(pdata.id, pdata.level)
+    if sid == 0 then
         setVisible(self.skillIcon, false)
         self.skill:setString('')
+    else
+        local sdata = Logic.allSkill[sid] 
+        self.skill:setString(sdata.name)
+        setDisplayFrame(self.skillIcon, "skill"..getSkillIcon(sid)..'.png')
+        setVisible(self.skillIcon, true)
+        if sdata.hasLevel > 0 then
+            self.skillLevel:setString(sdata.hasLevel)
+        else
+            self.skillLevel:setString('')
+        end
     end
-
 
     if not self.attribute then
         self.silver:setString(Logic.LevelCost[pdata.level+1+1].."银币")

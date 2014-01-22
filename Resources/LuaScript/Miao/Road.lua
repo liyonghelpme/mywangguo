@@ -178,6 +178,10 @@ function Road:adjustOnSlope()
             self.baseBuild.onSlope = true
         end
     end
+    --用于MiaoPeople定位高度
+    if set then
+        self.baseBuild.height = self.baseBuild.otherBuild.height
+    end
     return setYet
 end
 --当和斜坡冲突的时候变换路块类型
