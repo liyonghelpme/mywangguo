@@ -1,5 +1,5 @@
 require "menu.PeopleMenu3"
-require "menu.NewBuildMenu2"
+require "menu.NewBuildMenu3"
 require "menu.StoreMenu2"
 require "menu.ResearchMenu2"
 require "menu.IncSoldierMenu"
@@ -81,18 +81,9 @@ function PressMenu3:onTab(p)
     end
 end
 function PressMenu3:onBut(p)
-    --[[
-    local first = false
-    if self.curSel ~= p then
-        first = true
-        self:clearMenu()
-        self:setSelect(p)
-    end
-    --]]
-
     if p == 1  then
         global.director:popView()
-        local m = NewBuildMenu2.new()
+        local m = NewBuildMenu3.new()
         global.director:pushView(m, 1 )
     elseif p == 2 and  self.first then
         local m = PeopleMenu3.new(self)

@@ -34,6 +34,10 @@ function adjustNewHeight(mask2, width, ax, ay)
     ----print("ax ay obj offY !!!!!!!", ax, ay, width, mask2[dk], dk)
     return mask2[dk] or 0
 end
+--用于从数组中获取数据的 key
+function newAffKey(width, ax, ay)
+    return ay*width+ax+1
+end
 
 --点击时使用 点击坐标 到 网格坐标转化
 --裂缝区域属于 斜坡区域 属于下一个层的区域 因此 裂缝区域属于下一个层
@@ -71,7 +75,7 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     if allV ~= nil then
         --print("allV ", #allV, simple.encode(allV))
         for k, v in ipairs(allV) do
-            local hei = mask[v[2]*width+v[1]+1]
+            local hei = mask[v[2]*width+v[1]+1] or 0
             --print("hei", v[1], v[2], hei)
             --点击的Y值 向下偏移的高度
             local ncy = cy-hei*103
@@ -91,37 +95,68 @@ function cxyToAxyWithDepth(cx, cy, width, height, fixX, fixY, mask, cxyToAxyMap)
     --没有找到包含的 菱形网格 在裂缝里面
     return nil 
 
-    --[[
-    local ax, ay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
-    local dk = ay*width+ax+1
-    if mask[dk] then
-        --因为裂缝上面的网格都向上偏移了103 所以减去103 如果还在当前高度里面那么就在高地中
-        cy = cy-103
-        local nax, nay = newCartesianToAffine(cx, cy, width, height, fixX, fixY)
-        local dk = nay*width+nax+1
-        if mask[dk] then
-            return nax, nay, false, true
-        end
-        return ax, ay, true, false, nax, nay
-    end
-    return ax, ay, false, false
-    --]]
 end
 
 function axyToCxyWithDepth(ax, ay, width, height, fixX, fixY, mask)
     local dk = ay*width+ax+1
     local cx, cy = newAffineToCartesian(ax, ay, width, height, fixX, fixY)
     ------print("axyToCxyWithDepth", ax, ay, cx, cy)
-    cy = cy+103*mask[dk]
-    return cx, cy
+    local oldy = cy
+    cy = cy+103*(mask[dk] or 0)
+    return cx, cy, oldy
 end
+--检测tid 所在的范围 firstgid == 135 >= < nextRange tid = tid = firstgid
+function tidToTile(tid, normal, water, gidToTileName)
+    for i=2, #normal, 1 do
+        if tid < normal[i] then
+            return 'tile'..tid-normal[i-1]..'.png'
+        end
+    end
 
-function tidToTile(tid)
+    if tid < normal[#normal]+64 then
+        return 'tile'..tid-normal[#normal]..'.png'
+    end
+
+    for i=2, #water, 1 do
+        if tid < water[i] then
+            return 'tile'..(tid-water[i-1]+39)..'.png'
+        end
+    end
+    if tid < water[#water]+64 then
+        return 'tile'..(tid-water[#water]+39)..'.png'
+    end
+    local waterPic
+    if gidToTileName == nil then
+        waterPic = global.director.curScene.page.gidToTileName[tid]..'.png'
+    else
+        waterPic = gidToTileName[tid]..'.png'
+    end
+    return waterPic
+
+    --[[
+    for i=#water, 1, -1 do
+        if tid > water[i] then
+            tid = 
+        end
+    end
     if tid < 65 then
         tid = tid-1
         return 'tile'..tid..'.png'
-    else
+    elseif tid < 130 then
         tid = tid-65
         return 'tile'..tid..".png"
+    elseif tid < 213 then
+        tid = tid-135
+        return 'tile'..tid..'.png'
+    elseif tid < 280 then
+        tid = tid-213
+        return 'tile'..tid..'.png'
+    elseif tid < 345 then
+        tid = tid-280
+        return 'tile'..tid..'.png'
+    else
+        tid = tid-345
+        return 'tile'..tid..'.png'
     end
+    --]]
 end

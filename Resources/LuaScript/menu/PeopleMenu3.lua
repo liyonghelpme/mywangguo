@@ -1,7 +1,8 @@
 require "menu.TrainMenu2"
 require "menu.FindPeople2"
 require "menu.EquipMenu2"
-require "menu.AttributeMenu"
+--require "menu.AttributeMenu"
+require 'menu.AttributeMenu2'
 PeopleMenu3 = class()
 function PeopleMenu3:ctor()
     local vs = getVS()
@@ -17,10 +18,6 @@ function PeopleMenu3:ctor()
         "人才启用",
     }
 
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "mainBa.png"), {688, fixY(sz.height, 445)}), {190, 68}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "mainBa.png"), {688, fixY(sz.height, 296)}), {190, 68}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "mainBb.png"), {688, fixY(sz.height, 364)}), {190, 81}), {0.50, 0.50})
-
     local initX = 688
     local initY = fixY(sz.height, 222)
     local offY = -74
@@ -35,6 +32,9 @@ function PeopleMenu3:ctor()
         but.text = w
         if i == 4 then
             setColor(w, {255, 255, 255, 255*0.8})
+            if #Logic.ownPeople == 0 then
+                setColor(but.sp, {128, 128, 128, 255})
+            end
         end
         table.insert(self.data, {but, w})
     end
@@ -65,7 +65,7 @@ end
 function PeopleMenu3:onBut(p)
     if p == 1 then
         global.director:popView()
-        global.director:pushView(AttributeMenu.new(), 1)
+        global.director:pushView(AttributeMenu2.new(), 1)
     elseif p == 2 then
         global.director:popView()
         global.director:pushView(EquipMenu2.new(), 1)
@@ -73,8 +73,12 @@ function PeopleMenu3:onBut(p)
         global.director:popView()
         global.director:pushView(TrainMenu2.new(), 1)
     elseif p == 4 then
-        global.director:popView()
-        global.director:pushView(FindPeople2.new(), 1)
+        if #Logic.ownPeople > 0 then
+            global.director:popView()
+            global.director:pushView(FindPeople2.new(), 1)
+        else
+            addBanner("没有人才可以启用")
+        end
     end
 end
 

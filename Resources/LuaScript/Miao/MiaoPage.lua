@@ -6,37 +6,6 @@ MiaoPage = class()
 function MiaoPage:ctor(s)
     self.scene = s
     self.bg = CCLayer:create()
-    setContentSize(self.bg, {MapWidth, MapHeight})
-    setAnchor(self.bg, {0, 0})
-
-    self.oldBuildPos = {}
-
-    self.backpg = CCSpriteBatchNode:create("sea.png")
-    self.bg:addChild(self.backpg)
-    local col = math.ceil(MapWidth/64)
-    local row = math.ceil(MapHeight/32)+1
-    for i=0, row-1, 1 do
-        local initx = 0
-        if i%2 == 1 then
-            initx = 64 
-        end
-        for j=0, col-1, 1 do
-            local s = CCSprite:create("sea.png")
-            self.backpg:addChild(s)
-            setScale(setPos(s, {j*128+initx, i*32}), 1)
-        end
-    end
-
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("grassOne.plist")
-    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
-    self.tileMap = CCSpriteBatchNode:create("t512.png")
-    self.bg:addChild(self.tileMap)
-    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
-
-    self.grassMap = CCSpriteBatchNode:create("grassOne.png")
-    self.bg:addChild(self.grassMap)
-    setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
 
     local mj = simple.decode(getFileData("big512.json"))
     self.mapInfo = mj
@@ -44,13 +13,75 @@ function MiaoPage:ctor(s)
     local height = mj.height
     self.width = width
     self.height = height
+    local maxWH = math.max(self.width, self.height)
+    --矩形地图MapPos 对照
+    MapWidth = SIZEX*(maxWH*2)
+    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*2+20 
+
+    setContentSize(self.bg, {MapWidth, MapHeight})
+    setAnchor(self.bg, {0, 0})
+
+    self.oldBuildPos = {}
+
+    local col = math.ceil(MapWidth/64)
+    local row = math.ceil(MapHeight/32)+1
+    local tex = CCTextureCache:sharedTextureCache():addImage("water.jpg")
+    
+    local param = ccTexParams()
+    param.minFilter = GL_LINEAR
+    param.magFilter = GL_LINEAR
+    param.wrapS = GL_REPEAT
+    param.wrapT = GL_REPEAT
+    tex:setTexParameters(param)
+
+    local sea2 = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    local sea = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    self.bg:addChild(sea)
+    setAnchor(setPos(sea, {0, 0}), {0, 0})
+    self.bg:addChild(sea2)
+    setAnchor(setPos(sea2, {MapWidth, 0}), {0, 0})
+    self.seas = {sea, sea2}
+
+
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("grassOne.plist")
+    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
+
+    self.grassMap = CCSpriteBatchNode:create("grassOne.png")
+    self.bg:addChild(self.grassMap)
+    setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
+
+    self.tileMap = CCSpriteBatchNode:create("t512.png")
+    self.bg:addChild(self.tileMap)
+    setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
+
+
+    local mj = simple.decode(getFileData("big512.json"))
+    self.mapInfo = mj
+    local width = mj.width
+    local height = mj.height
+    self.width = width
+    self.height = height
+
     local tilesets = mj.tilesets
     self.tilesets = tilesets
-    local gidToImage = {}
+    -- >= 1 < 65
+    self.normal = {}
+    self.water = {}
+    self.gidToTileName = {}
+    self.gidToImage = {}
     for k, v in ipairs(self.tilesets) do
-        gidToImage[v.firstgid] = string.gsub(v.name, 'build', '')
+        self.gidToImage[v.firstgid] = string.gsub(v.name, 'build', '')
+        if string.find(v.name, 'water') ~= nil then
+            table.insert(self.water, v.firstgid)
+        elseif string.find(v.name, 'tt512') ~= nil then
+            table.insert(self.normal, v.firstgid)
+        else
+            self.gidToTileName[v.firstgid] = v.name
+        end
     end
-    self.gidToImage = gidToImage
+    print("normal water", simple.encode(self.normal))
+    print(simple.encode(self.water))
 
     --1-64   --> tile0 tile63
     --65-128 ---> tile0 tile63
@@ -63,10 +94,24 @@ function MiaoPage:ctor(s)
     end
     self.layerName = layerName
 
+    self.mask = {}
+    --所有mask layer 2 ---> 1
+    for k, v in pairs(layerName) do
+        if string.find(k, 'mask') ~= nil then
+            local mv = tonumber(string.sub(k, 5))
+            print("mask Layer mv", mv)
+            for i=1, #v.data, 1 do
+                if v.data[i] ~= 0 then
+                    self.mask[i] = mv-1
+                end
+            end
+        end
+    end
+
+    --[[
     --affine 坐标计算mask2
     local mask2 = layerName.mask2.data
     local mask3 = layerName.mask3.data
-    self.mask = {}
     for i=1, #mask2, 1 do
         if mask2[i] ~= 0 then
             self.mask[i] = 1
@@ -76,6 +121,7 @@ function MiaoPage:ctor(s)
             self.mask[i] = 0
         end
     end
+    --]]
 
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
@@ -86,7 +132,7 @@ function MiaoPage:ctor(s)
     --调整高度值
     --检查一个小范围的 ax ay 即可 确定属于哪个ax ay
     self.cxyToAxyMap = {}
-    for dk=1, #mask2, 1 do
+    for dk=1, self.width*self.height, 1 do
         --if dk <= 10 and dk >= 1 and dk%2 == 1 then
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
@@ -96,8 +142,8 @@ function MiaoPage:ctor(s)
             --使用菱形的 中下点 对齐的
             local left = cx-SIZEX
             local right = cx+SIZEX
-            local bottom = cy+self.mask[dk]*103
-            local top = cy+SIZEY*2+self.mask[dk]*103
+            local bottom = cy+(self.mask[dk] or 0)*103
+            local top = cy+SIZEY*2+(self.mask[dk] or 0)*103
             
             left = math.floor(left/SIZEX)
             right = math.ceil(right/SIZEX)
@@ -133,38 +179,9 @@ function MiaoPage:ctor(s)
        -- end
     end
     
-    --[[
-    local n = 0
-    for k, v in pairs(self.cxyToAxyMap) do
-        if n == 0  or n == 1 then
-            local x, y = getXY(k)
-            local md =  (x+y)%3
-            local c
-            if md == 0 then
-                c = {255, 0, 0, 128}
-            elseif md == 1 then
-                c = {0, 255, 0, 128}
-            else
-                c = {0, 0, 255, 128}
-            end
-            local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whitebox.png"), c), {SIZEX, SIZEY})
-            debug:addChild(sp)
-            setAnchor(setPos(sp, {x*SIZEX, y*SIZEY}), {0, 0})
-            for _, dv in ipairs(v) do
-                local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whiteArrow.png"), c), {SIZEX*2, SIZEY*2})
-                debug:addChild(sp)
-                local cx, cy = newAffineToCartesian(dv[1], dv[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
-                setAnchor(setPos(sp, {cx, cy}), {0.5, 0})
-            end
-        else
-        end
-        n = n +1
-    end
-    --]]
-
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
-            --local pname = tidToTile(dv)
+            --local pname = tidToTile(dv, self.normal, self.water)
             --print("pname is what?", pname)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
@@ -180,20 +197,13 @@ function MiaoPage:ctor(s)
             self.grassMap:addChild(pic)
             local sz = pic:getContentSize()
             setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
-            pic:setScale(1.01)
-            
-            --[[
-            if w%2 ~= h%2 then
-                pic:setFlipX(true)
-                pic:setFlipY(true)
-            end
-            --]]
+            pic:setScale(1.02)
         end
     end
 
     for dk, dv in ipairs(layerName.slop1.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.normal, self.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -206,7 +216,7 @@ function MiaoPage:ctor(s)
     end
     for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
-            local pname = tidToTile(dv)
+            local pname = tidToTile(dv, self.normal, self.water)
             local w = (dk-1)%width
             local h = math.floor((dk-1)/width)
 
@@ -221,6 +231,63 @@ function MiaoPage:ctor(s)
         end
     end
 
+    
+    self.slopeData = {}
+    for dk, dv in ipairs(layerName.slop2.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv, self.normal, self.water, self.gidToTileName)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            local dir = 0
+            if pname == 'tile18.png' then
+                dir = 0
+            elseif pname == 'tile16.png' then
+                dir = 1
+            else
+                dir = 2
+            end
+            --斜坡方向
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
+            self.slopeData[dk] = {dir, hei*OFF_HEIGHT+OFF_HEIGHT/2}
+            --nil 没有斜坡
+
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            --print("cx cy", cx, cy)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
+
+    for dk, dv in ipairs(layerName.slope3.data) do
+        if dv ~= 0 then
+            local pname = self.gidToTileName[dv]..'.png'
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
+
+    --河流图片
+    --调整河流的zord 来进行遮挡
+    for dk, dv in ipairs(layerName.water.data) do
+        if dv ~= 0 then
+            print("water pid", dv)
+            --local pname = tidToTile(dv, self.normal, self.water)
+            local pname = self.gidToTileName[dv]..'.png'
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+            print("water pname", pname)
+            local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.tileMap:addChild(pic)
+            local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+        end
+    end
 
 
     self.touchDelegate = StandardTouchHandler.new()
@@ -280,6 +347,23 @@ function MiaoPage:enterScene()
 end
 function MiaoPage:update(diff)
     self.touchDelegate:update(diff)
+    self:updateSea(diff)
+end
+function MiaoPage:updateSea(diff)
+    local s = diff*50
+    local p1 = getPos(self.seas[1])
+    local p2 = getPos(self.seas[2])
+    if p1[1]+s >= MapWidth then
+        p1[1] = -MapWidth
+    end
+    
+    --print("MapWidth", MapWidth, p2[1])
+    if p2[1]+s >= MapWidth then
+        p2[1] = -MapWidth
+    end
+
+    setPos(self.seas[1], {p1[1]+s, p1[2]})
+    setPos(self.seas[2], {p2[1]+s, p2[2]})
 end
 function MiaoPage:exitScene()
     Event:unregisterEvent(EVENT_TYPE.DO_MOVE, self)
@@ -419,9 +503,10 @@ function MiaoPage:beginBuild(kind, id, px, py)
         else
             p = {x=px, y=py}
         end
-        p = normalizePos({p.x, p.y}, 1, 1)
+        --p = normalizePos({p.x, p.y}, 1, 1)
+
         --取消左下右下的边
-        local ax, ay = newCartesianToAffine(p[1], p[2], self.width, self.height, MapWidth/2, FIX_HEIGHT)
+        local ax, ay = newCartesianToAffine(p.x, p.y, self.width, self.height, MapWidth/2, FIX_HEIGHT)
         ax = math.max(math.min(ax, self.width-1-1), 0)
         ay = math.max(math.min(ay, self.height-1-1), 0)
         local cx, cy = newAffineToCartesian(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
@@ -503,19 +588,6 @@ function MiaoPage:finishBuild()
         --end
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
-        --道路和 斜坡冲突 斜坡不能移动
-        --交给建筑物 来判断是否 dir 方向正确了 没有冲突才能实行建造的
-        --矿坑斜坡上
-        ---11 现在是服装店 不再是矿坑了 矿坑建筑物 拥有自己的新的ID
-        --[[
-        if self.curBuild.picName == 'build' and self.curBuild.id == 11 then
-            if self.curBuild.funcBuild:checkSlope() then
-                self.curBuild:finishBuild()
-                self.curBuild = nil
-            else
-                addBanner("必须建造到斜坡上面！")
-            end
-        --]]
         --桥梁建河流上
         if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
@@ -562,35 +634,6 @@ function MiaoPage:finishBuild()
             global.director.curScene.menu:finishBuild()
         end
         Logic.gotoHouse = true
-    end
-end
-
-function MiaoPage:onRemove()
-    if self.curBuild == nil then
-        local vs = getVS()
-        --先确定位置 再加入到 buildLayer里面
-        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='remove'}) 
-        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-        p = normalizePos({p.x, p.y}, 1, 1)
-        self.curBuild:setPos(p)
-        self.curBuild:setState(BUILD_STATE.MOVE)
-        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
-        Logic.paused = true
-    end
-end
---拖动某个建筑物 还是  
---选择某个建筑物 拖动 确定  取消 移动 setCurBuild = '??' 作为最上层一旦和这个建筑物 合体 就一起了 
---点击某个位置 这个建筑物 就被选中了 
-function MiaoPage:onMove()
-    if self.curBuild == nil then
-        local vs = getVS()
-        self.curBuild = MiaoBuild.new(self.buildLayer, {picName='move'})
-        local p = self.bg:convertToNodeSpace(ccp(vs.width/2, vs.height/2))
-        p = normalizePos({p.x, p.y}, 1, 1)
-        self.curBuild:setPos(p)
-        self.curBuild:setState(BUILD_STATE.MOVE)
-        self.buildLayer:addBuilding(self.curBuild, MAX_BUILD_ZORD)
-        Logic.paused = true
     end
 end
 

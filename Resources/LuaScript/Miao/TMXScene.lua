@@ -5,13 +5,15 @@ require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
+    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
         self:initData(rep, nil)
     else
-        sendReq('login', dict(), self.initData, nil, self)
-    end
+    --]]
+    sendReq('login', dict(), self.initData, nil, self)
+    --end
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
@@ -28,12 +30,15 @@ function TMXScene:ctor()
     delayCall(0.3, self.initDataNow, self)
     registerEnterOrExit(self)
     self.passTime = 0
+    self.checkTime = 0
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("equipOne.plist")
 end
 
 function TMXScene:initData(rep, param)
+    initCityData()
+
     local u = CCUserDefault:sharedUserDefault()
     local r = u:getStringForKey("resource")
     if r ~= "" then
@@ -64,6 +69,27 @@ function TMXScene:initData(rep, param)
         local rd = tableToDict(simple.decode(r))
         Logic.buildNum = rd
     end
+    local r = u:getStringForKey("ownCity")
+    if r ~= "" then
+        print("ownCity", r)
+        local rd = dictKeyToNum(simple.decode(r))
+        Logic.ownCity = rd
+    end
+    local r = u:getStringForKey("catData")
+    if r ~= "" and r ~= "null" then
+        print("catData", r)
+        local rd = simple.decode(r)
+        Logic.catData = rd
+        print("encode catData", simple.encode(Logic.catData))
+    else
+        Logic.catData = nil
+    end
+
+    local r = u:getStringForKey("ownPeople")
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownPeople = rd
+    end
 
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
@@ -88,12 +114,27 @@ function TMXScene:initData(rep, param)
             table.insert(Logic.buildList, v)
         end
     end
-
+    --城堡
+    Logic.castlePeople = {}
+    --村庄
+    Logic.villagePeople = {}
+    --新手村
+    Logic.newPeople = {}
     Logic.people = {}
     Logic.allPeople = rep.people
     print("allPeople", #Logic.allPeople)
     for k, v in ipairs(rep.people) do
         Logic.people[v.id] = v
+        if v.cityKind == 0 then
+            local df = getDefault(Logic.castlePeople, v.appear, {} )
+            table.insert(df, v.id)
+        elseif v.cityKind == 1 then
+            local df = getDefault(Logic.villagePeople, v.appear, {} )
+            table.insert(df, v.id)
+        else
+            local df = getDefault(Logic.newPeople, v.appear, {} )
+            table.insert(df, v.id)
+        end
     end
 
     Logic.allEquip = rep.equip
@@ -123,14 +164,68 @@ function TMXScene:initData(rep, param)
         global.director:pushView(NewGame.new(), 1, 0)
     end
 end
+
+function TMXScene:checkBattleTime(diff)
+    if Logic.catData ~= nil then
+        self.checkTime = self.checkTime+diff
+        if self.checkTime < 1 then
+            return
+        end
+        local lc = Logic.catData
+        --print("checkBattleTime", simple.encode(lc), lc)
+        local path = lc.path
+        local curPoint = lc.curPoint
+        lc.moveTime = lc.moveTime - self.checkTime
+        self.checkTime = 0
+
+        --cid inkScape 边关系中的id信息
+        --realId gimp 中的id信息
+        Logic.challengeCity = path[#path]
+        Logic.challengeNum = CityData[MapNode[Logic.challengeCity][5]]
+        if lc.moveTime <= 0 then
+            local nextPoint = curPoint+1
+            if nextPoint > #lc.path then
+                addBanner("部队到达了！")
+                global.director:pushScene(FightScene.new())
+                clearFight()
+            else
+                local lastPos = path[curPoint]
+                lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
+                local xy =  path[nextPoint]
+                xy = {MapNode[xy][1], MapNode[xy][2]}
+                local dis = distance(lastPos, xy)/CAT_SPEED
+                lc.moveTime = dis
+                lc.curPoint = nextPoint
+            end
+        end
+    end
+end
+
 function TMXScene:enterScene()
     registerUpdate(self)
+    --[[
+    if Logic.catData ~= nil then
+        local lc = Logic.catData
+        local cid = lc.path[#lc.path]
+        
+        --全局战斗计算时间的对象 一直存活的node对象
+        if self.fakeCat == nil then
+            self.fakeCat = MapCat.new(nil, nil, cid, true)
+            self.bg:addChild(self.fakeCat)
+        --updateFake Cat data
+        else
+        end
+    else
+    end
+    --]]
 end
+
 
 function TMXScene:update(diff)
     if Logic.paused then
         return
     end
+    self:checkBattleTime(diff)
     self.passTime = self.passTime+diff
     --暂停状态不要 保存游戏即可
     if self.passTime > 20 then
@@ -226,4 +321,7 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
     u:setStringForKey("inSell", simple.encode(Logic.inSell))
     u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
+    u:setStringForKey("ownCity", simple.encode(Logic.ownCity)) 
+    u:setStringForKey("catData", simple.encode(Logic.catData)) 
+    u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
 end

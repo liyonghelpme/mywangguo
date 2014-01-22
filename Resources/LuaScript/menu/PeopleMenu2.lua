@@ -1,7 +1,8 @@
 require "menu.TrainMenu2"
 require "menu.FindPeople2"
 require "menu.EquipMenu2"
-require "menu.AttributeMenu"
+--require "menu.AttributeMenu"
+require "menu.AttributeMenu2"
 PeopleMenu2 = class()
 function PeopleMenu2:ctor()
     local vs = getVS()
@@ -60,7 +61,7 @@ end
 function PeopleMenu2:onBut(p)
     if p == 1 then
         global.director:popView()
-        global.director:pushView(AttributeMenu.new(), 1)
+        global.director:pushView(AttributeMenu2.new(), 1)
     elseif p == 2 then
         global.director:popView()
         global.director:pushView(EquipMenu2.new(), 1)

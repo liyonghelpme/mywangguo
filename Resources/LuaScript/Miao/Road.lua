@@ -1,13 +1,33 @@
 --道路或者河流
 Road = class(FuncBuild)
-
+function tnumToTile(tn)
+    local tmap = {
+        [0]=6,
+        [1]=35,
+        [2]=34,
+        [3]=14,
+        [4]=35,
+        [5]=35,
+        [6]=12,
+        [7]=2,
+        [8]=34,
+        [9]=13,
+        [10]=34,
+        [11]=3,
+        [12]=15,
+        [13]=5,
+        [14]=4,
+        [15]=7,
+    }
+    return tmap[tn]
+end
 function Road:adjustValue()
     if not self.baseBuild.onSlope then
         print("adjust Value", self.baseBuild.value)
         if self.baseBuild.value >= 16 then
-            setDisplayFrame(self.baseBuild.changeDirNode, "t0.png")
+            setDisplayFrame(self.baseBuild.changeDirNode, "tile"..tnumToTile(0)..".png")
         else
-            setDisplayFrame(self.baseBuild.changeDirNode, "t"..self.baseBuild.value..".png")
+            setDisplayFrame(self.baseBuild.changeDirNode, "tile"..tnumToTile(self.baseBuild.value)..".png")
             setPos(self.baseBuild.changeDirNode, {0, -10})
         end
     else
@@ -158,6 +178,10 @@ function Road:adjustOnSlope()
             self.baseBuild.onSlope = true
         end
     end
+    --用于MiaoPeople定位高度
+    if set then
+        self.baseBuild.height = self.baseBuild.otherBuild.height
+    end
     return setYet
 end
 --当和斜坡冲突的时候变换路块类型
@@ -236,7 +260,7 @@ function Road:initView()
         self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile36.png"), {170/512, 0})
         self.baseBuild.onSlope = true
     else
-        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("t0.png"), {170/512, 0})
+        self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile"..tnumToTile(0)..".png"), {170/512, 0})
     end
     self:adjustScale()
 end

@@ -472,12 +472,28 @@ function MiaoBuild:setColPos()
         self:setColor(0)
         return
     end
+    local layer = self.map.scene.layerName.water
+    local gk = ay*self.map.scene.width+ax+1
+    local gid = layer.data[gk]
+    --有水 不能建造 桥梁除外
+    if gid ~= 0 then
+        self.colNow = 1
+        self:setColor(0)
+        return
+    end
+    local sd = self.map.scene.slopeData[gk]
+    if sd ~= nil then
+        self.colNow = 1
+        self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
+        return
+    end
+
     local layer = self.map.scene.layerName.grass
-    local gid = layer.data[ay*self.map.scene.width+ax+1]
+    local gid = layer.data[gk]
     print("slop1 gid type ax, ay ", ax, ay, gid)
     --local name = self.map.scene.tileName[gid]
     --基本上全部是草地
-    local name = tidToTile(gid)
+    local name = tidToTile(gid, self.map.scene.normal, self.map.scene.water)
     --草地才检测 是否可以建造建筑物
     if name == 'tile0.png' then
         local other = self.map:checkCollision(self)
@@ -537,17 +553,19 @@ end
 function MiaoBuild:update(diff)
     if not Logic.paused then 
         if self.id ~= -1 and self.id ~= nil then
-            local map = getBuildMap(self)
-            local p = getPos(self.bg)
-            local ax, ay = self:calAff()
-            self.posLabel:setString(self.id.." "..ax.." "..ay)
-            self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
-            --self.stateLabel:setString(map[3].." "..map[4])
-            local s = ''
-            for k, v in ipairs(self.belong) do
-                s = s..v.." "
+            if DEBUG then
+                local map = getBuildMap(self)
+                local p = getPos(self.bg)
+                local ax, ay = self:calAff()
+                self.posLabel:setString(self.id.." "..ax.." "..ay)
+                self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
+                --self.stateLabel:setString(map[3].." "..map[4])
+                local s = ''
+                for k, v in ipairs(self.belong) do
+                    s = s..v.." "
+                end
+                self.inRangeLabel:setString(s)
             end
-            self.inRangeLabel:setString(s)
         end
         self:updateState(diff)
         self.funcBuild:updateStage(diff)
@@ -570,13 +588,7 @@ function MiaoBuild:setPos(p)
     end
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
-    --self:adjustHeight()
 end
---[[
-function MiaoBuild:adjustRoad()
-    --self.funcBuild:adjustRoad()
-end
---]]
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
 function MiaoBuild:showIncrease(n, waitTime)
@@ -877,5 +889,27 @@ function MiaoBuild:setGoodsKind(k)
         self.goodsKind = k
         self.workNum = 0
         self.funcBuild:updateGoods()
+    end
+end
+function MiaoBuild:showNoGoods()
+    print("showNoGoods")
+    if self.infoBack == nil then
+        local sp = createSprite("newInfoBack.png")
+        local lab = ui.newTTFLabel({text='断货', size=25, color={251, 6, 41}})
+        local sz = {width=224, height=83}
+        sp:addChild(lab)
+        setPos(lab, {111, fixY(sz.height, 32)})
+        self.infoBack = sp
+        local function rinfo()
+            sp:runAction(fadeout(0.2))
+            lab:runAction(fadeout(0.2))
+        end
+        local function clearR()
+            removeSelf(sp)
+            self.infoBack = nil
+        end
+        self.infoBack:runAction(sequence({delaytime(1), callfunc(nil, rinfo), delaytime(0.2), callfunc(nil, clearR)}))
+        self.heightNode:addChild(sp)
+        setPos(sp, {0, 240})
     end
 end

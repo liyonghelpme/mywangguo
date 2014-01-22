@@ -2,6 +2,7 @@ Wood = class(FuncBuild)
 function Wood:ctor(b)
     self.baseBuild.maxNum = 20
     self.showState = -1
+    self.lastTime = 0
 end
 
 function Wood:initView()
@@ -12,15 +13,19 @@ function Wood:initView()
     self.baseBuild.changeDirNode:addChild(fence, -1) 
 end
 --砍伐结束 阶段 = 0
+--降低建筑物更新频率
 function Wood:updateStage(diff)
-    if self.baseBuild.state == BUILD_STATE.FREE then
-        self.baseBuild.lifeStage = self.baseBuild.lifeStage+diff
-        --4 个阶段 每8s 一个阶段
-        local s = math.floor(self.baseBuild.lifeStage/8)
-        s = math.min(s, 3)
-        if s ~= self.showState then
-            self.showState = s
-            setDisplayFrame(self.baseBuild.changeDirNode, "tree"..(self.showState+1)..'.png')
+    self.lastTime = self.lastTime+diff
+    if self.lastTime > 1 then
+        if self.baseBuild.state == BUILD_STATE.FREE then
+            self.baseBuild.lifeStage = self.baseBuild.lifeStage+diff
+            --4 个阶段 每8s 一个阶段
+            local s = math.floor(self.baseBuild.lifeStage/8)
+            s = math.min(s, 3)
+            if s ~= self.showState then
+                self.showState = s
+                setDisplayFrame(self.baseBuild.changeDirNode, "tree"..(self.showState+1)..'.png')
+            end
         end
     end
 end
