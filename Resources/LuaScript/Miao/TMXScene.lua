@@ -5,15 +5,13 @@ require "Miao.NewGame"
 TMXScene = class()
 
 function TMXScene:initDataNow()
-    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
         self:initData(rep, nil)
     else
-    --]]
-    sendReq('login', dict(), self.initData, nil, self)
-    --end
+        sendReq('login', dict(), self.initData, nil, self)
+    end
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
@@ -38,6 +36,7 @@ end
 
 function TMXScene:initData(rep, param)
     initCityData()
+    print("initData", rep, param)
 
     local u = CCUserDefault:sharedUserDefault()
     local r = u:getStringForKey("resource")
