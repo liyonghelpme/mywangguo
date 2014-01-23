@@ -157,8 +157,12 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
+
+    self.page.buildLayer:initPic()
+    --[[
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
+    --]]
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)

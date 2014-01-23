@@ -175,13 +175,13 @@ function AttributeMenu2:updateTab()
                 w3:setString('')
             else
                 local sdata = Logic.allSkill[sid]
-                local skillBoard = setAnchor(setSize(setPos(addSprite(panel, "skillBoard.png"), {385, fixY(sz.height, 24)}), {47, 46}), {0.50, 0.50})
+                local skillBoard = setAnchor(setPos(addSprite(panel, "skillBoard.png"), {385, fixY(sz.height, 24)}), {76/128, (128-66)/128})
 
                 if sdata.hasLevel > 0 then
-                    local sp = setAnchor(setPos(addSprite(skillBoard, "skill"..(sid-(sdata.hasLevel-1))..".png"), {23, 23}), {0.50, 0.50})
+                    local sp = setAnchor(setPos(addSprite(skillBoard, "skill"..(sid-(sdata.hasLevel-1))..".png"), {76, 128-66}), {76/128, 66/128})
                     local w = setPos(setAnchor(addChild(panel, ui.newBMFontLabel({text=sdata.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {363, fixY(sz.height, 39)})
                 else
-                    local sp = setAnchor(setPos(addSprite(skillBoard, "skill"..sid..".png"), {23, 23}), {0.50, 0.50})
+                    local sp = setAnchor(setPos(addSprite(skillBoard, "skill"..sid..".png"), {76, 66}), {76/128, (128-66)/128})
                 end
                 w3:setString(sdata.name)
             end

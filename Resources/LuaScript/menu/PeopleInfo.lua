@@ -38,6 +38,7 @@ function PeopleInfo:ctor(p, attribute)
     self.bodyIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 495)}), {32, 35}), {0.50, 0.50})
     self.speIcon = sp
+    --local skillBoard = setAnchor(setPos(addSprite(panel, "skillBoard.png"), {385, fixY(sz.height, 24)}), {76/128, (128-66)/128})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 542)}), {32, 35}), {0.50, 0.50})
     self.skillIcon = sp
     local w = setPos(setAnchor(addChild(self.skillIcon, ui.newBMFontLabel({text='', size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})

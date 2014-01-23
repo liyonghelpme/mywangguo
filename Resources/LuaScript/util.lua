@@ -1798,3 +1798,6 @@ function dictKeyToNum(d)
     end
     return temp
 end
+function closeDialog()
+    global.director:popView()
+end

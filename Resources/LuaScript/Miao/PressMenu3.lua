@@ -1,7 +1,7 @@
 require "menu.PeopleMenu3"
 require "menu.NewBuildMenu3"
-require "menu.StoreMenu2"
-require "menu.ResearchMenu2"
+require "menu.StoreMenu3"
+require "menu.ResearchMenu3"
 require "menu.IncSoldierMenu"
 require "menu.UseGoldMenu"
 PressMenu3 = class()
@@ -92,11 +92,11 @@ function PressMenu3:onBut(p)
     elseif p == 3 then
         if Logic.inResearch == nil then
             global.director:popView()
-            global.director:pushView(ResearchMenu2.new(), 1 )
+            global.director:pushView(ResearchMenu3.new(), 1 )
         end
     elseif p == 4 then
         global.director:popView()
-        global.director:pushView(StoreMenu2.new(), 1)
+        global.director:pushView(StoreMenu3.new(), 1)
     elseif p == 5 then
         global.director:popView()
         global.director:pushView(IncSoldierMenu.new(), 1)
