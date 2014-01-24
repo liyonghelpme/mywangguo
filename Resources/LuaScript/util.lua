@@ -955,7 +955,7 @@ function checkInChild(bg, pos)
         local child = tolua.cast(sub:objectAtIndex(i), 'CCNode')
         local np = child:convertToNodeSpace(ccp(pos[1], pos[2]))
         if checkIn(np.x, np.y, child:getContentSize()) then
-            print('child', child:getTag())
+            print('child', child:getTag(), child.id)
             return child
         end
     end
@@ -1505,6 +1505,15 @@ function newProNum(banner, n, max)
     end
 end
 
+function setTexOrDis(sp, n)
+    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
+    if tex then
+        sp:setDisplayFrame(tex)
+    else
+        setTexture(sp, n)
+    end
+    return sp
+end
 function setDisplayFrame(sp, n)
     print("setDisplayFrame !!!!!", sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)

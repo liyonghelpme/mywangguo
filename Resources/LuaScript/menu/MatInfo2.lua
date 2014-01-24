@@ -9,7 +9,7 @@ function MatInfo2:ctor()
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="贩卖许可", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {626, fixY(sz.height, 253)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="在库", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {446, fixY(sz.height, 254)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {338, fixY(sz.height, 253)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料情报", size=34, color={102, 66, 42}, font="f1"})), {0.00, 0.50}), {495, fixY(sz.height, 187)})
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "matInfo.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="按左右键切换是否允许贩卖", size=26, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {559, fixY(sz.height, 657)})
 
 

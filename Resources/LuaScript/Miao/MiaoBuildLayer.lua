@@ -86,6 +86,17 @@ function MiaoBuildLayer:switchPathSol()
     end
 end
 
+function MiaoBuildLayer:testCat()
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+    self:addPeople(14)
+end
 function MiaoBuildLayer:initCat()
     if Logic.inNew then
         self:addPeople(3)

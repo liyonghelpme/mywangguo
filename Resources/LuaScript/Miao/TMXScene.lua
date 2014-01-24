@@ -157,8 +157,8 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
-
     self.page.buildLayer:initPic()
+    self.page.buildLayer:testCat()
     --[[
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()

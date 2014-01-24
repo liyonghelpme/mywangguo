@@ -1,6 +1,6 @@
-require "menu.TrainMenu2"
+require "menu.TrainMenu3"
 require "menu.FindPeople2"
-require "menu.EquipMenu2"
+require "menu.EquipMenu3"
 --require "menu.AttributeMenu"
 require 'menu.AttributeMenu2'
 PeopleMenu3 = class()
@@ -68,10 +68,10 @@ function PeopleMenu3:onBut(p)
         global.director:pushView(AttributeMenu2.new(), 1)
     elseif p == 2 then
         global.director:popView()
-        global.director:pushView(EquipMenu2.new(), 1)
+        global.director:pushView(EquipMenu3.new(), 1)
     elseif p == 3 then
         global.director:popView()
-        global.director:pushView(TrainMenu2.new(), 1)
+        global.director:pushView(TrainMenu3.new(), 1)
     elseif p == 4 then
         if #Logic.ownPeople > 0 then
             global.director:popView()

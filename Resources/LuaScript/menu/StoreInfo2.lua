@@ -7,17 +7,19 @@ function StoreInfo2:ctor(b)
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {-21.0, fixY(sz.height, 0+sz.height)+3.5})
-    local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {533, fixY(sz.height, 387)}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {532, fixY(sz.height, 421)}), {603, 354}), {0.50, 0.50})
-    local but = ui.newButton({image="butc.png", text="更改商品", font="f1", size=27, delegate=self, callback=self.onBut})
-    but:setContentSize(160, 40)
-    setPos(addChild(self.temp, but.bg), {533, fixY(sz.height, 626)})
-    self.changeBut = but
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=30, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {331, fixY(sz.height, 216)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="维修费", size=30, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {605, fixY(sz.height, 215)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.repairCost.."银币", size=28, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {710, fixY(sz.height, 214)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="建筑情报", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {533, fixY(sz.height, 152)})
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 418)}), {626, 358}), {0.50, 0.50}), 255)
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="维修费用"..self.build.data.repairCost.."银币", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {1.00, 0.50}), {820, fixY(sz.height, 215)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {259, fixY(sz.height, 215)})
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    but:setContentSize(80, 82)
+    setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
+    local but = ui.newButton({image="butc.png", text="更改商品", font="f1", size=27, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    self.changeBut = but
+    but:setContentSize(158, 50)
+    setPos(addChild(self.temp, but.bg), {533, fixY(sz.height, 625)})
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "buildInfo.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
 
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "storeTable.png"), {629, fixY(sz.height, 424)}), {325, 153}), {0.50, 0.50})
@@ -45,6 +47,9 @@ function StoreInfo2:ctor(b)
     self.workNum = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="在库", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {468, fixY(sz.height, 302)})
     self.inGoods = w
+
+
+
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "probackC.png"), {617, fixY(sz.height, 301)}), {140, 29}), {0.50, 0.50})
     self.banner = banner
     local sp = setAnchor(setPos(addSprite(banner, "procolC.png"), {4, fixY(29, 24)}), {0.00, 0.00})
