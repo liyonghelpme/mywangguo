@@ -1811,3 +1811,15 @@ end
 function closeDialog()
     global.director:popView()
 end
+function initPlist()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("buildOne.plist")
+    sf:addSpriteFramesWithFile("buildTwo.plist")
+    sf:addSpriteFramesWithFile("buildThree.plist")
+    sf:addSpriteFramesWithFile("buildFour.plist")
+    sf:addSpriteFramesWithFile("skillOne.plist")
+    sf:addSpriteFramesWithFile("catOne.plist")
+    sf:addSpriteFramesWithFile("goodsOne.plist")
+    sf:addSpriteFramesWithFile("catCut.plist")
+    sf:addSpriteFramesWithFile("catHeadOne.plist")
+end

@@ -88,14 +88,14 @@ end
 
 function MiaoBuildLayer:testCat()
     self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
-    self:addPeople(14)
+    self:addPeople(15)
+    self:addPeople(16)
+    self:addPeople(17)
+    self:addPeople(18)
+    self:addPeople(19)
+    self:addPeople(20)
+    self:addPeople(21)
+    self:addPeople(22)
 end
 function MiaoBuildLayer:initCat()
     if Logic.inNew then
