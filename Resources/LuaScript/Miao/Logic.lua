@@ -575,4 +575,4 @@ function getSkillIcon(sid)
 end
 
 --当前可以启用的村民
-Logic.ownPeople = {}
+Logic.ownPeople = {20, 21, 22, 23}

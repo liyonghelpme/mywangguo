@@ -224,6 +224,7 @@ function addSprite(bg, name)
     if name == nil then
         sp = CCSprite:create()
     else
+        --强制使用单张图片
         if string.sub(name, 1, 1) == '#' then
             sp = CCSprite:create(string.sub(name, 2))
         else

@@ -1,5 +1,5 @@
 require "menu.TrainMenu3"
-require "menu.FindPeople2"
+require "menu.FindPeople3"
 require "menu.EquipMenu3"
 --require "menu.AttributeMenu"
 require 'menu.AttributeMenu2'
@@ -75,7 +75,7 @@ function PeopleMenu3:onBut(p)
     elseif p == 4 then
         if #Logic.ownPeople > 0 then
             global.director:popView()
-            global.director:pushView(FindPeople2.new(), 1)
+            global.director:pushView(FindPeople3.new(), 1)
         else
             addBanner("没有人才可以启用")
         end
