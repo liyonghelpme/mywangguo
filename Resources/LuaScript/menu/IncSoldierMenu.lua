@@ -3,56 +3,60 @@ function IncSoldierMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-20.0, -4.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {513, fixY(sz.height, 379)}), {619, 381}), {0.50, 0.50})
-    
-    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=1, touchBegan=self.selTab})
+    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+12})
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "smallDialogb.png"), {512, fixY(sz.height, 407)}), {588, 255}), {0.50, 0.50}), 255)
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    but:setContentSize(80, 82)
+    setPos(addChild(self.temp, but.bg), {813, fixY(sz.height, 196)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="不能再增加了", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {513, fixY(sz.height, 554)})
+    self.desWord = w
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "incTitle.png"), {525, fixY(sz.height, 234)}), {195, 39}), {0.50, 0.50}), 255)
+
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "peopBoard.png"), {332, fixY(sz.height, 408)}), {184, 183}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "role.png"), {329, fixY(sz.height, 404)}), {162, 161}), {0.50, 0.50}), 255)
+
+    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=1,  shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(341, 42)
-    setPos(addChild(self.temp, but.bg), {612, fixY(sz.height, 328)})
+    setPos(addChild(self.temp, but.bg), {611, fixY(sz.height, 342)})
     local but1 = but
 
-    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=2, touchBegan=self.selTab})
+    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=2, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(341, 42)
-    setPos(addChild(self.temp, but.bg), {612, fixY(sz.height, 372)})
+    setPos(addChild(self.temp, but.bg), {611, fixY(sz.height, 389)})
     local but2 = but
 
-    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=3, touchBegan=self.selTab})
+    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=3, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(341, 42)
-    setPos(addChild(self.temp, but.bg), {612, fixY(sz.height, 416)})
+    setPos(addChild(self.temp, but.bg), {611, fixY(sz.height, 436)})
     local but3 = but
 
-    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=4, touchBegan=self.selTab})
+    local but = ui.newButton({image="selSoldier.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=4, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(341, 42)
-    setPos(addChild(self.temp, but.bg), {612, fixY(sz.height, 459)})
+    setPos(addChild(self.temp, but.bg), {611, fixY(sz.height, 483)})
     local but4 = but
-
     self.buts = {but1, but2, but3, but4}
     self.words = {}
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "peopBoard.png"), {333, fixY(sz.height, 392)}), {184, 183}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "role.png"), {330, fixY(sz.height, 388)}), {162, 161}), {0.50, 0.50})
-    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {516, fixY(sz.height, 330)})
-    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="步卒", size=25, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {447, fixY(sz.height, 329)})
-    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {780, fixY(sz.height, 328)})
+
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="步卒", size=25, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {446, fixY(sz.height, 342)})
+    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="999", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {515, fixY(sz.height, 342)})
+    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {1.00, 0.50}), {778, fixY(sz.height, 342)})
+    table.insert(self.words, {w1, w2, w3})
+    
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="弓队", size=25, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {448, fixY(sz.height, 389)})
+    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="658", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {515, fixY(sz.height, 389)})
+    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {1.00, 0.50}), {778, fixY(sz.height, 389)})
     table.insert(self.words, {w1, w2, w3})
 
-    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="658", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {516, fixY(sz.height, 372)})
-    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="弓队", size=25, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {449, fixY(sz.height, 372)})
-    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {780, fixY(sz.height, 373)})
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="魔法", size=25, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {446, fixY(sz.height, 436)})
+    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="123", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {517, fixY(sz.height, 436)})
+    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {1.00, 0.50}), {779, fixY(sz.height, 436)})
     table.insert(self.words, {w1, w2, w3})
 
-    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="魔法", size=25, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {447, fixY(sz.height, 416)})
-    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="123", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {518, fixY(sz.height, 416)})
-    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="12345银币", size=25, color={254, 7, 1}, font="f2"})), {1.00, 0.50}), {780, fixY(sz.height, 417)})
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="铁骑", size=25, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {445, fixY(sz.height, 483)})
+    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="123", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {517, fixY(sz.height, 483)})
+    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="无法运用", size=25, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {1.00, 0.50}), {774, fixY(sz.height, 483)})
     table.insert(self.words, {w1, w2, w3})
-
-    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="铁骑", size=25, color={149, 149, 149}, font="f2"})), {0.00, 0.50}), {446, fixY(sz.height, 459)})
-    local w2 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="123", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {518, fixY(sz.height, 459)})
-    local w3 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="无法运用", size=25, color={149, 149, 149}, font="f2"})), {1.00, 0.50}), {780, fixY(sz.height, 458)})
-    table.insert(self.words, {w1, w2, w3})
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="兵力的增强", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {532, fixY(sz.height, 247)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="不能再增加了", size=26, color={32, 112, 220}, font="f1"})), {0.50, 0.50}), {524, fixY(sz.height, 529)})
-    self.desWord = w
 
     self:initButton()
     self:selTab(1)
@@ -104,6 +108,7 @@ function IncSoldierMenu:selTab(s)
     else
         self.desWord:setString("点击增强兵力")
     end
+    self.selNum = s
 end
 
 function IncSoldierMenu:onBut(param)

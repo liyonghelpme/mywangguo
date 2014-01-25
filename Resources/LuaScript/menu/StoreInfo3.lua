@@ -1,18 +1,18 @@
-require "menu.MatInfo3"
+require "menu.MatInfo2"
 require "menu.ChangeGoods"
-StoreInfo2 = class()
-function StoreInfo2:ctor(b)
+StoreInfo3 = class()
+function StoreInfo3:ctor(b)
     self.build = b
+
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
-
+    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 418)}), {626, 358}), {0.50, 0.50}), 255)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="维修费用"..self.build.data.repairCost.."银币", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {1.00, 0.50}), {820, fixY(sz.height, 215)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {259, fixY(sz.height, 215)})
-    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
     local but = ui.newButton({image="butc.png", text="更改商品", font="f1", size=27, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
@@ -22,13 +22,12 @@ function StoreInfo2:ctor(b)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "buildInfo.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
 
 
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "storeTable.png"), {629, fixY(sz.height, 424)}), {325, 153}), {0.50, 0.50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.des, size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {544, fixY(sz.height, 557)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商品", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {568, fixY(sz.height, 371)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.des, size=28, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {544, fixY(sz.height, 557)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商品", size=28, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {568, fixY(sz.height, 371)})
     self.goodsW = w 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=28, color={255, 255, 255}, font="f2"})), {0.50, 0.50}), {733, fixY(sz.height, 371)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=28, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {733, fixY(sz.height, 371)})
     self.priceW = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="贩卖力", size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {569, fixY(sz.height, 479)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="贩卖力", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {569, fixY(sz.height, 479)})
     self.ability = w
     local gn = '--'
     local price = '--'
@@ -36,28 +35,27 @@ function StoreInfo2:ctor(b)
         gn = GoodsName[self.build.goodsKind].name
         price = GoodsName[self.build.goodsKind].price
     end
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=gn, size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {568, fixY(sz.height, 415)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=gn, size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {568, fixY(sz.height, 415)})
     self.goodName = w
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=price.."银币", size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {731, fixY(sz.height, 416)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=price, size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {731, fixY(sz.height, 416)})
     self.price = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.productNum, size=25, color={248, 181, 81}, font="f2"})), {0.50, 0.50}), {736, fixY(sz.height, 481)})
-    local sp = setAnchor(setPos(addChild(self.temp, CCSprite:create("build"..self.build.id..".png")), {346, fixY(sz.height, 427)}), {0.50, 0.50})
-    local sca = getSca(sp, {210, 210})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.productNum, size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {736, fixY(sz.height, 481)})
+    local sp = setOpacity(setAnchor(setPos(addChild(self.temp, CCSprite:create("build"..self.build.id..".png")), {336, fixY(sz.height, 419)}), {0.50, 0.50}), 255)
+    local sca = getSca(sp, {210, 211})
     setScale(sp, sca)
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.workNum.."个", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {791, fixY(sz.height, 301)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.workNum.."个", size=25, color={248, 181, 81}, font="f2", shadowColor={0, 0, 0}})), {1.00, 0.50}), {791, fixY(sz.height, 301)})
     self.workNum = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="在库", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {468, fixY(sz.height, 302)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="在库", size=28, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {468, fixY(sz.height, 302)})
     self.inGoods = w
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "storeTable.png"), {629, fixY(sz.height, 424)}), {325, 153}), {0.50, 0.50}), 255)
 
-
-
+    
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "probackC.png"), {617, fixY(sz.height, 301)}), {140, 29}), {0.50, 0.50})
     self.banner = banner
     local sp = setAnchor(setPos(addSprite(banner, "procolC.png"), {4, fixY(29, 24)}), {0.00, 0.00})
     self.pro = sp
     storeProNum(sp, self.build.workNum, self.build.maxNum)
+
     self:initFarm()
     self:initFactory()
     self:initHouse()
@@ -76,11 +74,11 @@ function storeProNum(banner, n, max)
     end
 end
 
-function StoreInfo2:onBut()
+function StoreInfo3:onBut()
     global.director:pushView(ChangeGoods.new(self.build), 1)
 end
 
-function StoreInfo2:refreshData()
+function StoreInfo3:refreshData()
     local gn = '--'
     local price = '--'
     if self.build.goodsKind ~= nil then
@@ -93,4 +91,4 @@ function StoreInfo2:refreshData()
     storeProNum(self.pro, self.build.workNum, self.build.maxNum)
 end
 
-require "menu.StoreInfo2Static"
+require "menu.StoreInfo3Static"

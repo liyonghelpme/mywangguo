@@ -1,4 +1,6 @@
+require "menu.SessionMenu"
 require 'myMap.FightPath'
+
 MAP_STATE = {
     FREE = 0,
     IN_FIND = 1,
@@ -121,6 +123,13 @@ function MapCat:doDir(oldPos, newPos)
         setScaleX(self.bg, sca)
     end
 end
+
+function MapCat:gotoFight()
+    global.director:pushScene(FightScene.new())
+    removeSelf(self.bg)
+    clearFight()
+end
+
 function MapCat:update(diff)
     if self.lastPos ~= nil then
         local oldPos = self.lastPos
@@ -130,41 +139,6 @@ function MapCat:update(diff)
         self.lastPos = getPos(self.bg)
     end
     --只更新猫位置 
-    if self.fake then
-        --load data from Logic 
-        if self.state == MAP_STATE.FREE then
-            local ld = Logic.catData
-            self.pos = ld.pos
-            self.path = ld.path
-            self.curPoint = ld.curPoint
-            self.moveTime = ld.moveTime
-            self.state = MAP_STATE.MOVE
-        elseif self.state == MAP_STATE.MOVE then
-            self.moveTime = self.moveTime-diff
-            if self.moveTime <= 0 then
-                local nextPoint = self.curPoint+1
-                if nextPoint > #self.path then
-                    if not self.showYet then
-                        self.showYet = true
-                        addBanner("部队到达了")
-                        --对话框提示用户点击 就进入战斗场景
-                        --返回回来 之后需要 显示Fight Map 场景
-                        global.director:pushScene(FightScene.new())
-                        removeSelf(self.bg)
-                        clearFight()
-                    end
-                else
-                    local lastPos = self.path[self.curPoint]
-                    lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]} 
-                    local xy = self.path[nextPoint]
-                    xy = {MapNode[xy][1], MapNode[xy][2]}
-                    local dis = distance(lastPos, xy)/self.speed
-                    self.moveTime = dis
-                    self.curPoint = nextPoint
-                end
-            end
-        end
-    else
         if self.state == MAP_STATE.FREE then
             if Logic.catData ~= nil then
                 self:restoreData()
@@ -183,10 +157,13 @@ function MapCat:update(diff)
                 if nextPoint > #self.path then
                     if not self.showYet then
                         self.showYet = true
+                        global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self))
+                        --[[
                         addBanner("部队到达目标 开战了")
                         global.director:pushScene(FightScene.new())
                         removeSelf(self.bg)
                         clearFight()
+                        --]]
                     end
                 else
                     local xy =  self.path[nextPoint]
@@ -205,6 +182,5 @@ function MapCat:update(diff)
                 self:storeData()
             end
         end
-    end
 end
 

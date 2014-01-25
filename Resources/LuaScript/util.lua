@@ -224,6 +224,7 @@ function addSprite(bg, name)
     if name == nil then
         sp = CCSprite:create()
     else
+        --强制使用单张图片
         if string.sub(name, 1, 1) == '#' then
             sp = CCSprite:create(string.sub(name, 2))
         else
@@ -955,7 +956,7 @@ function checkInChild(bg, pos)
         local child = tolua.cast(sub:objectAtIndex(i), 'CCNode')
         local np = child:convertToNodeSpace(ccp(pos[1], pos[2]))
         if checkIn(np.x, np.y, child:getContentSize()) then
-            print('child', child:getTag())
+            print('child', child:getTag(), child.id)
             return child
         end
     end
@@ -1505,6 +1506,21 @@ function newProNum(banner, n, max)
     end
 end
 
+function setTexOrDis(sp, n)
+    if string.sub(name, 1, 1) == '#' then
+        setTexture(sp, string.sub(name, 2))
+        return sp
+    end
+
+    local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
+    if tex then
+        sp:setDisplayFrame(tex)
+    else
+        setTexture(sp, n)
+    end
+    return sp
+end
+
 function setDisplayFrame(sp, n)
     print("setDisplayFrame !!!!!", sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
@@ -1661,6 +1677,14 @@ function calAttr(id, level, equip)
             addEquipAttr(temp, Logic.equip[equip.body])
         end
     end
+    local skill = getPeopleSkill(id, level)
+    if skill == 0 then
+    else
+        local sdata = Logic.allSkill[skill]
+        temp.attack = temp.attack+sdata.attack
+        temp.defense = temp.defense+sdata.defense
+        print("skill attr")
+    end
     return temp
 end
 
@@ -1797,4 +1821,19 @@ function dictKeyToNum(d)
         temp[tonumber(k)] = v
     end
     return temp
+end
+function closeDialog()
+    global.director:popView()
+end
+function initPlist()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("buildOne.plist")
+    sf:addSpriteFramesWithFile("buildTwo.plist")
+    sf:addSpriteFramesWithFile("buildThree.plist")
+    sf:addSpriteFramesWithFile("buildFour.plist")
+    sf:addSpriteFramesWithFile("skillOne.plist")
+    sf:addSpriteFramesWithFile("catOne.plist")
+    sf:addSpriteFramesWithFile("goodsOne.plist")
+    sf:addSpriteFramesWithFile("catCut.plist")
+    sf:addSpriteFramesWithFile("catHeadOne.plist")
 end

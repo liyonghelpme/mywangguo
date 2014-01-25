@@ -102,7 +102,24 @@ end
 
 function FightPage:touchesBegan(touches)
     self.touchDelegate:tBegan(touches)
+    --点到建筑物上面还关闭对话框么
     global.director.curScene.menu:closeMenu()
+    self.touchBuild = nil
+    if self.touchDelegate.touchValue.count == 1 and self.touchDelegate.touchValue[0] ~= nil then
+        local tp = ccp(self.touchDelegate.touchValue[0][1], self.touchDelegate.touchValue[0][2])
+        for k, v in ipairs(self.allCity) do
+            local sz = v.changeDirNode:getContentSize()
+            local tn = v.changeDirNode:convertToNodeSpace(tp) 
+            if tn.x > 0 and tn.x < sz.width and tn.y > 0 and tn.y < sz.height then
+                print("touch In Castle", v.cid)
+                self.touchBuild = v
+                break
+            end
+        end
+        if self.touchBuild ~= nil then
+            self.touchBuild:touchBegan(touchBegan)
+        end
+    end
 end
 function FightPage:touchesMoved(touches)
     self.touchDelegate:tMoved(touches)
@@ -114,4 +131,9 @@ end
 
 function FightPage:touchesEnded(touches)
     self.touchDelegate:tEnded(touches)
+    if self.touchDelegate.accMove < 20 then
+        if self.touchBuild ~= nil then
+            self.touchBuild:touchEnded()
+        end
+    end
 end

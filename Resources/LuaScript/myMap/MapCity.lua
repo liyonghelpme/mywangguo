@@ -39,8 +39,8 @@ function MapCity:ctor(s, data, cid)
 
     print('myCity', simple.encode(data))
     local sz = getContentSize(self.changeDirNode)
-    self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
-    self.changeDirNode:addChild(self.touch.bg)
+    --self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
+    --self.changeDirNode:addChild(self.touch.bg)
 
     self.stateLabel = ui.newBMFontLabel({text=self.cid, size=30, color={128, 0, 0}, font='bound.fnt'})
     setPos(addChild(self.bg, self.stateLabel), {0, 40})

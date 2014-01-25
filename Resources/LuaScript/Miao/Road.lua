@@ -254,8 +254,8 @@ function Road:adjustScale()
     end
 end
 function Road:initView()
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("road.plist")
+    --local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    --sf:addSpriteFramesWithFile("road.plist")
     if self.baseBuild.privData.ladder == true then
         self.baseBuild.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName("tile36.png"), {170/512, 0})
         self.baseBuild.onSlope = true

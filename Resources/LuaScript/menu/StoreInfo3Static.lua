@@ -1,4 +1,4 @@
-function StoreInfo2:initFarm()
+function StoreInfo3:initFarm()
     if self.build.data.IsStore == 2 or self.build.data.IsStore == 3 or self.build.data.IsStore == 5 then
         self.changeBut.text:setString("查看材料情报")
         self.ability:setString("生产力")
@@ -6,10 +6,10 @@ function StoreInfo2:initFarm()
         self.goodsW:setString("生产")
     end
 end
-function StoreInfo2:onMat()
-    global.director:pushView(MatInfo3.new(self.build), 1)
+function StoreInfo3:onMat()
+    global.director:pushView(MatInfo2.new(self.build), 1)
 end
-function StoreInfo2:initFactory()
+function StoreInfo3:initFactory()
     if self.build.id == 5 then
         self.changeBut.bg:setVisible(false)
         self.ability:setString("生产力")
@@ -17,7 +17,7 @@ function StoreInfo2:initFactory()
         self.goodsW:setString("生产")
     end
 end
-function StoreInfo2:initHouse()
+function StoreInfo3:initHouse()
     if self.build.data.kind == 5 then
         self.changeBut.bg:setVisible(false)
         self.changeBut:setCallback(nil)

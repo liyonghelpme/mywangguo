@@ -1,5 +1,5 @@
 require "menu.SellMenu2"
-require "menu.StoreInfo2"
+--require "menu.StoreInfo3"
 
 BuildOpMenu = class()
 function BuildOpMenu:adjustPos()
@@ -38,6 +38,7 @@ function BuildOpMenu:ctor(b)
         local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=30, color=hexToDec('f1d49b'), font="f2"})), {0.50, 0.50}), {512, fixY(sz.height, 625)})
     end
     registerEnterOrExit(self)
+    centerBottom(self.temp)
 end
 
 function BuildOpMenu:onSwitch()

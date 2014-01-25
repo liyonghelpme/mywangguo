@@ -19,7 +19,7 @@ function PeopleInfo:ctor(p, attribute)
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="林雨披之助", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {358, fixY(sz.height, 219)})
     self.name = w
-    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="长刀", size=24, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 350)})
+    local w1 = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="长刀", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 350)})
     self.weapon = w1
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头巾", size=24, color={240, 196, 92}, font="f1"})), {0.00, 0.50}), {390, fixY(sz.height, 397)})
@@ -38,6 +38,7 @@ function PeopleInfo:ctor(p, attribute)
     self.bodyIcon = sp
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 495)}), {32, 35}), {0.50, 0.50})
     self.speIcon = sp
+    --local skillBoard = setAnchor(setPos(addSprite(panel, "skillBoard.png"), {385, fixY(sz.height, 24)}), {76/128, (128-66)/128})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "goodsIcon.png"), {341, fixY(sz.height, 542)}), {32, 35}), {0.50, 0.50})
     self.skillIcon = sp
     local w = setPos(setAnchor(addChild(self.skillIcon, ui.newBMFontLabel({text='', size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})
@@ -56,7 +57,7 @@ function PeopleInfo:ctor(p, attribute)
     self.attackBar = pro
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="攻击", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {531, fixY(sz.height, 284)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 285)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 285)})
     self.attack = w
 
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {668, fixY(sz.height, 332)}), {140, 29}), {0.50, 0.50})
@@ -67,32 +68,32 @@ function PeopleInfo:ctor(p, attribute)
     self.defenseBar = pro
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="防御", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {532, fixY(sz.height, 331)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 332)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 332)})
     self.defense = w
 
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {668, fixY(sz.height, 379)}), {140, 29}), {0.50, 0.50})
     local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
     self.healthBar = pro
 
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 379)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 379)})
     self.health = w
 
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {668, fixY(sz.height, 426)}), {140, 29}), {0.50, 0.50})
     local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
     self.brawnBar = pro
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 426)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 426)})
     self.brawn = w
 
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {668, fixY(sz.height, 473)}), {140, 29}), {0.50, 0.50})
     local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
     self.shootBar = pro
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 473)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 473)})
     self.shoot = w
 
     local banner = setAnchor(setSize(setPos(addSprite(self.temp, "prob.png"), {668, fixY(sz.height, 520)}), {140, 29}), {0.50, 0.50})
     local pro = setAnchor(setSize(setPos(addSprite(banner, "proa.png"), {4, 4.5}), {183, 20}), {0.0, 0})
     self.laborBar = pro
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {747, fixY(sz.height, 520)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 520)})
     self.labor = w
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="体力", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {530, fixY(sz.height, 379)})
@@ -116,8 +117,8 @@ function PeopleInfo:ctor(p, attribute)
     self.title = w
 
     if not self.attribute then
-        local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {532, fixY(sz.height, 567)})
-        local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999银币", size=25, color={248, 181, 81}, font="f2"})), {0.00, 0.50}), {699, fixY(sz.height, 568)})
+        local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=28, color={255, 255, 255}, font="f2"})), {0.00, 0.50}), {531, fixY(sz.height, 567)})
+        local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="9999银币", size=25, color={248, 181, 81}, font="f2"})), {1.00, 0.50}), {797, fixY(sz.height, 568)})
         self.silver = w
 
         local but = ui.newButton({image="butc.png", text="进行升级", font="f1", size=27, delegate=self, callback=self.onLevel})

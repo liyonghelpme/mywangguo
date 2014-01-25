@@ -2,6 +2,7 @@ require "Miao.MiaoPage"
 --require "Miao.TMXMenu"
 require "Miao.TMXMenu2"
 require "Miao.NewGame"
+require "menu.SessionMenu"
 TMXScene = class()
 
 function TMXScene:initDataNow()
@@ -96,6 +97,14 @@ function TMXScene:initData(rep, param)
         Logic.soldiers = rd
     end
 
+    Logic.cityGoods = {}
+    for k, v in ipairs(rep.cityData) do
+        v.goods = simple.decode(v.goods)
+        Logic.cityGoods[v.id] = v
+    end
+    print("cityGoods", #Logic.cityGoods)
+
+
     GoodsName = {}
     for k, v in ipairs(rep.goods) do
         GoodsName[v.id] = v
@@ -156,12 +165,21 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
+    self.page.buildLayer:initPic()
+    self.page.buildLayer:testCat()
+    --[[
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
+    --]]
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
+end
+
+function TMXScene:gotoFight()
+    global.director:pushScene(FightScene.new())
+    clearFight()
 end
 
 function TMXScene:checkBattleTime(diff)
@@ -184,9 +202,8 @@ function TMXScene:checkBattleTime(diff)
         if lc.moveTime <= 0 then
             local nextPoint = curPoint+1
             if nextPoint > #lc.path then
-                addBanner("部队到达了！")
-                global.director:pushScene(FightScene.new())
-                clearFight()
+                --addBanner("部队到达了！")
+                global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self))
             else
                 local lastPos = path[curPoint]
                 lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}

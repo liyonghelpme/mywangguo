@@ -32,6 +32,8 @@ function EquipChangeMenu:ctor(p, changeKind)
     self.touch = ui.newTouchLayer({size={listSize.width, self.HEIGHT}, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     self.cl:addChild(self.touch.bg)
     setPos(self.touch.bg, {0, 0})
+
+
     self.flowHeight = 0
     --选择武器页面
     self.selNum = changeKind or 1
