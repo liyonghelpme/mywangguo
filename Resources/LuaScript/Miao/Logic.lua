@@ -576,3 +576,12 @@ end
 
 --当前可以启用的村民
 Logic.ownPeople = {20, 21, 22, 23}
+--
+Logic.ownTech = {
+sword=0,
+spear=0,
+magic=0,
+bow=0,
+armour=0,
+ninja=0,
+}

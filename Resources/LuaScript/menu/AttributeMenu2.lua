@@ -1,4 +1,4 @@
-require "menu.PeopleInfo"
+require "menu.PeopleInfo2"
 AttributeMenu2 = class()
 function AttributeMenu2:ctor()
     print("AttributeMenu2")
@@ -137,7 +137,7 @@ function AttributeMenu2:updateTab()
     self.flowHeight = 0
 
 	local initX = 0
-	local initY = -55
+	local initY = -60
 	local offX = 0
 	local offY = 52
 	self.data = {}
@@ -299,7 +299,7 @@ function AttributeMenu2:touchEnded(x, y)
                 self:setSel(t)
             else
                 --global.director:popView()
-                global.director:pushView(PeopleInfo.new(self.selPanel, true), 1)
+                global.director:pushView(PeopleInfo2.new(self.selPanel, true), 1)
                 --return
             end
         end

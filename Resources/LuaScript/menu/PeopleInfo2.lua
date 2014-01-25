@@ -6,7 +6,7 @@ function PeopleInfo2:ctor(p, attribute)
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
+    self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 418)}), {626, 358}), {0.50, 0.50}), 255)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv.", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {682, fixY(sz.height, 216)})
@@ -14,7 +14,7 @@ function PeopleInfo2:ctor(p, attribute)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="name", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {259, fixY(sz.height, 215)})
     self.name = w
 
-    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
     local but = ui.newButton({image="newLeftArrow.png", text="", font="f1", size=18, delegate=self, callback=self.onLeft, shadowColor={0, 0, 0}, color={255, 255, 255}})
@@ -48,7 +48,7 @@ function PeopleInfo2:ctor(p, attribute)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 492)}), {40, 40}), {0.50, 0.50}), 255)
     self.speIcon = setPos(addSprite(sp, "goodsIcon.png"), {20, 20})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 540)}), {40, 40}), {0.50, 0.50}), 255)
-    self.skillIcon = setAnchor(setPos(addSprite(sp, "skill1.png"), {20, 20}), {76/128, 56/128})
+    self.skillIcon = setAnchor(setPos(addSprite(sp, "skill1.png"), {22, 22}), {76/128, 54/128})
 
     local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text='', size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})
     self.skillLevel = w
@@ -195,7 +195,8 @@ function PeopleInfo2:setPeople()
     self.shoot:setString(att.shoot)
     self.labor:setString(att.labor)
     setDisplayFrame(self.catHead, "catHead"..pdata.id..".png")
-
+    
+    self.level:setString('Lv.'..(pdata.level+1))
     if pdata.weapon ~= nil then
         self.weapon:setString(Logic.equip[pdata.weapon].name)
         setDisplayFrame(self.weaponIcon, "equip"..pdata.weapon..'.png')
@@ -257,4 +258,17 @@ function PeopleInfo2:setPeople()
     self.shootBar:setProNum(att.shoot, 300)
     self.laborBar:setProNum(att.labor, 300)
 
+end
+
+function PeopleInfo2:onLevel()
+    local people = Logic.farmPeople[self.selPeople] 
+    local silver = Logic.LevelCost[people.level+1+1]
+    print("LevelCost is ", people.level, silver)
+    if not checkCost(silver) then
+        addBanner("银币不足")
+    else
+        doCost(silver)
+        people:updateLevel()
+        global.director:popView()
+    end
 end

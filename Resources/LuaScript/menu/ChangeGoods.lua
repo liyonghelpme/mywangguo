@@ -1,45 +1,17 @@
 ChangeGoods = class()
 function ChangeGoods:ctor(b)
     self.build = b
-    --[[
-    local vs = getVS()
-    self.bg = CCNode:create()
-    local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {-26.0, fixY(sz.height, 0+sz.height)+3.5})
-    local sp = setAnchor(setPos(addSprite(self.temp, "dialogA.png"), {538, fixY(sz.height, 387)}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {537, fixY(sz.height, 400)}), {617, 396}), {0.50, 0.50})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击更改商品", size=26, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {467, fixY(sz.height, 626)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="商品一览", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {529, fixY(sz.height, 153)})
-
-
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {504, fixY(sz.height, 240)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {691, fixY(sz.height, 240)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {285, fixY(sz.height, 564)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="食材", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {434, fixY(sz.height, 563)})
-    self.food = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="s1个", size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {498, fixY(sz.height, 564)})
-    self.foodN = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="木材", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {539, fixY(sz.height, 563)})
-    self.wood = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="m1个", size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {603, fixY(sz.height, 564)})
-    self.woodN = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="石材", size=25, color={32, 112, 220}, font="f1"})), {0.00, 0.50}), {644, fixY(sz.height, 563)})
-    self.stone = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="st1个", size=20, color={255, 255, 255}, font="f1"})), {0.00, 0.50}), {708, fixY(sz.height, 564)})
-    self.stoneN = w
-    --]]
-
 local vs = getVS()
 self.bg = CCNode:create()
 local sz = {width=1024, height=768}
-self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
+self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
 local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
 local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 423)}), {626, 358}), {0.50, 0.50}), 255)
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击更改商品", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {523, fixY(sz.height, 625)})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {705, fixY(sz.height, 215)})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {511, fixY(sz.height, 215)})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="名称", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {324, fixY(sz.height, 215)})
-local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
 but:setContentSize(80, 82)
 setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
 local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "goodsInfo.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)

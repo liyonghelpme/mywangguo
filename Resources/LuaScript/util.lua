@@ -1507,6 +1507,11 @@ function newProNum(banner, n, max)
 end
 
 function setTexOrDis(sp, n)
+    if string.sub(name, 1, 1) == '#' then
+        setTexture(sp, string.sub(name, 2))
+        return sp
+    end
+
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
     if tex then
         sp:setDisplayFrame(tex)
@@ -1515,6 +1520,7 @@ function setTexOrDis(sp, n)
     end
     return sp
 end
+
 function setDisplayFrame(sp, n)
     print("setDisplayFrame !!!!!", sp, n)
     local tex = CCSpriteFrameCache:sharedSpriteFrameCache():spriteFrameByName(n)
@@ -1670,6 +1676,14 @@ function calAttr(id, level, equip)
         if equip.body ~= nil then
             addEquipAttr(temp, Logic.equip[equip.body])
         end
+    end
+    local skill = getPeopleSkill(id, level)
+    if skill == 0 then
+    else
+        local sdata = Logic.allSkill[skill]
+        temp.attack = temp.attack+sdata.attack
+        temp.defense = temp.defense+sdata.defense
+        print("skill attr")
     end
     return temp
 end

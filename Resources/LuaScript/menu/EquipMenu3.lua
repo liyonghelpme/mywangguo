@@ -7,7 +7,7 @@ function EquipMenu3:ctor()
     self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4.0})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 423)}), {626, 358}), {0.50, 0.50}), 255)
-    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {512, fixY(sz.height, 625)})
@@ -170,14 +170,18 @@ function EquipMenu3:touchEnded(x, y)
             else
                 local icon = checkInPanel(child, newPos)
                 local sdata = self.data[self.selPanel]
-                print("sdata is what", sdata)
-                for i=6, 9, 1 do
-                    print("icon is ", icon.id, sdata[i].id)
-                    if sdata[i] == icon then
-                        --global.director:popView()
-                        global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPanel], i-5), 1)
-                        return
+                if icon ~= nil then
+                    print("sdata is what", sdata)
+                    for i=6, 9, 1 do
+                        print("icon is ", icon.id, sdata[i].id)
+                        if sdata[i] == icon then
+                            --global.director:popView()
+                            global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPanel], i-5), 1)
+                            return
+                        end
                     end
+                else
+                    global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPanel], 1), 1)
                 end
                 --global.director:popView()
                 --global.director:pushView(PeopleInfo.new(self.selPanel), 1)

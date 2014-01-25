@@ -98,6 +98,14 @@ function TMXScene:initData(rep, param)
         Logic.soldiers = rd
     end
 
+    Logic.cityGoods = {}
+    for k, v in ipairs(rep.cityData) do
+        v.goods = simple.decode(v.goods)
+        Logic.cityGoods[v.id] = v
+    end
+    print("cityGoods", #Logic.cityGoods)
+
+
     GoodsName = {}
     for k, v in ipairs(rep.goods) do
         GoodsName[v.id] = v
