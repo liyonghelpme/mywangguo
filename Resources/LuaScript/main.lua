@@ -41,12 +41,13 @@ local function main()
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-
+    
     --[[
     local sc = FightScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
     --]]
+
     --[[
     local sc = FightMap.new()
     director:replaceScene(sc.bg)
