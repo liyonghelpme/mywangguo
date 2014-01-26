@@ -167,11 +167,9 @@ function TMXScene:initData(rep, param)
 
     self.menu:initDataOver()
     self.page.buildLayer:initPic()
-    self.page.buildLayer:testCat()
-    --[[
+    --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
-    --]]
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)

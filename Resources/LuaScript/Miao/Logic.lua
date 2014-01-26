@@ -521,8 +521,9 @@ end
 
 function initCityData()
     if not MapDataInitYet then
-        local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
-        local sz = getContentSize(tex)
+        --local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
+        local sz = {3072, 2304}
+        --getContentSize(tex)
         MapDataInitYet = true
         MapNode = tableToDict(MapNode)
         for k, v in pairs(MapNode) do
