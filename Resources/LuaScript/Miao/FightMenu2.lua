@@ -20,6 +20,19 @@ function FightMenu2:ctor(s)
     local sz = {width=1024, height=768}
     local bc = addNode(self.bg)
     local sp = CCSprite:create("battleUI.png")
+
+    --[[
+    local tex = CCTextureCache:sharedTextureCache():addImage("battleUI.png")
+    local r = CCRectMake(0, 0, 405, 291)
+    local left = createSpriteFrame(tex, r, 'leftBattle')
+    local r = CCRectMake(619, 0, 405, 291)
+    local right = createSpriteFrame(tex, r, 'rightBattle')
+
+    local sp = CCSpriteBatchNode:create("buildUI.png")
+    --]]
+
+
+
     self.bui = sp
     bc:addChild(sp)
     local vs = getVS()
