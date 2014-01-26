@@ -6,6 +6,8 @@ require "menu.SessionMenu"
 TMXScene = class()
 
 function TMXScene:initDataNow()
+    sendReq('login', dict(), self.initData, nil, self)
+    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -13,6 +15,7 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
+    --]]
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
@@ -165,12 +168,10 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
-    self.page.buildLayer:initPic()
-    self.page.buildLayer:testCat()
-    --[[
+    --self.page.buildLayer:initPic()
+    --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
-    --]]
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
