@@ -6,6 +6,7 @@ require "menu.SessionMenu"
 TMXScene = class()
 
 function TMXScene:initDataNow()
+    print("initDataNow")
     sendReq('login', dict(), self.initData, nil, self)
     --[[
     if not DEBUG then
@@ -168,7 +169,6 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
-    --self.page.buildLayer:initPic()
     --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
