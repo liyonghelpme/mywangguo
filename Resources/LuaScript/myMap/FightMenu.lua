@@ -94,7 +94,7 @@ function FightMenu:showCityInfo(city)
         print("city goods", simple.encode(cg))
         local gid = 1
         for k, v in ipairs(cg.equip) do
-            if gid >= 2 then
+            if gid >= 3 then
                 break
             end
             local edata = Logic.equip[v]
@@ -102,9 +102,9 @@ function FightMenu:showCityInfo(city)
             setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
             gid = gid+1
         end
-
+        print("gid", gid)
         for k, v in ipairs(cg.goods) do
-            if gid >= 2 then
+            if gid >= 3 then
                 break
             end
             local edata = GoodsName[v]
@@ -112,13 +112,16 @@ function FightMenu:showCityInfo(city)
             setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
             gid = gid+1
         end
+        print("gid", gid)
         for k, v in ipairs(cg.build) do
-            if gid >= 2 then
+            if gid >= 3 then
                 break
             end
             local edata = Logic.buildings[v]
             self['goods'..gid]:setString(edata.name)
             setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
+            local sca = getSca(self['g'..gid], {21, 18})
+            setScale(self['g'..gid], sca)
             gid = gid+1
         end
         print("gid is what", gid)

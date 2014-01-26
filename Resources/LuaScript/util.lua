@@ -1507,8 +1507,8 @@ function newProNum(banner, n, max)
 end
 
 function setTexOrDis(sp, n)
-    if string.sub(name, 1, 1) == '#' then
-        setTexture(sp, string.sub(name, 2))
+    if string.sub(n, 1, 1) == '#' then
+        setTexture(sp, string.sub(n, 2))
         return sp
     end
 
