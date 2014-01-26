@@ -19,7 +19,7 @@ function FightMap:checkWin()
     --addBanner("FightMap checkWin")
     if Logic.ownCity[Logic.challengeCity] ~= nil then
         --addBanner("获取 胜利奖励！")
-        global.director:pushView(SessionMenu.new("合战胜利了!"))
+        global.director:pushView(SessionMenu.new("合战胜利了!"), 1, 0)
         local city = self.page.cidToCity[Logic.challengeCity]
         city:setColor(0)
         if city.kind == 1 then
@@ -37,6 +37,8 @@ function FightMap:checkWin()
             end
         --新手村不在这里处理
         end
+    else
+        global.director:pushView(SessionMenu.new("合战失败了!"), 1, 0)
     end
 end
 function showPeopleInfo(c)

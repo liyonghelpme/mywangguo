@@ -157,7 +157,7 @@ function MapCat:update(diff)
                 if nextPoint > #self.path then
                     if not self.showYet then
                         self.showYet = true
-                        global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self))
+                        global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self), 1, 0)
                         --[[
                         addBanner("部队到达目标 开战了")
                         global.director:pushScene(FightScene.new())
