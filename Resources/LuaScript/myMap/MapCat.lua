@@ -125,9 +125,9 @@ function MapCat:doDir(oldPos, newPos)
 end
 
 function MapCat:gotoFight()
+    clearFight()
     global.director:pushScene(FightScene.new())
     removeSelf(self.bg)
-    clearFight()
 end
 
 function MapCat:update(diff)

@@ -179,8 +179,11 @@ function TMXScene:initData(rep, param)
 end
 
 function TMXScene:gotoFight()
-    global.director:pushScene(FightScene.new())
-    clearFight()
+    if Logic.catData ~= nil then
+        self.showYet = false
+        clearFight()
+        global.director:pushScene(FightScene.new())
+    end
 end
 
 function TMXScene:checkBattleTime(diff)
@@ -204,8 +207,11 @@ function TMXScene:checkBattleTime(diff)
             local nextPoint = curPoint+1
             --尴尬的bug 在开战的时候 不应该弹出这个对话框的
             if nextPoint > #lc.path then
+                if not self.showYet then
+                    self.showYet = true
                 --addBanner("部队到达了！")
-                global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self), 1, 0)
+                    global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self), 1, 0)
+                end
             else
                 local lastPos = path[curPoint]
                 lastPos = {MapNode[lastPos][1], MapNode[lastPos][2]}
