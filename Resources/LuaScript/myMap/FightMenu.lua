@@ -99,7 +99,7 @@ function FightMenu:showCityInfo(city)
             end
             local edata = Logic.equip[v]
             self['goods'..gid]:setString(edata.name)
-            setDisplayFrame(self['g'..gid]'equip'..edata.id..'.png')
+            setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
             gid = gid+1
         end
 

@@ -16,11 +16,11 @@ function SessionMenu:ctor(word, callback, del)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="忍者喵", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {603, fixY(sz.height, 546)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sessionTitle.png"), {523, fixY(sz.height, 233)}), {194, 38}), {0.50, 0.50}), 255)
     centerUI(self)
+    registerEnterOrExit(self)
 end
-
---关闭对话框的回调函数
-function SessionMenu:refreshData()
+function SessionMenu:exitScene()
     if self.callback ~= nil then
         self.callback(self.del)
     end
 end
+
