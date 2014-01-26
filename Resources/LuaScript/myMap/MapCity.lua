@@ -58,6 +58,7 @@ function MapCity:touchMoved(x, y)
 end
 function MapCity:touchEnded(x, y)
     --非主城
+    print("158 color", self.kind, self.color, self.cid, self.realId)
     if self.kind ~= 3 and self.color ~= 0 then
         global.director.curScene.menu:showCityInfo(self)
         --self.scene:sendCat(self)

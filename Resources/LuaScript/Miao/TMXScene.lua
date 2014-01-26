@@ -99,9 +99,11 @@ function TMXScene:initData(rep, param)
     end
 
     Logic.cityGoods = {}
+    CityData = {}
     for k, v in ipairs(rep.cityData) do
         v.goods = simple.decode(v.goods)
         Logic.cityGoods[v.id] = v
+        table.insert(CityData, {v.foot, v.arrow, v.magic, v.cav})
     end
     print("cityGoods", #Logic.cityGoods)
 
