@@ -19,6 +19,8 @@ function TMXScene:initDataNow()
     --sendReq('login', dict(), self.initData, nil, self)
 end
 function TMXScene:ctor()
+    self.name = "TMXScene"
+
     self.bg = CCScene:create()
     self.page = MiaoPage.new(self)
     self.bg:addChild(self.page.bg)

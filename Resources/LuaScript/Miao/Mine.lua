@@ -60,6 +60,8 @@ function Mine:whenColNow()
     if self:checkSlope() then
         print("whenColNow Mine", self.baseBuild.colNow, self.baseBuild.otherBuild)
         local dir = self.baseBuild.otherBuild.dir
+        --矿洞方向
+        self.dir = dir
         if dir == 0 then
             setScaleX(self.baseBuild.changeDirNode, -scaY)
         else

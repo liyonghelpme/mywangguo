@@ -9,6 +9,8 @@ function FightMenu:ctor()
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     self.rightBottom = addNode(self.temp)
     local but = ui.newButton({image="buta.png", text="返回", font="f2", size=30, delegate=self, callback=self.onBut, param=0, shadowColor={255, 255, 255}, color={206, 78, 0}})
+
+    setScriptTouchPriority(but.bg, -256)
     but:setContentSize(107, 113)
     setPos(addChild(self.rightBottom, but.bg), {945, fixY(sz.height, 706)})
     rightBottomUI(self.rightBottom)
@@ -58,18 +60,16 @@ function FightMenu:ctor()
 end
 function FightMenu:onBut(p)
     if p == 0 then
-        global.director:popScene()
+        if #global.director.stack == 0 then
+            global.director:popScene()
+        else
+            global.director:popView()
+        end
     else
         if Logic.catData ~= nil then
             addBanner("已经派出部队啦！")
         else
             if self.city ~= nil then
-                --[[
-                global.director.curScene.page:sendCat(self.city)
-                self:closeMenu()
-                global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
-                --]]
-                --global.director:pushView(ArmyMenu.new(), 1, 0)
                 global.director:pushView(ConfigMenu.new(self.city), 1, 0)
                 self:closeMenu()
             end

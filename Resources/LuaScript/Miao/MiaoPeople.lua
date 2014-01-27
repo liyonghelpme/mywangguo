@@ -296,7 +296,10 @@ function MiaoPeople:update(diff)
         self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))
     end
 end
+
 --只有在当前猫为寻路猫的情况下 才可以开始寻路过程
+--寻找运送矿石回去的道路 考虑所在网格的连通性
+--采矿场不能直接上去
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
         if self.map.curSol == nil or self.map.curSol == self or self.map.curSol.state ~= PEOPLE_STATE.IN_FIND then
@@ -305,6 +308,7 @@ function MiaoPeople:findPath(diff)
         end
     end
 end
+--矿洞不能检测 左上或者 右上的 斜坡 根据矿洞的方向决定
 function MiaoPeople:initFind(diff)
     if self.state == PEOPLE_STATE.START_FIND then
         local p = getPos(self.bg)
@@ -944,6 +948,7 @@ function MiaoPeople:checkNeibor(x, y)
     local buildCell = self.map.mapGridController.mapDict
     local curRoad = self.cells[curKey].build
     --多个layer 的数据 海水是一个Layer initCell staticObstacle bridge 其它建筑物是另外的cell 
+    --如果是该点 是矿洞 则 只检测一个方向的出口
     for n, nv in ipairs(neibors) do
         local key = getMapKey(nv[1], nv[2])
         local cx, cy = normalToCartesian(nv[1], nv[2])
