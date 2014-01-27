@@ -73,7 +73,7 @@ function MineStore:updateState()
 end
 
 function MineStore:updateGoods()
-    local show = math.floor(3*self.baseBuild.workNum/self.baseBuild.maxNum)
+    local show = math.ceil(3*self.baseBuild.workNum/self.baseBuild.maxNum)
     print("update MineStore Goods", self.baseBuild.workNum, self.baseBuild.maxNum, self.goodsNum, show)
     if self.baseBuild.workNum > 0 then
         show = math.max(1, show)

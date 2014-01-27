@@ -40,7 +40,19 @@ function Mine:checkFinish()
     end
 end
 function Mine:checkBuildable()
-    return false
+    --return false
+    if self.baseBuild.colNow == 1 then
+        if self.baseBuild.otherBuild ~= nil then
+            local dir = self.baseBuild.otherBuild.dir
+            if self.baseBuild.otherBuild.picName == 'slope' and (dir ==0 or dir == 1) then
+                return true
+            end
+        end
+        return false
+    else
+        --必须放斜坡上面
+        return false
+    end
 end
 --如果和斜坡碰撞了 调整图片方向
 function Mine:whenColNow()

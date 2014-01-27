@@ -93,9 +93,11 @@ function MiaoPeople:ctor(m, data)
     registerEnterOrExit(self)
 
 
-    self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={0, 255, 0}})
-    setPos(self.zordLabel, {200, 140})
-    addChild(self.heightNode, self.zordLabel)
+    if DEBUG then
+        self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={0, 255, 0}})
+        setPos(self.zordLabel, {200, 140})
+        addChild(self.heightNode, self.zordLabel)
+    end
 end
 function MiaoPeople:enterScene()
     registerUpdate(self)
@@ -480,10 +482,20 @@ function MiaoPeople:doFind(diff)
                 --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
                 --local findTarget = false
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
-                    --到此建筑物距离100 则是相邻的格子不可以直接行走上去 必须经过道路才行
-                    --findTarget = true
-                    --if self.actionContext ~= CAT_ACTION.GO_HOME and self.cells[point].gScore == 100 then
-                    --else
+                    --local isMine = false 
+                    --[[
+                    local mineOk = true
+                    --矿坑是否相邻于斜坡道路
+                    if self.predictTarget.id == 28 then
+                        local cd = self.cells[key].parent
+                        local bdata = self.cells[cd].build
+                        if bdata.onSlope then
+                            mineOk = false
+                        end
+                    end
+                    --]]
+                    --矿坑相邻的道路没在斜坡上面
+                    --if mineOk then
                     self.endPoint = {x, y} 
                     self.realTarget = buildCell[key][#buildCell[key]][1]
                     print("findTarget", self.predictTarget.picName, self.realTarget.picName)
@@ -930,6 +942,7 @@ function MiaoPeople:checkNeibor(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
+    local curRoad = self.cells[curKey].build
     --多个layer 的数据 海水是一个Layer initCell staticObstacle bridge 其它建筑物是另外的cell 
     for n, nv in ipairs(neibors) do
         local key = getMapKey(nv[1], nv[2])
@@ -951,15 +964,41 @@ function MiaoPeople:checkNeibor(x, y)
             --TODO 只有是ROAD 才能走过
             local hasRoad = false
             local isTarget = false
+            local bb
             if buildCell[key] ~= nil then
-                local bb = buildCell[key][#buildCell[key]][1]
+                bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
                 if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
                     hasRoad = true
                     --print("buildCell Kind Road")
                 else
                     if bb == self.predictTarget then
-                        isTarget = true
+                        local mineOk = true
+                        --矿坑 当前道路没有在斜坡上
+                        --当前道路 和矿坑同高度
+                        if bb.id == 28 then
+                            print("curRoad is ", curRoad)
+                            if curRoad ~= nil then
+                                if curRoad.onSlope then 
+                                    mineOk = false
+                                else
+                                    local ax, ay, height = bb:getAxAyHeight() 
+                                    local rax, ray, rhei = curRoad:getAxAyHeight()
+                                    print("my height road height", ax, ay, height, rax, ray, rhei)
+                                    --矿点和道路不在同一高度 
+                                    if height ~= rhei then
+                                        mineOk = false
+                                        print("mine not ok")
+                                    end
+                                end
+                            --矿点没有道路？
+                            else
+                                mineOk = false
+                            end
+                        end
+                        if mineOk then
+                            isTarget = true
+                        end
                     end
                     --print("no road")
                 end
@@ -996,6 +1035,7 @@ function MiaoPeople:checkNeibor(x, y)
                 if self.cells[key] == nil then
                     self.cells[key] = {}
                     self.cells[key].parent = curKey
+                    self.cells[key].build = bb
                     self:calcG(nv[1], nv[2])
                     self:calcH(nv[1], nv[2])
                     self:calcF(nv[1], nv[2])
@@ -1014,6 +1054,7 @@ function MiaoPeople:checkNeibor(x, y)
                     else
                         self:calcH(nv[1], nv[2])
                         self:calcF(nv[1], nv[2])
+                        self.cells[key].build = bb
                         --从旧的possible 中删除对象 
                         local oldPossible = self.pqDict[oldFScore]
                         for k, v in ipairs(oldPossible) do

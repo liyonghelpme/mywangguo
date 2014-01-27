@@ -313,7 +313,7 @@ function MiaoBuild:doSwitch()
     end
     self.map.mapGridController:clearMap(self)
     --如果不冲突则oldDir 记录下来
-    if self.colNow == 0 then
+    if self.funcBuild:checkBuildable() then
         self.oldDir = self.dir
         self.oldPos = getPos(self.bg)
     end
@@ -568,7 +568,7 @@ function MiaoBuild:touchesEnded(touches)
         --建造建筑物在finish的时候 生效
         Event:sendMsg(EVENT_TYPE.FINISH_MOVE, self)
         local ba = self.funcBuild:checkBuildable()
-        if self.colNow == 0 then
+        if ba then
             self.oldPos = getPos(self.bg)
             self.oldDir = self.dir
         end
@@ -856,6 +856,11 @@ function MiaoBuild:setOwner(s)
             self.nameLabel:setString(s.name)    
         end
     end
+end
+
+function MiaoBuild:takeWorkNum(n)
+    self.workNum = self.workNum-n
+    self.funcBuild:updateGoods()
 end
 
 function MiaoBuild:takeAllWorkNum()

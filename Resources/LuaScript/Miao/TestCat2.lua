@@ -414,33 +414,6 @@ function Cat2:checkAllPossible()
 
                 --获取资源不用占用 农田 和 采矿场 
                 --cpu 资源调度程序
-                --[[
-                if food > 0 and stone == 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
-                    --self:sortBuildings(allFoodFarm)
-                    self.people.predictTarget = gotoFarm
-                    --no needClear Owner 不用占用这个农田 通过其它方式写入 Queue之类的
-                    --self.people.predictTarget:setOwner(self.people)
-                    self.people.actionContext= CAT_ACTION.TAKE_FOOD
-                    --不用再清理 owner 默认需要 clearOwner needClearOwner = nil
-                    self.people.needClearOwner = false
-                    self.people.goodsKind = k.goodsKind
-                elseif stone > 0 and food == 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE, needClearOwner = true})
-                    self.people.predictTarget = gotoQuarry
-                    --self.people.predictTarget:setOwner(self.people)
-                    self.people.actionContext= CAT_ACTION.TAKE_STONE
-                    self.people.goodsKind = k.goodsKind
-                elseif food > 0 and stone > 0 then
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_FOOD, needClearOwner = true})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FARM, self.people.gotoFarm, CAT_ACTION.TAKE_FOOD, needClearOwner = false})
-                    table.insert(self.people.stateStack, {PEOPLE_STATE.GO_FACTORY, self.people.predictFactory, CAT_ACTION.PUT_STONE, needClearOwner = false})
-                    self.people.predictTarget = gotoQuarry
-                    --self.people.predictTarget:setOwner(self.people)
-                    self.people.actionContext= CAT_ACTION.TAKE_STONE
-                    self.people.goodsKind = k.goodsKind
-                end
-                --]]
                 self.people:printState()
                 print("find Factory !!!!!!!!!!!!!!!!!!!!!", self.people.predictFactory)
                 --记住找完可能建筑物 之后 就return 即可
@@ -660,28 +633,22 @@ function Cat2:handleAction(diff)
             self.people.wood = 0
             self.people:popState()
             self.people:putGoods()
-        --[[
-        elseif self.people.actionContext == CAT_ACTION.WOOD_CENTER then
-            self.moveCutTime = self.moveCutTime+diff
-            if self.moveCutTime >= 1 then
-                self.people.state = PEOPLE_STATE.FREE
-            end
-        --]]
-        --[[
-        elseif self.people.actionContext == CAT_ACTION.PUT_WOOD then
-            self.people.realTarget.wood = self.people.realTarget.wood + self.people.wood
-            self.people.wood = 0
-            self.people:putGoods()
-            self.people:setDir(1, -1)
-            self.people:popState()
-        --]]
         --运送木材到工厂
         elseif self.people.actionContext == CAT_ACTION.TAKE_WOOD then
-            self.people.wood = self.people.predictTarget.workNum
-            self.people.realTarget:takeAllWorkNum()
-            self.people:sendGoods()
+            local goodsKind = self.people.goodsKind
+            --根据商品种类 决定消耗的资源  运送的数量 根据 伐木场上限决定 显示
+            local wood = GoodsName[goodsKind].wood
+            local mn = self.people.predictStore.maxNum
+            local need = wood*mn
+            --只运送需要的数量 测试生产某种酒
+            self.people.wood = math.min(self.people.realTarget.workNum, need)
+            print("take wood", self.people.wood)
+            self.people.realTarget:takeWorkNum(self.people.wood)
+            --伐木场总量
+            self.people:sendGoods(self.people.realTarget.maxNum)
             self.people:popState()
         end
+
         print("action Context", self.people.actionContext)
     --end
     if needResetState then

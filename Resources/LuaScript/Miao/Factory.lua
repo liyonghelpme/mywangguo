@@ -77,15 +77,23 @@ function createFacBanner()
 end
 function Factory:update(diff)
     --print("Factory", self.passTime)
+    --[[
     setFacProNum(self.pro, self.passTime, 1)
     self.passTime = self.passTime+diff
     if self.passTime > 1 then
         self.passTime = 0
     end
+    --]]
     if self.baseBuild.owner == nil then
         self:stopWork()
     end
 end
+
+function Factory:updateProcess(t, tt)
+    t = math.min(t, tt)
+    setFacProNum(self.pro, t, tt)
+end
+
 function Factory:stopWork()
     removeSelf(self.banner)
     self.bg = nil

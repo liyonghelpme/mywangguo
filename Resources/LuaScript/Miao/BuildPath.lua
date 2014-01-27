@@ -92,15 +92,20 @@ function BuildPath:checkNeibor(x, y)
                 elseif not isStart and bb.picName == 'build' and bb.data.kind == 0 then
                     local mineOk = true
                     if bb.id == 28 then
-                        local ax, ay, height = bb:getAxAyHeight() 
                         print("curRoad is ", curRoad)
                         if curRoad ~= nil then
-                            local rax, ray, rhei = curRoad:getAxAyHeight()
-                            print("my height road height", ax, ay, height, rax, ray, rhei)
-                            --矿点和道路不在同一高度 
-                            if height ~= rhei then
+                            --不能寻路 斜坡上面的道路
+                            if curRoad.onSlope then 
                                 mineOk = false
-                                print("mine not ok")
+                            else
+                                local ax, ay, height = bb:getAxAyHeight() 
+                                local rax, ray, rhei = curRoad:getAxAyHeight()
+                                print("my height road height", ax, ay, height, rax, ray, rhei)
+                                --矿点和道路不在同一高度 
+                                if height ~= rhei then
+                                    mineOk = false
+                                    print("mine not ok")
+                                end
                             end
                         --矿点没有道路？
                         else
