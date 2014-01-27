@@ -2,6 +2,8 @@ require "menu.BuyMenu"
 EquipChangeMenu2 = class()
 function EquipChangeMenu2:ctor(p, changeKind)
     self.people = p
+    print("people changeKind", p.name, changeKind)
+
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
@@ -41,6 +43,7 @@ function EquipChangeMenu2:ctor(p, changeKind)
 
     self.selNum = changeKind or 1
     self:setView()
+    print("setView")
 end
 function EquipChangeMenu2:updateTab()
     removeSelf(self.flowNode)
@@ -67,6 +70,10 @@ function EquipChangeMenu2:updateTab()
         allData = Logic.allSpe
     end
 
+    if true then
+        return
+    end
+
     self.allData = allData
     print("refresh View", self.selNum)
     self.oldEquipId = nil
@@ -85,7 +92,7 @@ function EquipChangeMenu2:updateTab()
         
             local hb = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "headBoard.png"), {28, fixY(sz.height, 26)}), {57, 52}), {0.50, 0.50}), 255)
             local sp = setOpacity(setAnchor(setSize(setPos(addSprite(hb, "equip"..v.id..".png"), {28, fixY(sz.height, 26)}), {41, 36}), {0.50, 0.50}), 255)
-            local eqw = setPos(setAnchor(addChild(hb, ui.newBMFontLabel({text='装', size=188, color={206, 78, 0}, font="bound.fnt", shadowColor={255, 255, 255}})), {0.50, 0.50}), {44, fixY(52, 41)})
+            local eqw = setPos(setAnchor(addChild(hb, ui.newTTFLabel({text='E', size=188, color={206, 78, 0}, font="bound.fnt", shadowColor={255, 255, 255}})), {0.50, 0.50}), {44, fixY(52, 41)})
             setVisible(eqw, true)
             if self.selNum == 1 then
                 print("eqw")
