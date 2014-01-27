@@ -2,6 +2,22 @@ function MiaoPeople:setZord()
     local p = getPos(self.bg)
     local zOrd = MAX_BUILD_ZORD-p[2]-1
     self.bg:setZOrder(zOrd)
+
+    if DEBUG then
+        self.zordLabel:setString(zOrd)
+        print("setNormalZord", self.name, zOrd)
+    end
+end
+function MiaoPeople:setHighZord()
+    local p = getPos(self.bg)
+    local zOrd = MAX_BUILD_ZORD-p[2]+2
+    self.bg:setZOrder(zOrd)
+
+    if DEBUG then
+        self.zordLabel:setString(zOrd)
+        print("setHighZord", simple.encode(getPos(self.realTarget.bg)), simple.encode(getPos(self.bg)))
+        print("setHighZord", self.name, zOrd)
+    end
 end
 
 function MiaoPeople:stopMoveAction()
@@ -172,9 +188,18 @@ function MiaoPeople:handleQuarry()
             if self.realTarget.deleted then
                 self:clearStateStack()
             else
-                self.stone = self.predictTarget.workNum
-                self.realTarget:takeAllWorkNum()
-                self:sendGoods()
+
+                local goodsKind = self.goodsKind
+                --根据商品种类 决定消耗的资源  运送的数量 根据 伐木场上限决定 显示
+                local stone = GoodsName[goodsKind].stone
+                local mn = self.predictStore.maxNum
+                local need = stone*mn
+                --只运送需要的数量 测试生产某种酒
+                self.stone = math.min(self.realTarget.workNum, need)
+                --self.stone = self.predictTarget.workNum
+                print("take stone number")
+                self.realTarget:takeWorkNum(self.stone)
+                self:sendGoods(self.realTarget.maxNum)
                 self:popState()
             end
             self:resetState()
@@ -322,7 +347,7 @@ function MiaoPeople:adjustShadow()
     end
 end
 --清理每个状态的时候 self.food 也要清理一下 根据不同状态类型 调用状态的清理代码
-function MiaoPeople:sendGoods()
+function MiaoPeople:sendGoods(total)
     self.send = true
     self:adjustScale()
     self:adjustShadow()
@@ -336,18 +361,29 @@ function MiaoPeople:sendGoods()
         self.carName = {"a3.png", "b3.png"}
         self.carGoods = sp
     elseif self.stone > 0 then
+        if total == nil then
+            total = self.stone
+        end
+
         local sp = createSprite("f3.png")
         self.changeDirNode:addChild(sp)
         local sz = self.changeDirNode:getContentSize()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
-        self.carName = {"e3.png", 'f3.png'}
+        local n = math.max(math.min(math.ceil(self.stone*3/total), 3), 1)
+        self.carName = {"e"..n..".png", 'f'..n..'.png'}
         self.carGoods = sp
     elseif self.wood > 0 then
+        if total == nil then
+            total = self.wood
+        end
         local sp = createSprite("d3.png")
         self.changeDirNode:addChild(sp)
         local sz = self.changeDirNode:getContentSize()
         setPos(setAnchor(sp, {0.5, 0.5}), {sz.width/2, sz.height/2})
-        self.carName = {"c3.png", 'd3.png'}
+        --self.fullCarName = {{'c1.png', 'c2.png', 'c3.png'}, {'d1.png', 'd2.png', 'd3.png'}}
+        print("total wood number", total, self.wood)
+        local n = math.max(math.min(math.ceil(self.wood*3/total), 3), 1)
+        self.carName = {"c"..n..".png", 'd'..n..'.png'}
         self.carGoods = sp
     elseif self.workNum > 0 then
         local sp = createSprite("h3.png")
@@ -571,6 +607,7 @@ function MiaoPeople:handleTower()
 end
 
 
+--计算工厂工作时间 可以cache一下这个时间 下次不用计算
 function MiaoPeople:workInFactory()
     local le = self:getMyLaborEffect()
     local totalTime = 10
@@ -590,13 +627,11 @@ function MiaoPeople:workInFactory()
     --计算出1个 的生产时间 和 消耗的 生命值
     local rate = totalTime/productNum
     local cost = healthCost/productNum
-
     --10s 生产5个
-    --local rate = 10/5
-    --local cost = 5/5 
 
-    if self.workTime > rate then
-        self.workTime = 0
+    self.realTarget.funcBuild:updateProcess(self.workTime, rate)
+    if self.workTime >= rate then
+        self.workTime = self.workTime - rate
         self.health = self.health - cost
         print("product what??", self.realTarget.goodsKind)
 

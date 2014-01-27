@@ -26,8 +26,10 @@ function PeopleInfo2:ctor(p, attribute)
     --local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击更换装备", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {528, fixY(sz.height, 624)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "infoTitle.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
 
+    --local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "heroAttr.png"), {396, fixY(sz.height, 442)}), {181, 239}), {0.50, 0.50}), 255)
+    local but = ui.newButton({image="heroAttr.png", delegate=self, callback=self.onAtt, needScale=false})
+    addChild(self.temp, setPos(but.bg, {396, fixY(sz.height, 442)}))
 
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "heroAttr.png"), {396, fixY(sz.height, 442)}), {181, 239}), {0.50, 0.50}), 255)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="长刀", size=24, color={255, 255, 255}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {410, fixY(sz.height, 345)})
     self.weapon = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="头巾", size=24, color={240, 196, 92}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {410, fixY(sz.height, 392)})
@@ -40,15 +42,15 @@ function PeopleInfo2:ctor(p, attribute)
     self.skill = w
 
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 347)}), {40, 40}), {0.50, 0.50}), 255)
-    self.weaponIcon = setPos(addSprite(sp, "goodsIcon.png"), {20, 20})
+    self.weaponIcon = setPos(addSprite(sp, "equip1.png"), {22, 25})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 396)}), {40, 40}), {0.50, 0.50}), 255)
-    self.headIcon = setPos(addSprite(sp, "goodsIcon.png"), {20, 20})
+    self.headIcon = setPos(addSprite(sp, "equip1.png"), {22, 25})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 445)}), {40, 40}), {0.50, 0.50}), 255)
-    self.bodyIcon = setPos(addSprite(sp, "goodsIcon.png"), {20, 20})
+    self.bodyIcon = setPos(addSprite(sp, "equip1.png"), {22, 25})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 492)}), {40, 40}), {0.50, 0.50}), 255)
-    self.speIcon = setPos(addSprite(sp, "goodsIcon.png"), {20, 20})
+    self.speIcon = setPos(addSprite(sp, "equip1.png"), {22, 25})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "weaponIcon.png"), {333, fixY(sz.height, 540)}), {40, 40}), {0.50, 0.50}), 255)
-    self.skillIcon = setAnchor(setPos(addSprite(sp, "skill1.png"), {22, 22}), {76/128, 54/128})
+    self.skillIcon = setAnchor(setPos(addSprite(sp, "skill1.png"), {22, 25}), {76/128, 54/128})
 
     local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text='', size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {1, 8})
     self.skillLevel = w
@@ -117,6 +119,10 @@ function PeopleInfo2:ctor(p, attribute)
 
     self:setPeople()
     centerUI(self)
+end
+
+function PeopleInfo2:onAtt()
+    global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPeople]), 1)
 end
 function PeopleInfo2:onLeft()
     if self.selPeople > 1 then
@@ -271,4 +277,8 @@ function PeopleInfo2:onLevel()
         people:updateLevel()
         global.director:popView()
     end
+end
+
+function PeopleInfo2:refreshData()
+    self:setPeople()
 end

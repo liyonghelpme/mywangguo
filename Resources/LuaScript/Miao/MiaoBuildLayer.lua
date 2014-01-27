@@ -32,6 +32,8 @@ function MiaoBuildLayer:ctor(s)
     self.removeLayer = CCNode:create()
     self.bg:addChild(self.removeLayer)
 
+    self.menuLayer = CCNode:create()
+    self.bg:addChild(self.menuLayer)
     
     --寻路功能模块
     self.curSol = nil
@@ -61,7 +63,11 @@ function MiaoBuildLayer:update(diff)
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
-        self:addPeople(8)
+        --正在搜索路径则 不要添加新的商人
+        if publicMiaoPath ~= nil and publicMiaoPath.inSearch then
+        else
+            self:addPeople(8)
+        end
     end
 end
 

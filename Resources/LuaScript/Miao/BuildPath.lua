@@ -59,6 +59,7 @@ function BuildPath:checkNeibor(x, y)
     end
 
     local curKey = getMapKey(x, y)
+    local curRoad = self.cells[curKey].road
     --TrainZone 100 100 2400 400
     local buildCell = self.map.mapGridController.mapDict
     if self.cells[curKey].gScore >= 100 then
@@ -78,8 +79,9 @@ function BuildPath:checkNeibor(x, y)
             local nS
 
             local hasRoad = false
+            local bb
             if buildCell[key] ~= nil then
-                local bb = buildCell[key][#buildCell[key]][1]
+                bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
                 if bb.picName == 't' then
                     hasRoad = true
@@ -88,14 +90,39 @@ function BuildPath:checkNeibor(x, y)
                 --可以到达工厂
                 --就近的工厂
                 elseif not isStart and bb.picName == 'build' and bb.data.kind == 0 then
+                    local mineOk = true
+                    if bb.id == 28 then
+                        print("curRoad is ", curRoad)
+                        if curRoad ~= nil then
+                            --不能寻路 斜坡上面的道路
+                            if curRoad.onSlope then 
+                                mineOk = false
+                            else
+                                local ax, ay, height = bb:getAxAyHeight() 
+                                local rax, ray, rhei = curRoad:getAxAyHeight()
+                                print("my height road height", ax, ay, height, rax, ray, rhei)
+                                --矿点和道路不在同一高度 
+                                if height ~= rhei then
+                                    mineOk = false
+                                    print("mine not ok")
+                                end
+                            end
+                        --矿点没有道路？
+                        else
+                            mineOk = false
+                        end
+                    end
+
                     --是一个可以到达的 去工作的建筑物
                     --建筑物不能贯通周围邻居
-                    local oldDist = self.nearby[bb] or 999999
-                    self.nearby[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
-                    --print("add Building ", bb.id, bb.picName)
-                    table.insert(bb.belong, self.target.name)
-                    if #bb.belong > 3 then
-                        table.remove(bb.belong, 1)
+                    if mineOk then
+                        local oldDist = self.nearby[bb] or 999999
+                        self.nearby[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
+                        --print("add Building ", bb.id, bb.picName)
+                        table.insert(bb.belong, self.target.name)
+                        if #bb.belong > 3 then
+                            table.remove(bb.belong, 1)
+                        end
                     end
                     --是自己建筑物的一个网格  加入寻路中
                 else
@@ -112,6 +139,7 @@ function BuildPath:checkNeibor(x, y)
             if self.cells[key] == nil and hasRoad then
                 self.cells[key] = {}
                 self.cells[key].parent = curKey
+                self.cells[key].road = bb
                 self:calcG(nv[1], nv[2])
                 self:calcH(nv[1], nv[2])
                 self:calcF(nv[1], nv[2])

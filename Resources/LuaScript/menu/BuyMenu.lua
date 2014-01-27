@@ -48,7 +48,7 @@ function BuyMenu:onOK()
     else
         doCost(self.equip.silver)
         self.people:setEquip(self.equip.id)
-        addBanner(self.people.name.."装备"..self.equip.name..'成功')
+        addBanner(self.people.data.name.."装备"..self.equip.name..'成功')
     end
     --先更新数据 再退出对话框 或者使用通知机制
     --先退出对话框 接着 接受更新通知

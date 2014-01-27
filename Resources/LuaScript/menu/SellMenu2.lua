@@ -12,22 +12,6 @@ function SellMenu2:adjustPos()
 end
 function SellMenu2:ctor(b)
     self.build = b
-    --[[
-    local vs = getVS()
-    self.bg = CCNode:create()
-    local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {0, 0})
-    self:adjustPos()
-
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "smallDialog.png"), {533, fixY(sz.height, 386)}), {708, 396}), {0.50, 0.50})
-    local w = colorWords({text=string.format("<ffffff你确定卖出><63a3f9%s>?", self.build.data.name), font='f2', size=24})
-    setPos(setAnchor(addChild(self.temp, w), {0.50, 0.50}), {531, fixY(sz.height, 363)})
-
-    local but = ui.newButton({image="butc.png", text="确定", font="f1", size=25, delegate=self, callback=self.onSell, conSize={117, 43} })
-    --but:setContentSize(73, 38)
-    setPos(addChild(self.temp, but.bg), {532, fixY(sz.height, 533)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="确定卖出？", size=34, color={102, 4, 554}, font="f1"})), {0.00, 0.50}), {450, fixY(sz.height, 247)})
-    --]]
 
     local vs = getVS()
     self.bg = CCNode:create()
@@ -35,7 +19,7 @@ function SellMenu2:ctor(b)
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "smallDialogb.png"), {512, fixY(sz.height, 403)}), {588, 246}), {0.50, 0.50}), 255)
-    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {813, fixY(sz.height, 196)})
     local but = ui.newButton({image="butc.png", text="确定", font="f1", size=27, delegate=self, callback=self.onSell, shadowColor={0, 0, 0}, color={255, 255, 255}})

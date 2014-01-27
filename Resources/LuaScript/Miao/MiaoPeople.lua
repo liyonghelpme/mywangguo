@@ -2,7 +2,7 @@ require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
 require "Miao.MiaoPath"
-require "Miao.TestCat"
+--require "Miao.TestCat"
 require "Miao.TestCat2"
 require "Miao.Merchant"
 
@@ -91,6 +91,13 @@ function MiaoPeople:ctor(m, data)
 
     self.events = {EVENT_TYPE.PAUSE_GAME, EVENT_TYPE.CONTINUE_GAME}
     registerEnterOrExit(self)
+
+
+    if DEBUG then
+        self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={0, 255, 0}})
+        setPos(self.zordLabel, {200, 140})
+        addChild(self.heightNode, self.zordLabel)
+    end
 end
 function MiaoPeople:enterScene()
     registerUpdate(self)
@@ -259,7 +266,20 @@ function MiaoPeople:update(diff)
     self:doWork(diff)
     self:doPaused(diff)
     self:doWaitAni(diff)
-    self:setZord()
+    --self:setZord()
+
+    local isQuaOrWoo = false
+    if self.realTarget ~= nil then
+        if (self.realTarget.id == 19 or self.realTarget.id == 12 or self.realTarget.id == 28 or self.realTarget.id == 29) then
+            isQuaOrWoo = true
+        end
+        if not isQuaOrWoo then
+            self:setZord()
+        else
+            self:setHighZord()
+        end
+    end
+
 
     if DEBUG then
         local s = ''
@@ -462,10 +482,20 @@ function MiaoPeople:doFind(diff)
                 --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
                 --local findTarget = false
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
-                    --到此建筑物距离100 则是相邻的格子不可以直接行走上去 必须经过道路才行
-                    --findTarget = true
-                    --if self.actionContext ~= CAT_ACTION.GO_HOME and self.cells[point].gScore == 100 then
-                    --else
+                    --local isMine = false 
+                    --[[
+                    local mineOk = true
+                    --矿坑是否相邻于斜坡道路
+                    if self.predictTarget.id == 28 then
+                        local cd = self.cells[key].parent
+                        local bdata = self.cells[cd].build
+                        if bdata.onSlope then
+                            mineOk = false
+                        end
+                    end
+                    --]]
+                    --矿坑相邻的道路没在斜坡上面
+                    --if mineOk then
                     self.endPoint = {x, y} 
                     self.realTarget = buildCell[key][#buildCell[key]][1]
                     print("findTarget", self.predictTarget.picName, self.realTarget.picName)
@@ -605,6 +635,18 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
+                    --[[
+                    local isQuaOrWoo = false
+                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
+                        isQuaOrWoo = true
+                    end
+                    if not isQuaOrWoo then
+                        self:setZord()
+                    else
+                        self:setHighZord()
+                    end
+                    --]]
+
                     self:beforeHandle()
                     if self.realTarget.data.kind == 5 then
                         self:handleHome()
@@ -638,12 +680,16 @@ function MiaoPeople:doMove(diff)
                     end
                     self:finishHandle()
                 end
-                self:setZord()
+
             else
                 --商人会在商店门口等待一下 
                 local moved = false
                 local wait = false
                 local deleted = false
+                local isMine = false
+                local isQuaOrWoo = false
+                --检测目标是否移动 以及目标是否是矿坑
+                --检测如果是伐木场之类的 人物要在建筑物上面 
                 if nextPoint == #self.path then
                     moved = self:checkMoved()
                     if moved or self.realTarget.deleted then
@@ -656,18 +702,19 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.data ~= nil and self.realTarget.data.IsStore == 1 and self.realTarget.funcBuild.inMerchant ~= nil then
                          wait = true
                     end
+                    if self.realTarget.id == 28 then
+                        isMine = true
+                    end
+                    --伐木场 和 采矿场 不能遮挡人物
+                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
+                        isQuaOrWoo = true
+                    end
                 end
+
                 if not moved and not wait and not deleted then
                     --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                     local np = self.path[nextPoint]
                     local cp = self.path[self.curPoint]
-                    --[[
-                    local buildCell = self.map.mapGridController.mapDict
-                    local key = getMapKey(np[1], np[2])
-                    local bv = buildCell[key]
-                    --]]
-
-
 
                     --行走在有可能是斜坡的道路上面
                     --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
@@ -689,10 +736,12 @@ function MiaoPeople:doMove(diff)
                     
                     --normal to Affine
                     --normal 是网格的 中心normal坐标么？ YES
+                    
+                    --目标不是矿坑
                     local ax, ay = newNormalToAffine(np[1], np[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                     local nk = newAffKey(self.map.scene.width, ax, ay)
                     local sd = self.map.scene.slopeData[nk]
-                    if sd ~= nil then
+                    if sd ~= nil and not isMine then
                         local height = sd[2]
                         local ons = true
                         if ons then
@@ -705,7 +754,7 @@ function MiaoPeople:doMove(diff)
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
-                            self:setZord()
+                            --self:setZord()
                             --local nnp = self.path[nextPoint+1]
                             --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
                             --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
@@ -714,65 +763,15 @@ function MiaoPeople:doMove(diff)
                         end
                     end
 
-                    --[[
-                    if bv ~= nil then
-                        --计算斜坡的高度
-                        local height
-                        local ons = bv[#bv][1].onSlope 
-                        if ons then
-                            height = bv[#bv][1].height
-                        else
-                        --人走在普通的斜坡上面
-                            ons = bv[#bv][1].picName == 'slope' 
-                            if ons then
-                                height = bv[#bv][1].height
-                            end
-                        end
-
-                        if ons then
-                            goYet = true
-                            local cxy = setBuildMap({1, 1, np[1], np[2]})
-                            self.waitTime = 3
-                            if accMove then
-                                self.waitTime = self.waitTime/2
-                            end
-                            self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
-                            local dx, dy = np[1]-cp[1], np[2]-cp[2]
-                            self:setDir(cxy[1], cxy[2])
-                            self:setZord()
-                            --local nnp = self.path[nextPoint+1]
-                            --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
-                            --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
-                            self:moveSlope(dx, dy, 0, height)
-                            self.curPoint = self.curPoint+1
-                        end
-                    end
-                    --]]
-                    --[[ 
-                    local key = getMapKey(cp[1], cp[2])
-                    local cv = buildCell[key]
-                    --]]
                     --关键是newNormalToAffine 代码正确
                     local ax, ay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                     local nk = newAffKey(self.map.scene.width, ax, ay)
                     local sd = self.map.scene.slopeData[nk]
 
                     --当前点在 斜坡上 下一个点的高度值
-                    if not goYet and sd ~= nil then
+                    if not goYet and sd ~= nil and not isMine then
                         local height = sd[2]
                         local ons = true
-                        --[[
-                        local ons = cv[#cv][1].onSlope
-                        if ons then
-                            height = cv[#cv-1][1].height
-                        else
-                            ons = cv[#cv][1].picName == 'slope'
-                            if ons then
-                                height = cv[#cv][1].height
-                            end
-                        end
-                        --]]
-
                         if ons then
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})
@@ -783,12 +782,13 @@ function MiaoPeople:doMove(diff)
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
-                            self:setZord()
+                            --self:setZord()
                             self:moveSlope(dx, dy, 1, np)
                             self.curPoint = self.curPoint+1
                         end
                     end
 
+                    --普通行走
                     if not goYet then
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
                         self.waitTime = 1.5
@@ -797,7 +797,17 @@ function MiaoPeople:doMove(diff)
                         end
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         self:setDir(cxy[1], cxy[2])
-                        self:setZord()
+                        --比建筑物略高的zord
+                        --[[
+                        if isQuaOrWoo then
+                            local p = getPos(self.bg)
+                            local zOrd = MAX_BUILD_ZORD-p[2]+4
+                            self.bg:setZOrder(zOrd)
+                        else
+                            self:setZord()
+                        end
+                        --]]
+
                         self.curPoint = self.curPoint+1
                     end
                     --是否在运送货物
@@ -835,7 +845,7 @@ function MiaoPeople:doWork(diff)
             elseif self.realTarget.id == 2 then
                 self:workInFarm()
             else
-                self.funcPeople:workNow()
+                self.funcPeople:workNow(diff)
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then
@@ -932,6 +942,7 @@ function MiaoPeople:checkNeibor(x, y)
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
+    local curRoad = self.cells[curKey].build
     --多个layer 的数据 海水是一个Layer initCell staticObstacle bridge 其它建筑物是另外的cell 
     for n, nv in ipairs(neibors) do
         local key = getMapKey(nv[1], nv[2])
@@ -953,15 +964,41 @@ function MiaoPeople:checkNeibor(x, y)
             --TODO 只有是ROAD 才能走过
             local hasRoad = false
             local isTarget = false
+            local bb
             if buildCell[key] ~= nil then
-                local bb = buildCell[key][#buildCell[key]][1]
+                bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
                 if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
                     hasRoad = true
                     --print("buildCell Kind Road")
                 else
                     if bb == self.predictTarget then
-                        isTarget = true
+                        local mineOk = true
+                        --矿坑 当前道路没有在斜坡上
+                        --当前道路 和矿坑同高度
+                        if bb.id == 28 then
+                            print("curRoad is ", curRoad)
+                            if curRoad ~= nil then
+                                if curRoad.onSlope then 
+                                    mineOk = false
+                                else
+                                    local ax, ay, height = bb:getAxAyHeight() 
+                                    local rax, ray, rhei = curRoad:getAxAyHeight()
+                                    print("my height road height", ax, ay, height, rax, ray, rhei)
+                                    --矿点和道路不在同一高度 
+                                    if height ~= rhei then
+                                        mineOk = false
+                                        print("mine not ok")
+                                    end
+                                end
+                            --矿点没有道路？
+                            else
+                                mineOk = false
+                            end
+                        end
+                        if mineOk then
+                            isTarget = true
+                        end
                     end
                     --print("no road")
                 end
@@ -998,6 +1035,7 @@ function MiaoPeople:checkNeibor(x, y)
                 if self.cells[key] == nil then
                     self.cells[key] = {}
                     self.cells[key].parent = curKey
+                    self.cells[key].build = bb
                     self:calcG(nv[1], nv[2])
                     self:calcH(nv[1], nv[2])
                     self:calcF(nv[1], nv[2])
@@ -1016,6 +1054,7 @@ function MiaoPeople:checkNeibor(x, y)
                     else
                         self:calcH(nv[1], nv[2])
                         self:calcF(nv[1], nv[2])
+                        self.cells[key].build = bb
                         --从旧的possible 中删除对象 
                         local oldPossible = self.pqDict[oldFScore]
                         for k, v in ipairs(oldPossible) do

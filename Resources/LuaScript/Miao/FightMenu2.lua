@@ -262,6 +262,7 @@ function FightMenu2:update(diff)
     end
 end
 
+--士兵死亡
 function FightMenu2:killSoldier(soldier, killNum, healthHurt)
     local sol = self.scene.soldiers
     local maxSol = self.scene.maxSoldier
@@ -285,11 +286,11 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
     else
         if soldier.id == 0 then
             sol[2][1] = sol[2][1]-killNum
-            fightNumPro(self.eneFoot, sol[2][1], maxSol[1][1])
+            fightNumPro(self.eneFoot, sol[2][1], maxSol[2][1])
             self.eneFootNum:setString(sol[2][1])
         elseif soldier.id == 1 then
             sol[2][2] = sol[2][2]-killNum
-            fightNumPro(self.eneArrow, sol[2][2], maxSol[1][2])
+            fightNumPro(self.eneArrow, sol[2][2], maxSol[2][2])
             self.eneArrowNum:setString(sol[2][2])
         end
         self.rightHurt = self.rightHurt+healthHurt

@@ -1,3 +1,4 @@
+require "menu.DecorInfo"
 Tree = class(FuncBuild)
 
 function Tree:initView()
@@ -137,4 +138,8 @@ function Tree:finishMove()
         self:doEffect()
     end
     --]]
+end
+
+function Tree:detailDialog()
+    global.director:pushView(DecorInfo.new(self.baseBuild), 1)
 end

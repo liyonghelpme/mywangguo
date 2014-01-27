@@ -178,10 +178,49 @@ function FightArrow2:checkSide(s)
     return self.soldier[s]
 end
 
+--距离远则放弓箭 否则 就近身战斗
+function FightArrow2:waitAttack(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
+        if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+            self.soldier.attackTarget = self:findNearEnemy()
+        else
+            --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
+            if self.soldier.attackTarget.color ~= self.soldier.color then
+                local p = getPos(self.soldier.bg)
+                local mp = getPos(self.soldier.attackTarget.bg)
+                local dis = self.soldier:getDis(p, mp) 
+                --射箭攻击
+                if dis >=400 and dis <= 500 then
+                    self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                elseif dis <= FIGHT_NEAR_RANGE then
+                    self.soldier.changeDirNode:stopAllActions()
+                    self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                    print("WAIT_MOVE  NEAR_ATTACK")
+                    self.oneAttack = false
+                    self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
+                    self.soldier.changeDirNode:runAction(self.attackAni)
+                --足够靠近才反击
+                elseif dis < 400 then
+                    --攻击目标已经开始 攻击别人了 则 我主动靠近即可
+                    if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
+                        self.soldier:moveOneStep(diff)
+                    end
+                end
+            --我方靠近移动
+            else
+                self.soldier:moveOneStep(diff)
+            end
+        end
+    end
+end
+
+
+
 --等待 步兵过来攻击我
 --确定 是进入步兵回合了
 --确定步兵进入移动攻击状态了
 --isHead 了则等待 检测 连接的 敌方步兵是否会过来
+--[[
 function FightArrow2:waitAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
         --目标不存在或者目标已经死亡了
@@ -218,6 +257,8 @@ function FightArrow2:waitAttack(diff)
         end
         isHead = self.isHead
         
+        --头排 会 FightBack 攻击
+        --后排会 移动攻击 WAIT_ATTACK
 
         --对方向我移动中检测 一下距离 步兵正在向我靠近么 不一定可能正在向 地方
         --对方也在向我攻击移动
@@ -281,6 +322,8 @@ function FightArrow2:waitAttack(diff)
         end
     end
 end
+--]]
+
 function FightArrow2:doNearMove(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_MOVE then
         if not self.inMove then
@@ -362,7 +405,7 @@ end
 
 function FightArrow2:doFightBack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.FIGHT_BACK then
-        print("doFightBack now")
+        print("doFightBack now", self.shootYet, self.inFightBack)
         if not self.shootYet then
             self.shootYet = true
             local function addArrow()
@@ -393,10 +436,12 @@ function FightArrow2:doFightBack(diff)
                 self.soldier.changeDirNode:runAction(sequence({delaytime(0.2), callfunc(nil, addArrow)}))
             end
         else
-            local p = getPos(self.soldier.bg)
-            local ap = getPos(self.soldier.attackTarget.bg)
+            --local p = getPos(self.soldier.bg)
+            --local ap = getPos(self.soldier.attackTarget.bg)
             --控制动画频率
             if not self.inFightBack then
+                self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
+                --[[
                 if math.abs(p[1]-ap[1]) < FIGHT_NEAR_RANGE then
                     self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
                     print('FIGHT_BACK NEAR_ATTACK')
@@ -409,6 +454,7 @@ function FightArrow2:doFightBack(diff)
                 else
 
                 end
+                --]]
             end
         end
     end

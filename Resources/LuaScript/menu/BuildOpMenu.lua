@@ -24,8 +24,10 @@ function BuildOpMenu:ctor(b)
     but:setContentSize(87, 87)
     setPos(addChild(self.temp, but.bg), {512+112, fixY(sz.height, 704)})
     self.sellB = but
-
-    if self.build.data.switchable == 1 then
+    if self.build.picName == 't' then
+        setVisible(self.infoB.bg, false)
+        setPos(self.sellB.bg, {512, fixY(sz.height, 704)})
+    elseif self.build.data.switchable == 1 then
         local but = ui.newButton({image="buta.png", text="旋转", font="f2", size=23, delegate=self, callback=self.onSwitch})
         but:setContentSize(87, 87)
         setPos(addChild(self.temp, but.bg), {512, fixY(sz.height, 704)})

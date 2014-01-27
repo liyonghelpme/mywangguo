@@ -15,9 +15,9 @@ function MatInfo3:ctor()
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "matInfo.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "stoneIcon.png"), {287, fixY(sz.height, 356)}), {32, 37}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "foodIcon.png"), {288, fixY(sz.height, 481)}), {39, 41}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "foodIcon.png"), {287, fixY(sz.height, 356)}), {32, 37}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "woodIcon.png"), {286, fixY(sz.height, 419)}), {30, 38}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "stoneIcon.png"), {288, fixY(sz.height, 481)}), {39, 41}), {0.50, 0.50}), 255)
 
 
     local mat = getAllMatNum()

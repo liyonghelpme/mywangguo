@@ -197,6 +197,9 @@ function FightLayer2:ctor(s, my, ene)
     local vs = getVS()
     print("FightLayer2")
     self.passTime = 0
+    --当前动作的列
+    self.poseRowNum = 0
+    self.poseRowTime = 0
 
     self.myFootNum = self:convertNumToSoldier(my[1])
     self.myArrowNum = self:convertNumToSoldier(my[2])
@@ -295,9 +298,9 @@ function FightLayer2:ctor(s, my, ene)
         self.nearScene:addChild(near)
     end
 
-    self:adjustBattleScene(-self.leftBack)
+    self:adjustBattleScene(-self.leftBack+vs.width/3)
     self.smooth = 1
-    self.arrowSpeed = 400
+    self.arrowSpeed = 500
     self.solId = 0
     self.state = FIGHT_STATE.FREE
     self.curCol = 0
@@ -388,6 +391,7 @@ function FightLayer2:update(diff)
     if DEBUG_FIGHT then
         self.stateLabel:setString(str(self.finishAttack).." "..str(math.floor(self.passTime)))
     end
+    self.poseRowTime = self.poseRowTime+diff
 
     self:doFree(diff)
     self:doMove(diff)
@@ -432,16 +436,27 @@ function FightLayer2:initSoldier()
     self.allSoldiers = {}
     self.solOffY = 80
     self.scaleCoff = 0.05
-    --每一列 每一行
+
+    local myANum = #self.myArrowNum
+    local colId = myANum+#self.myFootNum-1
+    --每一列
+    --我方步兵的列编号
     for k, v in ipairs(self.myFootNum) do 
         --row
         local temp = {}
         table.insert(self.mySoldiers, temp) 
-        --所在行
+        --行
+        local lastOne = nil
         for ck, cv in ipairs(v) do 
             --col
             if cv > 0 then
-                local sp = FightSoldier2.new(self, 0, k-1, ck-1, {level=cv, color=0}, self:getSolId()) 
+                local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
                 self.battleScene:addChild(sp.bg)
                 setPos(sp.bg, {self.leftWidth-(k-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
                 --setPos(sp.bg, {0, 0})
@@ -455,7 +470,9 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
             end
         end
+        colId = colId-1
     end
+
     --列  行
     --最后一列 对齐 敌方士兵 士兵
     --数据是第一排 第二排
@@ -475,13 +492,21 @@ function FightLayer2:initSoldier()
         end
     end
 
+    local colId = #self.myArrowNum+#self.myFootNum
     self.eneSoldiers = {}
     for k, v in ipairs(self.eneFootNum) do
         local temp = {}
         table.insert(self.eneSoldiers, temp)
+        local lastOne = nil
         for ck, cv in ipairs(v) do
             if cv > 0 then
-                local sp = FightSoldier2.new(self, 0, k-1, ck-1, {level=cv, color=1}, self:getSolId()) 
+                local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=cv, color=1}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
                 self.battleScene:addChild(sp.bg)
                 setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
                 sp:setZord()
@@ -496,7 +521,9 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
             end
         end
+        colId = colId+1
     end
+
     self:printSoldier(self.eneSoldiers)
     for k, v in ipairs(self.eneSoldiers) do
         for tk, tv in ipairs(v) do
@@ -531,14 +558,23 @@ function FightLayer2:initSoldier()
     local footWidth = #self.myFootNum
     --leftWidth 士兵所在的列 和 行 全局的 
     --先考虑 步兵 炮兵 弓箭 最后骑兵
+    local colId = #self.myArrowNum-1
     for k, v in ipairs(self.myArrowNum) do 
         --row
         local temp = {}
         table.insert(self.myArrowSoldiers, temp) 
+        local lastOne = nil
         for ck, cv in ipairs(v) do 
             --col
             if cv > 0 then
-                local sp = FightSoldier2.new(self, 1, k-1+footWidth, ck-1, {level=cv, color=0}, self:getSolId()) 
+                --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
+                local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
                 self.battleScene:addChild(sp.bg)
                 setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
                 --setPos(sp.bg, {0, 0})
@@ -553,6 +589,7 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
             end
         end
+        colId = colId-1
     end
 
     for k, v in ipairs(self.myArrowSoldiers) do
@@ -581,12 +618,20 @@ function FightLayer2:initSoldier()
 
     local footWidth = #self.eneFootNum
     --更新状态 检测 myArrow eneArrowSoldiers
+    local colId = #self.myArrowNum+#self.myFootNum+#self.eneFootNum
     for k, v in ipairs(self.eneArrowNum) do
         local temp = {}
         table.insert(self.eneArrowSoldiers, temp)
+        local lastOne = nil
         for ck, cv in ipairs(v) do
             if cv > 0 then
-                local sp = FightSoldier2.new(self, 1, k-1+footWidth, ck-1, {level=cv, color=1}, self:getSolId()) 
+                local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=cv, color=1}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
                 self.battleScene:addChild(sp.bg)
                 setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1+footWidth)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
                 sp:setZord()
@@ -600,6 +645,7 @@ function FightLayer2:initSoldier()
                 table.insert(temp, sp)
             end
         end
+        colId = colId+1
     end
 
     for k, v in ipairs(self.eneArrowSoldiers) do
