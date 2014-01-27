@@ -28,7 +28,7 @@ function ui.newEditBox(params)
 
     if editbox then
         editbox:registerScriptEditBoxHandler(function(event, object)
-            print("editBox", event)
+            --print("editBox", event)
             if listenerType == "table" or listenerType == "userdata" then
                 if event == "began" then
                     listener:onEditBoxBegan(object)
@@ -111,7 +111,7 @@ function ui.newTTFLabel(params)
     end
     local edgeWidth = params.edgeWidth
     local shadowColor = params.shadowColor or {0, 0, 0}
-    print("shadow Color is", simple.encode(shadowColor))
+    --print("shadow Color is", simple.encode(shadowColor))
 
     local label
     --android ios 平台字体处理方法不同
@@ -142,7 +142,7 @@ function ui.newTTFLabel(params)
             --enableShadow(lab, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
             label:addChild(lab, -1)
             setAnchor(setPos(lab, {1, -2}), {0, 0})
-            print("set shadow Color")
+            ----print("set shadow Color")
             shadowWord = lab
         else
             if ANDROID == true then 
@@ -152,7 +152,7 @@ function ui.newTTFLabel(params)
                 --不支持
                 --enableShadow(label, CCSizeMake(1, 2), 1, 1, update)
             end
-            print("set normal shadow color")
+            ----print("set normal shadow color")
         end
     end
 

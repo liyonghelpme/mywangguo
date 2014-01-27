@@ -1688,7 +1688,7 @@ function calAttr(id, level, equip)
         local sdata = Logic.allSkill[skill]
         temp.attack = temp.attack+sdata.attack
         temp.defense = temp.defense+sdata.defense
-        print("skill attr")
+        --print("skill attr")
     end
     return temp
 end
