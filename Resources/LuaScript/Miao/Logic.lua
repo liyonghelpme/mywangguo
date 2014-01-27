@@ -576,7 +576,7 @@ function getSkillIcon(sid)
 end
 
 --当前可以启用的村民
-Logic.ownPeople = {20, 21, 22, 23}
+Logic.ownPeople = {11, 20, 21, 22, 23}
 --
 Logic.ownTech = {
 sword=0,

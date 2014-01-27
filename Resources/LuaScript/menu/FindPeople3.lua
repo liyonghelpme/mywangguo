@@ -1,3 +1,5 @@
+require "menu.SureGold"
+
 FindPeople3 = class()
 function FindPeople3:ctor()
     self.num = 1
@@ -128,11 +130,18 @@ function FindPeople3:onPeople()
     if not checkCost(cost) then
         addBanner("钱不够!")
     else
-        doCost(cost)
-        global.director:popView()
-        global.director.curScene.page:addPeople(pid)
-        --移除掉这个村民
-        table.remove(Logic.ownPeople, self.num)
+        local function callPeople()
+            doCost(cost)
+            global.director:popView()
+            global.director.curScene.page:addPeople(pid)
+            --移除掉这个村民
+            table.remove(Logic.ownPeople, self.num)
+        end
+        if pdata.gold > 0 then
+            global.director:pushView(SureGold.new(callPeople, self), nil)
+        else
+            callPeople()
+        end
     end
 end
 

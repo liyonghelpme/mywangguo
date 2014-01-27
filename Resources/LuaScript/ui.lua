@@ -106,6 +106,9 @@ function ui.newTTFLabel(params)
     local textValign = params.valign or ui.TEXT_VALIGN_CENTER
     local x, y       = params.x, params.y
     local dimensions = params.dimensions
+    if type(dimensions) == 'table' then
+        dimensions = CCSizeMake(dimensions[1], dimensions[2])
+    end
     local edgeWidth = params.edgeWidth
     local shadowColor = params.shadowColor or {0, 0, 0}
     print("shadow Color is", simple.encode(shadowColor))
