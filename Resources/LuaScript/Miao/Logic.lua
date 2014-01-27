@@ -55,6 +55,8 @@ Logic.allOwnBuild = {
     {2, 24}, {2, 25}, {2, 26}, {2, 27}, {2, 30}, {2, 31},
 
 }
+
+--初始化装饰物 到 商店中
 function getBuyableBuild()
     local temp = {}
     for k, v in ipairs(Logic.allOwnBuild) do
@@ -586,3 +588,5 @@ bow=0,
 armour=0,
 ninja=0,
 }
+--每个城市奖励的物品
+Logic.cityGoods = {}
