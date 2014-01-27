@@ -642,6 +642,7 @@ function Cat2:handleAction(diff)
                 print("TestCat2 begin work", self.moveCutTime)
                 if self.moveCutTime >= 1 then
                     self.moveYet = nil
+                    --1s 一次动画
                     local ani = createAnimation("cat_cut", "cat_cut_%d.png", 0, 14, 1, 1, true)
                     self.people:setMoveAction("cat_cut")
                     local sca = getScaleY(self.people.changeDirNode)
@@ -649,6 +650,7 @@ function Cat2:handleAction(diff)
 
                     self.people.state = PEOPLE_STATE.IN_WORK
                     self.people.workTime = 0
+                    self.woodTime = 0
                 end
             end
             needResetState = false
@@ -686,7 +688,7 @@ function Cat2:handleAction(diff)
         self.people:resetState()
     end
 end
-function Cat2:workNow()
+function Cat2:workNow(diff)
     local le = self.people:getMyLaborEffect()
     local totalTime = 10
     local productNum = 5
@@ -705,10 +707,17 @@ function Cat2:workNow()
     --print("totalTime, productNum healthCost", totalTime, productNum, healthCost)
     --计算出1个 的生产时间 和 消耗的 生命值
     --self.people.myHouse.productNum 花费时间减少  消耗体力不变
-    
+    --伐木 
     if self.people.actionContext == CAT_ACTION.LOGGING then
         local rate = totalTime/(self.people.lumber.productNum/20)/productNum
         local cost = healthCost/productNum
+        --做伐木动画
+        self.woodTime = self.woodTime+diff
+        if self.woodTime >= 1 then
+            self.woodTime = self.woodTime-1
+            self.people.realTarget.funcBuild:showAnimation()
+        end
+
         if self.people.workTime > rate then
             self.people.workTime = self.people.workTime - rate
             self.people.health = self.people.health -cost
@@ -724,16 +733,8 @@ function Cat2:workNow()
                 
                 --setPos(self.bg, self.oldMyP)
                 print("finish Logging reset Pos", self.people.wood)
-                --[[
-                self.moveCutTime = 0
-                self.people.actionContext = CAT_ACTION.WOOD_CENTER
-                self.people.state = PEOPLE_STATE.WAIT_ANI
-                self.people.bg:runAction(moveto(0.5, self.oldMyP[1], self.oldMyP[2]))
-                --]]
 
                 setPos(self.people.bg, self.oldMyP)
-                --local sz = self.changeDirNode:getContentSize()
-                --setAnchor(self.changeDirNode, {Logic.people[3].ax/sz.width, (sz.height-Logic.people[3].ay)/sz.height})
                 return
             end
         end

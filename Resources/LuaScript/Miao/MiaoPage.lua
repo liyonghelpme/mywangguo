@@ -16,7 +16,9 @@ function MiaoPage:ctor(s)
     local maxWH = math.max(self.width, self.height)
     --矩形地图MapPos 对照
     MapWidth = SIZEX*(maxWH*2)
-    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*2+20 
+    --3*103
+    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*4+50
+    --+180 
 
     setContentSize(self.bg, {MapWidth, MapHeight})
     setAnchor(self.bg, {0, 0})

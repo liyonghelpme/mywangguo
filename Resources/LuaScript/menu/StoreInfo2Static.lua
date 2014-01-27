@@ -28,7 +28,7 @@ function StoreInfo2:initHouse()
         local uname = '--'
         local level = '--'
         if self.build.owner ~= nil then
-            uname = self.build.owner.name
+            uname = self.build.owner.data.name
             level = self.build.owner.level+1
         end
         self.goodName:setString(str(uname))

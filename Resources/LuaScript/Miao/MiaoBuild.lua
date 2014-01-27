@@ -251,6 +251,10 @@ function MiaoBuild:ctor(m, data)
     setPos(self.possibleLabel, {0, 130})
     addChild(allLabel, self.possibleLabel)
 
+    self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={255, 0, 0}})
+    setPos(self.zordLabel, {0, 140})
+    addChild(self.heightNode, self.zordLabel)
+
     self.funcBuild:initWork()
     --看一下 CCNode 0 0 位置 和 一半位置
     --
@@ -392,6 +396,20 @@ function MiaoBuild:beginBuild()
     --self.inBuild = true
     self.firstMove = true
 end
+
+--缓存affine 坐标
+function MiaoBuild:getAxAyHeight()
+    if self.ax == nil then
+        local pos = getPos(self.bg)
+        local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+        --print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+        local hei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, ax, ay)
+        self.ax, self.ay, self.height = ax, ay, hei
+        --return ax, ay, height
+    end
+    return self.ax, self.ay, self.height
+end
+
 function MiaoBuild:touchesMoved(touches)
     local oldPos = self.lastPos
     self.lastPos = convertMultiToArr(touches)
@@ -407,6 +425,12 @@ function MiaoBuild:touchesMoved(touches)
             self.funcBuild:beginMove()
             self.firstMove = false
         end
+
+        if not self.clearYet then
+            self.clearYet = true
+            self.funcBuild:clearBuildEffect()
+        end
+
         local offY = (self.sx+self.sy)*SIZEY/2
         --计算点击点 到 屏幕空间的位置
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
@@ -433,6 +457,8 @@ function MiaoBuild:touchesMoved(touches)
                 end
                 self:setPos(newPos)
                 self:setMenuWord()
+                --移动建筑物 调整缓存属性
+                self.ax, self.ay, self.height = ax, ay, height
             end
         end
     end
@@ -441,6 +467,7 @@ end
 
 function MiaoBuild:setColor(c)
     if self.funcBuild.selGrid ~= nil then
+        print("set normal color")
         self.funcBuild:setBottomColor(c)
         self.funcBuild:setColor()
     end
@@ -481,12 +508,6 @@ function MiaoBuild:setColPos()
         self:setColor(0)
         return
     end
-    local sd = self.map.scene.slopeData[gk]
-    if sd ~= nil then
-        self.colNow = 1
-        self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
-        return
-    end
 
     local layer = self.map.scene.layerName.grass
     local gid = layer.data[gk]
@@ -508,6 +529,17 @@ function MiaoBuild:setColPos()
         end
     end
 
+    if self.colNow == 0 then
+        local sd = self.map.scene.slopeData[gk]
+        if sd ~= nil then
+            print("collision with slope")
+            self.colNow = 1
+            self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
+            --不能建造
+            self:setColor(0)
+            return
+        end
+    end
 end
 function MiaoBuild:touchesEnded(touches)
     --没有建造状态
@@ -518,7 +550,7 @@ function MiaoBuild:touchesEnded(touches)
                 --开始移动
                 print("show Info clearEffect")
                 self.funcBuild:clearEffect()
-                self:clearMyEffect()
+                --self:clearMyEffect()
             end
         end
     end
@@ -586,6 +618,7 @@ function MiaoBuild:setPos(p)
     if parent == nil then
         return
     end
+    self.zordLabel:setString(zord)
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
 end
@@ -909,7 +942,11 @@ function MiaoBuild:showNoGoods()
             self.infoBack = nil
         end
         self.infoBack:runAction(sequence({delaytime(1), callfunc(nil, rinfo), delaytime(0.2), callfunc(nil, clearR)}))
-        self.heightNode:addChild(sp)
-        setPos(sp, {0, 240})
+        --self.heightNode:addChild(sp)
+        local p = getPos(self.bg)
+        local hp = getPos(self.heightNode)
+        self.map.menuLayer:addChild(self.infoBack)
+        setPos(sp, {hp[1]+p[1], hp[2]+p[2]+240})
+        --setPos(sp, {0, 240})
     end
 end

@@ -92,53 +92,57 @@ function FightMenu:showCityInfo(city)
         self.gongw:setString(city.cityData[2])
         self.maw:setString(city.cityData[3])
         self.qiw:setString(city.cityData[4])
-        local cg = Logic.cityGoods[city.realId].goods
-        print("city goods", simple.encode(cg))
-        local gid = 1
-        for k, v in ipairs(cg.equip) do
-            if gid >= 3 then
-                break
+
+        local cg = Logic.cityGoods[city.realId]
+        if cg ~= nil then
+            cg = cg.goods
+            print("city goods", simple.encode(cg))
+            local gid = 1
+            for k, v in ipairs(cg.equip) do
+                if gid >= 3 then
+                    break
+                end
+                local edata = Logic.equip[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
             end
-            local edata = Logic.equip[v]
-            self['goods'..gid]:setString(edata.name)
-            setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
-            setScale(self['g'..gid], 1)
-            gid = gid+1
-        end
-        print("gid", gid)
-        for k, v in ipairs(cg.goods) do
-            if gid >= 3 then
-                break
+            print("gid", gid)
+            for k, v in ipairs(cg.goods) do
+                if gid >= 3 then
+                    break
+                end
+                print("goods is what? 148")
+                local edata = GoodsName[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
             end
-            print("goods is what? 148")
-            local edata = GoodsName[v]
-            self['goods'..gid]:setString(edata.name)
-            setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
-            setScale(self['g'..gid], 1)
-            gid = gid+1
-        end
-        print("gid", gid)
-        for k, v in ipairs(cg.build) do
-            if gid >= 3 then
-                break
+            print("gid", gid)
+            for k, v in ipairs(cg.build) do
+                if gid >= 3 then
+                    break
+                end
+                local edata = Logic.buildings[v]
+                self['goods'..gid]:setString(edata.name)
+                setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
+                local sca = getSca(self['g'..gid], {21, 18})
+                setScale(self['g'..gid], sca)
+                gid = gid+1
             end
-            local edata = Logic.buildings[v]
-            self['goods'..gid]:setString(edata.name)
-            setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
-            local sca = getSca(self['g'..gid], {21, 18})
-            setScale(self['g'..gid], sca)
-            gid = gid+1
-        end
-        for i=1, gid-1, 1 do
-            setVisible(self['goods'..i], true)
-            setVisible(self['g'..i], true)
-            setVisible(self['ib'..i], true)
-        end
-        print("gid is what", gid)
-        for i=gid, 2, 1 do
-            setVisible(self['goods'..i], false)
-            setVisible(self['g'..i], false)
-            setVisible(self['ib'..i], false)
+            for i=1, gid-1, 1 do
+                setVisible(self['goods'..i], true)
+                setVisible(self['g'..i], true)
+                setVisible(self['ib'..i], true)
+            end
+            print("gid is what", gid)
+            for i=gid, 2, 1 do
+                setVisible(self['goods'..i], false)
+                setVisible(self['g'..i], false)
+                setVisible(self['ib'..i], false)
+            end
         end
     end
 end

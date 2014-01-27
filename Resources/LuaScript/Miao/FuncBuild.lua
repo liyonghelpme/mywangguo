@@ -27,13 +27,13 @@ function FuncBuild:finishBuild()
 end
 function FuncBuild:beginBuild()
 end
-function FuncBuild:beginMove()
-    --第一次移动没有效果所以不清除
-    --[[
-    if not self.baseBuild.firstMove and self:checkBuildable() then
+function FuncBuild:clearBuildEffect()
+    --第一次移动没有效果所以不清除 没有在建造状态中
+    if self.baseBuild.state == BUILD_STATE.FREE then
         self.baseBuild:clearMyEffect()
     end
-    --]]
+end
+function FuncBuild:beginMove()
 end
 function FuncBuild:finishMove()
     --[[
@@ -45,11 +45,6 @@ end
 
 function FuncBuild:removeSelf()
     --卖出建筑物 不用清理 自己的效果了
-    --[[
-    if self.baseBuild.state == BUILD_STATE.FREE then
-        self.baseBuild:clearMyEffect()
-    end
-    --]]
 end
 
 function FuncBuild:setBuyer(b)
@@ -107,14 +102,30 @@ function FuncBuild:clearMenu()
             self.baseBuild.colNow = 0
             self:finishMove()
             self:doEffect()
-            self.baseBuild:doMyEffect()
+            --移动建筑物 如果清理过状态 则重新计算效果
+            if self.baseBuild.state == BUILD_STATE.FREE then
+                if self.baseBuild.clearYet then
+                    self.baseBuild.clearYet = false
+                    self.baseBuild:doMyEffect()
+                end
+            else
+                self.baseBuild:doMyEffect()
+            end
 
             setPos(self.baseBuild.bg, np)
             self.baseBuild.bg:runAction(sequence({moveto(0.2, self.baseBuild.oldPos[1], self.baseBuild.oldPos[2])}))
         --移动结束 恢复效果
         else
             self:doEffect()
-            self.baseBuild:doMyEffect()
+            --移动建筑物 如果清理过状态 则 重新计算效果
+            if self.baseBuild.state == BUILD_STATE.FREE then
+                if self.baseBuild.clearYet then
+                    self.baseBuild.clearYet = false
+                    self.baseBuild:doMyEffect()
+                end
+            else
+                self.baseBuild:doMyEffect()
+            end
         end
         if #global.director.stack > 0 then
             global.director:popView()
@@ -131,6 +142,9 @@ function FuncBuild:clearMenu()
     end
 end
 function FuncBuild:detailDialog()
+    if self.baseBuild.data.effect > 0 then
+        global.director:pushView(DecorInfo.new(self.baseBuild), 1)
+    end
 end
 function FuncBuild:showInfo()
     --先清理旧的
@@ -162,6 +176,7 @@ function FuncBuild:initBottom()
 end
 function FuncBuild:setBottomColor(c)
     if self.selGrid ~= nil then
+        print("setBottomColor", c)
         if c == 0 then
             setTexture(self.selGrid, "newRedGrid.png")
         else

@@ -35,6 +35,9 @@ function FightPage:ctor()
     self.touchDelegate:setBg(self.bg)
 
     self.debugNode = addNode(self.bg)
+    
+    local vs = getVS()
+    setPos(self.bg, {-1058+vs.width/2, -(2304-1086)+vs.height/2})
 
     self.needUpdate = true
     registerEnterOrExit(self)

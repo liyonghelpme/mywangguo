@@ -29,8 +29,12 @@ function Wood:updateStage(diff)
         end
     end
 end
+
+function Wood:showAnimation()
+    self.baseBuild.changeDirNode:runAction(repeatN(sequence({moveby(0.1, -5, 0), moveby(0.1, 5, 0)}), 1))
+end
+
 function Wood:updateGoods()
-    self.baseBuild.changeDirNode:runAction(repeatN(sequence({moveby(0.1, -5, 0), moveby(0.1, 5, 0)}), 4))
     if self.baseBuild.workNum == 0 then
         self.showState = -1
         self.baseBuild.lifeStage = 0

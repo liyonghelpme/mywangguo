@@ -31,6 +31,7 @@ function NewBuildMenu3:ctor()
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "envTitle.png"), {529, fixY(sz.height, 148)}), {97, 42}), {0.50, 0.50})
+    self.title = sp
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="饮料店", size=26, color={0, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {247, fixY(sz.height, 624)})
     self.name = w
@@ -130,6 +131,8 @@ function NewBuildMenu3:setSelect(s)
     self.selTab = s
     setVisible(self.tabs[self.selTab].attDark, false)
     self.tabs[self.selTab].bg:setZOrder(0)
+    local name = {'envTitle.png', 'laborTitle.png', 'storeTitle.png'}
+    setTexOrDis(self.title, name[s])
     self:setView(s)
 end
 function NewBuildMenu3:enterScene()
@@ -162,13 +165,13 @@ function NewBuildMenu3:updateTab()
             local build = setAnchor(setPos(addChild(panel, CCSprite:create("build"..v.id..".png")), {86, fixY(sz.height, 67)}), {0.50, 0.50})
             local sca = getSca(build, {130, 100})
             setScale(build, sca)
-            local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=18, color={0, 255, 255}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {85, fixY(sz.height, 146)})
+            local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=18, color={0, 255, 255}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {88, fixY(sz.height, 140)})
             panel:setTag(dataNum)
             setContentSize(panel, {sz.width, sz.height})
             dataNum = dataNum+1
 
             if v.countNum == 1 then
-                local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="X"..(getAvaBuildNum(v.id)), font='bound.fnt', size=18, color={0, 255, 255}})), {0, 0.5}), {122, fixY(sz.height, 36)})
+                local w = setPos(setAnchor(addChild(panel, ui.newBMFontLabel({text="X"..(getAvaBuildNum(v.id)), font='bound.fnt', size=18, color={0, 255, 255}})), {0, 0.5}), {122, fixY(sz.height, 36)})
             end
             table.insert(self.data, {sp, build, k})
             if col == 0 then

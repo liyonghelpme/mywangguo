@@ -2,7 +2,7 @@ require "heapq"
 require "Miao.FuncPeople"
 require "Miao.Worker"
 require "Miao.MiaoPath"
-require "Miao.TestCat"
+--require "Miao.TestCat"
 require "Miao.TestCat2"
 require "Miao.Merchant"
 
@@ -91,6 +91,11 @@ function MiaoPeople:ctor(m, data)
 
     self.events = {EVENT_TYPE.PAUSE_GAME, EVENT_TYPE.CONTINUE_GAME}
     registerEnterOrExit(self)
+
+
+    self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={0, 255, 0}})
+    setPos(self.zordLabel, {200, 140})
+    addChild(self.heightNode, self.zordLabel)
 end
 function MiaoPeople:enterScene()
     registerUpdate(self)
@@ -259,7 +264,20 @@ function MiaoPeople:update(diff)
     self:doWork(diff)
     self:doPaused(diff)
     self:doWaitAni(diff)
-    self:setZord()
+    --self:setZord()
+
+    local isQuaOrWoo = false
+    if self.realTarget ~= nil then
+        if (self.realTarget.id == 19 or self.realTarget.id == 12 or self.realTarget.id == 28 or self.realTarget.id == 29) then
+            isQuaOrWoo = true
+        end
+        if not isQuaOrWoo then
+            self:setZord()
+        else
+            self:setHighZord()
+        end
+    end
+
 
     if DEBUG then
         local s = ''
@@ -605,6 +623,18 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
+                    --[[
+                    local isQuaOrWoo = false
+                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
+                        isQuaOrWoo = true
+                    end
+                    if not isQuaOrWoo then
+                        self:setZord()
+                    else
+                        self:setHighZord()
+                    end
+                    --]]
+
                     self:beforeHandle()
                     if self.realTarget.data.kind == 5 then
                         self:handleHome()
@@ -638,12 +668,16 @@ function MiaoPeople:doMove(diff)
                     end
                     self:finishHandle()
                 end
-                self:setZord()
+
             else
                 --商人会在商店门口等待一下 
                 local moved = false
                 local wait = false
                 local deleted = false
+                local isMine = false
+                local isQuaOrWoo = false
+                --检测目标是否移动 以及目标是否是矿坑
+                --检测如果是伐木场之类的 人物要在建筑物上面 
                 if nextPoint == #self.path then
                     moved = self:checkMoved()
                     if moved or self.realTarget.deleted then
@@ -656,18 +690,19 @@ function MiaoPeople:doMove(diff)
                     elseif self.realTarget.data ~= nil and self.realTarget.data.IsStore == 1 and self.realTarget.funcBuild.inMerchant ~= nil then
                          wait = true
                     end
+                    if self.realTarget.id == 28 then
+                        isMine = true
+                    end
+                    --伐木场 和 采矿场 不能遮挡人物
+                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
+                        isQuaOrWoo = true
+                    end
                 end
+
                 if not moved and not wait and not deleted then
                     --当前点是 斜坡 或者 目标点是斜坡 都会降低移动速度
                     local np = self.path[nextPoint]
                     local cp = self.path[self.curPoint]
-                    --[[
-                    local buildCell = self.map.mapGridController.mapDict
-                    local key = getMapKey(np[1], np[2])
-                    local bv = buildCell[key]
-                    --]]
-
-
 
                     --行走在有可能是斜坡的道路上面
                     --setBuildMap --->根据normal 坐标 得到 cxy 坐标 
@@ -689,10 +724,12 @@ function MiaoPeople:doMove(diff)
                     
                     --normal to Affine
                     --normal 是网格的 中心normal坐标么？ YES
+                    
+                    --目标不是矿坑
                     local ax, ay = newNormalToAffine(np[1], np[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                     local nk = newAffKey(self.map.scene.width, ax, ay)
                     local sd = self.map.scene.slopeData[nk]
-                    if sd ~= nil then
+                    if sd ~= nil and not isMine then
                         local height = sd[2]
                         local ons = true
                         if ons then
@@ -705,7 +742,7 @@ function MiaoPeople:doMove(diff)
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
-                            self:setZord()
+                            --self:setZord()
                             --local nnp = self.path[nextPoint+1]
                             --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
                             --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
@@ -714,65 +751,15 @@ function MiaoPeople:doMove(diff)
                         end
                     end
 
-                    --[[
-                    if bv ~= nil then
-                        --计算斜坡的高度
-                        local height
-                        local ons = bv[#bv][1].onSlope 
-                        if ons then
-                            height = bv[#bv][1].height
-                        else
-                        --人走在普通的斜坡上面
-                            ons = bv[#bv][1].picName == 'slope' 
-                            if ons then
-                                height = bv[#bv][1].height
-                            end
-                        end
-
-                        if ons then
-                            goYet = true
-                            local cxy = setBuildMap({1, 1, np[1], np[2]})
-                            self.waitTime = 3
-                            if accMove then
-                                self.waitTime = self.waitTime/2
-                            end
-                            self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
-                            local dx, dy = np[1]-cp[1], np[2]-cp[2]
-                            self:setDir(cxy[1], cxy[2])
-                            self:setZord()
-                            --local nnp = self.path[nextPoint+1]
-                            --根据下一个点的高度计算偏移位置 当前点 和 下下点 高度的平均值
-                            --斜坡自身的高度 斜坡在初始化的时候自动初始化了高度值
-                            self:moveSlope(dx, dy, 0, height)
-                            self.curPoint = self.curPoint+1
-                        end
-                    end
-                    --]]
-                    --[[ 
-                    local key = getMapKey(cp[1], cp[2])
-                    local cv = buildCell[key]
-                    --]]
                     --关键是newNormalToAffine 代码正确
                     local ax, ay = newNormalToAffine(cp[1], cp[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
                     local nk = newAffKey(self.map.scene.width, ax, ay)
                     local sd = self.map.scene.slopeData[nk]
 
                     --当前点在 斜坡上 下一个点的高度值
-                    if not goYet and sd ~= nil then
+                    if not goYet and sd ~= nil and not isMine then
                         local height = sd[2]
                         local ons = true
-                        --[[
-                        local ons = cv[#cv][1].onSlope
-                        if ons then
-                            height = cv[#cv-1][1].height
-                        else
-                            ons = cv[#cv][1].picName == 'slope'
-                            if ons then
-                                height = cv[#cv][1].height
-                            end
-                        end
-                        --]]
-
                         if ons then
                             goYet = true
                             local cxy = setBuildMap({1, 1, np[1], np[2]})
@@ -783,12 +770,13 @@ function MiaoPeople:doMove(diff)
                             self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                             local dx, dy = np[1]-cp[1], np[2]-cp[2]
                             self:setDir(cxy[1], cxy[2])
-                            self:setZord()
+                            --self:setZord()
                             self:moveSlope(dx, dy, 1, np)
                             self.curPoint = self.curPoint+1
                         end
                     end
 
+                    --普通行走
                     if not goYet then
                         local cxy = setBuildMap({1, 1, np[1], np[2]})
                         self.waitTime = 1.5
@@ -797,7 +785,17 @@ function MiaoPeople:doMove(diff)
                         end
                         self.bg:runAction(moveto(self.waitTime, cxy[1], cxy[2]))    
                         self:setDir(cxy[1], cxy[2])
-                        self:setZord()
+                        --比建筑物略高的zord
+                        --[[
+                        if isQuaOrWoo then
+                            local p = getPos(self.bg)
+                            local zOrd = MAX_BUILD_ZORD-p[2]+4
+                            self.bg:setZOrder(zOrd)
+                        else
+                            self:setZord()
+                        end
+                        --]]
+
                         self.curPoint = self.curPoint+1
                     end
                     --是否在运送货物
@@ -835,7 +833,7 @@ function MiaoPeople:doWork(diff)
             elseif self.realTarget.id == 2 then
                 self:workInFarm()
             else
-                self.funcPeople:workNow()
+                self.funcPeople:workNow(diff)
             end
         end
     elseif self.state == PEOPLE_STATE.IN_HOME then

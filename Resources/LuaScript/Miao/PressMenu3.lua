@@ -48,7 +48,7 @@ function PressMenu3:ctor()
                 elseif rd[1] == 1 then
                     edata = GoodsName[rd[2]]
                 end
-                local info = ui.newButton({image="info.png", text=edata.name..diff..'%', conSize={181, 60}, size=24, color={0, 0, 0}, font='f2'})
+                local info = ui.newButton({image="info.png", text=edata.name..diff..'%', conSize={181, 60}, size=24, color={0, 0, 0}, font='f1'})
                 setPos(info.bg, {-190, 0})
                 but.bg:addChild(info.bg)
             end

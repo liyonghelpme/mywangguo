@@ -57,6 +57,8 @@ function MiaoPath:checkNeibor(x, y)
         isStart = true
     end
     local curKey = getMapKey(x, y)
+    local curRoad = self.cells[curKey].road
+
     --TrainZone 100 100 2400 400
     local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
@@ -78,8 +80,9 @@ function MiaoPath:checkNeibor(x, y)
             local nS
 
             local hasRoad = false
+            local bb
             if buildCell[key] ~= nil then
-                local bb = buildCell[key][#buildCell[key]][1]
+                bb = buildCell[key][#buildCell[key]][1]
                 --道路或者 桥梁 建造好的建筑物
                 if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
                     hasRoad = true
@@ -88,11 +91,33 @@ function MiaoPath:checkNeibor(x, y)
                 elseif not isStart and  bb.picName == 'build' and bb.data.kind == 0 then
                     --是一个可以到达的 去工作的建筑物
                     --建筑物不能贯通周围邻居
-                    local oldDist = self.allBuilding[bb] or 999999
-                    self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
-                    table.insert(bb.belong, self.target.name)
-                    if #bb.belong > 3 then
-                        table.remove(bb.belong, 1)
+                    --矿坑 检查道路是在斜坡上面 还是下面
+                    local mineOk = true
+                    if bb.id == 28 then
+                        local ax, ay, height = bb:getAxAyHeight() 
+                        print("curRoad is ", curRoad)
+                        if curRoad ~= nil then
+                            local rax, ray, rhei = curRoad:getAxAyHeight()
+                            print("my height road height", ax, ay, height, rax, ray, rhei)
+                            --矿点和道路不在同一高度 
+                            if height ~= rhei then
+                                mineOk = false
+                                print("mine not ok")
+                            end
+                        --矿点没有道路？
+                        else
+                            mineOk = false
+                        end
+                    end
+                    if mineOk then
+                        local oldDist = self.allBuilding[bb] or 999999
+                        self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
+                        table.insert(bb.belong, self.target.name)
+                        if #bb.belong > 3 then
+                            table.remove(bb.belong, 1)
+                        end
+                    else
+                        print("mine not belong")
                     end
                     --print("add Building ", bb.id, bb.picName)
                 else
@@ -106,6 +131,8 @@ function MiaoPath:checkNeibor(x, y)
             if self.cells[key] == nil and staticObstacle[key] == nil  and hasRoad then
                 self.cells[key] = {}
                 self.cells[key].parent = curKey
+                --该点对应的road 对象
+                self.cells[key].road = bb
                 self:calcG(nv[1], nv[2])
                 self:calcH(nv[1], nv[2])
                 self:calcF(nv[1], nv[2])

@@ -66,7 +66,11 @@ function StoreMenu3:setSel(s)
     end
 end
 function StoreMenu3:getAllAtt(edata)
-    self.desWord:setString(edata.name.." "..edata.attribute)
+    if edata.attribute ~= nil then
+        self.desWord:setString(edata.name.." "..edata.attribute)
+    else
+        self.desWord:setString(edata.name.." "..edata.des)
+    end
 end
 
 function StoreMenu3:updateTab()

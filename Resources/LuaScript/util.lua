@@ -934,6 +934,11 @@ function replaceStr(s, rep)
     return s
 end
 
+function setBox(n, box)
+    local sca = getSca(n, box)
+    setScale(n, sca)
+    return n
+end
 function getSca(n, box)
     local nSize = n:getContentSize()
     local sca
@@ -1834,6 +1839,7 @@ function initPlist()
     sf:addSpriteFramesWithFile("skillOne.plist")
     sf:addSpriteFramesWithFile("catOne.plist")
     sf:addSpriteFramesWithFile("goodsOne.plist")
+    sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
 end

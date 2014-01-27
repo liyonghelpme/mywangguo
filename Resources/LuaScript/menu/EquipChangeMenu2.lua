@@ -82,12 +82,19 @@ function EquipChangeMenu2:updateTab()
             local back = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {306, fixY(sz.height, 26)}), {479, 52}), {0.50, 0.50}), 255)
             local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=24, color={240,196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {98, fixY(sz.height, 24)})
             local w2
+        
+            local hb = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "headBoard.png"), {28, fixY(sz.height, 26)}), {57, 52}), {0.50, 0.50}), 255)
+            local sp = setOpacity(setAnchor(setSize(setPos(addSprite(hb, "equip"..v.id..".png"), {28, fixY(sz.height, 26)}), {41, 36}), {0.50, 0.50}), 255)
+            local eqw = setPos(setAnchor(addChild(hb, ui.newBMFontLabel({text='装', size=188, color={206, 78, 0}, font="bound.fnt", shadowColor={255, 255, 255}})), {0.50, 0.50}), {44, fixY(52, 41)})
+            setVisible(eqw, true)
             if self.selNum == 1 then
+                print("eqw")
                 if self.people.weapon == v.id then
                     setColor(back, {255, 255, 0})
                     self.oldEquipId = v.id
                     self.oldEquip = back
                     --print("self.oldEquip", self.oldEquip)
+                    setVisible(eqw, true)
                 end
                 w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.attack, size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {279, fixY(sz.height, 24)})
             elseif self.selNum == 2  then
@@ -95,6 +102,7 @@ function EquipChangeMenu2:updateTab()
                     setColor(back, {255, 255, 0})
                     self.oldEquipId = v.id
                     self.oldEquip = back
+                    setVisible(eqw, true)
                 end
                 local aname, anum = self:getFirstAtt(v)
                 w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=aname..'+'..anum, size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {279, fixY(sz.height, 24)})
@@ -103,6 +111,7 @@ function EquipChangeMenu2:updateTab()
                     setColor(back, {255, 255, 0})
                     self.oldEquipId = v.id
                     self.oldEquip = back
+                    setVisible(eqw, true)
                 end
                 w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.defense, size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {279, fixY(sz.height, 24)})
 
@@ -111,12 +120,11 @@ function EquipChangeMenu2:updateTab()
                     setColor(back, {255, 255, 0})
                     self.oldEquipId = v.id
                     self.oldEquip = back
+                    setVisible(eqw, true)
                 end
                 w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text='', size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {279, fixY(sz.height, 24)})
             end
             local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=(Logic.holdNum[v.id] or 0).."个", size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {1.00, 0.50}), {528, fixY(sz.height, 24)})
-            local sp = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "headBoard.png"), {28, fixY(sz.height, 26)}), {57, 52}), {0.50, 0.50}), 255)
-            local sp = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "equip"..v.id..".png"), {28, fixY(sz.height, 25)}), {41, 36}), {0.50, 0.50}), 255)
             panel:setTag(k)
             setContentSize(panel, {sz.width, sz.height})
 
@@ -305,13 +313,13 @@ function EquipChangeMenu2:touchEnded(x, y)
                     changeEquip(eid, 1)
                     self.people:putEquip(eid)
                     self:refreshData()
-                    addBanner(self.people.name.."卸下装备"..edata.name)
+                    addBanner(self.people.data.name.."卸下装备"..edata.name)
                     self.oldEquipId = nil
                     self.oldEquip = nil
                 elseif Logic.holdNum[eid] ~= nil and Logic.holdNum[eid] > 0  then
                     changeEquip(eid, -1)
                     self.people:setEquip(eid)
-                    addBanner(self.people.name.."装备"..edata.name..'成功')
+                    addBanner(self.people.data.name.."装备"..edata.name..'成功')
                     self:refreshData()
                 else
                     global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
@@ -334,4 +342,8 @@ function EquipChangeMenu2:touchEnded(x, y)
     oldPos[2] = math.max(0, math.min(self.minPos, oldPos[2]))
     self.flowNode:setPosition(ccp(oldPos[1], oldPos[2]+self.HEIGHT))
     print("flowHeight ", self.flowHeight, self.minPos, self.HEIGHT, oldPos[2])
+end
+
+function EquipChangeMenu2:refreshData()
+    self:setView()
 end

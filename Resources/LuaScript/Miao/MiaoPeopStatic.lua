@@ -2,6 +2,16 @@ function MiaoPeople:setZord()
     local p = getPos(self.bg)
     local zOrd = MAX_BUILD_ZORD-p[2]-1
     self.bg:setZOrder(zOrd)
+    self.zordLabel:setString(zOrd)
+    print("setNormalZord", self.name, zOrd)
+end
+function MiaoPeople:setHighZord()
+    print("setHighZord", simple.encode(getPos(self.realTarget.bg)), simple.encode(getPos(self.bg)))
+    local p = getPos(self.bg)
+    local zOrd = MAX_BUILD_ZORD-p[2]+2
+    self.bg:setZOrder(zOrd)
+    self.zordLabel:setString(zOrd)
+    print("setHighZord", self.name, zOrd)
 end
 
 function MiaoPeople:stopMoveAction()

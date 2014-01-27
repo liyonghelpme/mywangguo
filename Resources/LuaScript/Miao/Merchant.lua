@@ -1,3 +1,4 @@
+--PublicMerchant = nil
 
 Merchant = class(FuncPeople)
 function Merchant:checkWork(k)
@@ -86,6 +87,7 @@ function Merchant:findTarget()
             self.people.miaoPath:init(mx, my)
             table.insert(self.people.stateStack, self.people.state)
             self.people.state = PEOPLE_STATE.FIND_NEAR_BUILDING
+            --PublicMerchant = self.people 
         else
             allBuild = self.people.miaoPath.allBuilding
             for k, v in pairs(allBuild) do

@@ -187,7 +187,7 @@ end
 --当和斜坡冲突的时候变换路块类型
 function Road:whenColNow()
     local setYet = false
-    print("when col now", self.baseBuild.colNow)
+    print("when col now", self.baseBuild.colNow, self.baseBuild.otherBuild)
     if self.baseBuild.colNow == 1 then
         if self.baseBuild.otherBuild ~= nil then
             if self.baseBuild.otherBuild.picName == 'slope' then
@@ -209,6 +209,7 @@ end
 
 --斜坡上面 可以建造道路
 function Road:setColor()
+    print("road color set now", self.baseBuild.colNow, self.baseBuild.otherBuild)
     if self.baseBuild.colNow == 1 then
         if self.baseBuild.otherBuild ~= nil then
             local dir = self.baseBuild.otherBuild.dir
