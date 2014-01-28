@@ -1,3 +1,9 @@
+function MiaoPeople:getFastZord()
+    local p = getPos(self.bg)
+    local zOrd = MAX_BUILD_ZORD-p[2]
+    return zOrd
+end
+
 function MiaoPeople:setZord()
     local p = getPos(self.bg)
     local zOrd = MAX_BUILD_ZORD-p[2]-1
@@ -19,6 +25,14 @@ function MiaoPeople:setHighZord()
         print("setHighZord", self.name, zOrd)
     end
 end
+
+function MiaoPeople:setSuperHighZord()
+    local p = getPos(self.bg)
+    local zOrd = MAX_BUILD_ZORD-p[2]+100
+    self.bg:setZOrder(zOrd)
+    print("setSuperHighZord", zOrd)
+end
+
 
 function MiaoPeople:stopMoveAction()
     if self.moveAction ~= nil then

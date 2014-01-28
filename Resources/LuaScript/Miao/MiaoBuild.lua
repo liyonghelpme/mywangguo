@@ -693,6 +693,7 @@ function MiaoBuild:setPos(p)
 
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
+    self.zord = zord
 end
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
