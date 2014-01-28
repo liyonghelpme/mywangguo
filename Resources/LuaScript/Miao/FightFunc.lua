@@ -33,3 +33,6 @@ function FightFunc:finishAttack(diff)
 end
 function FightFunc:resetPos()
 end
+function FightFunc:doWaitArrow()
+end
+

@@ -321,6 +321,7 @@ function FightLayer2:doFree(diff)
         self.state = FIGHT_STATE.MOVE
         self.passTime = 0
         self.curCol = 1
+
         self.moveSpeed = 500
         --使用ease 函数调整move 状态
         local vs = getVS()

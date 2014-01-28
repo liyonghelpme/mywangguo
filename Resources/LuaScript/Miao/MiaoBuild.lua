@@ -485,14 +485,87 @@ function MiaoBuild:calAff()
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     return ax, ay
 end
+
+
+--伐木场和 采矿场需要判定多个网格不冲突
+function MiaoBuild:checkRiverOrSlopeCol()
+    local pos = getPos(self.bg)
+    local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
+    local allCoord = {}
+    --2 * 1 
+    --normalMap 中的 size  sx sy 刚好和affine 坐标系中的 size 相反
+    for i = 0, self.sx-1, 1 do
+        for j=0, self.sy-1, 1 do
+            table.insert(allCoord, {ax-j, ay-i})
+        end
+    end
+    print("checkRiverOrSlopeCol", simple.encode(allCoord))
+
+    --超出边界
+    for k, v in ipairs(allCoord) do
+        if not self.static and (v[1] < 0 or v[2] < 0 or v[1] >= self.map.scene.width or v[2] >= self.map.scene.height or v[1] >= self.map.scene.width-4) then
+            --print("out of range")
+            self.colNow = 1
+            self:setColor(0)
+            return true
+        end
+    end
+    --河流
+    local layer = self.map.scene.layerName.water
+    for k, v in ipairs(allCoord) do
+        local gk = v[2]*self.map.scene.width+v[1]+1
+        local gid = layer.data[gk]
+        if gid ~= 0 then
+            self.colNow = 1
+            self.otherBuild = nil
+            self:setColor(0)
+            return true
+        end
+    end
+
+    for k, v in ipairs(allCoord) do
+        local gk = v[2]*self.map.scene.width+v[1]+1
+        local sd = self.map.scene.slopeData[gk]
+        if sd ~= nil then
+            print("collision with slope")
+            self.colNow = 1
+            self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
+            --不能建造
+            self:setColor(0)
+            return true
+        end
+    end
+
+    return false
+end
+
+
+
 function MiaoBuild:setColPos()
     self.colNow = 1
     self.otherBuild = nil
     self:setColor(0)
 
+    local other = self.map:checkCollision(self)
+    print("checkCollision result", other)
+    if other ~= nil then
+        self.colNow = 1
+        self.otherBuild = other
+        self:setColor(0)
+    else
+        self.colNow = 0
+        self:setColor(1)
+    end
+
+    if self.colNow == 0 then
+        print("no building col check river")
+        local col = self:checkRiverOrSlopeCol()
+    end
+    --[[
     local pos = getPos(self.bg)
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
     
+    --综合考虑建筑物所有的网格
     if not self.static and (ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= self.map.scene.width-4) then
         print("out of range")
         self.colNow = 1
@@ -508,27 +581,19 @@ function MiaoBuild:setColPos()
         self:setColor(0)
         return
     end
-
     local layer = self.map.scene.layerName.grass
     local gid = layer.data[gk]
     print("slop1 gid type ax, ay ", ax, ay, gid)
+    local name = tidToTile(gid, self.map.scene.normal, self.map.scene.water)
+    --]]
+
     --local name = self.map.scene.tileName[gid]
     --基本上全部是草地
-    local name = tidToTile(gid, self.map.scene.normal, self.map.scene.water)
     --草地才检测 是否可以建造建筑物
-    if name == 'tile0.png' then
-        local other = self.map:checkCollision(self)
-        print("checkCollision result", other)
-        if other ~= nil then
-            self.colNow = 1
-            self.otherBuild = other
-            self:setColor(0)
-        else
-            self.colNow = 0
-            self:setColor(1)
-        end
-    end
-
+    --if name == 'tile0.png' then
+    --end
+    --没有和建筑物冲突 接着检查是否和 斜坡冲突
+    --[[
     if self.colNow == 0 then
         local sd = self.map.scene.slopeData[gk]
         if sd ~= nil then
@@ -540,7 +605,9 @@ function MiaoBuild:setColPos()
             return
         end
     end
+    --]]
 end
+
 function MiaoBuild:touchesEnded(touches)
     --没有建造状态
     if self.inSelf then

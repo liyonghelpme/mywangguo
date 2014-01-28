@@ -17,13 +17,8 @@ function WoodStore:initBottom()
     end
 end
 function WoodStore:initView()
-    --local bd = Logic.buildings[self.baseBuild.id]
-    --local sz = self.baseBuild.changeDirNode:getContentSize()
-    --setPos(setAnchor(self.baseBuild.changeDirNode, {bd.ax/sz.width, (sz.height-bd.ay)/sz.height}), {0, SIZEY})
-    --local bd = Logic.buildings[self.baseBuild.id]
     local sz = self.baseBuild.changeDirNode:getContentSize()
     setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0, SIZEY})
-    --self.tool = setSize(setPos(addSprite(self.baseBuild.changeDirNode, "equip70.png"), {93, fixY(130, 75)}), {40, 40})
     self.tool = addNode(self.baseBuild.changeDirNode)
 end
 
@@ -58,20 +53,6 @@ function WoodStore:doSwitch()
     end
 end
 function WoodStore:updateState()
-    --[[
-    if self.stonePic ~= nil then
-        removeSelf(self.stonePic)
-    end
-    self.stonePic = CCNode:create()
-    self.baseBuild.bg:addChild(self.stonePic)
-    local sn = math.ceil(self.baseBuild.stone/5)
-    local initX = -20
-    for i=1, sn, 1 do
-        local sp = CCSprite:create("herb109.png")
-        self.stonePic:addChild(sp)
-        setPos(sp, {initX+(i-1)*40, 30})
-    end
-    --]]
 end
 
 function WoodStore:updateGoods()

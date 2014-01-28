@@ -144,6 +144,8 @@ end
 function FuncBuild:detailDialog()
     if self.baseBuild.data.effect > 0 then
         global.director:pushView(DecorInfo.new(self.baseBuild), 1)
+    elseif self.baseBuild.id == 28 or self.baseBuild.id == 29 then
+        global.director:pushView(DecorInfo.new(self.baseBuild), 1)
     end
 end
 function FuncBuild:showInfo()

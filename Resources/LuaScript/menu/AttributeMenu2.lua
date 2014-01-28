@@ -280,10 +280,16 @@ function AttributeMenu2:setSel(s)
             setColor(word[2], {40, 172, 255})
             setColor(word[3], {206, 78, 0})
             setColor(word[4], {206, 78, 0})
-            local fp = Logic.farmPeople[self.selPanel].data.skill
-            print("skill Num is", skill)
-            --print(simple.encode(Logic.skill))
-            self.attWord:setString(Logic.skill[fp].attribute)
+            
+            local pdata = Logic.farmPeople[self.selPanel]
+            local sid = getPeopleSkill(pdata.id, pdata.level)
+            if sid == 0 then
+                self.attWord:setString('')
+            else
+                local sdata = Logic.skill[sid]
+                self.attWord:setString(sdata.attribute)
+            end
+
         end
     --end
 end

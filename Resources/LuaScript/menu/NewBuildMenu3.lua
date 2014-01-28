@@ -35,9 +35,9 @@ function NewBuildMenu3:ctor()
 
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="饮料店", size=26, color={0, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {247, fixY(sz.height, 624)})
     self.name = w
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=26, color={0, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {381, fixY(sz.height, 625)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="10000", size=26, color={0, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {411, fixY(sz.height, 625)})
     self.price = w
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "silverIcon.png"), {354, fixY(sz.height, 627)}), {31, 32}), {0.50, 0.50})
+    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "silverIcon.png"), {384, fixY(sz.height, 627)}), {31, 32}), {0.50, 0.50})
     self.icon = sp
 
     local but = ui.newButton({image="atttab.png", text="", font="f1", size=18, delegate=self, needScale=false, touchBegan=self.onTab, param=3, shadowColor={0, 0, 0}, color={255, 255, 255}})

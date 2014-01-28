@@ -1,6 +1,6 @@
 require "Miao.MiaoPeople"
 require "model.MapGridController"
-require "Miao.TestCat"
+--require "Miao.TestCat"
 MiaoBuildLayer = class(MoveMap)
 function MiaoBuildLayer:ctor(s)
     self.scene = s

@@ -427,7 +427,10 @@ function MiaoPeople:initFind(diff)
 
             local sk = getMapKey(mx, my)
             local buildCell = self.map.mapGridController.mapDict
-            local bb = buildCell[sk][#buildCell[sk]][1]
+            local bb
+            if buildCell[sk] ~= nil then
+                bb = buildCell[sk][#buildCell[sk]][1]
+            end
             print("set init build")
             self.cells[sk] = {}
             self.cells[sk].gScore = 0

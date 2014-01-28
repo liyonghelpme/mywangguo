@@ -104,7 +104,6 @@ function MoveMap:checkCollision(build)
         return 1
     end
 
-
     local map = getBuildMap(build)
     local sx = map[1]
     local sy = map[2]
@@ -121,13 +120,6 @@ function MoveMap:checkCollision(build)
                 if v[#v][1] ~= build then
                     return v[#v][1]
                 end
-                --[[
-                for m, n in ipairs(v) do
-                    if n[1] ~= build then
-                        return n[1]
-                    end
-                end
-                --]]
             end
             if self.staticObstacle[key] ~= nil then
                 print("col key", key)
