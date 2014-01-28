@@ -6,6 +6,9 @@ require "menu.SessionMenu"
 TMXScene = class()
 
 function TMXScene:initDataNow()
+    print("initDataNow")
+    --sendReq('login', dict(), self.initData, nil, self)
+    
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -39,6 +42,7 @@ end
 
 function TMXScene:initData(rep, param)
     initCityData()
+    print("initData", rep, param)
 
     local u = CCUserDefault:sharedUserDefault()
     local r = u:getStringForKey("resource")
@@ -168,7 +172,6 @@ function TMXScene:initData(rep, param)
     end
 
     self.menu:initDataOver()
-    self.page.buildLayer:initPic()
     --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()

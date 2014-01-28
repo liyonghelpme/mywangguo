@@ -1476,7 +1476,7 @@ function colorLine(param)
     local curWidth = 0
     local anchor = param.anchor or {0, 1}
     for k, v in ipairs(words) do
-        print("colorLine", v)
+        --print("colorLine", v)
         local temp = colorWords({text=v, color=col, size=si, width=param.width, font=param.font})
         n:addChild(temp)
         setPos(setAnchor(temp, anchor), {0, -curHeight})
@@ -1688,7 +1688,7 @@ function calAttr(id, level, equip)
         local sdata = Logic.allSkill[skill]
         temp.attack = temp.attack+sdata.attack
         temp.defense = temp.defense+sdata.defense
-        print("skill attr")
+        --print("skill attr")
     end
     return temp
 end

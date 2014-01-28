@@ -37,6 +37,7 @@ function FightMenu2:ctor(s)
     bc:addChild(sp)
     local vs = getVS()
     setAnchor(setPos(sp, {vs.width/2, 0}), {0.5, 0})
+
     local tsz = sp:getContentSize()
     self.tsz =tsz
     --bottom center cust height
@@ -44,6 +45,7 @@ function FightMenu2:ctor(s)
     self.realHeight = nh
     print("ui height", nh)
     setScaleY(sp, nh/tsz.height)
+    setScaleX(sp, vs.width/tsz.width)
     --[[
     setPos(sp, {512, fixY(sz.height, 592)})
     centerYRate(bc)  

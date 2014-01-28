@@ -49,6 +49,7 @@ function StandardTouchHandler:fastScale(sca, midOld)
     if self.targetScale == nil then
         self.targetScale = self.bg:getScale()
     end
+    --乘法指数变化
     local newScale = self.targetScale*sca
     
     if newScale >= self.scaMax and sca > 1 then
@@ -57,25 +58,30 @@ function StandardTouchHandler:fastScale(sca, midOld)
     if newScale <= self.scaMin and sca < 1 then
         newScale = self.targetScale
     end
+
     local sz = self.bg:getContentSize() 
     local wid = newScale*sz.width
     local hei = newScale*sz.height
     local vs = getVS()
     local tm = self.targetMove or getPos(self.bg)
 
+    --[[
+    --缩放比例不会改变只会改变 move 位置
     if tm[1]+wid <= vs.width+5 and sca < 1 then
         newScale = self.targetScale 
     end
     if tm[2]+hei <= vs.height+5 and sca < 1 then
         newScale = self.targetScale
     end
+    --]]
 
     --oldScale oldPos
     local scale = getScale(self.bg)
     local wid, hei = scale*sz.width, scale*sz.height
     local pos = getPos(self.bg)
+    --旧的中点相对于当前位置的偏移
     local ax, ay = (midOld[1]-pos[1])/wid, (midOld[2]-pos[2])/hei
-
+    
     local wid, hei = newScale*sz.width, newScale*sz.height
     local px, py = midOld[1]-wid*ax, midOld[2]-hei*ay
 
@@ -108,18 +114,30 @@ function StandardTouchHandler:MoveBack(difx, dify)
     local tm = self.targetMove
     --保护边界
     ----print("target Move is ", sim:encode(tm))
-    if tm[1] >= 5 and difx > 0 then
-        self.targetMove[1] = tm[1]-difx
+    if tm[1] >= -5  then
+        --self.targetMove[1] = tm[1]-difx
+        self.targetMove[1] = math.min(-5, tm[1]-difx)
     end
-    if tm[1]+wid <= vs.width+5 and difx < 0  then
-        self.targetMove[1] = tm[1]-difx    
+    --应该clamp 到边界内
+    if tm[1]+wid <= vs.width+5 then
+        --[[
+        if difx < 0 then
+            --self.targetMove[1] = tm[1]-difx    
+            self.targetMove[1] = math.max(tm[1]-difx, vs.width+5-wid)
+        else
+        end
+        --]]
+        self.targetMove[1] = math.max(tm[1]-difx, vs.width+5-wid)
     end
-
-    if tm[2] >= 5 and dify > 0 then
-        self.targetMove[2] = tm[2]-dify
+    --zoom up dify < 0 but dify 
+    --dify < 0 
+    if tm[2] >= -5  then
+        self.targetMove[2] = math.min(-5, tm[2]-dify)
     end
-    if tm[2]+hei <= vs.height+5 and dify < 0 then
-        self.targetMove[2] = tm[2]-dify
+    --and dify < 0
+    if tm[2]+hei <= vs.height+5  then
+        --self.targetMove[2] = tm[2]-dify
+        self.targetMove[2] = math.max(tm[2]-dify, vs.height+5-hei)
     end
 
 end

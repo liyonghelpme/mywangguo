@@ -251,9 +251,11 @@ function MiaoBuild:ctor(m, data)
     setPos(self.possibleLabel, {0, 130})
     addChild(allLabel, self.possibleLabel)
 
-    self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={255, 0, 0}})
-    setPos(self.zordLabel, {0, 140})
-    addChild(self.heightNode, self.zordLabel)
+    if DEBUG then
+        self.zordLabel = ui.newBMFontLabel({text=0, size=30, color={255, 0, 0}})
+        setPos(self.zordLabel, {0, 140})
+        addChild(self.heightNode, self.zordLabel)
+    end
 
     self.funcBuild:initWork()
     --看一下 CCNode 0 0 位置 和 一半位置
@@ -467,7 +469,7 @@ end
 
 function MiaoBuild:setColor(c)
     if self.funcBuild.selGrid ~= nil then
-        print("set normal color")
+        --print("set normal color")
         self.funcBuild:setBottomColor(c)
         self.funcBuild:setColor()
     end
@@ -685,7 +687,10 @@ function MiaoBuild:setPos(p)
     if parent == nil then
         return
     end
-    self.zordLabel:setString(zord)
+    if DEBUG then
+        self.zordLabel:setString(zord)
+    end
+
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
     self.zord = zord

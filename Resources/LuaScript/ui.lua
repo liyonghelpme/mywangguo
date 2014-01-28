@@ -28,7 +28,7 @@ function ui.newEditBox(params)
 
     if editbox then
         editbox:registerScriptEditBoxHandler(function(event, object)
-            print("editBox", event)
+            --print("editBox", event)
             if listenerType == "table" or listenerType == "userdata" then
                 if event == "began" then
                     listener:onEditBoxBegan(object)
@@ -111,14 +111,19 @@ function ui.newTTFLabel(params)
     end
     local edgeWidth = params.edgeWidth
     local shadowColor = params.shadowColor or {0, 0, 0}
-    print("shadow Color is", simple.encode(shadowColor))
+    --print("shadow Color is", simple.encode(shadowColor))
 
     local label
     --android ios 平台字体处理方法不同
+    local fontName = 'fonts/fang.ttf'
+    if not ANDROID then
+        --fontName = 'FZDHTJW--GB1-0'
+        fontName = 'fang'
+    end
     if dimensions then
-        label = CCLabelTTF:create(text, "fonts/fang.ttf", size, dimensions, textAlign, textValign)
+        label = CCLabelTTF:create(text, fontName, size, dimensions, textAlign, textValign)
     else
-        label = CCLabelTTF:create(text, "fonts/fang.ttf", size)
+        label = CCLabelTTF:create(text, fontName, size)
     end
     local shadowWord
     if font == 'f2' then
@@ -137,17 +142,17 @@ function ui.newTTFLabel(params)
             --enableShadow(lab, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
             label:addChild(lab, -1)
             setAnchor(setPos(lab, {1, -2}), {0, 0})
-            print("set shadow Color")
+            ----print("set shadow Color")
             shadowWord = lab
         else
             if ANDROID == true then 
                 enableShadow(label, CCSizeMake(1, -2), 1, 1, update, shadowColor[1], shadowColor[2], shadowColor[3])
             else
-                --enableShadow(label, CCSizeMake(1, 2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
+                enableShadow(label, CCSizeMake(1, -2), 1, 1, true, shadowColor[1], shadowColor[2], shadowColor[3])
                 --不支持
-                enableShadow(label, CCSizeMake(1, 2), 1, 1, update)
+                --enableShadow(label, CCSizeMake(1, 2), 1, 1, update)
             end
-            print("set normal shadow color")
+            ----print("set normal shadow color")
         end
     end
 

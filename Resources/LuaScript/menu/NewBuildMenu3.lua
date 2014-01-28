@@ -155,6 +155,7 @@ function NewBuildMenu3:updateTab()
     self.data = {}
     local sz = {width=184, height=183}
     local dataNum = 1
+    print("building List")
     for k, v in ipairs(Logic.buildList) do
         if v.tab == self.selTab-1 then
             local row = math.floor((dataNum-1)/3)
