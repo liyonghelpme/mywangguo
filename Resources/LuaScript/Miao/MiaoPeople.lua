@@ -296,7 +296,10 @@ function MiaoPeople:update(diff)
         self.actionLabel:setString(str(self.actionContext)..'\n'..str(self.ignoreTerrian))
     end
 end
+
 --只有在当前猫为寻路猫的情况下 才可以开始寻路过程
+--寻找运送矿石回去的道路 考虑所在网格的连通性
+--采矿场不能直接上去
 function MiaoPeople:findPath(diff)
     if self.state == PEOPLE_STATE.FREE then
         if self.map.curSol == nil or self.map.curSol == self or self.map.curSol.state ~= PEOPLE_STATE.IN_FIND then
@@ -305,6 +308,7 @@ function MiaoPeople:findPath(diff)
         end
     end
 end
+--矿洞不能检测 左上或者 右上的 斜坡 根据矿洞的方向决定
 function MiaoPeople:initFind(diff)
     if self.state == PEOPLE_STATE.START_FIND then
         local p = getPos(self.bg)
@@ -335,12 +339,6 @@ function MiaoPeople:initFind(diff)
         --tired 不能中断操作
         --新系统 stateContext actionContext
         if self.stateContext ~= nil then
-            --[[
-            self.predictTarget = self.stateContext[2]
-            self.actionContext = self.stateContext[3] 
-            self.needClearOwner = self.stateContext.needClearOwner or true
-            self.stateContext = nil
-            --]]
             self:useStateContext()
             if self.predictTarget.deleted then
                 self.predictTarget = nil
@@ -428,8 +426,15 @@ function MiaoPeople:initFind(diff)
             self.predictEnd = {tx, ty}
 
             local sk = getMapKey(mx, my)
+            local buildCell = self.map.mapGridController.mapDict
+            local bb
+            if buildCell[sk] ~= nil then
+                bb = buildCell[sk][#buildCell[sk]][1]
+            end
+            print("set init build")
             self.cells[sk] = {}
             self.cells[sk].gScore = 0
+            self.cells[sk].build = bb
             self:calcH(mx, my)
             self:calcF(mx, my)
             self:pushQueue(mx, my)
@@ -482,18 +487,6 @@ function MiaoPeople:doFind(diff)
                 --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
                 --local findTarget = false
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
-                    --local isMine = false 
-                    --[[
-                    local mineOk = true
-                    --矿坑是否相邻于斜坡道路
-                    if self.predictTarget.id == 28 then
-                        local cd = self.cells[key].parent
-                        local bdata = self.cells[cd].build
-                        if bdata.onSlope then
-                            mineOk = false
-                        end
-                    end
-                    --]]
                     --矿坑相邻的道路没在斜坡上面
                     --if mineOk then
                     self.endPoint = {x, y} 
@@ -940,10 +933,27 @@ function MiaoPeople:checkNeibor(x, y)
     end
     local curKey = getMapKey(x, y)
     --TrainZone 100 100 2400 400
-    local staticObstacle = self.map.staticObstacle 
     local buildCell = self.map.mapGridController.mapDict
     local curRoad = self.cells[curKey].build
+
+    --矿洞只有一个出口
+    --只用检测 开始的矿洞位置
+    if isStart and curRoad ~= nil and curRoad.id == 28 then
+        print("start Point mine")
+        local dir = curRoad.funcBuild.dir
+        if dir == 0 then
+            neibors = {
+                {x+1, y-1}
+            }
+        else
+            neibors = {
+                {x-1, y-1}
+            }
+        end
+    end
+
     --多个layer 的数据 海水是一个Layer initCell staticObstacle bridge 其它建筑物是另外的cell 
+    --如果是该点 是矿洞 则 只检测一个方向的出口
     for n, nv in ipairs(neibors) do
         local key = getMapKey(nv[1], nv[2])
         local cx, cy = normalToCartesian(nv[1], nv[2])
@@ -958,7 +968,6 @@ function MiaoPeople:checkNeibor(x, y)
             local nS
             --不在open 表里面
             --首次加入
-            --or staticObstacle[key] ~= nil 
             --没有河流阻碍
             --同一个位置 图层逐渐加上去的 所以检测最后一个层是什么类型即可
             --TODO 只有是ROAD 才能走过

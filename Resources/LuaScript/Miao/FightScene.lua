@@ -28,7 +28,9 @@ function FightScene:ctor()
     self.soldiers = {{15, 10, 0, 0}, {10, 18, 0, 0}}
     --]]
 
-    self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
+    --self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
+
+    self.soldiers = {{25, 10, 0, 0}, {5, 40, 0, 0}}
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 

@@ -77,6 +77,13 @@ function FightArrow2:startAttack()
     end
     print("goto wait Attack")
     self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
+    --self.soldier.state = FIGHT_SOL_STATE.ARROW_WAIT
+end
+
+function FightArrow2:doWaitArrow(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.ARROW_WAIT then
+
+    end
 end
 
 --委任自动攻击 最近的敌人
@@ -182,7 +189,33 @@ end
 function FightArrow2:waitAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
         if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
-            self.soldier.attackTarget = self:findNearEnemy()
+            --射击完之后清空attackTarget 属性
+            local isHead = false
+            local att
+            if not self.isHead then
+                if self.soldier.color == 0 then
+                    self:checkSide('right')
+                    att = self.soldier.right
+                    if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                        isHead = true
+                    end
+                else
+                    self:checkSide('left')
+                    att = self.soldier.left
+                    if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                        isHead = true
+                    end
+                end
+            end
+            self.isHead = isHead
+            
+            --寻找头部的步兵敌人
+            if isHead then
+                self.soldier.attackTarget = self:findNearEnemy()
+            --就是我的左侧或者右侧的朋友
+            else
+                self.soldier.attackTarget = att
+            end
         else
             --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
             if self.soldier.attackTarget.color ~= self.soldier.color then
@@ -206,8 +239,9 @@ function FightArrow2:waitAttack(diff)
                         self.soldier:moveOneStep(diff)
                     end
                 end
-            --我方靠近移动
-            else
+
+            --移动靠近我的 弓箭手 
+            elseif self.soldier.attackTarget.id == 1 then
                 self.soldier:moveOneStep(diff)
             end
         end
@@ -572,6 +606,7 @@ function FightArrow2:finishAttack()
     print("clear arrow Hurt for arrow")
     self.soldier.arrowHurt = 0
     self.soldier.midPoint = nil
+    self.soldier.attackTarget = nil
 
     if self.soldier.dead then
         --setVisible(self.soldier.bg, false)

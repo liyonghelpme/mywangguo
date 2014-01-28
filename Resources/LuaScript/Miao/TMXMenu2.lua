@@ -92,7 +92,9 @@ function TMXMenu2:onLeft()
     if self.inBuild then
         global.director.curScene.page.curBuild:doSwitch()
     else
-        global.director:pushScene(FightMap.new())
+        if global.director.curScene.name == "TMXScene" then
+            global.director:pushScene(FightMap.new())
+        end
     end
 end
 

@@ -2,6 +2,8 @@ require "menu.BuyMenu"
 EquipChangeMenu2 = class()
 function EquipChangeMenu2:ctor(p, changeKind)
     self.people = p
+    print("people changeKind", p.name, changeKind)
+
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
@@ -20,7 +22,6 @@ function EquipChangeMenu2:ctor(p, changeKind)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "equipCh1.png"), {549, fixY(sz.height, 147)}), {297, 43}), {0.50, 0.50}), 255)
     self.total = sp
 
-
     self.scrollPro = createScroll(self.temp, sz)
 
     local listSize = {width=546, height=319}
@@ -37,10 +38,17 @@ function EquipChangeMenu2:ctor(p, changeKind)
     setPos(self.touch.bg, {0, 0})
     self.flowHeight = 0
 
-    centerUI(self)
-
     self.selNum = changeKind or 1
     self:setView()
+
+    centerUI(self)
+    --[[
+    if true then
+        return
+    end
+    --]]
+
+    print("setView")
 end
 function EquipChangeMenu2:updateTab()
     removeSelf(self.flowNode)
@@ -67,12 +75,14 @@ function EquipChangeMenu2:updateTab()
         allData = Logic.allSpe
     end
 
+
     self.allData = allData
     print("refresh View", self.selNum)
     self.oldEquipId = nil
     self.oldEquip = nil
     local tempAllData = {}
 	for k, v in ipairs(allData) do
+        --装备研究过才能显示
         if Logic.researchEquip[v.id]  == true then
             table.insert(tempAllData, v)
             local row = math.floor((k-1)/rowWidth)
@@ -85,8 +95,8 @@ function EquipChangeMenu2:updateTab()
         
             local hb = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "headBoard.png"), {28, fixY(sz.height, 26)}), {57, 52}), {0.50, 0.50}), 255)
             local sp = setOpacity(setAnchor(setSize(setPos(addSprite(hb, "equip"..v.id..".png"), {28, fixY(sz.height, 26)}), {41, 36}), {0.50, 0.50}), 255)
-            local eqw = setPos(setAnchor(addChild(hb, ui.newBMFontLabel({text='装', size=188, color={206, 78, 0}, font="bound.fnt", shadowColor={255, 255, 255}})), {0.50, 0.50}), {44, fixY(52, 41)})
-            setVisible(eqw, true)
+            local eqw = setPos(setAnchor(addChild(hb, ui.newTTFLabel({text='E', size=18, color={206, 78, 0}, font="bound.fnt", shadowColor={255, 255, 255}})), {0.50, 0.50}), {44, fixY(52, 41)})
+            setVisible(eqw, false)
             if self.selNum == 1 then
                 print("eqw")
                 if self.people.weapon == v.id then
@@ -137,9 +147,11 @@ function EquipChangeMenu2:updateTab()
 end
 
 function EquipChangeMenu2:setView()
+    print("selPage", self.selPage, self.selNum)
     if self.selPage ~= nil then
         removeSelf(self.selPage)
     end
+
     if self.selNum == 1 then
         self:initWeaponView()
     elseif self.selNum == 2 then
@@ -149,7 +161,7 @@ function EquipChangeMenu2:setView()
     elseif self.selNum == 4 then
         self:initSpeView()
     end
-    print("updateTab")
+    print("updateTab now")
     self:updateTab()
     self.selPanel = nil
     self:setSel(1)
@@ -158,6 +170,7 @@ function EquipChangeMenu2:setView()
         print("resetScroll")
         self.scrollPro:resetScroll()
     end
+    print("finish setView")
 end
 
 function EquipChangeMenu2:initWeaponView()
@@ -174,13 +187,11 @@ function EquipChangeMenu2:initWeaponView()
 end
 
 function EquipChangeMenu2:initHeadView()
-    print("initHeadView")
+    --print("initHeadView")
     local temp = CCNode:create()
     self.temp:addChild(temp)
     self.selPage = temp
-
-    local vs = getVS()
-    self.bg = CCNode:create()
+    --node 被替换成空node了
     local sz = {width=1024, height=768}
     local w = setPos(setAnchor(addChild(temp, ui.newTTFLabel({text="点击查看详情", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {533, fixY(sz.height, 625)})
     self.desWord = w

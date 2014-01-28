@@ -623,7 +623,7 @@ function Cat2:handleAction(diff)
 
                     self.people.state = PEOPLE_STATE.IN_WORK
                     self.people.workTime = 0
-                    self.woodTime = 0
+                    self.woodTime = 0.4
                 end
             end
             needResetState = false

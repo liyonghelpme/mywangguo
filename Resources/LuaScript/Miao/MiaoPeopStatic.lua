@@ -30,9 +30,12 @@ function MiaoPeople:setMoveAction(aniName)
     if self.curAni ~= aniName then
         self:stopMoveAction()
         self.curAni = aniName
-        local ani = CCAnimationCache:sharedAnimationCache():animationByName(aniName)
-        self.moveAction = repeatForever(CCAnimate:create(ani))
-        self.changeDirNode:runAction(self.moveAction)
+
+        if aniName ~= nil then
+            local ani = CCAnimationCache:sharedAnimationCache():animationByName(aniName)
+            self.moveAction = repeatForever(CCAnimate:create(ani))
+            self.changeDirNode:runAction(self.moveAction)
+        end
     end
 end
 function MiaoPeople:setDir(x, y)
@@ -346,12 +349,15 @@ function MiaoPeople:adjustShadow()
         --setAnchor(self.shadow, {0.5, 31/512})
     end
 end
+
 --清理每个状态的时候 self.food 也要清理一下 根据不同状态类型 调用状态的清理代码
 function MiaoPeople:sendGoods(total)
     self.send = true
     self:adjustScale()
     self:adjustShadow()
+    --停止移动动作
     setDisplayFrame(self.changeDirNode, "car_rb_0.png")
+    self:setMoveAction("car_rb")
     local sca = getScaleY(self.changeDirNode)
     if self.food > 0 then
         local sp = setDisplayFrame(CCSprite:create(), "b3.png")
@@ -403,7 +409,10 @@ function MiaoPeople:putGoods()
     if self.send then
         self.send = false
         self:adjustScale()
+        --放下物品
         setDisplayFrame(self.changeDirNode, "cat_"..self.id.."_rb_0.png")
+        self:setMoveAction("people"..self.id.."_rb")
+
         local sca = getScaleY(self.changeDirNode)
         setScaleX(self.changeDirNode, sca)
         if self.carGoods ~= nil then

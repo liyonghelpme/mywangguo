@@ -174,10 +174,11 @@ function EquipMenu3:touchEnded(x, y)
                     print("sdata is what", sdata)
                     for i=6, 9, 1 do
                         print("icon is ", icon.id, sdata[i].id)
-                        if sdata[i] == icon then
+                        if sdata[i].id == icon.id then
                             --global.director:popView()
-                            global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPanel], i-5), 1)
-                            return
+                            global.director:pushView(EquipChangeMenu2.new(Logic.farmPeople[self.selPanel], icon.id), 1)
+                            --return
+                            break
                         end
                     end
                 else

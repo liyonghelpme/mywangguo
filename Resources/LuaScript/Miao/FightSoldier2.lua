@@ -19,6 +19,8 @@ FIGHT_SOL_STATE = {
 
     --步兵杀死 第一排弓箭手 接着 近距离 攻击其它弓箭手
     FOOT_MOVE_TO = 13,
+
+    ARROW_WAIT = 14,
 }
 
 FightSoldier2 = class()
@@ -298,6 +300,7 @@ function FightSoldier2:update(diff)
     self:doNearMove(diff)
     self:doMoveTo(diff)
     self.funcSoldier:doWaitMove(diff)
+    self.funcSoldier:doWaitArrow(diff)
 end
 
 function FightSoldier2:doPose(diff)
@@ -482,87 +485,6 @@ function FightSoldier2:doMove(diff)
         --同方士兵 
         else
             self.state = FIGHT_SOL_STATE.FOOT_MOVE_TO 
-            --print("same color just move ", self.moveYet)
-            --前方士兵开始移动之后 我也紧随其移动即可
-            --local p = getPos(self.bg)
-            --local attPos = getPos(self.attackTarget.bg)
-            --local dx = math.abs(attPos[1]-p[1])
-            --dx > FIGHT_OFFX+10 and
-            --移动 到 attackTarget 后面
-            --[[
-            if not self.moveYet then
-                local offX = FIGHT_OFFX
-                if self.color == 0 then
-                    offX = -FIGHT_OFFX
-                end
-                if self.attackTarget.midPoint ~= nil then
-                    self.moveYet = true
-                    self.midPoint = self.attackTarget.midPoint+offX 
-                    print("midPoint", self.sid, self.midPoint)
-                    print('other midPoint', self.attackTarget.midPoint)
-                    local diffx = self.midPoint-p[1]
-                    local t = math.abs(diffx/self.speed)
-                    self.moveFin = false
-                    local function finishMove()
-                        print("soldier finishMove", self.midPoint)
-                        self.moveFin = true
-                        --self.changeDirNode:stopAction(self.moveAni)
-                        --空闲等待状态
-                        --self.changeDirNode:runAction(CCAnimate:create(self.idleAction))
-                    end
-                    print("bg move action", t, p[2], self.midPoint)
-                    self.bg:runAction(sequence({moveto(t, self.midPoint, p[2]), callfunc(nil, finishMove)}))
-                end
-            end
-            --我方士兵处于移动状态 自己没有在移动状态 前列 士兵跑步向前
-            if self.attackTarget.inMove and not self.inMove then
-                local offX
-                local offX = FIGHT_OFFX
-                if self.color == 0 then
-                    offX = -FIGHT_OFFX
-                end
-                local p = getPos(self.bg)
-                self.midPoint = self.attackTarget.midPoint+offX
-                local diffx = self.midPoint-p[1]
-                local t = math.abs(diffx/self.speed)
-                self.bg:runAction(moveto(t, self.midPoint, p[2]))
-                --需要几个frame 来广播移动
-                self.inMove = true
-            end
-            if self.inMove then
-                local p = getPos(self.bg)
-                if p[1] == self.midPoint then
-                    self.inMove = false
-                end
-            end
-            --如果同行死亡
-            --后续的同行也要跟进 攻击目标
-            --同行死亡自己没有在移动才可以移动
-            if self.attackTarget.dead and not self.inMove then
-                print("my friend dead then find my friend's enemy to attack if exists ")
-                self.attackTarget = self:findNearRow()
-                if self.attackTarget ~= nil then
-                    local nap = getPos(self.attackTarget.bg)
-                    local mmid 
-                    if self.color == 0 then
-                        mmid = nap[1]-80
-                    else
-                        mmid = nap[1]+80
-                    end
-                    self.midPoint = mmid
-                    local p = getPos(self.bg)
-                    local diffx = self.midPoint-p[1]
-                    local t = math.abs(diffx/self.speed)
-                    self.bg:runAction(moveto(t, self.midPoint, p[2]))
-                    --需要几个frame 来广播移动
-                    self.inMove = true
-                else
-                    print("my Friend's attackTarget dead and I can't find attackTarget ")
-                    self.state = FIGHT_SOL_STATE.KILL_ALL 
-                end
-            end
-            --]]
-            --如果没有同行 攻击 同列
         end
     end
 end

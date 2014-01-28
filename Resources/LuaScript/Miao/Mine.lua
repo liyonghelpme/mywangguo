@@ -54,12 +54,16 @@ function Mine:checkBuildable()
         return false
     end
 end
+
 --如果和斜坡碰撞了 调整图片方向
+--restore位置的时候 只是上一个有效位置 
 function Mine:whenColNow()
     local scaY = getScaleY(self.baseBuild.changeDirNode)
     if self:checkSlope() then
         print("whenColNow Mine", self.baseBuild.colNow, self.baseBuild.otherBuild)
         local dir = self.baseBuild.otherBuild.dir
+        --矿洞方向
+        self.dir = dir
         if dir == 0 then
             setScaleX(self.baseBuild.changeDirNode, -scaY)
         else
