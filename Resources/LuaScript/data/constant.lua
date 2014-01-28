@@ -14,7 +14,7 @@ FIGHT_ROW_OFFY = 35
 FIGHT_NEAR_RANGE = 100
 DEBUG_FIGHT = false
 
-ANDROID = false
+ANDROID = true
 
 MapWidth = 4080
 --Warning 修改了背景地图大小 就会导致所有建筑物坐标偏移了 使用网格存储建筑物位置

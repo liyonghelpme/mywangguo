@@ -157,24 +157,6 @@ function MiaoPage:ctor(s)
             right = math.ceil(right/SIZEX)
             bottom = math.floor(bottom/SIZEY)
             top = math.ceil(top/SIZEY)
-            --[[
-            print("left right", cx, cy, left, right, bottom, top)
-            local c = {255, 0, 0}
-            local wid = (right-left)*SIZEX
-            local hei = (top-bottom)*SIZEY
-            for i=left,right-1,1 do
-                for j=bottom,top-1,1 do
-                    local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whitebox.png"), c), {SIZEX, SIZEY})
-                    debug:addChild(sp)
-                    setAnchor(setPos(sp, {i*SIZEX, j*SIZEY}), {0, 0})
-                end
-            end
-
-            local sp = setSize(setColor(CCSprite:createWithSpriteFrameName("whiteArrow.png"), c), {SIZEX*2, SIZEY*2})
-            debug:addChild(sp)
-            local cx, cy = newAffineToCartesian(w, h, self.width, self.height, MapWidth/2, FIX_HEIGHT)
-            setAnchor(setPos(sp, {cx, cy}), {0.5, 0})
-            --]]
 
             --将该区域 插入到 对应的 cxy区域中
             for i = left, right-1, 1 do
