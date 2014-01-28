@@ -7,8 +7,8 @@ TMXScene = class()
 
 function TMXScene:initDataNow()
     print("initDataNow")
-    sendReq('login', dict(), self.initData, nil, self)
-    --[[
+    --sendReq('login', dict(), self.initData, nil, self)
+    
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -16,7 +16,6 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
-    --]]
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
