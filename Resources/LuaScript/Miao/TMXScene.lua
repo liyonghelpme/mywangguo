@@ -6,15 +6,13 @@ require "menu.SessionMenu"
 TMXScene = class()
 
 function TMXScene:initDataNow()
-    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
         self:initData(rep, nil)
     else
-    --]]
-    sendReq('login', dict(), self.initData, nil, self)
-    --end
+        sendReq('login', dict(), self.initData, nil, self)
+    end
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
