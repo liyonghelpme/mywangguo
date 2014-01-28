@@ -273,10 +273,25 @@ function MiaoPeople:update(diff)
         if (self.realTarget.id == 19 or self.realTarget.id == 12 or self.realTarget.id == 28 or self.realTarget.id == 29) then
             isQuaOrWoo = true
         end
-        if not isQuaOrWoo then
-            self:setZord()
-        else
-            self:setHighZord()
+        --靠近伐木场建筑物 的时候 zord 要保持高位
+        local nearStart = false
+        --但是离开了 起点块就不应该这样做了
+        if self.startBuild ~= nil and (self.startBuild.id == 12 or self.startBuild.id == 19 or self.startBuild.id == 29) then
+            --isQuaOrWoo = true
+            isQuaOrWoo = false
+            local fz = self:getFastZord()
+            local dz = math.abs(self.startZord-fz)
+            if dz <= 100 then
+                nearStart = true
+                self:setSuperHighZord()
+            end
+        end
+        if not nearStart then
+            if not isQuaOrWoo then
+                self:setZord()
+            else
+                self:setHighZord()
+            end
         end
     end
 
@@ -344,35 +359,6 @@ function MiaoPeople:initFind(diff)
                 self.predictTarget = nil
                 self:clearStateStack()
             end
-        elseif self.goSmith then
-            self.predictTarget = self.tempSmith
-            self.tempSmith = nil
-            self.goSmith = false
-        elseif self.goBack then
-            self.predictTarget = self.map.backPoint
-            print("goBack now")
-        elseif self.goStore then
-            self.predictTarget = self.tempStore
-            self.tempStore = nil
-            self.goStore = false
-        elseif self.goMine then
-            self.predictTarget = self.tempMine
-            self.tempMine = nil
-            self.goMine = false
-        --因为角色还占用着 矿场的 工具呢 所以需要返回
-        elseif self.goQuarry then
-            self.predictTarget = self.tempQuarry
-            self.tempQuarry = nil
-            self.goQuarry = false
-        elseif self.goFactory then
-            print("goFactory !!!!!")
-            self.predictTarget = self.tempFactory
-            self.tempFactory = nil
-            self.goFactory = false
-        elseif self.goTower then
-            self.predictTarget = self.tempTower
-            self.tempTower = nil
-            self.goTower = false
         --寻找住宅
         elseif self.tired then
             self:findHouse()
@@ -435,6 +421,12 @@ function MiaoPeople:initFind(diff)
             self.cells[sk] = {}
             self.cells[sk].gScore = 0
             self.cells[sk].build = bb
+            --寻路起点建筑物类型
+            self.startBuild = bb
+            if bb ~= nil then
+                self.startZord = bb.zord 
+            end
+
             self:calcH(mx, my)
             self:calcF(mx, my)
             self:pushQueue(mx, my)
@@ -628,18 +620,6 @@ function MiaoPeople:doMove(diff)
                         self.map.mapGridController:removeSoldier(self)
                     end
                 else
-                    --[[
-                    local isQuaOrWoo = false
-                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
-                        isQuaOrWoo = true
-                    end
-                    if not isQuaOrWoo then
-                        self:setZord()
-                    else
-                        self:setHighZord()
-                    end
-                    --]]
-
                     self:beforeHandle()
                     if self.realTarget.data.kind == 5 then
                         self:handleHome()
