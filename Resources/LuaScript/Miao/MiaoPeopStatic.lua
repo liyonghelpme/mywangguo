@@ -378,6 +378,7 @@ function MiaoPeople:sendGoods(total)
         local n = math.max(math.min(math.ceil(self.stone*3/total), 3), 1)
         self.carName = {"e"..n..".png", 'f'..n..'.png'}
         self.carGoods = sp
+        setDisplayFrame(sp, self.carName[2])
     elseif self.wood > 0 then
         if total == nil then
             total = self.wood
@@ -391,6 +392,7 @@ function MiaoPeople:sendGoods(total)
         local n = math.max(math.min(math.ceil(self.wood*3/total), 3), 1)
         self.carName = {"c"..n..".png", 'd'..n..'.png'}
         self.carGoods = sp
+        setDisplayFrame(sp, self.carName[2])
     elseif self.workNum > 0 then
         local sp = createSprite("h3.png")
         self.changeDirNode:addChild(sp)
