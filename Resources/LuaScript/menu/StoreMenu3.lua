@@ -205,11 +205,14 @@ function StoreMenu3:touchEnded(x, y)
                     if storeData[1] == 0 then
                         changeEquip(edata.id, 1)
                         self.data[self.selPanel][3]:setString(Logic.holdNum[edata.id])
+                        --once 不应该在商店显示
+                        --changeBuyNum(edata.id, 1)
                     elseif storeData[1] == 2 then
                         changeBuildNum(edata.id, 1)
                         self.data[self.selPanel][3]:setString(getTotalBuildNum(edata.id))
                         self.data[self.selPanel][4]:setString(getBuyPrice(edata.id).."银币")
                     end
+
                     addBanner("购买"..edata.name.."成功")
                 end
                 --global.director:popView()
