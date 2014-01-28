@@ -27,6 +27,8 @@ Logic.allSkill = {}
 
 --持有武器的数量
 Logic.holdNum = {}
+--购买的装备数量 = 装备的 和 持有的
+Logic.buyNum = {}
 
 --待研究的物品 类型 id
 Logic.researchGoods = {
@@ -282,9 +284,14 @@ function getLaborEffect(l)
 
 end
 
+function changeBuyNum(id, num)
+    Logic.buyNum[id] = (Logic.buyNum[id] or 0)+num
+end
+
 function changeEquip(id, num)
     Logic.holdNum[id] = (Logic.holdNum[id] or 0)+num
 end
+
 
 --实现升级属性提升机制
 Logic.LevelCost = {
