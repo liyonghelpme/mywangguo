@@ -43,6 +43,20 @@ function FightMap:checkWin()
                 for k, v in ipairs(cg.goods) do
                     local edata = GoodsName[v]
                     addBanner("获得新物品"..edata.name)
+
+                    for tk, tv in pairs(Logic.techId) do
+                        if tv == v then
+                            Logic.ownTech[tk] = Logic.ownTech[tk]+1
+                            addBanner("技能书获得"..edata.name.."lv"..Logic.ownTech[tk])
+                            local eq = checkTechNewEquip(tk, Logic.ownTech[tk])
+                            for ek, ev in ipairs(eq) do
+                                local equipData = Logic.equip[ev]
+                                addBanner("可以研究新的物品了"..equipData.name)
+                                table.insert(Logic.researchGoods, {0, ev})
+                            end
+                            break
+                        end
+                    end
                 end
                 
                 for k, v in ipairs(cg.build) do

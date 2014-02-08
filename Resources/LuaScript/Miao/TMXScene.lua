@@ -7,8 +7,9 @@ TMXScene = class()
 
 function TMXScene:initDataNow()
     print("initDataNow")
-    --sendReq('login', dict(), self.initData, nil, self)
+    sendReq('login', dict(), self.initData, nil, self)
     
+    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -16,6 +17,7 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
+    --]]
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
@@ -151,7 +153,9 @@ function TMXScene:initData(rep, param)
             table.insert(df, v.id)
         end
     end
-
+    
+    --Logic.techGoods = {}
+    
     Logic.allEquip = rep.equip
     for k, v in ipairs(rep.equip) do
         Logic.equip[v.id] = v
@@ -164,7 +168,20 @@ function TMXScene:initData(rep, param)
         elseif v.kind == 3 then
             table.insert(Logic.allSpe, v)
         end
+        v.getMethod = simple.decode(v.getMethod)
+        --[[
+        local gm = simple.decode(v.getMethod)
+        for gk, gv in ipairs(gm) do
+            --技术等级
+            local tg = getDefault(Logic.techGoods, gv[1]..gv[2], {})
+            table.insert(tg, v.id)
+        end
+        --]]
     end
+    --print("equips", simple.encode(Logic.techGoods))
+    
+    --local tt = checkTechNewEquip('sword', 1)
+    --print("equips", simple.encode(tt))
 
     Logic.allSkill = rep.skill
     for k, v in ipairs(rep.skill) do

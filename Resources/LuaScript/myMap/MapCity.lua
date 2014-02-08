@@ -15,6 +15,7 @@ function MapCity:ctor(s, data, cid)
     end
     --col == 0 我的
     self.bg = CCNode:create()
+    --竞技场
     if self.kind == 0 then
         self.changeDirNode = CCSprite:create("fightPoint.png")
     elseif self.kind == 1 then 
@@ -22,7 +23,7 @@ function MapCity:ctor(s, data, cid)
     --其它村庄
     elseif self.kind == 2 then
         self.changeDirNode = CCSprite:create("village.png")
-    --main city
+    --main city 主城
     elseif self.kind == 3 then
         self.changeDirNode = CCSprite:create("village.png")
     end
@@ -42,7 +43,7 @@ function MapCity:ctor(s, data, cid)
     --self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     --self.changeDirNode:addChild(self.touch.bg)
 
-    self.stateLabel = ui.newBMFontLabel({text=self.cid, size=30, color={128, 0, 0}, font='bound.fnt'})
+    self.stateLabel = ui.newBMFontLabel({text=str(self.realId), size=30, color={128, 0, 0}, font='bound.fnt'})
     setPos(addChild(self.bg, self.stateLabel), {0, 40})
 end
 function MapCity:setColor(c)
@@ -62,5 +63,6 @@ function MapCity:touchEnded(x, y)
     if self.kind ~= 3 and self.color ~= 0 then
         global.director.curScene.menu:showCityInfo(self)
         --self.scene:sendCat(self)
+
     end
 end

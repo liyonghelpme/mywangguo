@@ -31,8 +31,9 @@ Logic.holdNum = {}
 Logic.buyNum = {}
 
 --待研究的物品 类型 id
+--0 装备
 Logic.researchGoods = {
-    {0, 2}, {0, 3}, {0, 4},
+    {0, 2}, {0, 3}, {0, 11},
 }
 --正在研究的物品
 Logic.inResearch = nil
@@ -586,7 +587,7 @@ end
 
 --当前可以启用的村民
 Logic.ownPeople = {11, 20, 21, 22, 23}
---
+
 Logic.ownTech = {
 sword=0,
 spear=0,
@@ -595,5 +596,61 @@ bow=0,
 armour=0,
 ninja=0,
 }
+Logic.techId = {
+sword=40,
+spear=41,
+magic=42,
+bow=43,
+armour=44,
+ninja=45,
+}
+
 --每个城市奖励的物品
 Logic.cityGoods = {}
+--技术等级对应的物品
+--sword1 ----> goodsList 
+--sword2 ----> goodsList
+Logic.techGoods = {
+}
+
+function checkTechNewEquip(techName, techLevel)
+    local temp = {}
+    for k, v in pairs(Logic.equip) do
+        local gm = v.getMethod
+        local findMatch = false
+        local otherOk = nil
+        --需要这个新的 技术 满足了
+        --并且其它条件已经满足了
+
+        for gk, gv in ipairs(gm) do
+            if techName == gv[1] and techLevel == gv[2] then
+                findMatch = true
+            elseif Logic.ownTech[gv[1]] == gv[2] then
+            else
+                otherOk = false
+            end
+        end
+        --匹配了技术 并且 其它技术满足条件
+        --新增的 装备
+        if findMatch and otherOk ~= false then
+            table.insert(temp, v.id)
+        end
+    end
+    print("new Equip is", simple.encode(temp))
+    return temp
+end
+
+
+
+--竞技场兵力
+Logic.arena = {
+    {48, 31, 0, 0},
+    {65, 43, 0, 0},
+    {72, 60, 5, 1},
+    {85, 68, 4, 11},
+    {105, 76, 4, 13},
+}
+
+--根据当前占领的城堡数量 以及当前 占领的村落数量
+--ownVillage 和 ownCity分离开来
+Logic.arenaLevel = 1
