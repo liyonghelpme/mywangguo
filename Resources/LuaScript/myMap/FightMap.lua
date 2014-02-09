@@ -17,7 +17,44 @@ end
 function FightMap:checkWin()
     print("FightMenu checkWin", Logic.challengeCity)
     --addBanner("FightMap checkWin")
-    if Logic.ownCity[Logic.challengeCity] ~= nil then
+    if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
+        if Logic.winArena then
+            Logic.winArena = false
+            global.director:pushView(SessionMenu.new("挑战竞技场胜利了"), 1, 0)
+            --士兵数量
+            local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
+            local reward = Logic.arenaReward[Logic.arenaLevel]
+            local silver = (Logic.arenaLevel-1)*50+500
+            --难度提升1
+            Logic.arenaLevel = Logic.arenaLevel+1
+            if reward[1] == 'equip' then
+                --出现在商店里面
+                if reward[4] then
+                    table.insert(Logic.ownGoods, {0, reward[2]})
+                end
+                --持有数量增加
+                changeEquip(reward[2], reward[3])
+                local edata = Logic.equip[reward[2]]
+                addBanner("获得物品"..edata.name..reward[3])
+            elseif reward[1] == 'goods' then
+                --兵法书
+                if reward[2] == 39 then
+                    Logic.fightNum = Logic.fightNum+1
+                    addBanner("合战人数增加1")
+                else
+                end
+            elseif reward[1] == 'build' then
+                table.insert(Logic.ownBuild, reward[2])
+                local bd = Logic.buildings[reward[2]]
+                addBanner("获得建筑物"..bd.name)
+            elseif reward[1] == 'gold' then
+                silver = silver+reward[3]
+            end
+            --获得银币
+            doGain(silver)
+            addBanner("获得银币"..silver)
+        end
+    elseif Logic.ownCity[Logic.challengeCity] ~= nil then
         --addBanner("获取 胜利奖励！")
         global.director:pushView(SessionMenu.new("合战胜利了!"), 1, 0)
         local city = self.page.cidToCity[Logic.challengeCity]

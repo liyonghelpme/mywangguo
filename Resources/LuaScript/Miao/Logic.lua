@@ -33,7 +33,7 @@ Logic.buyNum = {}
 --待研究的物品 类型 id
 --0 装备
 Logic.researchGoods = {
-    {0, 2}, {0, 3}, {0, 11},
+    --{0, 2}, {0, 3}, {0, 11},
 }
 --正在研究的物品
 Logic.inResearch = nil
@@ -44,8 +44,16 @@ Logic.inResearch = nil
 --1 商店卖出物品
 --[[
 --]]
+--商店可以直接购买的物品
 Logic.ownGoods = {
-    {0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68},
+    --{0, 1}, 
+    {0, 2}, {0, 3}, {0, 11},
+    {0, 28}, {0, 30}, {0, 31},
+    {0, 47}, 
+    --{0, 48}, 
+    {0, 59},
+    {0, 67}, 
+    --{0, 68},
 }
 Logic.allOwnBuild = {
 
@@ -516,12 +524,20 @@ Logic.cityNum = {}
 
 --占领的城市
 Logic.ownCity = {}
+--挑战竞技场胜利
+Logic.winArena = false
 
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
     print("winCity of scene", Logic.challengeCity)
     if Logic.challengeCity ~= nil then
-        Logic.ownCity[Logic.challengeCity] = true
+        --竞技场
+        --挑战 竞技场 kind = 0
+        if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
+            Logic.winArena = true
+        else
+            Logic.ownCity[Logic.challengeCity] = true
+        end
     end
     --table.insert(Logic.ownCity, Logic.challengeCity)
 end
@@ -654,3 +670,27 @@ Logic.arena = {
 --根据当前占领的城堡数量 以及当前 占领的村落数量
 --ownVillage 和 ownCity分离开来
 Logic.arenaLevel = 1
+--挑战获得的物品包括
+--奖励silver 500 + 50
+--kind: equip goods gold
+--id
+--number
+require "arenaData.lua"
+Logic.arenaReward = {}
+for k, v in ipairs(ArenaReward) do
+    Logic.arenaReward[v[1]] = v[2]
+end
+
+function getArenaReward()
+end
+
+--参加合战士兵数量
+Logic.fightNum = 4
+
+--不同条件
+Logic.ownBuild = {
+    1, 2, 
+    4, 
+    5, 
+    6, 7,
+}

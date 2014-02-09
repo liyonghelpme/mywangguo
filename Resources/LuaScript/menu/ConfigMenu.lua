@@ -37,6 +37,9 @@ function ConfigMenu:ctor(ct)
 
     centerUI(self)
 end
+function ConfigMenu:onArena()
+    global.director:pushScene(FightScene.new())
+end
 
 function ConfigMenu:onBut(p)
     if p == 1 then
@@ -44,10 +47,17 @@ function ConfigMenu:onBut(p)
     elseif p == 2 then
         global.director:pushView(ChooseMenu.new(), 1, 0)
     elseif p == 3 then
-        print("fight menu city")
-        global.director.curScene.page:sendCat(self.city)
-        global.director:popView()
-        global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+        --挑战竞技场
+        if self.city.kind == 0 then
+            global.director:popView()
+            Logic.challengeCity = self.city
+            global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self), 1, 0)
+        else
+            print("fight menu city")
+            global.director.curScene.page:sendCat(self.city)
+            global.director:popView()
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+        end
     end
 end
 

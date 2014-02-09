@@ -98,6 +98,24 @@ function TMXScene:initData(rep, param)
         Logic.ownPeople = rd
     end
 
+    local r = u:getStringForKey('ownBuild')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownBuild = rd
+    end
+
+    local r = u:getStringForKey('fightNum')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.fightNum = rd
+    end
+
+    local r = u:getStringForKey('arenaLevel')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.arenaLevel = rd
+    end
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
@@ -219,6 +237,7 @@ function TMXScene:checkBattleTime(diff)
         lc.moveTime = lc.moveTime - self.checkTime
         self.checkTime = 0
 
+        --cid 信息
         --cid inkScape 边关系中的id信息
         --realId gimp 中的id信息
         Logic.challengeCity = path[#path]
@@ -368,4 +387,7 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("ownCity", simple.encode(Logic.ownCity)) 
     u:setStringForKey("catData", simple.encode(Logic.catData)) 
     u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
+    u:setStringForKey("ownBuild", simple.encode(Logic.ownBuild)) 
+    u:setStringForKey("fightNum", simple.encode(Logic.fightNum)) 
+    u:setStringForKey("arenaLevel", simple.encode(Logic.arenaLevell)) 
 end

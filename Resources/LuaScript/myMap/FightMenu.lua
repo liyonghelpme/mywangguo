@@ -76,6 +76,69 @@ function FightMenu:onBut(p)
         end
     end
 end
+--显示竞技场数据
+function FightMenu:showArenaInfo(city)
+    if self.city == nil and self.finAni then
+        self.city = city
+        setVisible(self.leftCenter, true)
+        local sca = getScale(self.leftCenter)
+        local sz = self.lm:getContentSize()
+        local p = getPos(self.leftCenter)
+        setPos(self.leftCenter, {-sz.width, p[2]})
+        self.leftCenter:runAction(expout(moveto(0.5, 0, p[2])))
+
+        local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
+        self.buw:setString(cityData[1])
+        self.gongw:setString(cityData[2])
+        self.maw:setString(cityData[3])
+        self.qiw:setString(cityData[4])
+        --显示报酬多少
+        
+        local rew = Logic.arenaReward[Logic.arenaLevel]
+        if rew ~= nil then
+            local gid = 1
+            local v = rew[2]
+            if rew[1] == 'equip' then
+                local edata = Logic.equip[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
+            elseif rew[1] == 'goods' then
+                local edata = GoodsName[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
+            elseif rew[1] == 'build' then
+                local edata = Logic.buildings[v]
+                self['goods'..gid]:setString(edata.name)
+                setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
+                local sca = getSca(self['g'..gid], {21, 18})
+                setScale(self['g'..gid], sca)
+                gid = gid+1
+            elseif rew[1] == 'gold' then
+                self['goods'..gid]:setString(rew[3])
+                setTexOrDis(self['g'..gid], '#silverIcon.png')
+                local sca = getSca(self['g'..gid], {21, 18})
+                setScale(self['g'..gid], sca)
+                gid = gid+1
+            end
+
+            for i=1, gid-1, 1 do
+                setVisible(self['goods'..i], true)
+                setVisible(self['g'..i], true)
+                setVisible(self['ib'..i], true)
+            end
+            print("gid is what", gid)
+            for i=gid, 2, 1 do
+                setVisible(self['goods'..i], false)
+                setVisible(self['g'..i], false)
+                setVisible(self['ib'..i], false)
+            end
+        end
+    end
+end
 function FightMenu:showCityInfo(city)
     --无相关城堡数据
     print("city info", city, self.finAni, city.cityData)
