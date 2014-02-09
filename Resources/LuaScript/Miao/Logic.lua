@@ -694,3 +694,7 @@ Logic.ownBuild = {
     5, 
     6, 7,
 }
+
+Logic.lastArenaTime = 0
+
+Logic.landBook = 0

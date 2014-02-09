@@ -33,6 +33,8 @@ function FightMenu:ctor()
     self.gongw = w
     local w = setPos(setAnchor(addChild(self.leftCenter, ui.newTTFLabel({text="魔法:", size=24, color={240, 196, 92}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {11, fixY(sz.height, 319)})
     local w = setPos(setAnchor(addChild(self.leftCenter, ui.newTTFLabel({text="财宝:", size=24, color={240, 196, 92}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {11, fixY(sz.height, 365)})
+    self.coldTime = w
+
     local w = setPos(setAnchor(addChild(self.leftCenter, ui.newTTFLabel({text="ma999", size=23, color={255, 241, 0}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {77, fixY(sz.height, 319)})
     self.maw = w
     local w = setPos(setAnchor(addChild(self.leftCenter, ui.newTTFLabel({text="土地产权证", size=23, color={255, 241, 0}, font="f2", shadowColor={0, 0, 0}})), {0.00, 0.50}), {66, fixY(sz.height, 403)})
@@ -65,11 +67,19 @@ function FightMenu:onBut(p)
         else
             global.director:popView()
         end
-    else
+    --攻击按钮
+    elseif p == 1 then
         if Logic.catData ~= nil then
             addBanner("已经派出部队啦！")
         else
-            if self.city ~= nil then
+            if self.city.kind == 0 then
+                if self.arenaIncold then
+                    addBanner("竞技场正在冷却")
+                else
+                    global.director:pushView(ConfigMenu.new(self.city), 1, 0)
+                    self:closeMenu()
+                end
+            elseif self.city ~= nil then
                 global.director:pushView(ConfigMenu.new(self.city), 1, 0)
                 self:closeMenu()
             end
@@ -95,47 +105,56 @@ function FightMenu:showArenaInfo(city)
         --显示报酬多少
         
         local rew = Logic.arenaReward[Logic.arenaLevel]
-        if rew ~= nil then
-            local gid = 1
-            local v = rew[2]
-            if rew[1] == 'equip' then
-                local edata = Logic.equip[v]
-                self['goods'..gid]:setString(edata.name)
-                setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
-                setScale(self['g'..gid], 1)
-                gid = gid+1
-            elseif rew[1] == 'goods' then
-                local edata = GoodsName[v]
-                self['goods'..gid]:setString(edata.name)
-                setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
-                setScale(self['g'..gid], 1)
-                gid = gid+1
-            elseif rew[1] == 'build' then
-                local edata = Logic.buildings[v]
-                self['goods'..gid]:setString(edata.name)
-                setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
-                local sca = getSca(self['g'..gid], {21, 18})
-                setScale(self['g'..gid], sca)
-                gid = gid+1
-            elseif rew[1] == 'gold' then
-                self['goods'..gid]:setString(rew[3])
-                setTexOrDis(self['g'..gid], '#silverIcon.png')
-                local sca = getSca(self['g'..gid], {21, 18})
-                setScale(self['g'..gid], sca)
-                gid = gid+1
-            end
+        local gid = 1
+        local t = Logic.date-Logic.lastArenaTime
+        self.arenaIncold = false
+        local leftTime = 50-t
+        if t >= 50 then
+            if rew ~= nil then
+                local v = rew[2]
+                if rew[1] == 'equip' then
+                    local edata = Logic.equip[v]
+                    self['goods'..gid]:setString(edata.name)
+                    setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
+                    setScale(self['g'..gid], 1)
+                    gid = gid+1
+                elseif rew[1] == 'goods' then
+                    local edata = GoodsName[v]
+                    self['goods'..gid]:setString(edata.name)
+                    setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
+                    setScale(self['g'..gid], 1)
+                    gid = gid+1
+                elseif rew[1] == 'build' then
+                    local edata = Logic.buildings[v]
+                    self['goods'..gid]:setString(edata.name)
+                    setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
+                    local sca = getSca(self['g'..gid], {21, 18})
+                    setScale(self['g'..gid], sca)
+                    gid = gid+1
+                elseif rew[1] == 'gold' then
+                    self['goods'..gid]:setString(rew[3])
+                    setTexOrDis(self['g'..gid], '#silverIcon.png')
+                    local sca = getSca(self['g'..gid], {21, 18})
+                    setScale(self['g'..gid], sca)
+                    gid = gid+1
+                end
 
-            for i=1, gid-1, 1 do
-                setVisible(self['goods'..i], true)
-                setVisible(self['g'..i], true)
-                setVisible(self['ib'..i], true)
             end
-            print("gid is what", gid)
-            for i=gid, 2, 1 do
-                setVisible(self['goods'..i], false)
-                setVisible(self['g'..i], false)
-                setVisible(self['ib'..i], false)
-            end
+        else
+            self.arenaIncold = true
+            self.coldTime:setString("冷却时间:"..math.floor(leftTime).."s")
+        end
+
+        for i=1, gid-1, 1 do
+            setVisible(self['goods'..i], true)
+            setVisible(self['g'..i], true)
+            setVisible(self['ib'..i], true)
+        end
+        print("gid is what", gid)
+        for i=gid, 2, 1 do
+            setVisible(self['goods'..i], false)
+            setVisible(self['g'..i], false)
+            setVisible(self['ib'..i], false)
         end
     end
 end

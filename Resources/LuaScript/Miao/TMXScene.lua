@@ -116,6 +116,30 @@ function TMXScene:initData(rep, param)
         Logic.arenaLevel = rd
     end
 
+    local r = u:getStringForKey('ownTech')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownTech = rd
+    end
+
+    local r = u:getStringForKey('lastArenaTime')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.lastArenaTime = rd
+    end
+
+    local r = u:getStringForKey('date')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.date = rd
+    end
+
+    local r = u:getStringForKey('landBook')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.landBook = rd
+    end
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
@@ -389,5 +413,9 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
     u:setStringForKey("ownBuild", simple.encode(Logic.ownBuild)) 
     u:setStringForKey("fightNum", simple.encode(Logic.fightNum)) 
-    u:setStringForKey("arenaLevel", simple.encode(Logic.arenaLevell)) 
+    u:setStringForKey("arenaLevel", simple.encode(Logic.arenaLevel)) 
+    u:setStringForKey("ownTech", simple.encode(Logic.ownTech)) 
+    u:setStringForKey("lastArenaTime", simple.encode(Logic.lastArenaTime)) 
+    u:setStringForKey("date", simple.encode(Logic.date)) 
+    u:setStringForKey("landBook", simple.encode(Logic.landBook)) 
 end

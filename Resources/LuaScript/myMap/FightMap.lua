@@ -21,6 +21,7 @@ function FightMap:checkWin()
         if Logic.winArena then
             Logic.winArena = false
             global.director:pushView(SessionMenu.new("挑战竞技场胜利了"), 1, 0)
+            Logic.lastArenaTime = Logic.date
             --士兵数量
             local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
             local reward = Logic.arenaReward[Logic.arenaLevel]
@@ -59,6 +60,7 @@ function FightMap:checkWin()
         global.director:pushView(SessionMenu.new("合战胜利了!"), 1, 0)
         local city = self.page.cidToCity[Logic.challengeCity]
         city:setColor(0)
+        --城堡
         if city.kind == 1 then
             --城堡数据
             local cp = Logic.castlePeople[city.realId]
@@ -74,13 +76,15 @@ function FightMap:checkWin()
                 for k, v in ipairs(cg.equip) do
                     local edata = Logic.equip[v]
                     addBanner("获得了装备"..edata.name)
-                    table.insert(Logic.ownGoods, {0, edata.id})
+                    --table.insert(Logic.ownGoods, {0, edata.id})
+                    --装备只可以获得1个不能从商店购买
+                    changeEquip(edata.id, 1)
                 end
                 --研究用的书籍 可以 研究新装备
                 for k, v in ipairs(cg.goods) do
                     local edata = GoodsName[v]
                     addBanner("获得新物品"..edata.name)
-
+                    local findTech = false
                     for tk, tv in pairs(Logic.techId) do
                         if tv == v then
                             Logic.ownTech[tk] = Logic.ownTech[tk]+1
@@ -91,7 +95,27 @@ function FightMap:checkWin()
                                 addBanner("可以研究新的物品了"..equipData.name)
                                 table.insert(Logic.researchGoods, {0, ev})
                             end
+                            findTech = true
                             break
+                        end
+                    end
+                    --不是技术书籍 兵种数据 和 土地证书
+                    if not findTech then
+                        if v == 46 then
+                            Logic.soldiers[2] = {1, 30} 
+                            addBanner("获得新兵种 弓兵")
+                        elseif v == 47 then
+                            Logic.soldiers[3] = {1, 20} 
+                            addBanner("获得新兵种 魔法兵")
+                        elseif v == 48 then
+                            Logic.soldiers[4] = {1, 10} 
+                            addBanner("获得新兵种 骑兵")
+                        elseif v == 38 then
+                            Logic.landBook = Logic.landBook+1 
+                            addBanner("获得土地产权证书")
+                        elseif v == 39 then
+                            Logic.fightNum = Logic.fightNum+1
+                            addBanner("合战人数增加1")
                         end
                     end
                 end
@@ -99,8 +123,13 @@ function FightMap:checkWin()
                 for k, v in ipairs(cg.build) do
                     local edata = Logic.buildings[v]
                     addBanner("获得新建筑物"..edata.name)
+                    table.insert(Logic.ownBuild, edata.id)
                 end
+                local silver = cg.silver
+                doGain(silver)
+                addBanner("获得银币"..silver)
             end
+        --村落
         elseif city.kind == 2 then
             local cp = Logic.villagePeople[city.realId]
             if cp ~= nil then
