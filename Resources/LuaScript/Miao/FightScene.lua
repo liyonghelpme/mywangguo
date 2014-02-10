@@ -27,14 +27,19 @@ function FightScene:ctor()
     self.soldiers = {copyTable(testData), copyTable(testData)}
     self.soldiers = {{15, 10, 0, 0}, {10, 18, 0, 0}}
     --]]
+
     --挑战竞技场 
     --挑战竞技场胜利 kind == 0 奖励物品 提升竞技场 
+    --[[
     if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
         local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
         self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(cityData)}
     else
         self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
     end
+    --]]
+    
+    self.soldiers = {{0, 0, 5, 0}, {0, 0, 5, 0}}
 
     --self.soldiers = {{25, 10, 0, 0}, {5, 40, 0, 0}}
 

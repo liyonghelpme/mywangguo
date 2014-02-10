@@ -36,3 +36,6 @@ end
 function FightFunc:doWaitArrow()
 end
 
+function FightFunc:findNearEnemy()
+end
+

@@ -6,7 +6,7 @@ function FightLayer2:finishFoot()
     else
         self.animateYet = false
         self.finishAttack = false
-        self.day = 0
+        self.day = 3
         self.passTime = 0
         for k, v in ipairs(self.allSoldiers) do
             v.funcSoldier:resetPos()
@@ -213,12 +213,13 @@ function FightLayer2:footScript(diff)
     --print("footScript")
     local p = getPos(self.battleScene)
     if self.passTime == 0 then
-        self.moveTarget = p[1]
-
         local footDead, left, right = self:checkOneFootDead()
         if left == 0 and right == 0 then
-            self.day = 0
+            self.day = 3
+            return
         end
+
+        self.moveTarget = p[1]
         --快速移动镜头 分镜头
         --再显示animate动画
         local p = getPos(self.battleScene)
@@ -441,11 +442,14 @@ function FightLayer2:cloneRightCamera()
     print("cloneRightCamera")
 end
 
+--[[
 function FightLayer2:switchArrow()
     self.day = 1
     self.animateYet = false
     self.passTime = 0
 end
+--]]
+
 --显示分镜头关闭主镜头
 function FightLayer2:showLeftCamera()
     setVisible(self.leftCamera.renderTexture, true)
@@ -508,6 +512,20 @@ function FightLayer2:splitCamera()
     setPos(self.leftCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
     self.split = true
 end
+function FightLayer2:checkMagic()
+    local left
+    local right
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.id == 2 then
+            if v.color == 0 then
+                left = true
+            else
+                right = true
+            end
+        end
+    end
+    return left, right
+end
 function FightLayer2:checkArrow()
     local left
     local right
@@ -541,6 +559,177 @@ function FightLayer2:checkOneArrowDead()
     print("check FootDead", left, right)
     return true, left, right
 end
+function FightLayer2:checkOneMagicDead()
+    local left = 0
+    local right = 0
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.id == 2 then
+            if v.color == 0 then
+                left = left+1
+            elseif v.color == 1 then
+                right = right+1
+            end
+            if left > 0 and right > 0 then
+                return false
+            end
+        end
+    end
+    print("check Magic Dead", left, right)
+    return true, left, right
+end
+function FightLayer2:magicScript(diff)
+    if self.passTime == 0 then
+        print("magicScript", self.day, diff)
+        local ad, left, right = self:checkOneMagicDead()
+        if left == 0 and right == 0 then
+            self.day = 1
+            return
+        end
+
+        local p = getPos(self.battleScene)
+        local vs = getVS()
+        --快速回到 双方部队头部
+        --这种类型部队的头部
+        if left == 0 then
+            self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
+            self:showLeftCamera()
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        else
+            local fw = #self.myFootNum*FIGHT_OFFX
+            local bp = self.leftWidth-fw
+            --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
+            self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
+            print("self.leftWidth ", self.moveTarget)
+            self:showLeftCamera() 
+            --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置
+            --然后恢复场景位置
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        end
+
+        if right == 0 then
+            self:showRightCamera()
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+        else
+            --右侧镜头位置当前屏幕的左侧
+            self:showRightCamera()
+            local fw = #self.eneFootNum*FIGHT_OFFX
+            local ahead = self.WIDTH-self.rightWidth+fw
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_HEAD_OFF))
+        end
+    end
+
+    self.passTime = self.passTime+diff
+
+    --两个镜头已经分离了再合并
+    --判断两个镜头的 动作
+    --暂时不要镜头动作
+    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil then
+        local vs = getVS()
+        local ls = -self.leftCamera.startPoint[1]
+        local rs = -self.rightCamera.startPoint[1]
+        local lw = self.leftCamera.width
+        local rw = self.rightCamera.width
+        local lp = getPos(self.leftCamera.renderTexture)
+        local rp = getPos(self.rightCamera.renderTexture)
+        print("magic leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
+        --当一方没有 魔法师剩余的时候 则 等待另外一侧镜头到达屏幕中央则 clone这个镜头即可
+        local left, right = self:checkMagic()
+        --只有单侧士兵
+        --左侧没有弓箭手
+        --战场中心不是 WIDTH/2 而是 LEFTWIDHT + vs.width*1.5/2 的位置
+        local bmid = self.leftWidth+vs.width*1.5/2
+        if not left then
+            print("magic left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
+            if not self.mergeYet then
+                if rs <= bmid and rs > bmid-vs.width/2 then
+                    print("magic no left arrow so merge Right Camera ")
+                    self:mergeRightCamera()
+                end
+            else
+                if rs <= bmid-vs.width/2 then
+                    print("magic no left arrow begin clone Right Camera")
+                    self:cloneRightCamera()
+                end
+            end
+        elseif not right then
+            if not self.mergeYet then
+                if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
+                    self:mergeCamera()
+                end
+            else
+                if (ls+lw) >= bmid+vs.width/2 then
+                    self:cloneLeftCamera()
+                end
+            end
+        else
+            --镜头相交
+            if not self.mergeYet then
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
+            end
+            --拆分镜头 交错弓箭镜头
+            if self.mergeYet then
+                if ls > rs+rw or ls+lw < rs then
+                    self:splitCamera()
+                end
+            end
+        end
+    end
+
+    --镜头移动到目标位置
+    print("magic leftCamera ", self.leftCamera.startPoint[1], self.leftCamera.moveTarget)
+    if not self.animateYet and math.abs(self.leftCamera.startPoint[1]-self.leftCamera.moveTarget) < 5 then
+        self.animateYet = true
+        for k, v in ipairs(self.allSoldiers) do
+            --开始跑步和攻击
+            v:doRunAndAttack(self.day)
+        end
+    end
+
+    if self.arrow ~= nil or self.rightArrow ~= nil then
+        if not self.arrowOver then
+            print("magic check arrow Over one arrow dead", self.arrow, self.rightArrow, self.arrowOver)
+            if self.arrow ~= nil and self.arrow.dead then
+                print("left Arrow dead")
+                self.arrow = nil
+                --需要清理双方的 弓箭
+                self.rightArrow = nil
+                self.arrowOver = true
+                --进入分屏幕状态 下一个 回合
+                self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishMagic)}))
+            elseif self.rightArrow ~= nil and self.rightArrow.dead then
+                print("right Arrow dead")
+                self.rightArrow = nil
+                self.arrow = nil
+                self.arrowOver = true
+                self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishMagic)}))
+            end
+            print("magic over", self.arrowOver)
+        end
+    end
+    if self.clone then
+        print("start clone", self.cloneWho)
+        --clone 镜头要逐渐修改不能突然移动
+        if self.cloneWho == 0 then
+            print("magic clone set left camera move target ")
+            self.mainCamera.moveTarget = self.leftCamera.moveTarget 
+            self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
+        else
+            print("magic clone set right camera move")
+            self.mainCamera.moveTarget = self.rightCamera.moveTarget
+            self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
+        end
+    end
+end
+
+
+function FightLayer2:cavalryScript(diff)
+    if self.passTime == 0 then
+        self.day = 0
+    end
+end
+
 --屏幕左侧宽度 要是 保证最后面的有半个屏幕可以显示 至少 
 --当前最后面的 是弓箭手
 --当前的命令队列 cmdList 解释命令 执行命令  
@@ -548,7 +737,7 @@ function FightLayer2:arrowScript(diff)
     if self.passTime == 0 then
         local ad, left, right = self:checkOneArrowDead()
         if left == 0 and right == 0 then
-            self.day = 1
+            self.day = 2
             return
         end
 
@@ -640,7 +829,7 @@ function FightLayer2:arrowScript(diff)
     --进入 动画状态
     local p = getPos(self.battleScene)
     --print("battleScene pos and moveTarget", p[1], self.moveTarget)
-    if not self.animateYet and math.abs(p[1]-self.moveTarget) <= 5 then
+    if not self.animateYet and math.abs(self.leftCamera.startPoint[1]-self.leftCamera.moveTarget) < 5 then
         self.animateYet = true
         for k, v in ipairs(self.allSoldiers) do
             --开始跑步和攻击
@@ -685,6 +874,25 @@ function FightLayer2:arrowScript(diff)
         end
     end
 end
+function FightLayer2:finishMagic()
+    print("finish Magic")
+
+    self:clearMenu()
+    local ret, left, right = self:oneFail()
+    if ret then
+    else
+        --进入步兵开始状态 屏幕分割 和 屏幕设定位置
+        for k, v in ipairs(self.allSoldiers) do
+            v:finishAttack()
+        end
+
+        self.day = 1
+        self.arrowOver = false
+        self.animateYet = false
+        self.passTime = 0
+        self:clearAllCamera()
+    end
+end
 --进入步兵回合 
 --插入好多动作
 function FightLayer2:finishArrow()
@@ -700,7 +908,7 @@ function FightLayer2:finishArrow()
         for k, v in ipairs(self.allSoldiers) do
             v:finishAttack()
         end
-        self.day = 1
+        self.day = 2
         self.arrowOver = false
         self.animateYet = false
         self.passTime = 0
@@ -708,14 +916,11 @@ function FightLayer2:finishArrow()
     end
 end
 
-
-
---可能有多个 arrow
---先追踪 我方的弓箭
---镜头追踪新的弓箭位置
-function FightLayer2:traceArrow(arr)
-    if arr.color == 0 then
-        if self.arrow ~= nil then
+--追踪 魔法飞行
+--[[
+function FightLayer2:traceMagic(mag)
+    if .color == 0 then
+        if self.mag ~= nil then
             local ap = getPos(self.arrow.bg)
             local np = getPos(arr.bg)
             --按照左侧追踪 我方镜头表现
@@ -729,10 +934,36 @@ function FightLayer2:traceArrow(arr)
                 end
             else
             end
+
+        else
+        end
+    end
+end
+--]]
+
+--可能有多个 arrow
+--先追踪 我方的弓箭
+--镜头追踪新的弓箭位置
+function FightLayer2:traceArrow(arr)
+    if arr.color == 0 then
+        if self.arrow ~= nil then
+            local ap = getPos(self.arrow.bg)
+            local np = getPos(arr.bg)
+            --按照左侧追踪 我方镜头表现
+            if np[1] > ap[1] then
+                if DEBUG_FIGHT then
+                    setColor(self.arrow.changeDirNode, {255, 255, 0})
+                end
+                self.arrow = arr
+                if DEBUG_FIGHT then
+                    setColor(self.arrow.changeDirNode, {0, 255, 255})
+                end
+            else
+            end
         else
             self.arrow = arr
             if DEBUG_FIGHT then
-                setColor(self.arrow.changeDirNode, {0, 255, 0})
+                setColor(self.arrow.changeDirNode, {0, 255, 255})
             end
         end
         --startPoint 应该
@@ -743,17 +974,17 @@ function FightLayer2:traceArrow(arr)
             local np = getPos(arr.bg)
             if np[1] < ap[1] then
                 if DEBUG_FIGHT then
-                    setColor(self.rightArrow.changeDirNode, {255, 0, 0})
+                    setColor(self.rightArrow.changeDirNode, {255, 255, 0})
                 end
                 self.rightArrow = arr
                 if DEBUG_FIGHT then
-                    setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+                    setColor(self.rightArrow.changeDirNode, {0, 255, 255})
                 end
             end
         else
             self.rightArrow = arr
             if DEBUG_FIGHT then
-                setColor(self.rightArrow.changeDirNode, {0, 255, 0})
+                setColor(self.rightArrow.changeDirNode, {0, 255, 255})
             end
         end
         print("right traceing")

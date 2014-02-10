@@ -1,6 +1,7 @@
 require "Miao.FightFunc"
 require "Miao.FightArrow2"
 require "Miao.FightFoot"
+require "Miao.FightMagic"
 FIGHT_SOL_STATE = {
     FREE=0,
     START_ATTACK=1,
@@ -23,7 +24,20 @@ FIGHT_SOL_STATE = {
     ARROW_WAIT = 14,
 }
 
+
 FightSoldier2 = class()
+function FightSoldier2:initSoldierNet()
+    self.map.soldierNet[getMapKey(self.col, self.row)] = self
+end
+
+function FightSoldier2:initLeftRight()
+    local left = getMapKey(self.col-1, self.row)
+    local right = getMapKey(self.col+1, self.row)
+    self.left = self.map.soldierNet[left]
+    self.right = self.map.soldierNet[right]
+end
+
+
 --调整每个士兵的左右 我方的 右侧 敌方的左侧
 function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.sid = sid
@@ -41,6 +55,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     --所在列
     self.col = col
     self.row = row
+    self:initSoldierNet()
+
     --相当于几个士兵的能力
     self.data = data
     self.color = data.color
@@ -60,6 +76,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
         self.funcSoldier = FightFoot.new(self)
     elseif self.id == 1 then
         self.funcSoldier = FightArrow2.new(self)
+    elseif self.id == 2 then
+        self.funcSoldier = FightMagic.new(self)
     end
 
     self.bg = CCNode:create()
@@ -163,18 +181,25 @@ function FightSoldier2:setDir()
 end
 function FightSoldier2:doRunAndAttack(day)
     if not self.dead then
+        print("startAttack", day, self.id)
         --先弓箭 接着 步兵
-        if day == 0 and self.id == 1 then
+        if day == 1 and self.id == 1 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
             if DEBUG_FIGHT then
                 self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
             end
-        elseif day == 1 and self.id == 0 then
+        elseif day == 2 and self.id == 0 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
             print("Arrow start Attack")
             if DEBUG_FIGHT then
                 self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
             end
+        elseif day == 0 and self.id == 2 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
+        elseif day == 3 and self.id == 3 then
         end
     end
 end
