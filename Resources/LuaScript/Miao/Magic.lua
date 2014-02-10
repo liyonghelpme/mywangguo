@@ -25,6 +25,7 @@ end
 function Magic:update(diff)
     local p = getPos(self.bg)
     local tp = getPos(self.target.bg)
+    self.lastPos = p
     if self.target.dead then
         self:doHarm()
     else

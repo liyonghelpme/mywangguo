@@ -2,6 +2,7 @@ require "Miao.FightFunc"
 require "Miao.FightArrow2"
 require "Miao.FightFoot"
 require "Miao.FightMagic"
+require "Miao.FightCavalry"
 FIGHT_SOL_STATE = {
     FREE=0,
     START_ATTACK=1,
@@ -22,6 +23,10 @@ FIGHT_SOL_STATE = {
     FOOT_MOVE_TO = 13,
 
     ARROW_WAIT = 14,
+    
+    --骑兵等待返回
+    WAIT_BACK = 15,
+    MOVE_BACK = 16,
 }
 
 
@@ -78,16 +83,19 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
         self.funcSoldier = FightArrow2.new(self)
     elseif self.id == 2 then
         self.funcSoldier = FightMagic.new(self)
+    elseif self.id == 3 then
+        self.funcSoldier = FightCavalry.new(self)
     end
 
     self.bg = CCNode:create()
     self.funcSoldier:initView()
     self.bg:addChild(self.changeDirNode)
     setAnchor(self.changeDirNode, {262/512, (512-352)/512})
+
     self.state = FIGHT_SOL_STATE.FREE
-    self.shadow = CCSprite:create("roleShadow2.png")
-    self.bg:addChild(self.shadow,  -1)
-    setSize(self.shadow, {70, 44})
+
+    self.funcSoldier:initShadow()
+
     self.needUpdate = true
     registerEnterOrExit(self)
     
@@ -104,7 +112,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
         self.bg:addChild(self.sidLabel)
         setPos(self.sidLabel, {0, 100})
 
-        self.colLabel = ui.newBMFontLabel({text=self.col, font="bound.fnt", size=24, color={128, 128, 0}})
+        self.colLabel = ui.newBMFontLabel({text='cr'..self.col..' '..self.row, font="bound.fnt", size=24, color={128, 128, 0}})
         addChild(self.bg, self.colLabel)
         setPos(self.colLabel, {0, 130})
     end
@@ -200,6 +208,10 @@ function FightSoldier2:doRunAndAttack(day)
                 self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
             end
         elseif day == 3 and self.id == 3 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
         end
     end
 end
@@ -207,7 +219,8 @@ function FightSoldier2:updateLabel()
     if not DEBUG_FIGHT then
         return
     end
-    local s = self.sid..' '
+    --local s = self.sid..' '
+    local s = ''
     if self.left ~= nil then
         s = s..'l '..self.left.sid
     end
@@ -221,11 +234,12 @@ function FightSoldier2:updateLabel()
     s = s..'x:'..math.floor(p[1])..' '..math.floor(p[2])
     --self.stateLabel:setString(s)
 
+
     local tid
     if self.attackTarget ~= nil then
         tid = self.attackTarget.sid
     end
-    self.stateLabel:setString(self.state.." "..str(tid).." "..str(self.funcSoldier.isHead))
+    self.stateLabel:setString(self.state.." "..str(tid).." "..str(self.funcSoldier.isHead)..'\n'..s)
 
 
     --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
@@ -276,6 +290,7 @@ function FightSoldier2:startAttack(diff)
             if self.attackTarget ~= nil then 
                 if self.attackTarget.color ~= self.color then
                     enePos = getPos(self.attackTarget.bg)
+                    --步兵互相靠近
                     if self.attackTarget.id == 0 then
                         local midPoint = (self.oldPos[1]+enePos[1])/2
                         midPoint = midPoint+offX+math.random(20)-10
@@ -285,6 +300,7 @@ function FightSoldier2:startAttack(diff)
                         self.bg:runAction(self.moveAct)
                         self.midPoint = midPoint
                         print("attack MidPoint", self.midPoint)
+                    --步兵 和 其它兵种 移动靠近对方
                     else
                         local offE = -110
                         if self.color == 1 then
@@ -312,6 +328,10 @@ end
 --跟随我前面的 我方士兵
 function FightSoldier2:update(diff)
     self:updateLabel()
+    --弓箭手 步兵 
+    --骑士 步兵 之间的 防御 步兵 靠近骑兵的攻击
+    --只有骑兵的 优先级 是 低于 步兵的 优先级
+    --self:doFree(diff)
     self:startAttack(diff)
     self:doPose(diff)
     self:doMove(diff)
@@ -326,6 +346,9 @@ function FightSoldier2:update(diff)
     self:doMoveTo(diff)
     self.funcSoldier:doWaitMove(diff)
     self.funcSoldier:doWaitArrow(diff)
+    self.funcSoldier:doWaitBack(diff)
+    self.funcSoldier:doMoveBack(diff)
+    self.funcSoldier:doFree(diff)
 end
 
 function FightSoldier2:doPose(diff)
@@ -486,30 +509,34 @@ end
 
 function FightSoldier2:doMove(diff)
     if self.state == FIGHT_SOL_STATE.IN_MOVE then
-        if self.attackTarget.color ~= self.color then
-            local p = getPos(self.bg)
-            print("not same color move", p[1], self.midPoint)
-            --停止移动了 才可以
-            if self.beginMove ~= nil and not self.beginMove then
-                beginMove = nil
-                self.inMove = false
-                --self.bg:stopAction(self.moveAct)
-                self.changeDirNode:stopAction(self.moveAni)
-                self.state = FIGHT_SOL_STATE.IN_ATTACK
-                local rd = math.random(2)
-                local aa 
-                if rd == 1 then
-                    aa = self.attackA
-                else
-                    aa = self.attackB
+        if self.id == 0 then 
+            if self.attackTarget.color ~= self.color then
+                local p = getPos(self.bg)
+                print("not same color move", p[1], self.midPoint)
+                --停止移动了 才可以
+                if self.beginMove ~= nil and not self.beginMove then
+                    beginMove = nil
+                    self.inMove = false
+                    --self.bg:stopAction(self.moveAct)
+                    self.changeDirNode:stopAction(self.moveAni)
+                    self.state = FIGHT_SOL_STATE.IN_ATTACK
+                    local rd = math.random(2)
+                    local aa 
+                    if rd == 1 then
+                        aa = self.attackA
+                    else
+                        aa = self.attackB
+                    end
+                    self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
+                    self.oneAttack = false
+                    self:showAttackEffect()
                 end
-                self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
-                self.oneAttack = false
-                self:showAttackEffect()
+            --同方士兵 
+            else
+                self.state = FIGHT_SOL_STATE.FOOT_MOVE_TO 
             end
-        --同方士兵 
         else
-            self.state = FIGHT_SOL_STATE.FOOT_MOVE_TO 
+            self.funcSoldier:doMove(diff)
         end
     end
 end
@@ -597,10 +624,14 @@ function FightSoldier2:findNearRow()
     local eneList = {}
     if self.color == 0 then
         table.insert(eneList, self.map.eneSoldiers)
+        table.insert(eneList, self.map.eneMagicSoldiers)
         table.insert(eneList, self.map.eneArrowSoldiers)
+        table.insert(eneList, self.map.eneCavalrySoldiers)
     else
         table.insert(eneList, self.map.mySoldiers)
+        table.insert(eneList, self.map.myMagicSoldiers)
         table.insert(eneList, self.map.myArrowSoldiers)
+        table.insert(eneList, self.map.myCavalrySoldiers)
     end
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do

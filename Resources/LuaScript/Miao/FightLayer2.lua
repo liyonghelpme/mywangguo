@@ -40,7 +40,8 @@ function FightLayer2:convertNumToSoldier(n)
     local pow
     if n == 0 then
         --至少一列空列
-        return {{0, 0, 0, 0, 0}}
+        --return {{0, 0, 0, 0, 0}}
+        return {}
     end
 
     if n < 100 then
@@ -214,12 +215,14 @@ function FightLayer2:ctor(s, my, ene)
     self.myFootNum = self:convertNumToSoldier(my[1])
     self.myArrowNum = self:convertNumToSoldier(my[2])
     self.myMagicNum = self:convertNumToSoldier(my[3])
+    self.myCavalryNum = self:convertNumToSoldier(my[4])
     --self.myFootNum = self:testNum12(1)
     --self.myArrowNum = self:testNum11()
 
     self.eneFootNum = self:convertNumToSoldier(ene[1])
     self.eneArrowNum = self:convertNumToSoldier(ene[2])
     self.eneMagicNum = self:convertNumToSoldier(ene[3])
+    self.eneCavalryNum = self:convertNumToSoldier(ene[4])
     --self.eneFootNum = self:testNum13(0)
     --self.eneArrowNum = self:testNum14()
 
@@ -339,7 +342,7 @@ function FightLayer2:doFree(diff)
         --使用ease 函数调整move 状态
         local vs = getVS()
         local p = getPos(self.battleScene)
-        local endPoint = self.rightBack-vs.width
+        local endPoint = self.rightBack-vs.width+100
         print("endPoint is", endPoint)
         self.endPoint = endPoint
         self.totalTime = (endPoint-p[1])/self.moveSpeed
@@ -422,6 +425,7 @@ function FightLayer2:initPic()
     sf:addSpriteFramesWithFile("cat_foot.plist")
     sf:addSpriteFramesWithFile("cat_arrow.plist")
     sf:addSpriteFramesWithFile("cat_magic.plist")
+    sf:addSpriteFramesWithFile("cat_cavalry.plist")
     sf:addSpriteFramesWithFile("attackAni.plist")
     createAnimation("attackSpe1", "attack%d.png", 5, 8, 1, 0.5, true)
     createAnimationWithNum("attackSpe2", "attack%d.png", 0.5, true, {1, 3, 4})
@@ -471,7 +475,7 @@ function FightLayer2:initSoldier()
     self.soldierNet = {}
 
 
-    local colId = #self.myArrowNum+#self.myFootNum+#self.myMagicNum-1
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum-1
     --每一列
     --我方步兵的列编号
     for k, v in ipairs(self.myFootNum) do 
@@ -511,21 +515,9 @@ function FightLayer2:initSoldier()
     --数据是第一排 第二排
     --还想知道 每种 士兵 所包含的列数 
     --如果直到了所有的这种士兵 其实 可以 计算出 包围盒子的
-    self:printSoldier(self.mySoldiers)
-    for k, v in ipairs(self.mySoldiers) do
-        for tk, tv in ipairs(v) do
-            if tv then
-                if self.mySoldiers[k-1] then
-                    tv.right = self.mySoldiers[k-1][tk] 
-                end
-                if self.mySoldiers[k+1] then
-                    tv.left = self.mySoldiers[k+1][tk]
-                end
-            end
-        end
-    end
+
     --敌方步兵所在的列编号
-    local colId = #self.myArrowNum+#self.myFootNum+#self.myMagicNum
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum
 
     self.eneSoldiers = {}
     for k, v in ipairs(self.eneFootNum) do
@@ -558,37 +550,12 @@ function FightLayer2:initSoldier()
         colId = colId+1
     end
 
-    self:printSoldier(self.eneSoldiers)
-    for k, v in ipairs(self.eneSoldiers) do
-        for tk, tv in ipairs(v) do
-            if tv then
-                if self.eneSoldiers[k-1] then
-                    tv.left = self.eneSoldiers[k-1][tk]
-                end
-                if self.eneSoldiers[k+1] then
-                    tv.right = self.eneSoldiers[k+1][tk]
-                end
-            print("set left right", tk, tv.sid, tv.left, tv.right)
-            end
-        end
-    end
-
-    for tk, tv in ipairs(self.mySoldiers[1]) do
-        if tv then
-            tv.right = self.eneSoldiers[1][tk]
-        end
-    end
-    for tk, tv in ipairs(self.eneSoldiers[1]) do
-        if tv then
-            tv.left = self.mySoldiers[1][tk]
-        end
-    end
 
     --初始化 魔法兵  调整弓箭手的 所在列 colId
     self.myMagicSoldiers = {}
     self.eneMagicSoldiers = {}
     local footWidth = #self.myFootNum
-    local colId = #self.myArrowNum+#self.myMagicNum-1
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum-1
     for k, v in ipairs(self.myMagicNum) do
         local temp = {}
         table.insert(self.myMagicSoldiers, temp)
@@ -621,7 +588,7 @@ function FightLayer2:initSoldier()
 
     local footWidth = #self.eneFootNum
     --更新状态 检测 myArrow eneArrowSoldiers
-    local colId = #self.myArrowNum+#self.myMagicNum+#self.myFootNum+#self.eneFootNum 
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum+#self.eneFootNum 
     for k, v in ipairs(self.eneMagicNum) do
         local temp = {}
         table.insert(self.eneMagicSoldiers, temp)
@@ -659,10 +626,10 @@ function FightLayer2:initSoldier()
     --弓箭手的位置  屏幕的
     self.myArrowSoldiers = {}
     self.eneArrowSoldiers = {}
-    local footWidth = #self.myFootNum
+    local footWidth = #self.myMagicNum+#self.myFootNum
     --leftWidth 士兵所在的列 和 行 全局的 
     --先考虑 步兵 炮兵 弓箭 最后骑兵
-    local colId = #self.myArrowNum-1
+    local colId = #self.myCavalryNum+#self.myArrowNum-1
     for k, v in ipairs(self.myArrowNum) do 
         --row
         local temp = {}
@@ -696,37 +663,10 @@ function FightLayer2:initSoldier()
         colId = colId-1
     end
 
-    --[[
-    for k, v in ipairs(self.myArrowSoldiers) do
-        for tk, tv in ipairs(v) do
-            if tv then
-                if self.myArrowSoldiers[k-1] ~= nil then
-                    tv.right = self.myArrowSoldiers[k-1][tk] 
-                end
-                if self.myArrowSoldiers[k+1] ~= nil then
-                    tv.left = self.myArrowSoldiers[k+1][tk]
-                end
-            end
-        end
-    end
-    --]]
-    --调整弓箭手的 相邻 部队的联系
-    --该行最后的 网格数据结构 table 构建grid 网格 周围四个 邻居都能快速的 找到
-    --网格的 left right up down 4个方向快速找到邻居
-    --通过相邻邻居快速找打攻击目标
-    --[[
-    for tk, tv in ipairs(self.myArrowSoldiers[1]) do
-        --tv 不是nil 或者 false
-        if tv then
-            --步兵的最左侧
-            tv.right = getRowMost(self.mySoldiers, tk, 'left')
-        end
-    end
-    --]]
 
-    local footWidth = #self.eneFootNum
+    local footWidth = #self.eneFootNum+#self.eneMagicNum
     --更新状态 检测 myArrow eneArrowSoldiers
-    local colId = #self.myArrowNum+#self.myMagicNum+#self.myFootNum+#self.eneFootNum
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum+#self.eneFootNum+#self.eneMagicNum
     for k, v in ipairs(self.eneArrowNum) do
         local temp = {}
         table.insert(self.eneArrowSoldiers, temp)
@@ -755,29 +695,78 @@ function FightLayer2:initSoldier()
         end
         colId = colId+1
     end
-    --[[
-    for k, v in ipairs(self.eneArrowSoldiers) do
-        for tk, tv in ipairs(v) do
-            if tv then
-                if self.eneArrowSoldiers[k-1] then
-                    tv.left = self.eneArrowSoldiers[k-1][tk]
+
+    self.myCavalrySoldiers = {}
+    self.eneCavalrySoldiers = {}
+    local footWidth = #self.myArrowNum+#self.myMagicNum+#self.myFootNum
+    --leftWidth 士兵所在的列 和 行 全局的 
+    --先考虑 步兵 炮兵 弓箭 最后骑兵
+    local colId = #self.myCavalryNum-1
+
+    for k, v in ipairs(self.myCavalryNum) do 
+        --row
+        local temp = {}
+        table.insert(self.myCavalrySoldiers, temp) 
+        local lastOne = nil
+        for ck, cv in ipairs(v) do 
+            --col
+            if cv > 0 then
+                --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
+                local sp = FightSoldier2.new(self, 3, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
                 end
-                if self.eneArrowSoldiers[k+1] then
-                    tv.right = self.eneArrowSoldiers[k+1][tk]
-                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            else
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
             end
-            --print("set left right", tk, tv.sid, tv.left, tv.right)
         end
+        colId = colId-1
     end
 
-    for tk, tv in ipairs(self.eneArrowSoldiers[1]) do
-        --tv 不是nil 或者 false
-        if tv then
-            --步兵的最左侧
-            tv.left = getRowMost(self.eneSoldiers, tk, 'right')
+    local footWidth = #self.eneFootNum+#self.eneMagicNum+#self.eneArrowNum
+    --更新状态 检测 myArrow eneArrowSoldiers
+    local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum+#self.eneFootNum+#self.eneMagicNum+#self.eneArrowNum
+    for k, v in ipairs(self.eneCavalryNum) do
+        local temp = {}
+        table.insert(self.eneCavalrySoldiers, temp)
+        local lastOne = nil
+        for ck, cv in ipairs(v) do
+            if cv > 0 then
+                local sp = FightSoldier2.new(self, 3, colId, ck-1, {level=cv, color=1}, self:getSolId()) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1+footWidth)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                sp:setZord()
+                sp:setDir()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            else
+                local sp = {dead=true, color=0, sid=-1, id=-1}
+                table.insert(temp, sp)
+            end
         end
+        colId = colId+1
     end
-    --]]
 
     --列  行
     --最后一列 对齐 敌方士兵 士兵

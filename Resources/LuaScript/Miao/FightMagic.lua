@@ -6,6 +6,7 @@ function FightMagic:ctor(s)
     self.soldier.idleAni = createAnimation("cat_magic_idle", 'cat_magic_idle_%d.png', 0, 20, 1, 1, true)
     self.soldier.deadAni = createAnimation("cat_magic_dead", 'cat_magic_dead_%d.png', 0, 10, 1, 1, true)
     self.soldier.deadAni:setRestoreOriginalFrame(false)
+    self.showMagicTime = 0.76
 end
 
 function FightMagic:initView()
@@ -24,10 +25,12 @@ function FightMagic:findNearEnemy()
         table.insert(eneList, self.soldier.map.eneSoldiers)
         table.insert(eneList, self.soldier.map.eneMagicSoldiers)
         table.insert(eneList, self.soldier.map.eneArrowSoldiers)
+        table.insert(eneList, self.soldier.map.eneCavalrySoldiers)
     else
         table.insert(eneList, self.soldier.map.mySoldiers)
         table.insert(eneList, self.soldier.map.myMagicSoldiers)
         table.insert(eneList, self.soldier.map.myArrowSoldiers)
+        table.insert(eneList, self.soldier.map.myCavalrySoldiers)
     end
 
     --这两个状态 不累计arrowHurt数值
@@ -123,8 +126,183 @@ function FightMagic:startAttack()
 
     self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
 end
-function FightMagic:waitAttack(diff)
-    if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
+
+--修改magic
+function FightMagic:doFightBack(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.FIGHT_BACK then
+        print("magic doFightBack now", self.shootYet, self.inFightBack)
+        if not self.shootYet then
+            self.shootYet = true
+            local function addArrow()
+                local p = getPos(self.soldier.bg)
+                local a = Magic.new(self.soldier, self.soldier.attackTarget)
+                self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
+                local abg = a.bg
+                local offX = 20
+                if self.soldier.color == 1 then
+                    offX = -20
+                end
+                setPos(abg, {p[1]+offX, p[2]})
+                if self.soldier.color == 1 then
+                    setScaleX(a.changeDirNode, -1)
+                end
+                local as = self.soldier.map.arrowSpeed
+                local tpos = getPos(self.soldier.attackTarget.bg)
+                local tt = math.abs(tpos[1]-p[1])/as
+                a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(nil, removeSelf, a.bg)}))
+            end
+            if not self.dead then
+                self.soldier.changeDirNode:stopAllActions()
+                self.inFightBack = true
+                local function clearFightBack()
+                    self.inFightBack = false
+                end
+                self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(nil, clearFightBack)}))
+                self.soldier.changeDirNode:runAction(sequence({delaytime(0.76), callfunc(nil, addArrow)}))
+            end
+        else
+            --控制动画频率
+            if not self.inFightBack then
+                self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
+            end
+        end
     end
 end
 
+function FightMagic:doNext(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.NEXT_TARGET then
+        if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
+            local p = getPos(self.soldier.attackTarget.bg)
+            local mp = getPos(self.soldier.bg)
+            if math.abs(p[1]-mp[1]) < FIGHT_NEAR_RANGE then
+                --self.soldier.changeDirNode:stopAction(self.idleAction)
+                self.soldier.changeDirNode:stopAllActions()
+                --doNext 杀死一个目标 找下一个目标
+                self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                print("doNext NEAR_ATTACK")
+                self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
+                self.oneAttack = false
+                --self:showAttackEffect()
+                --print("next attack target get now attack him!!", self.sid, self.attackTarget.sid)
+            end
+        else
+            --等待下一个士兵 但是 没有了
+            --如果没有下一个士兵则不在搜索了
+            self.soldier.attackTarget = self:findNearEnemy()
+        end
+    end
+end
+
+--未修改
+function FightMagic:doNearAttack(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.NEAR_ATTACK then
+        print("doNearAttack", self.soldier.attackTarget.sid)
+        if self.oneAttack then
+            self.oneAttack = false
+            --nearAttack 结束的时候 才会找下一个
+            --近战攻击 等待下一个 靠近
+            if self.soldier.attackTarget.dead then
+                self.soldier.state = FIGHT_SOL_STATE.NEXT_TARGET
+                self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
+                self.soldier.changeDirNode:stopAllActions()
+                self.soldier.changeDirNode:runAction(self.idleAction)
+                local ene = self:findNearFoot()
+                self.soldier.attackTarget = ene
+            else
+                print("near enemy is", self.soldier.attackTarget.sid)
+                self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
+            end
+        end
+    end
+end
+
+--魔法师 对 步兵
+--未修改
+function FightMagic:waitAttack(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
+        --步兵周期
+        if self.soldier.map.day == 2 then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+                local isHead = false
+                local att
+                if not self.isHead then
+                    if self.soldier.color == 0 then
+                        self:checkSide('right')
+                        att = self.soldier.right
+                        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    else
+                        self:checkSide('left')
+                        att = self.soldier.left
+                        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    end
+                end
+                self.isHead = isHead
+                --头 FightBack 只能攻击 同行的 不能 攻击 非同行的敌人 
+                if isHead then
+                    self.soldier.attackTarget = self:findNearEnemy()
+                --就是我的左侧或者右侧的朋友 或者敌人
+                else
+                    self.soldier.attackTarget = att
+                end
+
+            else
+                --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
+                if self.soldier.attackTarget.color ~= self.soldier.color then
+                    local p = getPos(self.soldier.bg)
+                    local mp = getPos(self.soldier.attackTarget.bg)
+                    local dis = self.soldier:getDis(p, mp) 
+                    --射箭攻击
+                    if dis >=400 and dis <= 500 then
+                        self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                    elseif dis <= FIGHT_NEAR_RANGE then
+                        self.soldier.changeDirNode:stopAllActions()
+                        self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                        print("WAIT_MOVE  NEAR_ATTACK")
+                        self.oneAttack = false
+                        self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
+                        self.soldier.changeDirNode:runAction(self.attackAni)
+                    --足够靠近才反击
+                    elseif dis < 400 then
+                        --攻击目标已经开始 攻击别人了 则 我主动靠近即可
+                        if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
+                            self.soldier:moveOneStep(diff)
+                        end
+                    end
+
+                --移动靠近我的 弓箭手 
+                elseif self.soldier.attackTarget.id == self.soldier.id then
+                    self.soldier:moveOneStep(diff)
+                end
+            end
+
+        end
+    end
+end
+
+function FightMagic:finishAttack()
+    --self.soldier.state = FIGHT_SOL_STATE.FREE
+    --步兵移动会影响所有士兵的状态 包括弓箭手类型 所以弓箭手也要调整状态
+    self.isHead = false 
+    self.oneAttack = false
+    self.firstCheckYet = false
+    self.inFightBack = false
+    self.inMove = false
+    print("clear arrow or magic Hurt for arrow")
+    self.soldier.arrowHurt = 0
+    self.soldier.midPoint = nil
+    self.soldier.attackTarget = nil
+
+    if self.soldier.dead then
+        --setVisible(self.soldier.bg, false)
+        --fly away invisible
+    else
+        self.soldier.changeDirNode:stopAllActions()
+        self.soldier.bg:stopAllActions()
+        self.soldier.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
+        self.soldier.changeDirNode:runAction(self.soldier.idleAction)
+    end
+end

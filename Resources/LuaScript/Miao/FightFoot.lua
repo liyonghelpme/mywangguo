@@ -35,9 +35,11 @@ function FightFoot:finishAttack()
 end
 
 function FightFoot:resetPos()
-    if not self.soldier.dead then
-        print("reset Pos", self.soldier.sid, self.soldier.oldPos)
-        setPos(self.soldier.bg, self.soldier.oldPos)
+    if self.soldier.map.day == 2 then
+        if not self.soldier.dead then
+            print("reset Pos", self.soldier.sid, self.soldier.oldPos)
+            setPos(self.soldier.bg, self.soldier.oldPos)
+        end
     end
 end
 

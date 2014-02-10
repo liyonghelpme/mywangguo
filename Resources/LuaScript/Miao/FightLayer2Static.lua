@@ -1,3 +1,20 @@
+function FightLayer2:finishCavalry()
+    print("finishCavalry")
+    self:clearMenu()
+    local ret, left, right = self:oneFail()
+    if ret then
+    else
+        self.animateYet = false
+        self.finishAttack = false
+        for k, v in ipairs(self.allSoldiers) do
+            v.funcSoldier:resetPos()
+        end
+        self.day = 0
+        self.passTime = 0
+        self:clearAllCamera()
+    end
+end
+
 function FightLayer2:finishFoot()
     print("finish Foot attack")
     self:clearMenu()
@@ -6,11 +23,11 @@ function FightLayer2:finishFoot()
     else
         self.animateYet = false
         self.finishAttack = false
-        self.day = 3
-        self.passTime = 0
         for k, v in ipairs(self.allSoldiers) do
             v.funcSoldier:resetPos()
         end
+        self.day = 3
+        self.passTime = 0
         self:clearAllCamera()
     end
 end
@@ -390,6 +407,41 @@ function FightLayer2:footScript(diff)
         end
     end
 end
+function FightLayer2:findMyRightMostCavalry()
+    local maxX = 0
+    local mySol 
+    for k, v in ipairs(self.myCavalrySoldiers) do
+        for tk, tv in ipairs(v) do
+            --活着的士兵
+            if not tv.dead then
+                local p = getPos(tv.bg)
+                if p[1] > maxX then
+                    mySol = tv
+                    maxX = p[1]
+                end
+            end
+        end
+    end
+    return mySol
+end
+function FightLayer2:findEneLeftCavalry()
+    local minX = 999999
+    local eneSol 
+    for k, v in ipairs(self.eneCavalrySoldiers) do
+        for tk, tv in ipairs(v) do
+            --活着的士兵
+            if not tv.dead then
+                local p = getPos(tv.bg)
+                if p[1] < minX then
+                    eneSol = tv
+                    minX = p[1]
+                end
+            end
+        end
+    end
+    return eneSol
+end
+
 function FightLayer2:findMyRightMostFoot()
     local maxX = 0
     local mySol 
@@ -512,6 +564,43 @@ function FightLayer2:splitCamera()
     setPos(self.leftCamera.renderTexture, {vs.width/2+vs.width/4+1, FIGHT_HEIGHT/2})
     self.split = true
 end
+
+--活着的骑兵 都 在等待 返回
+function FightLayer2:cavalryAllWait()
+    --local waitBack = false
+    for mk, mv in ipairs(self.myCavalrySoldiers) do
+        for k, v in ipairs(mv) do
+            print("cavalryAllWait myCavalrySoldiers", v.dead, v.state)
+            if not v.dead and  v.state ~= FIGHT_SOL_STATE.WAIT_BACK then
+                return false
+            end
+        end
+    end
+    for mk, mv in ipairs(self.eneCavalrySoldiers) do
+        for k, v in ipairs(mv) do
+            print("cavalryAllWait eneCavalrySoldiers", v.dead, v.state)
+            if not v.dead and v.state ~= FIGHT_SOL_STATE.WAIT_BACK then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+function FightLayer2:checkCavalry()
+    local left
+    local right
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.id == 3 then
+            if v.color == 0 then
+                left = true
+            else
+                right = true
+            end
+        end
+    end
+    return left, right
+end
 function FightLayer2:checkMagic()
     local left
     local right
@@ -557,6 +646,25 @@ function FightLayer2:checkOneArrowDead()
         end
     end
     print("check FootDead", left, right)
+    return true, left, right
+end
+
+function FightLayer2:checkOneCavalryDead()
+    local left = 0
+    local right = 0
+    for k, v in ipairs(self.allSoldiers) do
+        if not v.dead and v.id == 3 then
+            if v.color == 0 then
+                left = left+1
+            elseif v.color == 1 then
+                right = right+1
+            end
+            if left > 0 and right > 0 then
+                return false
+            end
+        end
+    end
+    print("check Magic Dead", left, right)
     return true, left, right
 end
 function FightLayer2:checkOneMagicDead()
@@ -726,7 +834,173 @@ end
 
 function FightLayer2:cavalryScript(diff)
     if self.passTime == 0 then
-        self.day = 0
+        print("cavalryScript", self.day, diff)
+        local ad, left, right = self:checkOneCavalryDead()
+        if left == 0 and right == 0 then
+            self.day = 0
+            return
+        end
+
+        local p = getPos(self.battleScene)
+        local vs = getVS()
+        --快速回到 双方部队头部
+        --这种类型部队的头部
+        if left == 0 then
+            self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
+            self:showLeftCamera()
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        else
+            local fw = (#self.myArrowNum+#self.myMagicNum+#self.myFootNum)*FIGHT_OFFX
+            local bp = self.leftWidth-fw
+            --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
+            self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
+            print("self.leftWidth ", self.moveTarget)
+            self:showLeftCamera() 
+            --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置
+            --然后恢复场景位置
+            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+        end
+
+        if right == 0 then
+            self:showRightCamera()
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+        else
+            --右侧镜头位置当前屏幕的左侧
+            self:showRightCamera()
+            local fw = (#self.eneFootNum+#self.eneMagicNum+#self.eneArrowNum)*FIGHT_OFFX
+            local ahead = self.WIDTH-self.rightWidth+fw
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_HEAD_OFF))
+        end
+    end
+
+    self.passTime = self.passTime+diff
+    
+    --骑兵开始移动
+    local ls = self.leftCamera.startPoint[1]
+    --镜头移动移动到目标位置了 则播放跑步动画
+    if math.abs(ls-self.leftCamera.moveTarget) < 5 then
+        if not self.animateYet then
+            self.animateYet = true
+            for k, v in ipairs(self.allSoldiers) do
+                --开始跑步和攻击
+                v:doRunAndAttack(self.day)
+            end
+        end
+    end
+
+    --模仿trace 步兵  merge 
+    --模仿弓箭 split
+    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil and not self.finishAttack then
+        local vs = getVS()
+        local ls = -self.leftCamera.startPoint[1]
+        local rs = -self.rightCamera.startPoint[1]
+        local lw = self.leftCamera.width
+        local rw = self.rightCamera.width
+        local lp = getPos(self.leftCamera.renderTexture)
+        local rp = getPos(self.rightCamera.renderTexture)
+        print("magic leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
+        --当一方没有 魔法师剩余的时候 则 等待另外一侧镜头到达屏幕中央则 clone这个镜头即可
+        local left, right = self:checkCavalry()
+        --只有单侧士兵
+        --左侧没有弓箭手
+        --战场中心不是 WIDTH/2 而是 LEFTWIDHT + vs.width*1.5/2 的位置
+        local bmid = self.leftWidth+vs.width*1.5/2
+        if not left then
+            print("magic left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
+            if not self.mergeYet then
+                if rs <= bmid and rs > bmid-vs.width/2 then
+                    print("magic no left arrow so merge Right Camera ")
+                    self:mergeRightCamera()
+                end
+            else
+                if rs <= bmid-vs.width/2 then
+                    print("magic no left arrow begin clone Right Camera")
+                    self:cloneRightCamera()
+                end
+            end
+        elseif not right then
+            if not self.mergeYet then
+                if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
+                    self:mergeCamera()
+                end
+            else
+                if (ls+lw) >= bmid+vs.width/2 then
+                    self:cloneLeftCamera()
+                end
+            end
+        else
+            --镜头相交
+            if not self.mergeYet then
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
+            end
+            --拆分镜头 交错弓箭镜头
+            if self.mergeYet then
+                if ls > rs+rw or ls+lw < rs then
+                    self:splitCamera()
+                end
+            end
+        end
+
+    end
+
+    --骑兵全部死亡 或者 骑兵 都 waitBack 了 则 骑兵回合准备结束
+    local allW = self:cavalryAllWait()
+    local footDead, left, right = self:checkOneCavalryDead()
+    print("all Wait cavalry dead", allW, footDead)
+    if (allW or (left == 0 and right == 0)) and not self.finishAttack then
+        local oneDead = self:checkOneDead()
+        self.finishAttack = true
+        for k, v in ipairs(self.allSoldiers) do
+            v.funcSoldier:finishAttack(oneDead)
+        end
+        self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishCavalry)}))
+    end
+
+
+    --模仿 步兵 追踪士兵
+    if not self.finishAttack and self.animateYet then
+        --从外列 逐行搜索
+        if self.mySol == nil or self.mySol.dead then
+            self.mySol = self:findMyRightMostCavalry()
+        end
+        if self.mySol ~= nil then
+            if DEBUG_FIGHT then
+                setColor(self.mySol.changeDirNode, {0, 255, 0})
+            end
+            self.leftCamera:trace(self.mySol, FIGHT_OFFX*3)
+        end
+        --寻找影子步兵
+        --local sp = getPos(mySol.bg)
+        --local vs = getVS()
+        --看一下4对象的位置
+        --查看一下 当前最前端的步兵的 位置 如果步兵死亡了 那么 就使用影子步兵来移动
+        --shadow 所有步兵移动都会 影响 
+        if self.eneSol == nil or self.eneSol.dead then
+            self.eneSol = self:findEneLeftCavalry()
+        end
+        if self.eneSol ~= nil then
+            if DEBUG_FIGHT then
+                setColor(self.eneSol.changeDirNode, {0, 255, 0})
+            end
+            self.rightCamera:trace(self.eneSol, -FIGHT_OFFX*3)
+        end
+    end
+    if self.clone then
+        print("start clone", self.cloneWho)
+        if self.cloneWho == 0 then
+            print("cavalry clone left camera", self.leftCamera.cid, self.leftCamera.moveTarget, simple.encode(self.leftCamera.startPoint))
+            print("self right", self.rightCamera.moveTarget, simple.encode(self.rightCamera.startPoint))
+            --local vs = getVS()
+            --相对于左侧镜头 有半个屏幕的偏移
+            self.mainCamera.moveTarget = self.leftCamera.moveTarget+self.mainCamera.mainOff
+            --self.mainCamera.startPoint = copyTable(self.leftCamera.startPoint)
+        else
+            print("foot clone right camera")
+            self.mainCamera.moveTarget = self.rightCamera.moveTarget+self.mainCamera.mainOff
+            --self.mainCamera.startPoint = copyTable(self.rightCamera.startPoint)
+        end
     end
 end
 
@@ -748,7 +1022,7 @@ function FightLayer2:arrowScript(diff)
             self:showLeftCamera()
             self.leftCamera:fastMoveTo(p, self.moveTarget) 
         else
-            local fw = #self.myFootNum*FIGHT_OFFX
+            local fw = (#self.myMagicNum+#self.myFootNum)*FIGHT_OFFX
             local bp = self.leftWidth-fw
             --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
             self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
@@ -764,7 +1038,7 @@ function FightLayer2:arrowScript(diff)
         else
             --右侧镜头位置当前屏幕的左侧
             self:showRightCamera()
-            local fw = #self.eneFootNum*FIGHT_OFFX
+            local fw = (#self.eneFootNum+#self.eneMagicNum)*FIGHT_OFFX
             local ahead = self.WIDTH-self.rightWidth+fw
             self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_HEAD_OFF))
         end
