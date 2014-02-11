@@ -1668,12 +1668,25 @@ end
 
 function calAttr(id, level, equip)
     local data = Logic.people[id]
-    local temp = {health=data.health+data.healthAdd*level, labor=data.labor+data.laborAdd*level, attack=math.floor((data.brawn+data.brawnAdd*level)/2),
+    local battack = math.floor((data.brawn+data.brawnAdd*level)/2)
+    local sattack = math.floor((data.shoot+data.shootAdd*level)/2)
+    --根据 腕力 射击 装备类型 决定 攻击力
+    local temp = {health=data.health+data.healthAdd*level, labor=data.labor+data.laborAdd*level, attack=battack,
     defense=0, shoot=data.shoot+data.shootAdd*level, 
     brawn=data.brawn+data.brawnAdd*level}
+    --近战 还是远程
+    local weapKind = 0
     if equip ~= nil then
         if equip.weapon ~= nil then
             addEquipAttr(temp, Logic.equip[equip.weapon])
+            local edata = Logic.equip[equip.weapon]
+            if edata.kind == 0 then
+                if edata.subKind == 0 or edata.subKind == 1 or edata.subKind == 4 then
+                    weapKind = 0
+                else
+                    weapKind = 1
+                end
+            end
         end
         if equip.head ~= nil then
             addEquipAttr(temp, Logic.equip[equip.head])
@@ -1682,6 +1695,14 @@ function calAttr(id, level, equip)
             addEquipAttr(temp, Logic.equip[equip.body])
         end
     end
+    --使用近战武器还是 远程武器
+    if weapKind == 0 then
+        local battack = math.floor(temp.brawn/2)
+        temp.attack = battack
+    else
+        temp.attack = math.floor(temp.shoot/2)
+    end
+
     local skill = getPeopleSkill(id, level)
     if skill == 0 then
     else

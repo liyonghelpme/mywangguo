@@ -1,17 +1,32 @@
 FightCavalry = class(FightFunc)
 function FightCavalry:ctor(s)
-    self.soldier.attackA = createAnimation("cat_cavalry_attackA", "cat_cavalry_attackA_%d.png", 0, 16, 1, 1, true)
-    self.soldier.attackB = createAnimation("cat_cavalry_attackB", "cat_cavalry_attackB_%d.png", 0, 20, 1, 1, true)
-    self.soldier.runAni = createAnimation("cat_cavalry_run", 'cat_cavalry_run_%d.png', 0, 12, 1, 1, true)
-    self.soldier.idleAni = createAnimation("cat_cavalry_idle", 'cat_cavalry_idle_%d.png', 0, 20, 1, 1, true)
-    self.soldier.deadAni = createAnimation("cat_cavalry_dead", 'cat_cavalry_dead_%d.png', 0, 10, 1, 1, true)
-    self.soldier.deadAni:setRestoreOriginalFrame(false)
+    if not self.soldier.isHero then
+        self.soldier.attackA = createAnimation("cat_cavalry_attackA", "cat_cavalry_attackA_%d.png", 0, 16, 1, 1, true)
+        self.soldier.attackB = createAnimation("cat_cavalry_attackB", "cat_cavalry_attackB_%d.png", 0, 20, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_cavalry_run", 'cat_cavalry_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_cavalry_idle", 'cat_cavalry_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_cavalry_dead", 'cat_cavalry_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+    else
+        self.soldier.attackA = createAnimation("cat_hero_cavalry_attackA", "cat_hero_cavalry_attackA_%d.png", 0, 16, 1, 1, true)
+        self.soldier.attackB = createAnimation("cat_hero_cavalry_attackB", "cat_hero_cavalry_attackB_%d.png", 0, 20, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_cavalry_run", 'cat_hero_cavalry_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_cavalry_idle", 'cat_hero_cavalry_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_cavalry_dead", 'cat_hero_cavalry_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+    end
 end
 
 function FightCavalry:initView()
-    self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_cavalry_idle_0.png")
-    setScale(self.soldier.changeDirNode, 0.8)
+    if not self.soldier.isHero then
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_cavalry_idle_0.png")
+        setScale(self.soldier.changeDirNode, 0.8)
+    else
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_hero_cavalry_idle_0.png")
+        setScale(self.soldier.changeDirNode, 0.8)
+    end
 end
+
 function FightCavalry:initShadow()
     self.soldier.shadow = CCSprite:create("roleShadow2.png")
     self.soldier.bg:addChild(self.soldier.shadow,  -1)
@@ -403,12 +418,12 @@ end
 
 function FightCavalry:doNearAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_ATTACK then
-        print("cavalry doNearAttack", self.soldier.attackTarget.sid)
+        --print("cavalry doNearAttack", self.soldier.attackTarget.sid)
         if self.oneAttack then
             self.oneAttack = false
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
-            if self.soldier.attackTarget.dead then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
                 self.soldier.state = FIGHT_SOL_STATE.FREE
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()

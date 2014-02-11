@@ -59,6 +59,7 @@ function Camera:adjustMoveTarget()
         else
             local vs = getVS()
             --弓箭就要考虑 changeDirNode 和 bg 不同因素
+            print("object changeDirNode", self.object.changeDirNode)
             local ap = getPos(self.object.changeDirNode)
             local abp = getPos(self.object.bg)
             ap[1] = abp[1]+ap[1]

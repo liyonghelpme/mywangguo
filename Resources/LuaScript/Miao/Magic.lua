@@ -15,7 +15,7 @@ function Magic:ctor(s, t)
     self.bg:addChild(self.changeDirNode)
     local ani = getAnimation("magicBall")
     self.changeDirNode:runAction(repeatForever(CCAnimate:create(ani)))
-    setAnchor(self.changeDirNode, {119/192, (192-130)/192})
+    setAnchor(self.changeDirNode, {119/192, (192-140)/192})
     
     self.needUpdate = true
     registerEnterOrExit(self)

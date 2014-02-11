@@ -1,16 +1,28 @@
 require "Miao.Magic"
 FightMagic = class(FightFunc)
 function FightMagic:ctor(s)
-    self.soldier.attackA = createAnimation("cat_magic_attackA", "cat_magic_attackA_%d.png", 0, 20, 1, 1, true)
-    self.soldier.runAni = createAnimation("cat_magic_run", 'cat_magic_run_%d.png', 0, 12, 1, 1, true)
-    self.soldier.idleAni = createAnimation("cat_magic_idle", 'cat_magic_idle_%d.png', 0, 20, 1, 1, true)
-    self.soldier.deadAni = createAnimation("cat_magic_dead", 'cat_magic_dead_%d.png', 0, 10, 1, 1, true)
-    self.soldier.deadAni:setRestoreOriginalFrame(false)
-    self.showMagicTime = 0.76
+    if not self.soldier.isHero then
+        self.soldier.attackA = createAnimation("cat_magic_attackA", "cat_magic_attackA_%d.png", 0, 20, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_magic_run", 'cat_magic_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_magic_idle", 'cat_magic_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_magic_dead", 'cat_magic_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+        self.showMagicTime = 0.76
+    else
+        self.soldier.attackA = createAnimation("cat_hero_magic_attackA", "cat_hero_magic_attackA_%d.png", 0, 20, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_magic_run", 'cat_hero_magic_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_magic_idle", 'cat_hero_magic_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_magic_dead", 'cat_hero_magic_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+    end
 end
 
 function FightMagic:initView()
-    self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_magic_idle_0.png")
+    if not self.soldier.isHero then
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_magic_idle_0.png")
+    else
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_hero_magic_idle_0.png")
+    end
 end
 
 --法师 和 弓箭手 寻找 最近的敌人 去 攻击
@@ -198,12 +210,12 @@ end
 --未修改
 function FightMagic:doNearAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_ATTACK then
-        print("doNearAttack", self.soldier.attackTarget.sid)
+        --print("doNearAttack", self.soldier.attackTarget.sid)
         if self.oneAttack then
             self.oneAttack = false
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
-            if self.soldier.attackTarget.dead then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
                 self.soldier.state = FIGHT_SOL_STATE.NEXT_TARGET
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()
@@ -245,7 +257,7 @@ function FightMagic:waitAttack(diff)
                 self.isHead = isHead
                 --头 FightBack 只能攻击 同行的 不能 攻击 非同行的敌人 
                 if isHead then
-                    self.soldier.attackTarget = self:findNearEnemy()
+                    self.soldier.attackTarget = self:findNearFoot()
                 --就是我的左侧或者右侧的朋友 或者敌人
                 else
                     self.soldier.attackTarget = att
@@ -259,7 +271,11 @@ function FightMagic:waitAttack(diff)
                     local dis = self.soldier:getDis(p, mp) 
                     --射箭攻击
                     if dis >=400 and dis <= 500 then
-                        self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                        local dy = math.abs(p[2]-mp[2])
+                        --同行才能fightback
+                        if dy < 5 then
+                            self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                        end
                     elseif dis <= FIGHT_NEAR_RANGE then
                         self.soldier.changeDirNode:stopAllActions()
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
@@ -360,7 +376,11 @@ function FightMagic:waitCavalry(diff)
             local dis = self.soldier:getDis(p, mp) 
             --射箭攻击
             if dis >=400 and dis <= 500 then
+                --local dy = math.abs(p[2]-mp[2])
+                --同行才能fightback
+                --if dy < 5 then
                 self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                --end
             end
         end
     end

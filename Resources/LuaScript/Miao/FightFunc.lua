@@ -88,11 +88,52 @@ function FightFunc:checkIsHead()
         end
     end
     self.isHead = isHead
-    return isHead
+    return isHead, att
 end
+
 function FightFunc:doWaitBack(diff)
 end
 function FightFunc:doMoveBack(diff)
 end
 function FightFunc:doFree(diff)
+end
+
+function FightFunc:findNearFoot()
+    print("find Near foot of soldier")
+    local dx = 999999
+    local dy = 999999
+    local p = getPos(self.soldier.bg)
+    local ene
+    local eneList = {}
+    if self.soldier.color == 0 then
+        table.insert(eneList, self.soldier.map.eneSoldiers)
+    else
+        table.insert(eneList, self.soldier.map.mySoldiers)
+    end
+
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    if tdisy < dy then
+                        dy = tdisy
+                        dx = tdisx
+                        ene = cv
+                    elseif tdisy == dy then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+        if ene ~= nil then
+            return ene
+        end
+    end
+    return ene
 end

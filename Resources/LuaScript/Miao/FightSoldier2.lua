@@ -3,6 +3,7 @@ require "Miao.FightArrow2"
 require "Miao.FightFoot"
 require "Miao.FightMagic"
 require "Miao.FightCavalry"
+require "Miao.Hero"
 FIGHT_SOL_STATE = {
     FREE=0,
     START_ATTACK=1,
@@ -45,7 +46,7 @@ end
 
 
 --调整每个士兵的左右 我方的 右侧 敌方的左侧
-function FightSoldier2:ctor(m, id, col, row, data, sid)
+function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
     self.sid = sid
     self.id = id
     self.map = m
@@ -54,6 +55,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     --up low 敌方所在行 我方可能已经没有了士兵
     self.up = nil
     self.low = nil
+    self.isHero = isHero
+    self.heroData = heroData
 
     --print('left right', self.left, self.right)
     self.health = 20
@@ -78,6 +81,13 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.defense = myab.defense
     --地图记录每个网格状态 
     --士兵类型kind
+    if isHero then
+        self.health = self.heroData.health 
+        self.maxHealth = self.heroData.health 
+        self.attack = self.heroData.attack
+        self.defense = self.heroData.defense
+    end
+
     if self.id == 0  then
         self.funcSoldier = FightFoot.new(self)
     elseif self.id == 1 then
@@ -276,14 +286,22 @@ function FightSoldier2:startAttack(diff)
 
             --因为 不是head 所以不能攻击这
             --寻找第一个非死亡对象 步兵  同行
-            self.attackTarget = self:findFastTarget()
+            --self.attackTarget = self:findFastTarget()
+            local isHead, att = self.funcSoldier:checkIsHead()
+            --头部 步兵 寻找最近的 步兵 攻击 没有则 寻找 普通士兵
+            --TODO 优化 记录是否存在敌对步兵
+            if isHead then
+                self.attackTarget = self.funcSoldier:findNearFoot()
+            else
+                self.attackTarget = att
+            end
             if self.color == 0 then
                 offX = -40+self.row*5
             else
                 offX  = 40-self.row*5
             end
 
-            --同行没有
+            --没有步兵 可以 攻击 则 选择 其它兵种
             if self.attackTarget == nil then
                 print("start Attack find near row")
                 self.attackTarget = self:findNearRow()
@@ -427,6 +445,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack)
     end
 
     print("doHurt", harm, self.defense, self.health)
+    harm = harm+math.random(3)
     local harm = harm-self.defense
     harm = math.max(harm, 1)
     --伤害小于 生命值上限
@@ -809,8 +828,12 @@ end
 
 function FightSoldier2:doMoveTo(diff)
     if self.state == FIGHT_SOL_STATE.FOOT_MOVE_TO then
+        --如果 同行 死掉了 则 寻找 foot 或者 其它兵种
         if self.attackTarget == nil or self.attackTarget.dead then
-            self.attackTarget = self:findNearRow()
+            self.attackTarget = self.funcSoldier:findNearFoot()
+            if self.attackTarget == nil then
+                self.attackTarget = self:findNearRow()
+            end
         --逐步靠经目标
         else
             --紧随我方目标身后

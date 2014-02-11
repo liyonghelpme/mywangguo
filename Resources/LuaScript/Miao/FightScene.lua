@@ -48,7 +48,16 @@ function FightScene:ctor()
     --self.soldiers = {{70, 0, 0, 50}, {70, 0, 0, 50}}
     --self.soldiers = {{70, 0, 0, 50}, {70, 0, 0, 50}}
     --self.soldiers = {{0, 5, 0, 0}, {0, 0, 0, 5}}
-    self.soldiers = {{0, 0, 5, 0}, {0, 0, 0, 5}}
+    --self.soldiers = {{0, 0, 30, 0}, {0, 0, 0, 30}}
+    --self.soldiers = {{0, 0, 33, 0}, {80, 0, 0, 0}}
+    --self.soldiers = {{10, 5, 5, 5}, {10, 5, 5, 5}}
+    --self.soldiers = {{10, 10, 10, 10}, {10, 10, 10, 10}}
+    --self.soldiers = {{10, 20, 10, 10}, {15, 10, 10, 10}}
+    self.soldiers = {{20, 20, 20, 20}, {20, 20, 20, 20}}
+    
+    --attack defense health 前 中 后 默认都在前方布局  技能属性
+    --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
+    self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 

@@ -34,64 +34,121 @@ FightLayer2 = class()
 --阶梯 方式 来表现士兵数量
 --超过2000个最多25个 每个能力平均 
 --第一排 第二排
-function FightLayer2:convertNumToSoldier(n)
+function FightLayer2:convertNumToSoldier(n, h)
+    local hero = {}
+    if h ~= nil then
+        hero = h
+    end
+    print("hero is", simple.encode(hero))
+
     local temp = {}
     local num
     local pow
-    if n == 0 then
+    --没有普通 士兵 没有 英雄
+    if n == 0 and #hero == 0 then
         --至少一列空列
         --return {{0, 0, 0, 0, 0}}
         return {}
     end
-
+    
+    local hn = #hero
     if n < 100 then
         num = math.max(math.floor(n/5), 1)
-        if n > 5 then
-            pow = 5
-        else
-            pow = n
-        end
+        --减去英雄的数量
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     --5 * 5 = 25 最多士兵数量
     elseif n < 250 then
         num = math.floor(n/10)
-        pow = 10 
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     elseif n < 500 then
         num = math.floor(n/20)
-        pow = 20
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     elseif n < 1000 then
         num = math.floor(n/40)
-        pow = 40
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     elseif n < 2000 then
         num = math.floor(n/80)
-        pow = 80
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     else
         pow = math.floor(n/25)
-        num = 25
+        num = math.min(25-hn, num)
+        pow = math.floor(n/num)
     end
-    local leftNum = n-num*pow
+    --local leftNum = n-num*pow
+    local leftNum = 0
     print("left Number is", n, num, pow, leftNum)
 
     local curCol
+    local totalNum = num+hn
+    --前 hn 个是 英雄特殊值
+    for i =0, totalNum-1, 1 do
+        local col = math.floor(i/5)
+        local row = math.floor(i%5)
+        if row == 0 then
+            curCol = {}
+            local leftRow = totalNum-col*5
+            --最后剩余的数量 也占用 1行
+            --if leftNum > 0 then
+            --    leftRow = leftRow+1
+            --end
+            --剩余数量 居中显示
+            if leftRow < 4 then
+                for pad=0, math.floor((5-leftRow)/2)-1, 1 do
+                    table.insert(curCol, 0)
+                end
+            end
+            table.insert(temp, curCol)
+        end
+        --每个士兵实力5
+        --print("insert hero", i, hn, curCol, hero[i+1])
+        if i < hn then
+            table.insert(curCol, hero[i+1])
+        else
+            table.insert(curCol, pow)
+        end
+    end
+    
+    --[[
     for i =0, num-1, 1 do
         local col = math.floor(i/5)
         local row = math.floor(i%5)
         if row == 0 then
             curCol = {}
+            local leftRow = num-col*5
+            --最后剩余的数量 也占用 1行
+            if leftNum > 0 then
+                leftRow = leftRow+1
+            end
+            --剩余数量 居中显示
+            if leftRow < 4 then
+                for pad=0, math.floor((5-leftRow)/2)-1, 1 do
+                    table.insert(curCol, 0)
+                end
+            end
             table.insert(temp, curCol)
         end
         --每个士兵实力5
         table.insert(curCol, pow)
     end
+    --]]
     --保证所有士兵都有left 或者 right连接 至少有一个空列
+    --[[
     if leftNum > 0 then
         local col = math.floor(num/5)
         local row = math.floor(num%5)
         if row == 0 then
-            curCol = {}
+            --居中显示
+            curCol = {0, 0}
             table.insert(temp, curCol)
         end
         table.insert(curCol, leftNum)
     end
+    --]]
     --补全当前列
     while #curCol < 5 do
         table.insert(curCol, 0)
@@ -212,10 +269,10 @@ function FightLayer2:ctor(s, my, ene)
     self.poseRowNum = 0
     self.poseRowTime = 0
 
-    self.myFootNum = self:convertNumToSoldier(my[1])
-    self.myArrowNum = self:convertNumToSoldier(my[2])
-    self.myMagicNum = self:convertNumToSoldier(my[3])
-    self.myCavalryNum = self:convertNumToSoldier(my[4])
+    self.myFootNum = self:convertNumToSoldier(my[1], self.scene.heros[1])
+    self.myArrowNum = self:convertNumToSoldier(my[2], self.scene.heros[2])
+    self.myMagicNum = self:convertNumToSoldier(my[3], self.scene.heros[3])
+    self.myCavalryNum = self:convertNumToSoldier(my[4], self.scene.heros[4])
     --self.myFootNum = self:testNum12(1)
     --self.myArrowNum = self:testNum11()
 
@@ -423,9 +480,13 @@ end
 function FightLayer2:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("cat_foot.plist")
+    sf:addSpriteFramesWithFile("cat_hero_foot.plist")
     sf:addSpriteFramesWithFile("cat_arrow.plist")
+    sf:addSpriteFramesWithFile("cat_hero_arrow.plist")
     sf:addSpriteFramesWithFile("cat_magic.plist")
+    sf:addSpriteFramesWithFile("cat_hero_magic.plist")
     sf:addSpriteFramesWithFile("cat_cavalry.plist")
+    sf:addSpriteFramesWithFile("cat_hero_cavalry.plist")
     sf:addSpriteFramesWithFile("attackAni.plist")
     createAnimation("attackSpe1", "attack%d.png", 5, 8, 1, 0.5, true)
     createAnimationWithNum("attackSpe2", "attack%d.png", 0.5, true, {1, 3, 4})
@@ -485,8 +546,26 @@ function FightLayer2:initSoldier()
         --行
         local lastOne = nil
         for ck, cv in ipairs(v) do 
-            --col
-            if cv > 0 then
+            --col 
+            --0 1 2 3
+            --英雄 
+            if type(cv) == 'table' then
+                local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=0, color=0}, self:getSolId(), true, cv) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.leftWidth-(k-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
                 sp.low = lastOne
                 if lastOne ~= nil then
@@ -563,7 +642,24 @@ function FightLayer2:initSoldier()
         table.insert(self.myMagicSoldiers, temp)
         local lastOne = nil
         for ck, cv in ipairs(v) do
-            if cv > 0 then
+            if type(cv) == 'table' then
+                local sp = FightSoldier2.new(self, 2, colId, ck-1, {level=0, color=0}, self:getSolId(), true, cv)
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+                self.battleScene:addChild(sp.bg)
+
+                setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 2, colId, ck-1, {level=cv, color=0}, self:getSolId())
                 sp.low = lastOne
                 if lastOne ~= nil then
@@ -640,8 +736,24 @@ function FightLayer2:initSoldier()
         table.insert(self.myArrowSoldiers, temp) 
         local lastOne = nil
         for ck, cv in ipairs(v) do 
-            --col
-            if cv > 0 then
+            if type(cv) == 'table' then
+                local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=0, color=0}, self:getSolId(), true, cv) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            elseif cv > 0 then
                 --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
                 local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
                 sp.low = lastOne
@@ -716,7 +828,24 @@ function FightLayer2:initSoldier()
         local lastOne = nil
         for ck, cv in ipairs(v) do 
             --col
-            if cv > 0 then
+            if type(cv) == 'table' then
+                local sp = FightSoldier2.new(self, 3, colId, ck-1, {level=0, color=0}, self:getSolId(), true, cv) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.leftWidth-(k+footWidth-1)*FIGHT_OFFX+(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+            elseif cv > 0 then
                 --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
                 local sp = FightSoldier2.new(self, 3, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
                 sp.low = lastOne
