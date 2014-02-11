@@ -801,8 +801,8 @@ function FightSoldier2:moveOneStep(diff)
         dis = self.oldDis*(1-smooth)+dis*smooth
     end
     self.oldDis = cdis
-
-    if dis > FIGHT_OFFX then
+    --两个士兵相距的距离 大于mx 移动距离
+    if dis > FIGHT_OFFX+math.abs(mx) then
         setPos(self.bg, {p[1]+mx, p[2]})
     end
 end

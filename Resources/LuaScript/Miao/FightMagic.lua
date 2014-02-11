@@ -162,8 +162,10 @@ function FightMagic:doFightBack(diff)
             end
         else
             --控制动画频率
-            if not self.inFightBack then
-                self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
+            if self.soldier.map.day == 2 then
+                if not self.inFightBack then
+                    self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
+                end
             end
         end
     end
@@ -278,10 +280,92 @@ function FightMagic:waitAttack(diff)
                     self.soldier:moveOneStep(diff)
                 end
             end
-
+        elseif self.soldier.map.day == 3 then
+            self:waitCavalry(diff)
         end
     end
 end
+
+function FightMagic:findNearCavalry()
+    local dx = 999999
+    local dy = 999999
+    local p = getPos(self.soldier.bg)
+    local ene
+    local eneList = {}
+    if self.soldier.color == 0 then
+        table.insert(eneList, self.soldier.map.eneCavalrySoldiers)
+    else
+        table.insert(eneList, self.soldier.map.myCavalrySoldiers)
+    end
+    
+    --print("findNearEnemy isStart", isStart)
+    --local firstEnable
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                --没有在近战中 才考虑arrowHurt问题
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    --同行
+                    if tdisy < 5 then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+        if ene ~= nil then
+            return ene
+        end
+    end
+    return ene
+end
+function FightMagic:waitCavalry(diff)
+    if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+        local isHead = false
+        local att
+        if not self.isHead then
+            if self.soldier.color == 0 then
+                self:checkSide('right')
+                att = self.soldier.right
+                if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                    isHead = true
+                end
+            else
+                self:checkSide('left')
+                att = self.soldier.left
+                if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                    isHead = true
+                end
+            end
+        end
+        self.isHead = isHead
+        --头 FightBack 只能攻击 同行的 不能 攻击 非同行的敌人 
+        if isHead then
+            self.soldier.attackTarget = self:findNearCavalry()
+        --就是我的左侧或者右侧的朋友 或者敌人
+        else
+            --self.soldier.attackTarget = att
+        end
+
+    else
+        --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
+        if self.soldier.attackTarget.color ~= self.soldier.color then
+            local p = getPos(self.soldier.bg)
+            local mp = getPos(self.soldier.attackTarget.bg)
+            local dis = self.soldier:getDis(p, mp) 
+            --射箭攻击
+            if dis >=400 and dis <= 500 then
+                self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+            end
+        end
+    end
+end
+
 
 function FightMagic:finishAttack()
     --self.soldier.state = FIGHT_SOL_STATE.FREE

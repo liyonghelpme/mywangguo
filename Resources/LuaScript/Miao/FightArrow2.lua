@@ -240,8 +240,88 @@ function FightArrow2:waitAttack(diff)
                     self.soldier:moveOneStep(diff)
                 end
             end
+        elseif self.soldier.map.day == 3 then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+                local isHead = false
+                local att
+                if not self.isHead then
+                    if self.soldier.color == 0 then
+                        self:checkSide('right')
+                        att = self.soldier.right
+                        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    else
+                        self:checkSide('left')
+                        att = self.soldier.left
+                        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    end
+                end
+                self.isHead = isHead
+                --寻找就近的骑兵
+                if isHead then
+                    self.soldier.attackTarget = self:findNearCavalry()
+                --就是我的左侧或者右侧的朋友
+                else
+                    --不反抗
+                    --self.soldier.attackTarget = att
+                end
+            else
+                --射箭攻击 骑兵
+                if self.soldier.attackTarget.color ~= self.soldier.color then
+                    local p = getPos(self.soldier.bg)
+                    local mp = getPos(self.soldier.attackTarget.bg)
+                    local dis = self.soldier:getDis(p, mp) 
+                    --射箭攻击
+                    if dis >=400 and dis <= 500 then
+                        self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                    end
+                end
+            end
         end
     end
+end
+
+--只射击 同行的 骑兵
+function FightArrow2:findNearCavalry()
+    local dx = 999999
+    local dy = 999999
+    local p = getPos(self.soldier.bg)
+    local ene
+    local eneList = {}
+    if self.soldier.color == 0 then
+        table.insert(eneList, self.soldier.map.eneCavalrySoldiers)
+    else
+        table.insert(eneList, self.soldier.map.myCavalrySoldiers)
+    end
+    
+    --print("findNearEnemy isStart", isStart)
+    --local firstEnable
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                --没有在近战中 才考虑arrowHurt问题
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    --同行
+                    if tdisy < 5 then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+        if ene ~= nil then
+            return ene
+        end
+    end
+    return ene
 end
 
 
@@ -366,22 +446,11 @@ function FightArrow2:doFightBack(diff)
             --local p = getPos(self.soldier.bg)
             --local ap = getPos(self.soldier.attackTarget.bg)
             --控制动画频率
-            if not self.inFightBack then
-                self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
-                --[[
-                if math.abs(p[1]-ap[1]) < FIGHT_NEAR_RANGE then
-                    self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
-                    print('FIGHT_BACK NEAR_ATTACK')
-                    self.shootYet = false
-                    self.oneAttack = false
-                    self.soldier.changeDirNode:stopAllActions()
-                    --又开始执行另外的攻击动作了 执行的太多了
-                    self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
-                --对方超出攻击范围 且已经靠近则移动近战攻击
-                else
-
+            --对上步兵 才会近战攻击
+            if self.soldier.map.day == 2 then
+                if not self.inFightBack then
+                    self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
                 end
-                --]]
             end
         end
     end

@@ -53,13 +53,13 @@ function FightCavalry:checkIsCavalryHead()
     if self.soldier.color == 0 then
         self:checkSide('right')
         att = self.soldier.right
-        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color or self.soldier.right.kind ~= self.soldier.kind then
+        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color or self.soldier.right.id ~= self.soldier.id then
             isHead = true
         end
     else
         self:checkSide('left')
         att = self.soldier.left
-        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color or self.soldier.left.kind ~= self.soldier.kind then
+        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color or self.soldier.left.id ~= self.soldier.id then
             isHead = true
         end
     end
@@ -76,6 +76,8 @@ function FightCavalry:startAttack()
     self.attackEffect = {}
     self.soldier.oldPos = getPos(self.soldier.bg)
     print("self.cavalry head", self.soldier.sid, isHead, att)
+    --骑兵头
+    self.cavalryHead = isHead
     if isHead then
         local nearThree = self:findNearEnemy()
         self.nearThree = nearThree
@@ -86,8 +88,13 @@ function FightCavalry:startAttack()
 
         local maxDx = self:getMaxDif()
         --后面的 骑士 只是跟随 本骑士一起 奔跑而已 不会去攻击
+        --骑士受到 攻击 导致 位置偏移了 所以 误差 导致没有撞击到目标 造成 对弓箭手的伤害
         if #self.nearThree > 0 then
-            local midPoint = maxDx
+            local offX = 20
+            if self.soldier.color == 1 then
+                offX = -20
+            end
+            local midPoint = maxDx+offX
             local t = math.abs(midPoint-self.soldier.oldPos[1])/self.soldier.speed
             --self.beginMove = true
             self.midPoint = midPoint
@@ -130,13 +137,17 @@ function FightCavalry:doMove(diff)
             self.moveAni = repeatForever(CCAnimate:create(self.soldier.runAni))
             self.soldier.changeDirNode:stopAllActions()
             self.soldier.changeDirNode:runAction(self.moveAni)
-
-            self.midPoint = self.soldier.attackTarget.funcSoldier.midPoint
+            local offX = 100
+            if self.soldier.color == 1 then
+                offX = -100
+            end
+            self.midPoint = self.soldier.attackTarget.funcSoldier.midPoint+offX
             local t = math.abs(self.midPoint-self.soldier.oldPos[1])/self.soldier.speed
             self.moveTime = t 
         end
     end
     --检查当前是否和 目标碰撞在一起 如果是 则 产生攻击效果
+    --检测和 目标碰撞在一起 比较消耗资源为什么？非常卡顿
     if self.nearThree ~= nil then
         print("nearThree is", #self.nearThree)
         local p = getPos(self.soldier.bg)
@@ -161,13 +172,20 @@ function FightCavalry:doMove(diff)
         end
     end
 end
+
 function FightCavalry:harmOne(ene)
     if not self.dead then
         --显示一个攻击动作么？
         --self.beginAttack = true
         ene:doHurt(self.soldier.attack, true)
+        --步兵反击一下
+        --人马分离
+        if ene.id == 0 and self.cavalryHead then
+            self.soldier:doHurt(ene.attack)
+        end
     end
 end
+
 
 function FightCavalry:doMoveBack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.MOVE_BACK then

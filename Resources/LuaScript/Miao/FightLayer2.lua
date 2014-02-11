@@ -342,7 +342,7 @@ function FightLayer2:doFree(diff)
         --使用ease 函数调整move 状态
         local vs = getVS()
         local p = getPos(self.battleScene)
-        local endPoint = self.rightBack-vs.width+100
+        local endPoint = self.rightBack-vs.width+200
         print("endPoint is", endPoint)
         self.endPoint = endPoint
         self.totalTime = (endPoint-p[1])/self.moveSpeed

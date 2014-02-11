@@ -139,6 +139,9 @@ function FightLayer2:oneFail()
     --清理相机 状态
     self.clone = false
     self.mergeYet = false
+    
+    self.mySol = nil
+    self.eneSol = nil
 
     for k, v in ipairs(self.allSoldiers) do
         if not v.dead then
