@@ -503,8 +503,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId-1
@@ -543,8 +544,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=1, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId+1
@@ -579,8 +581,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId-1
@@ -611,8 +614,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId+1
@@ -656,8 +660,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId-1
@@ -689,8 +694,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId+1
@@ -729,8 +735,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId-1
@@ -761,8 +768,9 @@ function FightLayer2:initSoldier()
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
             else
-                local sp = {dead=true, color=0, sid=-1, id=-1}
+                local sp = {dead=true, color=0, sid=-1, id=-1, initLeftRight=initSolLeftRight, map=self, col=colId, row=ck-1}
                 table.insert(temp, sp)
+                self.soldierNet[getMapKey(colId, ck-1)] = sp
             end
         end
         colId = colId+1
@@ -775,10 +783,23 @@ function FightLayer2:initSoldier()
     --如果直到了所有的这种士兵 其实 可以 计算出 包围盒子的
     --弓箭手直接 打第一排
 
-
+    self:printNet()
     --初始化所有士兵 的 left right 属性
-    for k, v in ipairs(self.soldierNet) do
+    for k, v in pairs(self.soldierNet) do
         v:initLeftRight()
+    end
+    self:printLeftRight()
+end
+function FightLayer2:printNet()
+    print("soldier Net")
+    for k, v in pairs(self.soldierNet) do
+        local x, y = getXY(k)
+        print("cr", x, y, v.sid)
+    end
+end
+function FightLayer2:printLeftRight()
+    print("left right")
+    for k, v in pairs(self.soldierNet) do
     end
 end
 

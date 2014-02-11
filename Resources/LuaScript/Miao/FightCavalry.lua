@@ -10,6 +10,7 @@ end
 
 function FightCavalry:initView()
     self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_cavalry_idle_0.png")
+    setScale(self.soldier.changeDirNode, 0.8)
 end
 function FightCavalry:initShadow()
     self.soldier.shadow = CCSprite:create("roleShadow2.png")
@@ -48,22 +49,23 @@ end
 function FightCavalry:checkIsCavalryHead()
     local isHead = false
     local att
-    if not self.isHead then
-        if self.soldier.color == 0 then
-            self:checkSide('right')
-            att = self.soldier.right
-            if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color or self.soldier.right.kind ~= self.soldier.kind then
-                isHead = true
-            end
-        else
-            self:checkSide('left')
-            att = self.soldier.left
-            if self.soldier.left == nil or self.soldier.right.color ~= self.soldier.color or self.soldier.left.kind ~= self.soldier.kind then
-                isHead = true
-            end
+    --if not self.isHead then
+    if self.soldier.color == 0 then
+        self:checkSide('right')
+        att = self.soldier.right
+        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color or self.soldier.right.kind ~= self.soldier.kind then
+            isHead = true
+        end
+    else
+        self:checkSide('left')
+        att = self.soldier.left
+        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color or self.soldier.left.kind ~= self.soldier.kind then
+            isHead = true
         end
     end
-    self.isHead = isHead
+    print("checkIsCavalryHead", self.soldier.sid, isHead, att)
+    --end
+    --self.isHead = isHead
     return isHead, att
 end
 
@@ -72,14 +74,14 @@ function FightCavalry:startAttack()
     --最近的3个目标
     local isHead, att = self:checkIsCavalryHead()
     self.attackEffect = {}
+    self.soldier.oldPos = getPos(self.soldier.bg)
+    print("self.cavalry head", self.soldier.sid, isHead, att)
     if isHead then
         local nearThree = self:findNearEnemy()
         self.nearThree = nearThree
         self.moveAni = repeatForever(CCAnimate:create(self.soldier.runAni))
         self.soldier.changeDirNode:stopAllActions()
         self.soldier.changeDirNode:runAction(self.moveAni)
-
-        self.soldier.oldPos = getPos(self.soldier.bg)
         self.soldier.state = FIGHT_SOL_STATE.IN_MOVE
 
         local maxDx = self:getMaxDif()
@@ -87,32 +89,57 @@ function FightCavalry:startAttack()
         if #self.nearThree > 0 then
             local midPoint = maxDx
             local t = math.abs(midPoint-self.soldier.oldPos[1])/self.soldier.speed
-            self.beginMove = true
+            --self.beginMove = true
             self.midPoint = midPoint
             self.moveTime = t 
+            print("startAttack", self.soldier.sid, self.moveTime)
+            --self.totalMoveTime = t
         end
     --非头部骑兵 则 使用 头部的 nearThree 作为自己的 nearThree 属性
     else
+        print("back soldier move", self.soldier.sid, att)
         self.soldier.attackTarget = att
+        self.soldier.state = FIGHT_SOL_STATE.IN_MOVE
     end
 end
+--前排 骑兵 跑动
+--后排 骑兵 跑动
 function FightCavalry:doMove(diff)
-    local dx = self.soldier:getSpeed() * diff
-    local p = getPos(self.soldier.bg)
-    p[1] = p[1]+dx
-    setPos(self.soldier.bg, p)
-    self.moveTime = self.moveTime-diff
-    if self.moveTime <= 0 then
-        self.soldier.state = FIGHT_SOL_STATE.WAIT_BACK
+    print("self move time", self.soldier.sid, self.moveTime)
+    if self.moveTime ~= nil then
+        local dx = self.soldier:getSpeed() * diff
+        local p = getPos(self.soldier.bg)
+        p[1] = p[1]+dx
+        setPos(self.soldier.bg, p)
+        self.moveTime = self.moveTime-diff
+        if self.moveTime <= 0 then
+            self.soldier.state = FIGHT_SOL_STATE.WAIT_BACK
+        end
+    else
+        
     end
 
     --攻击 我方 第一排的 骑兵的 nearThree 目标 
-    if self.soldier.attackTarget ~= nil then
-        self.nearThree = self.soldier.attackTarget.funcSoldier.nearThree 
+    --print("doMove", self.soldier.attackTarget, self.nearThree, self.soldier.attackTarget.funcSoldier.nearThree)
+    if self.soldier.attackTarget ~= nil and self.nearThree == nil and self.soldier.attackTarget.funcSoldier.nearThree ~= nil then
+        print("set near Three of front", self.soldier.sid)
+        self.nearThree = copyTable(self.soldier.attackTarget.funcSoldier.nearThree)
+        --设定 移动 目标 为 我方骑兵的 移动目标
+        --这个骑兵 设定 midpoint 和 移动时间
+        if self.nearThree ~= nil then
+            self.moveAni = repeatForever(CCAnimate:create(self.soldier.runAni))
+            self.soldier.changeDirNode:stopAllActions()
+            self.soldier.changeDirNode:runAction(self.moveAni)
+
+            self.midPoint = self.soldier.attackTarget.funcSoldier.midPoint
+            local t = math.abs(self.midPoint-self.soldier.oldPos[1])/self.soldier.speed
+            self.moveTime = t 
+        end
     end
     --检查当前是否和 目标碰撞在一起 如果是 则 产生攻击效果
     if self.nearThree ~= nil then
         print("nearThree is", #self.nearThree)
+        local p = getPos(self.soldier.bg)
         for k, v in ipairs(self.nearThree) do
             if not v.dead and self.attackEffect[v] == nil then
                 local ep = getPos(v.bg)
@@ -286,7 +313,7 @@ function FightCavalry:doFree(diff)
             print("doFree day 2")
             --寻找 进攻的 步兵 目标
             if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
-                print("attackTarget dead")
+                print("attackTarget nil dead")
                 local isHead = false
                 local att
                 if not self.isHead then
@@ -368,7 +395,7 @@ function FightCavalry:doNearAttack(diff)
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()
                 self.soldier.changeDirNode:runAction(self.idleAction)
-                local ene = self:findNearFoot()
+                local ene = self:findCloseEnemy()
                 self.soldier.attackTarget = ene
             else
                 print("near enemy is", self.soldier.attackTarget.sid)
@@ -389,6 +416,8 @@ end
 function FightCavalry:finishAttack(oneDead)
     --步兵移动会影响所有士兵的状态 包括弓箭手类型 所以弓箭手也要调整状态
     self.soldier.state = FIGHT_SOL_STATE.FREE
+    print("finishAttack moveTime", self.soldier.sid, self.moveTime)
+    self.moveTime = nil
     self.isHead = false 
     self.oneAttack = false
     self.firstCheckYet = false
@@ -397,6 +426,7 @@ function FightCavalry:finishAttack(oneDead)
     print("clear arrow or magic Hurt for arrow")
     self.soldier.arrowHurt = 0
     self.soldier.midPoint = nil
+    self.midPoint = nil
     self.soldier.attackTarget = nil
     self.nearThree = nil
 
@@ -414,11 +444,12 @@ function FightCavalry:finishAttack(oneDead)
             self.soldier.changeDirNode:runAction(self.moveAni)
 
             --self.soldier.state = FIGHT_SOL_STATE.MOVE_BACK
+            local scay = getScaleY(self.soldier.changeDirNode)
             if self.soldier.color == 0 then
-                setScaleX(self.soldier.changeDirNode, -1) 
+                setScaleX(self.soldier.changeDirNode, -scay) 
                 self.soldier.bg:runAction(sequence({delaytime(0.5), moveby(1, -self.soldier:getSpeed()*1, 0)}))
             else
-                setScaleX(self.soldier.changeDirNode, 1)
+                setScaleX(self.soldier.changeDirNode, scay)
                 self.soldier.bg:runAction(sequence({delaytime(0.5), moveby(1, -self.soldier:getSpeed()*1, 0)}))
             end
         else
@@ -436,10 +467,11 @@ function FightCavalry:resetPos()
         if not self.soldier.dead then
             print("cavalry reset Pos", self.soldier.sid, self.soldier.oldPos)
             setPos(self.soldier.bg, self.soldier.oldPos)
+            local scay = getScaleY(self.soldier.changeDirNode)
             if self.soldier.color == 0 then
-                setScaleX(self.soldier.changeDirNode, 1)
+                setScaleX(self.soldier.changeDirNode, scay)
             else
-                setScaleX(self.soldier.changeDirNode, -1)
+                setScaleX(self.soldier.changeDirNode, -scay)
             end
         end
     end

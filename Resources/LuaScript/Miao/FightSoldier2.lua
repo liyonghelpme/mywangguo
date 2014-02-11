@@ -40,6 +40,7 @@ function FightSoldier2:initLeftRight()
     local right = getMapKey(self.col+1, self.row)
     self.left = self.map.soldierNet[left]
     self.right = self.map.soldierNet[right]
+    print("left right is", left, right)
 end
 
 
@@ -181,10 +182,11 @@ function FightSoldier2:setZord()
     self.bg:setZOrder(MAX_BUILD_ZORD-p[2])
 end
 function FightSoldier2:setDir()
+    local scaY = getScaleY(self.changeDirNode)
     if self.color == 1 then
-        setScaleX(self.changeDirNode, -1)
+        setScaleX(self.changeDirNode, -scaY)
     else
-        setScaleX(self.changeDirNode, 1)
+        setScaleX(self.changeDirNode, scaY)
     end
 end
 function FightSoldier2:doRunAndAttack(day)

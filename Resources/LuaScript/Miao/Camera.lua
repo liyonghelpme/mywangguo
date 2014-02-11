@@ -80,6 +80,7 @@ function Camera:update(diff)
     self:adjustMoveTarget()
     if self.moveTarget ~= nil then
         local pos = self.startPoint
+        --smooth 总是无法达到
         local smooth = diff*CAMERA_SMOOTH
         smooth = math.min(smooth, 1)
         local dx = math.abs(pos[1]-self.moveTarget)

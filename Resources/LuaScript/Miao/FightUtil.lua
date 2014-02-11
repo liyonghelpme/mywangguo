@@ -48,3 +48,11 @@ function getFirstNotDead(sol, side)
     return sol[side]
 end
 
+function initSolLeftRight(self)
+    local left = getMapKey(self.col-1, self.row)
+    local right = getMapKey(self.col+1, self.row)
+    self.left = self.map.soldierNet[left]
+    self.right = self.map.soldierNet[right]
+end
+function createDeadSoldier()
+end

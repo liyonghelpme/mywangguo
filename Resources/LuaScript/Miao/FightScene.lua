@@ -41,8 +41,9 @@ function FightScene:ctor()
     
     --self.soldiers = {{0, 0, 5, 0}, {0, 10, 0, 0}}
     --self.soldiers = {{0, 0, 0, 5}, {0, 0, 0, 5}}
-    self.soldiers = {{5, 0, 0, 5}, {0, 0, 0, 5}}
+    --self.soldiers = {{35, 0, 0, 5}, {0, 0, 0, 40}}
     --self.soldiers = {{25, 10, 0, 0}, {5, 40, 0, 0}}
+    self.soldiers = {{0, 0, 0, 30}, {0, 0, 0, 30}}
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
 
