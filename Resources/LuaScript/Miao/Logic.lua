@@ -708,3 +708,16 @@ Logic.ownBuild = {
 Logic.lastArenaTime = 0
 
 Logic.landBook = 0
+
+
+Logic.initYet = false
+local function initData(rep, param)
+    Logic.allSkill = rep.skill
+    for k, v in ipairs(rep.skill) do
+        Logic.skill[v.id] = v
+    end
+    Logic.initYet = true
+end
+function initDataFromServer()
+    sendReq('login', dict(), initData, nil, nil)
+end

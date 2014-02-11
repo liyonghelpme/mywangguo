@@ -4,14 +4,11 @@ function FightLayer2:finishCavalry()
     local ret, left, right = self:oneFail()
     if ret then
     else
-        self.animateYet = false
-        self.finishAttack = false
         for k, v in ipairs(self.allSoldiers) do
             v.funcSoldier:resetPos()
         end
         self.day = 0
-        self.passTime = 0
-        self:clearAllCamera()
+        self:clearState()
     end
 end
 
@@ -21,14 +18,11 @@ function FightLayer2:finishFoot()
     local ret, left, right = self:oneFail()
     if ret then
     else
-        self.animateYet = false
-        self.finishAttack = false
         for k, v in ipairs(self.allSoldiers) do
             v.funcSoldier:resetPos()
         end
         self.day = 3
-        self.passTime = 0
-        self:clearAllCamera()
+        self:clearState()
     end
 end
 --只有在处理完 游戏是否结束后 再清理是否split的状态
@@ -140,8 +134,7 @@ function FightLayer2:oneFail()
     self.clone = false
     self.mergeYet = false
     
-    self.mySol = nil
-    self.eneSol = nil
+    --self.skillYet = false
 
     for k, v in ipairs(self.allSoldiers) do
         if not v.dead then
@@ -228,6 +221,35 @@ function FightLayer2:getEneLeft()
     return minX, myT
 end
 
+function FightLayer2:initSkill()
+    local ss = self.mySoldiers
+    local hasSkill = false
+    for k, v in ipairs(ss) do
+        for tk, tv in ipairs(v) do
+            if not tv.dead and tv.isHero and tv.heroData.skill ~= nil then
+                local skId = tv.heroData.skill
+                local sdata = Logic.skill[skId]
+                self.skillEffect = sdata 
+                hasSkill = true
+            end
+        end
+    end
+    if hasSkill then
+        for k, v in ipairs(self.allSoldiers) do
+            if not v.dead then
+                v:showSkillEffect()
+            end
+        end
+        local function setOver()
+            self.skillOver = true
+        end
+        self.bg:runAction(sequence({delaytime(1), callfunc(nil, setOver)}))
+    else
+        self.skillOver = true
+    end
+end
+
+
 --不同士兵类型执行不同的剧本
 function FightLayer2:footScript(diff)
     --print("footScript")
@@ -278,8 +300,16 @@ function FightLayer2:footScript(diff)
     if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil then
         local ls = self.leftCamera.startPoint[1]
         --镜头移动移动到目标位置了 则播放跑步动画
+        --播放 技能 效果 skillEffect Yet 
+        --skillEffect Yet over 接着 进入正题
         if math.abs(ls-self.leftCamera.moveTarget) < 5 then
-            if not self.animateYet then
+            --最简单的箭头效果 图片
+            if not self.skillYet then
+                self.skillYet = true
+                self:initSkill()
+            end
+
+            if self.skillOver and not self.animateYet then
                 self.animateYet = true
                 for k, v in ipairs(self.allSoldiers) do
                     --开始跑步和攻击
@@ -497,13 +527,6 @@ function FightLayer2:cloneRightCamera()
     print("cloneRightCamera")
 end
 
---[[
-function FightLayer2:switchArrow()
-    self.day = 1
-    self.animateYet = false
-    self.passTime = 0
-end
---]]
 
 --显示分镜头关闭主镜头
 function FightLayer2:showLeftCamera()
@@ -964,6 +987,7 @@ function FightLayer2:cavalryScript(diff)
 
     --模仿 步兵 追踪士兵
     if not self.finishAttack and self.animateYet then
+        print("trace cavalry", self.mySol, self.eneSol)
         --从外列 逐行搜索
         if self.mySol == nil or self.mySol.dead then
             self.mySol = self:findMyRightMostCavalry()
@@ -1164,11 +1188,21 @@ function FightLayer2:finishMagic()
         end
 
         self.day = 1
-        self.arrowOver = false
-        self.animateYet = false
-        self.passTime = 0
-        self:clearAllCamera()
+        self:clearState()
     end
+end
+function FightLayer2:clearState()
+    self.skillOver = false
+    self.arrowOver = false
+    self.skillYet = false
+    self.animateYet = false
+    self.passTime = 0
+    self.skillEffect = nil
+    self.finishAttack = false
+
+    self.mySol = nil
+    self.eneSol = nil
+    self:clearAllCamera()
 end
 --进入步兵回合 
 --插入好多动作
@@ -1186,10 +1220,7 @@ function FightLayer2:finishArrow()
             v:finishAttack()
         end
         self.day = 2
-        self.arrowOver = false
-        self.animateYet = false
-        self.passTime = 0
-        self:clearAllCamera()
+        self:clearState()
     end
 end
 

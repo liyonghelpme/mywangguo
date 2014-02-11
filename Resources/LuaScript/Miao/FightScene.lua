@@ -57,16 +57,25 @@ function FightScene:ctor()
     
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
-    self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    self.heros = {{{attack=6*5, defense=0, health=66*5, skill=2} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
-
     self.bg = CCScene:create()
-    self.layer = FightLayer2.new(self, self.soldiers[1], self.soldiers[2])
-    self.bg:addChild(self.layer.bg)
-    self.menu = FightMenu2.new(self)
-    self.bg:addChild(self.menu.bg)
+    
+    initDataFromServer()
 
-    self.dialogController = DialogController.new(self)
-    self.bg:addChild(self.dialogController.bg)
+    self.needUpdate = true
+    registerEnterOrExit(self)
+end
+function FightScene:update(diff)
+    if Logic.initYet then
+        Logic.initYet = false
+        self.layer = FightLayer2.new(self, self.soldiers[1], self.soldiers[2])
+        self.bg:addChild(self.layer.bg)
+        self.menu = FightMenu2.new(self)
+        self.bg:addChild(self.menu.bg)
+
+        self.dialogController = DialogController.new(self)
+        self.bg:addChild(self.dialogController.bg)
+    end
 end

@@ -283,6 +283,7 @@ function FightLayer2:ctor(s, my, ene)
     --self.eneFootNum = self:testNum13(0)
     --self.eneArrowNum = self:testNum14()
 
+    self.skillEffect = nil
     
     --最后留上一列的宽度
     --最后一种兵至少需要半个屏幕的宽度
@@ -501,6 +502,17 @@ function FightLayer2:initPic()
         sf:addSpriteFrame(sp, "magic"..i)
     end
     createAnimation("magicBall", "magic%d", 0, 11, 1, 0.5, true)
+
+    local tex = CCTextureCache:sharedTextureCache():addImage("skillEffect.png")
+    for i=0, 13, 1 do
+        local row = math.floor(i/5)
+        local col = i%5
+        local r = CCRectMake(col*192, row*192, 192, 192)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        sf:addSpriteFrame(sp, "skillEffect"..i)
+    end
+    createAnimation("skillEffect", "skillEffect%d", 0, 13, 1, 0.5, true)
+
 end
 function FightLayer2:getSolId()
     self.solId = self.solId+1
@@ -918,7 +930,17 @@ function FightLayer2:initSoldier()
         v:initLeftRight()
     end
     self:printLeftRight()
+    
+    self:initPassivitySkill()
 end
+
+--初始化步兵的 被动技能
+function FightLayer2:initPassivitySkill()
+    for k, v in ipairs(self.allSoldiers) do
+        v:initPassivitySkill()
+    end
+end
+
 function FightLayer2:printNet()
     print("soldier Net")
     for k, v in pairs(self.soldierNet) do

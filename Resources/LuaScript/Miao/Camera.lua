@@ -54,12 +54,12 @@ function Camera:trace(o, offX)
 end
 function Camera:adjustMoveTarget()
     if self.object ~= nil then
-        if self.object.dead then
+        if self.object.dead or self.object.changeDirNode == nil then
             --追踪对象死亡了
         else
             local vs = getVS()
             --弓箭就要考虑 changeDirNode 和 bg 不同因素
-            print("object changeDirNode", self.object.changeDirNode)
+            print("object changeDirNode", self.object.mid, self.object.dead, self.object.changeDirNode)
             local ap = getPos(self.object.changeDirNode)
             local abp = getPos(self.object.bg)
             ap[1] = abp[1]+ap[1]

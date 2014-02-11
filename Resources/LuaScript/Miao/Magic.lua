@@ -1,9 +1,12 @@
 Magic = class()
+local mid = 0
 function Magic:ctor(s, t)
     self.soldier = s
     self.target = t
     self.color = self.soldier.color
-    
+    self.mid = mid
+    self.dead = false
+    mid = mid+1
     local bf = ccBlendFunc()
     bf.src = GL_ONE
     bf.dst = GL_ONE
@@ -42,8 +45,10 @@ function Magic:update(diff)
 end
 
 function Magic:doHarm()
-    self.target:doHurt(self.soldier.attack, true)
+    print("Magic do Harm", self.mid)
     self.dead = true
+    self.changeDirNode = nil
+    self.target:doHurt(self.soldier.attack, true)
     removeSelf(self.bg)
 end
 
