@@ -15,10 +15,15 @@ function ConfigMenu:ctor(ct)
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+34", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.00, 0.50}), {341, fixY(sz.height, 531)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+35", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.00, 0.50}), {446, fixY(sz.height, 531)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+36", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.00, 0.50}), {550, fixY(sz.height, 531)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+37", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.00, 0.50}), {654, fixY(sz.height, 531)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+34", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {364, fixY(sz.height, 531)})
+    self.footW = w
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+35", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {469, fixY(sz.height, 531)})
+    self.arrowW = w
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+36", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {574, fixY(sz.height, 531)})
+    self.magicW = w
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="+37", size=18, color={248, 181, 81}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {677, fixY(sz.height, 531)})
+    self.cavalryW = w
+     
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="步兵", size=18, color={255, 255, 255}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {364, fixY(sz.height, 493)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="弓箭", size=18, color={255, 255, 255}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {469, fixY(sz.height, 494)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="魔法", size=18, color={255, 255, 255}, font="f1", shadowColor={0, 0, 0}})), {0.50, 0.50}), {574, fixY(sz.height, 493)})
@@ -90,6 +95,7 @@ function ConfigMenu:adjustAttend()
         local sp = createSprite("cat_"..pData.id.."_rb_0.png")
         setAnchor(setPos(setScale(sp, 0.5), {bpos[1]-bsize[1]/2+initX+col*offX, bpos[2]-bsize[2]/2+initY+row*offY}), {257/512, (512-374)/512})
         addChild(self.hNode, sp)
+        sp:setZOrder(10-row)
 
         local equip = pData
         local weapKind = 0 
@@ -122,11 +128,31 @@ function ConfigMenu:adjustAttend()
             magic = magic+1
         end
     end
-
+    if foot > 0 then
+        self.footW:setString('+'..foot)
+    else
+        self.footW:setString('')
+    end
+    if arrow > 0 then
+        self.arrowW:setString('+'..arrow)
+    else
+        self.arrowW:setString('')
+    end
+    if magic > 0 then
+        self.magicW:setString('+'..magic)
+    else
+        self.magicW:setString('')
+    end
+    if cavalry > 0 then
+        self.cavalryW:setString('+'..cavalry)
+    else
+        self.cavalryW:setString('')
+    end
 end
 
 --调整参战英雄数量
 function ConfigMenu:refreshData()
+    print("refresh ConfigMenu")
     self:adjustAttend()
 end
 
@@ -140,6 +166,10 @@ function ConfigMenu:onBut(p)
     elseif p == 2 then
         global.director:pushView(ChooseMenu.new(), 1, 0)
     elseif p == 3 then
+        if #Logic.attendHero == 0 then
+            addBanner("至少选择一个村民参战!")
+            return
+        end
         --挑战竞技场
         if self.city.kind == 0 then
             global.director:popView()
@@ -154,6 +184,4 @@ function ConfigMenu:onBut(p)
     end
 end
 
-function ConfigMenu:refreshData()
-end
 

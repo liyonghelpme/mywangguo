@@ -61,7 +61,59 @@ function FightScene:ctor()
     
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=6} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=41} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
-    self.heros = {{{attack=6*5, defense=0, health=66*5, skill=45} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=45} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    self.heros = {{}, {}, {}, {}}
+    for k, v in ipairs(Logic.attendHero) do
+        local pdata = Logic.farmPeople[v]
+        local equip = pdata
+        local weapKind = 0 
+        local ride = false
+        if equip.weapon ~= nil then
+            local edata = Logic.equip[equip.weapon]
+            --兵器
+            if edata.kind == 0 then
+                --近战 远战
+                if edata.subKind == 0 or edata.subKind == 1 or edata.subKind == 4 then
+                    weapKind = 0
+                elseif edata.subKind == 2 then
+                    weapKind = 1
+                elseif edata.subKind == 3 then
+                    weapKind = 2
+                end
+            end
+        end
+        local equipSkill
+        if equip.spe ~= nil then
+            local edata = Logic.equip[equip.weapon]
+            ride = edata.ride == 1
+            if edata.skillId ~= 0 then
+                equipSkill = edata.skillId
+            end
+        end
+        
+        local attr = calAttr(pdata.id, pdata.level, pdata) 
+        local sid = getPeopleSkill(pdata.id, pdata.level)
+        local skllId
+        if equipSkill ~= nil then
+            skillId = equipSkill
+        else
+            skillId = sid
+        end
+        if skillId == 0 then
+            skillId = nil
+        end
+        if ride then
+            table.insert(self.heros[4], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+        elseif weapKind == 0 then
+            table.insert(self.heros[1], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+        elseif weapKind == 1 then
+            table.insert(self.heros[2], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+        elseif weapKind == 2 then
+            table.insert(self.heros[3], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+        end
+    end
+    print("attendHero", simple.encode(Logic.attendHero))
+    print(simple.encode(self.heros))
 
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
@@ -70,13 +122,14 @@ function FightScene:ctor()
     self.bg:addChild(self.dialogController.bg)
     
     --initDataFromServer()
-    Logic.initYet = true
+    self.initYet = true
     self.needUpdate = true
     registerEnterOrExit(self)
 end
 function FightScene:update(diff)
-    if Logic.initYet then
-        Logic.initYet = false
+    --print("init Fight View", Logic.initYet)
+    if self.initYet then
+        self.initYet = false
         self.layer = FightLayer2.new(self, self.soldiers[1], self.soldiers[2])
         self.bg:addChild(self.layer.bg)
         self.menu = FightMenu2.new(self)

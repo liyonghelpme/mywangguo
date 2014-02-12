@@ -9,7 +9,8 @@ function ChooseMenu:ctor()
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {848, fixY(sz.height, 112)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最多选择6个英雄参加", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {533, fixY(sz.height, 625)})
+    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="最多选择"..Logic.fightNum.."个英雄参加", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {533, fixY(sz.height, 625)})
+    
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="费用", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {673, fixY(sz.height, 217)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="配属", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {593, fixY(sz.height, 217)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="防", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {547, fixY(sz.height, 216)})
@@ -47,6 +48,12 @@ function ChooseMenu:updateTab()
 
     local sz = {width=546, height=53}
 	self.data = {}
+    local att = Logic.attendHero
+    local aYet = {}
+    for k, v in ipairs(att) do
+        aYet[v] = true 
+    end
+
     for k, v in ipairs(Logic.farmPeople) do
 		local row = math.floor((k-1)/rowWidth)
 		local col = (k-1)%rowWidth
@@ -57,7 +64,11 @@ function ChooseMenu:updateTab()
         local sp = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "headBoard.png"), {28, fixY(sz.height, 26)}), {57, 52}), {0.50, 0.50}), 255)
         local sp = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "catHead"..v.id..".png"), {28, fixY(sz.height, 24)}), {52, 45}), {0.50, 0.50}), 255)
         local attend = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "attend.png"), {48, fixY(sz.height, 40)}), {23, 25}), {0.50, 0.50}), 255)
-        setVisible(attend, false)
+        if aYet[k] then
+            setVisible(attend, true)
+        else
+            setVisible(attend, false)
+        end
 
         local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=25, color={255, 241, 0}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {84, fixY(sz.height, 25)})
         local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=23, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {124, fixY(sz.height, 25)})
@@ -128,6 +139,23 @@ end
 function ChooseMenu:adjustAttend(t)
     local word =  self.data[t]
     local v = word.attend:isVisible()
+    if not v then
+        if #Logic.attendHero >= Logic.fightNum then
+            addBanner("参战人数不能超过"..Logic.fightNum)
+            return
+        end
+    end
+
+    if v then
+        for ak, av in ipairs(Logic.attendHero) do
+            if av == t then
+                table.remove(Logic.attendHero, ak)
+                break
+            end
+        end
+    else
+        table.insert(Logic.attendHero, t)
+    end
     setVisible(word.attend, not v)
 end
 function ChooseMenu:setSel(s)
