@@ -36,7 +36,100 @@ function ConfigMenu:ctor(ct)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "configTitle.png"), {533, fixY(sz.height, 147)}), {212, 41}), {0.50, 0.50}), 255)
 
     centerUI(self)
+    
+    self:initHero()
 end
+
+function ConfigMenu:initHero()
+    local n = Logic.fightNum
+    local en = Logic.attendHero
+
+    --补全 英雄
+    if #en < n then
+        local inAtt = {}
+        for k, v in ipairs(en) do
+            inAtt[v] = true 
+        end
+        local left = n-#en
+        --没有在farmPeople 中
+        for k, v in ipairs(Logic.farmPeople) do
+            if not inAtt[k] then
+                table.insert(en, k)
+                left = left-1
+            end
+            if left <= 0 then
+                break
+            end
+        end
+    end
+    self:adjustAttend() 
+end
+
+function ConfigMenu:adjustAttend()
+    if self.hNode ~= nil then
+        removeSelf(self.hNode)
+    end
+    self.hNode = addNode(self.temp)
+    local initX = 140
+    local initY = 176-128
+    local offX = 80
+    local offY = 60
+    local bsize = {519, 176}
+    local bpos = {523, fixY(768, 365)}
+
+    print("initHero", simple.encode(Logic.attendHero))
+
+    local foot = 0
+    local arrow = 0
+    local magic = 0
+    local cavalry = 0
+    for k, v in ipairs(Logic.attendHero) do
+        local row = math.floor((k-1)/4)
+        local col = (k-1)%4
+        local pData = Logic.farmPeople[v]
+        local sp = createSprite("cat_"..pData.id.."_rb_0.png")
+        setAnchor(setPos(setScale(sp, 0.5), {bpos[1]-bsize[1]/2+initX+col*offX, bpos[2]-bsize[2]/2+initY+row*offY}), {257/512, (512-374)/512})
+        addChild(self.hNode, sp)
+
+        local equip = pData
+        local weapKind = 0 
+        local ride = false
+        if equip.weapon ~= nil then
+            local edata = Logic.equip[equip.weapon]
+            --兵器
+            if edata.kind == 0 then
+                --近战 远战
+                if edata.subKind == 0 or edata.subKind == 1 or edata.subKind == 4 then
+                    weapKind = 0
+                elseif edata.subKind == 2 then
+                    weapKind = 1
+                elseif edata.subKind == 3 then
+                    weapKind = 2
+                end
+            end
+        end
+        if equip.spe ~= nil then
+            local edata = Logic.equip[equip.weapon]
+            ride = edata.ride == 1
+        end
+        if ride then
+            cavalry = cavalry+1
+        elseif weapKind == 0 then
+            foot = foot+1
+        elseif weapKind == 1 then
+            arrow = arrow+1
+        elseif weapKind == 2 then
+            magic = magic+1
+        end
+    end
+
+end
+
+--调整参战英雄数量
+function ConfigMenu:refreshData()
+    self:adjustAttend()
+end
+
 function ConfigMenu:onArena()
     global.director:pushScene(FightScene.new())
 end

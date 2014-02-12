@@ -1694,7 +1694,11 @@ function calAttr(id, level, equip)
         if equip.body ~= nil then
             addEquipAttr(temp, Logic.equip[equip.body])
         end
+        if equip.spe ~= nil then
+            addEquipAttr(temp, Logic.equip[equip.spe])
+        end
     end
+
     --使用近战武器还是 远程武器
     if weapKind == 0 then
         local battack = math.floor(temp.brawn/2)

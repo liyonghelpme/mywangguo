@@ -75,9 +75,9 @@ function MiaoPeople:ctor(m, data)
     self.bg = CCNode:create()
     self.heightNode = addNode(self.bg)
     print("init MiaoPeople", self.id)
-    if self.id == 1 then
-        self.funcPeople = Worker.new(self)
-    elseif self.data.kind == 2 then
+    --if self.id == 1 then
+    --    self.funcPeople = Worker.new(self)
+    if self.data.kind == 2 then
         self.funcPeople = Merchant.new(self) 
     --elseif self.id == 3 then
     --    self.funcPeople = Cat.new(self)

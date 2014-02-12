@@ -513,7 +513,6 @@ function FightLayer2:initPic()
     end
     createAnimation("skillEffect", "skillEffect%d", 0, 13, 1, 0.5, true)
     
-
     local tex = CCTextureCache:sharedTextureCache():addImage("attackPower.png")
     for i=0, 19, 1 do
         local row = math.floor(i/5)
@@ -523,6 +522,17 @@ function FightLayer2:initPic()
         sf:addSpriteFrame(sp, "ap"..i)
     end
     createAnimation("attackPower", "ap%d", 0, 19, 1, 1, true)
+
+    local tex = CCTextureCache:sharedTextureCache():addImage("skillHealth.png")
+    for i=0, 28, 1 do
+        local row = math.floor(i/5)
+        local col = i%5
+        local r = CCRectMake(col*192, row*192, 192, 192)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        sf:addSpriteFrame(sp, "skillHealth"..i)
+    end
+    createAnimation("skillHealth", "skillHealth%d", 0, 28, 1, 1.5, true)
+
 end
 
 function FightLayer2:getSolId()

@@ -6,14 +6,25 @@ function FightMap:ctor()
     initPlist()
 
     self.bg = CCScene:create()
-    self.page = FightPage.new()
-    self.bg:addChild(self.page.bg)
-    self.menu = FightMenu.new(self)
-    self.bg:addChild(self.menu.bg)
 
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
+    
+    --initDataFromServer()
+    Logic.initYet = true
+    self.needUpdate = true
+    registerEnterOrExit(self)
 end
+function FightMap:update(diff)
+    if Logic.initYet then
+        Logic.initYet = false
+        self.page = FightPage.new()
+        self.bg:addChild(self.page.bg)
+        self.menu = FightMenu.new(self)
+        self.bg:addChild(self.menu.bg)
+    end
+end
+
 function FightMap:checkWin()
     print("FightMenu checkWin", Logic.challengeCity)
     --addBanner("FightMap checkWin")

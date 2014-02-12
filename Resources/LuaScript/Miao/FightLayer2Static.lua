@@ -870,6 +870,10 @@ function FightLayer2:magicScript(diff)
                 --需要清理双方的 弓箭
                 self.rightArrow = nil
                 self.arrowOver = true
+                
+                for k, v in ipairs(self.allSoldiers) do
+                    v:finishAttack()
+                end
                 --进入分屏幕状态 下一个 回合
                 self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishMagic)}))
             elseif self.rightArrow ~= nil and self.rightArrow.dead then
@@ -877,6 +881,9 @@ function FightLayer2:magicScript(diff)
                 self.rightArrow = nil
                 self.arrow = nil
                 self.arrowOver = true
+                for k, v in ipairs(self.allSoldiers) do
+                    v:finishAttack()
+                end
                 self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishMagic)}))
             end
             print("magic over", self.arrowOver)
@@ -1190,12 +1197,18 @@ function FightLayer2:arrowScript(diff)
                 self.rightArrow = nil
                 self.arrowOver = true
                 --进入分屏幕状态 下一个 回合
+                for k, v in ipairs(self.allSoldiers) do
+                    v:finishAttack()
+                end
                 self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishArrow)}))
             elseif self.rightArrow ~= nil and self.rightArrow.dead then
                 print("right Arrow dead")
                 self.rightArrow = nil
                 self.arrow = nil
                 self.arrowOver = true
+                for k, v in ipairs(self.allSoldiers) do
+                    v:finishAttack()
+                end
                 self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishArrow)}))
             end
             print("arrow over", self.arrowOver)
@@ -1223,9 +1236,6 @@ function FightLayer2:finishMagic()
     if ret then
     else
         --进入步兵开始状态 屏幕分割 和 屏幕设定位置
-        for k, v in ipairs(self.allSoldiers) do
-            v:finishAttack()
-        end
 
         self.day = 1
         self:clearState()
@@ -1258,9 +1268,6 @@ function FightLayer2:finishArrow()
     if ret then
     else
         --进入步兵开始状态 屏幕分割 和 屏幕设定位置
-        for k, v in ipairs(self.allSoldiers) do
-            v:finishAttack()
-        end
         self.day = 2
         self:clearState()
     end

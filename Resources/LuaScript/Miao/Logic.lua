@@ -708,14 +708,186 @@ Logic.ownBuild = {
 Logic.lastArenaTime = 0
 
 Logic.landBook = 0
+--参展英雄id 列表
+Logic.attendHero = {
+}
 
 
 Logic.initYet = false
 local function initData(rep, param)
+    initCityData()
+    print("initData", rep, param)
+
+    local u = CCUserDefault:sharedUserDefault()
+    local r = u:getStringForKey("resource")
+    if r ~= "" then
+        Logic.resource = simple.decode(r)
+    end
+    local r = u:getStringForKey("holdNum")
+    if r ~= "" then
+        Logic.holdNum = tableToDict(simple.decode(r))
+        print("decode holdNum", simple.encode(Logic.holdNum))
+    end
+    local r = u:getStringForKey("researchData")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.researchGoods = rd.researchGoods
+        Logic.inResearch = rd.inResearch
+        Logic.ownGoods = rd.ownGoods
+    end
+    initResearchEquip() 
+
+    local r = u:getStringForKey("inSell")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.inSell = rd
+    end
+
+    local r = u:getStringForKey("buildNum")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.buildNum = rd
+    end
+    local r = u:getStringForKey("ownCity")
+    if r ~= "" then
+        print("ownCity", r)
+        local rd = dictKeyToNum(simple.decode(r))
+        Logic.ownCity = rd
+    end
+    local r = u:getStringForKey("catData")
+    if r ~= "" and r ~= "null" then
+        print("catData", r)
+        local rd = simple.decode(r)
+        Logic.catData = rd
+        print("encode catData", simple.encode(Logic.catData))
+    else
+        Logic.catData = nil
+    end
+
+    local r = u:getStringForKey("ownPeople")
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownPeople = rd
+    end
+
+    local r = u:getStringForKey('ownBuild')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownBuild = rd
+    end
+
+    local r = u:getStringForKey('fightNum')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.fightNum = rd
+    end
+
+    local r = u:getStringForKey('arenaLevel')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.arenaLevel = rd
+    end
+
+    local r = u:getStringForKey('ownTech')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownTech = rd
+    end
+
+    local r = u:getStringForKey('lastArenaTime')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.lastArenaTime = rd
+    end
+
+    local r = u:getStringForKey('date')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.date = rd
+    end
+
+    local r = u:getStringForKey('landBook')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.landBook = rd
+    end
+
+    local r = u:getStringForKey("soldiers")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.soldiers = rd
+    end
+
+    Logic.cityGoods = {}
+    CityData = {}
+    for k, v in ipairs(rep.cityData) do
+        v.goods = simple.decode(v.goods)
+        Logic.cityGoods[v.id] = v
+        table.insert(CityData, {v.foot, v.arrow, v.magic, v.cav})
+    end
+    print("cityGoods", #Logic.cityGoods)
+
+
+    GoodsName = {}
+    for k, v in ipairs(rep.goods) do
+        GoodsName[v.id] = v
+    end
+
+    Logic.buildings = {}
+    for k, v in ipairs(rep.build) do
+        v.goodsList = simple.decode(v.goodsList)
+        Logic.buildings[v.id] = v 
+    end
+
+    Logic.buildList = {}
+    for k, v in ipairs(rep.build) do
+        if v.deleted == 0 then
+            table.insert(Logic.buildList, v)
+        end
+    end
+    --城堡
+    Logic.castlePeople = {}
+    --村庄
+    Logic.villagePeople = {}
+    --新手村
+    Logic.newPeople = {}
+    Logic.people = {}
+    Logic.allPeople = rep.people
+    print("allPeople", #Logic.allPeople)
+    for k, v in ipairs(rep.people) do
+        Logic.people[v.id] = v
+        if v.cityKind == 0 then
+            local df = getDefault(Logic.castlePeople, v.appear, {} )
+            table.insert(df, v.id)
+        elseif v.cityKind == 1 then
+            local df = getDefault(Logic.villagePeople, v.appear, {} )
+            table.insert(df, v.id)
+        else
+            local df = getDefault(Logic.newPeople, v.appear, {} )
+            table.insert(df, v.id)
+        end
+    end
+    
+    Logic.allEquip = rep.equip
+    for k, v in ipairs(rep.equip) do
+        Logic.equip[v.id] = v
+        if v.kind == 0 then
+            table.insert(Logic.allWeapon, v)
+        elseif v.kind == 1 then
+            table.insert(Logic.allHead, v)
+        elseif v.kind == 2 then
+            table.insert(Logic.allBody, v)
+        elseif v.kind == 3 then
+            table.insert(Logic.allSpe, v)
+        end
+        v.getMethod = simple.decode(v.getMethod)
+    end
+
     Logic.allSkill = rep.skill
     for k, v in ipairs(rep.skill) do
         Logic.skill[v.id] = v
     end
+
     Logic.initYet = true
 end
 function initDataFromServer()

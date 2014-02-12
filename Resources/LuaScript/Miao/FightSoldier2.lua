@@ -73,7 +73,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
     self.speed = 300
     self.smooth = 2
     self.arrowHurt = 0
-
+    --level 就是 power信息
     local myab = getSolAbility(self.id+1, self.data.level, self.map.scene.maxSoldier[self.color+1][self.id+1])
     self.health = myab.health
     self.maxHealth = myab.health
@@ -81,12 +81,15 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
     self.defense = myab.defense
     --地图记录每个网格状态 
     --士兵类型kind
+    --英雄只有 1个 人物
     if isHero then
         self.health = self.heroData.health 
         self.maxHealth = self.heroData.health 
         self.attack = self.heroData.attack
         self.defense = self.heroData.defense
+        self.data.level = 1
     end
+
     self.oldAttack = self.attack
 
     if self.id == 0  then
@@ -1023,6 +1026,26 @@ function FightSoldier2:finishAttack()
         removeSelf(self.skillAni)
         self.skillAni = nil
     end
+    --技能恢复生命值 草药
+    if not self.dead then
+        if self.isHero and self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            if skData.kind == 8 then
+                print("health skill", self.sid, self.health)
+                local sp = createSprite("skillHealth0")
+                local bf = ccBlendFunc()
+                bf.src = GL_ONE
+                bf.dst = GL_ONE
+                sp:setBlendFunc(bf)
+                self.bg:addChild(sp)
+                setAnchor(sp, {112/192, (192-114)/192})
+                --英雄对应的 士兵power = 1 所以有伤害增加 但是 没有 人物损失
+                self.health = math.min(self.maxHealth, self.health+self.maxHealth*skData.effect/100)
+                sp:runAction(sequence({CCAnimate:create(getAnimation("skillHealth")), callfunc(nil, removeSelf, sp)}))
+            end
+        end
+    end
+
     self.attack = self.oldAttack
     self.funcSoldier:finishAttack()
 end
