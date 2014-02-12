@@ -512,8 +512,19 @@ function FightLayer2:initPic()
         sf:addSpriteFrame(sp, "skillEffect"..i)
     end
     createAnimation("skillEffect", "skillEffect%d", 0, 13, 1, 0.5, true)
+    
 
+    local tex = CCTextureCache:sharedTextureCache():addImage("attackPower.png")
+    for i=0, 19, 1 do
+        local row = math.floor(i/5)
+        local col = i%5
+        local r = CCRectMake(col*192, row*192, 192, 192)
+        local sp = CCSpriteFrame:createWithTexture(tex, r)
+        sf:addSpriteFrame(sp, "ap"..i)
+    end
+    createAnimation("attackPower", "ap%d", 0, 19, 1, 1, true)
 end
+
 function FightLayer2:getSolId()
     self.solId = self.solId+1
     return self.solId
@@ -542,6 +553,7 @@ function FightLayer2:initSoldier()
     print(simple.encode(self.eneMagicNum))
     self.mySoldiers = {}
     self.allSoldiers = {}
+    self.allHero = {{}, {}, {}, {}}
     self.solOffY = 80
     self.scaleCoff = 0.05
 
@@ -551,6 +563,7 @@ function FightLayer2:initSoldier()
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum-1
     --每一列
     --我方步兵的列编号
+    local hData = self.allHero[1]
     for k, v in ipairs(self.myFootNum) do 
         --row
         local temp = {}
@@ -577,6 +590,8 @@ function FightLayer2:initSoldier()
                 table.insert(self.allSoldiers, sp)
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
+
+                table.insert(hData, sp)
             elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
                 sp.low = lastOne
@@ -647,6 +662,9 @@ function FightLayer2:initSoldier()
     --初始化 魔法兵  调整弓箭手的 所在列 colId
     self.myMagicSoldiers = {}
     self.eneMagicSoldiers = {}
+
+    --foot arrow magic cavalry
+    hData = self.allHero[3]
     local footWidth = #self.myFootNum
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum-1
     for k, v in ipairs(self.myMagicNum) do
@@ -671,6 +689,7 @@ function FightLayer2:initSoldier()
 
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
+                table.insert(hData, sp)
             elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 2, colId, ck-1, {level=cv, color=0}, self:getSolId())
                 sp.low = lastOne
@@ -741,6 +760,7 @@ function FightLayer2:initSoldier()
     local footWidth = #self.myMagicNum+#self.myFootNum
     --leftWidth 士兵所在的列 和 行 全局的 
     --先考虑 步兵 炮兵 弓箭 最后骑兵
+    hData = self.allHero[2]
     local colId = #self.myCavalryNum+#self.myArrowNum-1
     for k, v in ipairs(self.myArrowNum) do 
         --row
@@ -765,6 +785,7 @@ function FightLayer2:initSoldier()
 
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
+                table.insert(hData, sp)
             elseif cv > 0 then
                 --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
                 local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
@@ -832,7 +853,7 @@ function FightLayer2:initSoldier()
     --leftWidth 士兵所在的列 和 行 全局的 
     --先考虑 步兵 炮兵 弓箭 最后骑兵
     local colId = #self.myCavalryNum-1
-
+    hData = self.allHero[4]
     for k, v in ipairs(self.myCavalryNum) do 
         --row
         local temp = {}
@@ -857,6 +878,7 @@ function FightLayer2:initSoldier()
 
                 local sca = 1-(ck-1)*self.scaleCoff
                 setScale(sp.bg, sca)
+                table.insert(hData, sp)
             elseif cv > 0 then
                 --弓箭手需要 自己所在部队的编号么 需要一个全局列编号
                 local sp = FightSoldier2.new(self, 3, colId, ck-1, {level=cv, color=0}, self:getSolId()) 
@@ -932,9 +954,31 @@ function FightLayer2:initSoldier()
     self:printLeftRight()
     
     self:initPassivitySkill()
+
+    for k, v in ipairs(self.allHero) do
+        for tk, tv in ipairs(v) do
+            print("heroData", tv.sid)
+        end
+    end
+    self:showPassivitySkill() 
+end
+
+function FightLayer2:showPassivitySkill()
+    for k, v in ipairs(self.allHero) do
+        for hk, hv in ipairs(v) do
+            if not hv.dead and hv.heroData.skill ~= nil then
+                local skData = Logic.skill[hv.heroData.skill]
+                if skData.passivity == 1 then
+                    addBanner("发动被动技能"..skData.name)
+                end
+            end
+        end
+    end
 end
 
 --初始化步兵的 被动技能
+--只在 战斗开始 初始化 和 finishAttack 时候 再 重新初始化一次
+--支持 一回合的效果技能
 function FightLayer2:initPassivitySkill()
     for k, v in ipairs(self.allSoldiers) do
         v:initPassivitySkill()

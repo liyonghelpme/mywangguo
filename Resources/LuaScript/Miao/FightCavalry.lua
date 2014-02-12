@@ -192,11 +192,12 @@ function FightCavalry:harmOne(ene)
     if not self.dead then
         --显示一个攻击动作么？
         --self.beginAttack = true
-        ene:doHurt(self.soldier.attack, true)
+        local ra = self.soldier:getAttack()
+        ene:doHurt(ra, true, self.soldier)
         --步兵反击一下
         --人马分离
         if ene.id == 0 and self.cavalryHead then
-            self.soldier:doHurt(ene.attack)
+            self.soldier:doHurt(ene.attack, nil, ene)
         end
     end
 end

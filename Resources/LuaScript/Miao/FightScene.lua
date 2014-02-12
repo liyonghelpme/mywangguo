@@ -57,10 +57,16 @@ function FightScene:ctor()
     
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
-    self.heros = {{{attack=6*5, defense=0, health=66*5, skill=2} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=2} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    
+    --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=6} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    self.heros = {{{attack=6*5, defense=0, health=66*5, skill=41} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+
 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
     self.bg = CCScene:create()
+    self.dialogController = DialogController.new(self)
+    self.bg:addChild(self.dialogController.bg)
     
     initDataFromServer()
 
@@ -75,7 +81,5 @@ function FightScene:update(diff)
         self.menu = FightMenu2.new(self)
         self.bg:addChild(self.menu.bg)
 
-        self.dialogController = DialogController.new(self)
-        self.bg:addChild(self.dialogController.bg)
     end
 end

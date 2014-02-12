@@ -108,7 +108,7 @@ function FightMagic:startAttack()
             end
             --changeDirNode pos
             setPos(abg, {p[1]+offX, p[2]})
-            setPos(a.changeDirNode, {0, 34})
+            --setPos(a.changeDirNode, {0, 34})
 
             if self.soldier.color == 1 then
                 setScaleX(a.changeDirNode, -1)
@@ -120,7 +120,7 @@ function FightMagic:startAttack()
             --y 方向相对偏移
             --a.changeDirNode:runAction(sequence({jumpBy(tt, tpos[1]-p[1], tpos[2]-p[2], 150+math.random(30), 1), callfunc(a, a.doHarm)}))
             --飞行到 目标 附近 则爆炸 
-            a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(nil, removeSelf, a.bg)}))
+            a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(a, a.doHarm)}))
             --a.color = self.soldier.color
             --a.soldier = self.soldier
             --a.target = ene
@@ -161,7 +161,7 @@ function FightMagic:doFightBack(diff)
                 local as = self.soldier.map.arrowSpeed
                 local tpos = getPos(self.soldier.attackTarget.bg)
                 local tt = math.abs(tpos[1]-p[1])/as
-                a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(nil, removeSelf, a.bg)}))
+                a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(a, a.doHarm)}))
             end
             if not self.dead then
                 self.soldier.changeDirNode:stopAllActions()

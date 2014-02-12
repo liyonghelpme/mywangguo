@@ -221,8 +221,46 @@ function FightLayer2:getEneLeft()
     return minX, myT
 end
 
+--初始化 主动技能
+--不用heros 使用 活着的英雄列表
 function FightLayer2:initSkill()
-    local ss = self.mySoldiers
+    local ss
+    local heros = self.allHero
+    local he
+    --步兵技能 暂时只实现步兵
+    --TODO
+    if self.day == 2 then
+        ss = self.mySoldiers
+        he = heros[1]
+    end
+
+    local positive = {}
+    for k, v in ipairs(he) do
+        if not v.dead and v.heroData.skill ~= nil then
+            local skData = Logic.skill[v.heroData.skill]
+            if skData.kind == 1 then
+                table.insert(positive, skData)
+            end
+        end
+    end
+    --确保 英雄 是 活着的 才能施展技能的呀
+    print("positive skill")
+    if #positive > 0 then
+        for k, v in ipairs(ss) do
+            for tk, tv in ipairs(v) do
+                if not tv.dead then
+                    tv:showSkillEffect(positive)
+                end
+            end
+        end
+        local function setOver()
+            self.skillOver = true
+        end
+        self.bg:runAction(sequence({delaytime(1), callfunc(nil, setOver)}))
+    else
+        self.skillOver = true
+    end
+    --[[
     local hasSkill = false
     for k, v in ipairs(ss) do
         for tk, tv in ipairs(v) do
@@ -247,6 +285,7 @@ function FightLayer2:initSkill()
     else
         self.skillOver = true
     end
+    --]]
 end
 
 
@@ -824,8 +863,9 @@ function FightLayer2:magicScript(diff)
     if self.arrow ~= nil or self.rightArrow ~= nil then
         if not self.arrowOver then
             print("magic check arrow Over one arrow dead", self.arrow, self.rightArrow, self.arrowOver)
+            --双方 弓箭都死亡了 才行的
             if self.arrow ~= nil and self.arrow.dead then
-                print("left Arrow dead")
+                print("left Arrow dead", self.arrow.mid)
                 self.arrow = nil
                 --需要清理双方的 弓箭
                 self.rightArrow = nil
@@ -833,7 +873,7 @@ function FightLayer2:magicScript(diff)
                 --进入分屏幕状态 下一个 回合
                 self.bg:runAction(sequence({delaytime(2), callfunc(self, self.finishMagic)}))
             elseif self.rightArrow ~= nil and self.rightArrow.dead then
-                print("right Arrow dead")
+                print("right Arrow dead", self.rightArrow.mid)
                 self.rightArrow = nil
                 self.arrow = nil
                 self.arrowOver = true
@@ -1203,6 +1243,8 @@ function FightLayer2:clearState()
     self.mySol = nil
     self.eneSol = nil
     self:clearAllCamera()
+    --重新初始化 被动状态 因为英雄可能被杀掉了
+    self:initPassivitySkill()
 end
 --进入步兵回合 
 --插入好多动作

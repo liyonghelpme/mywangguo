@@ -273,6 +273,28 @@ end
 
 function FightSoldier2:startAttack(diff)
     if self.state == FIGHT_SOL_STATE.START_ATTACK then
+        if self.isHero and self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            local rate = 1
+            if skData.kind == 6 and (self.id == 0 or self.id == 3 ) then
+                rate = skData.effect 
+            elseif skData.kind == 7 and (self.id == 1 or self.id == 2) then
+                rate = skData.effect
+            end
+            --finishAttack 
+            if rate > 1 then
+                local sp = createSprite("ap0")
+                local bf = ccBlendFunc()
+                bf.src = GL_ONE
+                bf.dst = GL_ONE
+                sp:setBlendFunc(bf)
+                self.bg:addChild(sp)
+                setAnchor(sp, {102/192, (192-153)/192})
+                sp:runAction(repeatForever(CCAnimate:create(getAnimation("attackPower"))))
+                self.skillAni = sp
+            end
+        end
+
         --步兵移动
         if self.id == 0 then
             self.moveAni = repeatForever(CCAnimate:create(self.runAni))
@@ -405,6 +427,24 @@ function FightSoldier2:runAction(act, loop)
     end
 end
 
+function FightSoldier2:getAttack()
+    local realAttack = self.attack
+    local rate = 1
+    if self.isHero then
+        if self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            if skData.kind == 6 and (self.id == 0 or self.id == 3 ) then
+                rate = skData.effect 
+            elseif skData.kind == 7 and (self.id == 1 or self.id == 2) then
+                rate = skData.effect
+            end
+        end
+    end
+    realAttack = realAttack*rate
+    print("realAttack", realAttack, rate)
+    return realAttack
+end
+
 function FightSoldier2:doHarm()
     --自己没死才能造成伤害
     if not self.dead then
@@ -414,7 +454,9 @@ function FightSoldier2:doHarm()
             --敌人没挂 才出攻击动作
             self:showAttackEffect()
         end
-        self.attackTarget:doHurt(self.attack, false, self)
+        local realAttack = self:getAttack()
+        self.attackTarget:doHurt(realAttack, false, self)
+
         local dir = 1
         if self.color == 1 then
             dir = -1
@@ -435,11 +477,29 @@ function FightSoldier2:calHurt(harm)
     return math.max(1, harm-self.defense)
 end
 --谁攻击高 对方就受到 被动伤害
-function FightSoldier2:doHurt(harm, showBomb, whoAttack)
+function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     --死亡了就不接受 伤害了
     if self.dead then
         return
     end
+    --远程攻击无效
+    if self.isHero and self.heroData.skill ~= nil then
+        if self.heroData.skill == 39 then
+            if whoAttack.id == 1 and isArrow then
+                return
+            end
+        elseif self.heroData.skill == 40 then
+            if whoAttack.id == 2 and isArrow then
+                return
+            end
+        elseif self.heroData.skill == 41 then
+            if (whoAttack.id == 1 or whoAttack.id == 2) and isArrow then
+                return
+            end
+        end
+        --local skData = Logic.skill[self.heroData.skill]
+    end
+
     local rd = math.random(2)
     if rd == 1 or showBomb then
         self:showBombEffect()
@@ -449,12 +509,24 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack)
     harm = harm+math.random(3)
     
     local realDefense = self.defense
+    local addRate = 0
     --根据是谁 发动的 攻击 步兵 弓箭手 魔法师 骑兵 来决定  是否有伤害免疫
     for k, v in ipairs(self.extraEffect) do
-
+        --步兵减免伤害 可以叠加效果
+        if v.kind == 2 and whoAttack.id == 0 then
+            addRate = addRate+v.effect
+        elseif v.kind == 3 and whoAttack.id == 1 then
+            addRate = addRate+v.effect
+        elseif v.kind == 4 and whoAttack.id == 2 then
+            addRate = addRate+v.effect
+        elseif v.kind == 5 and whoAttack.id == 3 then
+            addRate = addRate+v.effect
+        end
     end
+    realDefense = math.floor(realDefense*(100+addRate)/100)
+    print("realDefense is", realDefense, self.defense, addRate)
 
-    local harm = harm-self.defense
+    local harm = harm-realDefense
     harm = math.max(harm, 1)
     --伤害小于 生命值上限
     harm = math.min(self.health, harm)
@@ -947,6 +1019,10 @@ function FightSoldier2:doDead(diff)
 end
 
 function FightSoldier2:finishAttack()
+    if self.skillAni ~= nil then
+        removeSelf(self.skillAni)
+        self.skillAni = nil
+    end
     self.attack = self.oldAttack
     self.funcSoldier:finishAttack()
 end
@@ -983,7 +1059,7 @@ function FightSoldier2:doWinMove(left, right)
         end
     end
 end
-function FightSoldier2:showSkillEffect()
+function FightSoldier2:showSkillEffect(positive)
     if self.color == 0 then
         local day = self.map.day
         if (day == 0 and self.id == 2) or (day == 1 and self.id == 1) or (day == 2 and self.id == 0) or (day == 3 and self.id == 3) then
@@ -995,9 +1071,8 @@ function FightSoldier2:showSkillEffect()
             sp:runAction(sequence({CCAnimate:create(getAnimation("skillEffect")), callfunc(nil, removeSelf, sp)}))
             self.bg:addChild(sp)
             setPos(sp, {0, 100})
-
-            if self.map.skillEffect.kind == 1 then
-                self.attack = math.floor(self.attack*(100+self.map.skillEffect.effect)/100)
+            if positive[1].kind == 1 then
+                self.attack = math.floor(self.attack*(100+positive[1].effect)/100)
                 print("attack increase")
             --这个技能 持续有效 步兵 防御力 被动技能
             --需要在 开战之前就已经确定了
@@ -1010,7 +1085,7 @@ end
 
 function FightSoldier2:initPassivitySkill()
     self.extraEffect = {}
-    local heros = self.map.scene.heros
+    local heros = self.map.allHero
     local he
     if self.id == 0 then
         he = heros[1]
@@ -1023,11 +1098,20 @@ function FightSoldier2:initPassivitySkill()
     end
 
     --被动防御 步兵 的 技能
+    --检查我部队 中了英雄 是否 活着 以及技能
     for k, v in ipairs(he) do
-        if v.skill ~= nil then
-            local skData = Logic.skill[v.skill]
+        if not v.dead and v.heroData.skill ~= nil then
+            local skData = Logic.skill[v.heroData.skill]
+            print("initPassivitySkill", self.sid, simple.encode(skData))
+            --耐步兵 弓箭 魔法 骑兵
             if skData.kind == 2 then
                 table.insert(self.extraEffect, {kind=2, effect=skData.effect})
+            elseif skData.kind == 3 then
+                table.insert(self.extraEffect, {kind=3, effect=skData.effect})
+            elseif skData.kind == 4 then
+                table.insert(self.extraEffect, {kind=4, effect=skData.effect})
+            elseif skData.kind == 5 then
+                table.insert(self.extraEffect, {kind=5, effect=skData.effect})
             end
         end
     end

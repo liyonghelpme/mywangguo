@@ -52,7 +52,7 @@ function FightArrow2:startAttack()
         --自动追踪 屏幕移动镜头 根据弓箭位置
         local function addArrow()
             print("addArrow", self.soldier.sid, self.soldier.attackTarget.sid)
-            local a = Arrow.new()
+            local a = Arrow.new(self.soldier)
             local abg = a.bg
             self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
             local p = getPos(self.soldier.bg)
@@ -73,7 +73,7 @@ function FightArrow2:startAttack()
             --y 方向相对偏移
             a.changeDirNode:runAction(sequence({jumpBy(tt, tpos[1]-p[1], tpos[2]-p[2], 150+math.random(30), 1), callfunc(a, a.doHarm)}))
             a.color = self.soldier.color
-            a.soldier = self.soldier
+            --a.soldier = self.soldier
             a.target = ene
             self.soldier.map:traceArrow(a)
             
@@ -480,7 +480,7 @@ function FightArrow2:doHarm()
     if not self.dead then
         self.oneAttack = true
         --self:showAttackEffect()
-        self.soldier.attackTarget:doHurt(self.soldier.attack)
+        self.soldier.attackTarget:doHurt(self.soldier.attack, nil, self.soldier)
         local dir = self.soldier.map:getAttackDir(self.soldier, self.soldier.attackTarget)
         local rd = math.random(2)+2
         self.soldier.bg:runAction(moveby(0.2, dir*rd, 0))

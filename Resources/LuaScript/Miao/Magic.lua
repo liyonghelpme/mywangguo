@@ -48,7 +48,8 @@ function Magic:doHarm()
     print("Magic do Harm", self.mid)
     self.dead = true
     self.changeDirNode = nil
-    self.target:doHurt(self.soldier.attack, true)
+    local ra = self.soldier:getAttack()
+    self.target:doHurt(ra, true, self.soldier, true)
     removeSelf(self.bg)
 end
 

@@ -1,5 +1,6 @@
 Arrow = class()
-function Arrow:ctor()
+function Arrow:ctor(s)
+    self.soldier = s
     --self.bg = CCSprite:create("catArrow.png") 
     self.bg = CCNode:create()
     self.changeDirNode = addSprite(self.bg, "catArrow.png")
@@ -24,7 +25,8 @@ function Arrow:update(diff)
     self.lastPos = p
 end
 function Arrow:doHarm()
-    self.target:doHurt(self.soldier.attack, true)
+    local ra = self.soldier:getAttack()
+    self.target:doHurt(ra, true, self.soldier, true)
     self.dead = true
     removeSelf(self.bg)
 end
@@ -55,8 +57,10 @@ function Arrow2:update(diff)
         end
     end
 end
+
 function Arrow2:doHarm()
-    self.target:doHurt(self.soldier.attack, true)
+    local ra = self.soldier:getAttack()
+    self.target:doHurt(ra, true, self.soldier, true)
     self.dead = true
     removeSelf(self.bg)
 end

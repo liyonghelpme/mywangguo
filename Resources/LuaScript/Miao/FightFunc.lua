@@ -52,7 +52,8 @@ function FightFunc:doHarm()
     if not self.dead then
         self.oneAttack = true
         --self:showAttackEffect()
-        self.soldier.attackTarget:doHurt(self.soldier.attack)
+        local ra = self.soldier:getAttack()
+        self.soldier.attackTarget:doHurt(ra, nil, self.soldier)
         local dir = self.soldier.map:getAttackDir(self.soldier, self.soldier.attackTarget)
         local rd = math.random(2)+2
         self.soldier.bg:runAction(moveby(0.2, dir*rd, 0))
