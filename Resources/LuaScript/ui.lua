@@ -326,3 +326,28 @@ function ui.newTouchLayer(params)
     registerTouch(obj)
     return obj
 end
+
+function ui.newFullTouch(params)
+    local obj = {}
+    local lay = CCLayer:create()
+    obj.bg = lay
+    --lay:setAnchorPoint(ccp(0, 0))
+    --lay:setContentSize(CCSizeMake(params.size[1], params.size[2]))
+    local sz = lay:getContentSize()
+    function obj:touchBegan(x, y)
+        --local xy = lay:convertToNodeSpace(ccp(x, y))
+        --if checkIn(xy.x, xy.y, sz) then
+        params.touchBegan(params.delegate, x, y)
+        return true
+        --end
+        --return false
+    end
+    function obj:touchMoved(x, y)
+        params.touchMoved(params.delegate, x, y)
+    end
+    function obj:touchEnded(x, y)
+        params.touchEnded(params.delegate, x, y)
+    end
+    registerTouch(obj)
+    return obj
+end
