@@ -34,9 +34,11 @@ function Bird:ctor(s)
     self.bg:addChild(self.touch.bg)
     local fallT = 1.329
     --self.acc = 360*2/(fallT*fallT)
-    self.acc = 400
+    self.acc = 500
     self.vx = 100
     self.targetDir = 0
+    self.upTime = 0
+    self.leftTime = 0
     
     self.moveAni = nil
     self.passTime = 0
@@ -63,13 +65,32 @@ function Bird:update(diff)
 
         print("bird update", self.acc, diff, self.acc*diff)
         --self.vy = self.vy - self.acc*diff 
-        self.vy = self.vy -self.acc*diff
+        --向上冲力的时候 不考虑重力了
+        --物理帧率 都是 1/60
+        --向上有初速度 
+        --向下也有初速度
+        --向下没有最大速度
+        --向上有最大速度
+        if self.upTime > 0 then
+            self.vy = math.max(math.max(self.vy, 80), 150)
+            self.vy = self.vy+800*0.01666
+            self.vy = math.min(self.vy, 150)
+        else
+            self.vy = math.min(self.vy, -40)
+            self.vy = self.vy -self.acc*0.01666
+        end
+        --固定帧率 来做 物理计算根据时间 来确定 是否到特定的帧了
+        self.upTime = math.max(self.upTime-1, 0)
+        print("upTime is", self.upTime)
+
+        if self.tap then
+            self.targetDir = -45
+        end
         if self.tap then
             self.tap = false
-            Music.playEffect("jump.mp3")
+            --Music.playEffect("jump.mp3")
             --self.vy = 80
-            self.vy = -40
-            self.targetDir = -45
+            --self.vy = -40
 
             local vs = getVS()
             local p = getPos(self.bg)
@@ -77,18 +98,29 @@ function Bird:update(diff)
             if p[2] >= vs.height-40 then
                  
             else
-                if self.moveAni ~= nil then
-                    self.bg:stopAction(self.moveAni)
-                end
-                
-                self.moveAni = expinout(moveby(0.1, 0, 72))
-                self.bg:runAction(self.moveAni)
+                --if self.moveAni ~= nil then
+                --   self.bg:stopAction(self.moveAni)
+                --end
+
+                --self.targetHeight = p[2]+72 
+                --self.inUp = true
+                --local function clearMove()
+                --    self.inUp = false
+                --    self.vy = -40
+                --end
+                --self.moveAni = sequence({moveby(0.1, 0, 72), callfunc(nil, clearMove)})
+                --self.vy = 0
+                self.upTime = self.upTime+5
+                --self.moveAni = sequence({delaytime(0.1), callfunc(nil, clearMove)})
+                --self.bg:runAction(self.moveAni)
             end
         end
-
         local p = getPos(self.bg)
+        --速度向上 冲量
+        --if not self.inUp then
         p[2] = p[2]+self.vy*diff
         setPos(self.bg, p)
+        --end
         
         local pp = getPos(self.scene.pipNode)
         for k, v in ipairs(self.scene.pipe) do
@@ -183,6 +215,16 @@ function Bird:update(diff)
     local smooth = math.min(1, 8*diff)
     local nr = cr*(1-smooth)+self.targetDir*smooth
     setRotation(self.bg, nr)
+    
+    if self.targetHeight ~= nil then
+        local cp = getPos(self.bg)
+        local smooth = math.min(1, 8*diff)
+        local nr = cp[2]*(1-smooth)+self.targetHeight*smooth
+        setPos(self.bg, {cp[1], nr})
+        if self.targetHeight-nr <= 10 then
+            self.targetHeight = nil
+        end
+    end
 end
 
 function Bird:touchBegan(x, y)

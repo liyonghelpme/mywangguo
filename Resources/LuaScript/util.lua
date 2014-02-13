@@ -8,7 +8,7 @@ function dict(arr)
     return temp
 end
 --require "data.String"
-local sim = require "SimpleJson"
+--local sim = require "SimpleJson"
 function registerMultiTouch(obj)
     --x y id x y id  x y id
     local function onTouch(eventType, touches)
@@ -1754,6 +1754,16 @@ function centerUI(sp)
     if sp.cl ~= nil then
         sp.cl:setContentSize(CCSizeMake(sp.listSize.width, sp.HEIGHT*sca))
     end
+end
+function centerNode(sp)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    local cx, cy = ds[1]/2, ds[2]/2
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+
+    setScale(sp, sca)
+    setPos(sp, {nx, ny})
 end
 
 function centerTop(sp)

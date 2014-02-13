@@ -16,7 +16,17 @@ function BirdMenu:ctor(s)
     but:setContentSize(276, 106)
     setPos(addChild(self.temp, but.bg), {383, fixY(sz.height, 765)})
 
-    centerUI(self)
+    local bottom = addNode(self.bg)
+    local sca = vs.width/sz.width
+    local sp = setScale(setOpacity(setAnchor(setPos(addSprite(bottom, "intro.png"), {vs.width/2, 0}), {0.50, 0.0}), 255), sca)
+
+    local butNode = addNode(self.bg)
+    local but = ui.newButton({image="free.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=3, shadowColor={0, 0, 0}, color={255, 255, 255}})
+    but:setContentSize(123, 47)
+    setPos(addChild(butNode, but.bg), {657, fixY(sz.height, 992)})
+    rightBottomUI(butNode)
+
+    centerNode(self.temp)
 end
 function BirdMenu:onBut(p)
     --start Game
@@ -26,5 +36,6 @@ function BirdMenu:onBut(p)
         self.scene:startGame()
     elseif p == 1 then
     elseif p == 2 then
+    elseif p == 3 then
     end
 end

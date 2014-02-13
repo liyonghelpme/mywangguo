@@ -94,7 +94,7 @@ function BirdScene:ctor()
     end
     setVisible(self.nightNode, false)
 
-    self.speed = 200
+    self.speed = 150
     self.lastPos = 1000
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
