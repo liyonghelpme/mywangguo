@@ -6,9 +6,10 @@ BIRD_STATE = {
 }
 function Bird:ctor(s)
     self.scene = s
-
-    self.ani = getAnimation("birdAni")
-    self.bg = createSprite("greenbirds1.png")
+    local rd = math.random(16)
+    self.ani = getAnimation("birdAni"..rd)
+    --随机一只鸟
+    self.bg = createSprite("bird_"..rd.."_0.png")
     setAnchor(self.bg, {378/768, (1024-360)/1024})
     self.bg:runAction(repeatForever(CCAnimate:create(self.ani)))
     --self.bg:setRotation(45)
@@ -67,7 +68,7 @@ function Bird:update(diff)
             Music.playEffect("jump.mp3")
             --self.vy = 80
             self.vy = -40
-            self.targetDir = -30
+            self.targetDir = -45
 
             local vs = getVS()
             local p = getPos(self.bg)

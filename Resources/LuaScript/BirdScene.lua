@@ -108,8 +108,10 @@ function BirdScene:ctor()
 end
 function BirdScene:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("greenbird.plist")
-    createAnimation("birdAni", "greenbirds%d.png", 1, 4, 1, 0.133, true)
+    sf:addSpriteFramesWithFile("allBird.plist")
+    for i=1, 16, 1 do
+        createAnimation("birdAni"..i, "bird_"..i.."_%d.png", 0, 3, 1, 0.133, true)
+    end
 end
 function BirdScene:initMusic()
     Music.preload("button.mp3")
