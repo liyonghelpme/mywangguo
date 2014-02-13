@@ -1729,6 +1729,19 @@ function calAttr(id, level, equip)
     return temp
 end
 
+--将centerUI的坐标转化成屏幕坐标
+function screenXY(x, y)
+    local vs = getVS()
+    local ds = global.director.designSize
+    local sca = math.min(vs.width/ds[1], vs.height/ds[2])
+    
+    local cx, cy = ds[1]/2, ds[2]/2
+    local nx, ny = vs.width/2-cx*sca, vs.height/2-cy*sca
+    print("screenXY ", nx, ny, sca, x, y) 
+    return nx+x*sca, ny+y*sca
+end
+
+
 function centerUI(sp)
     local vs = getVS()
     local ds = global.director.designSize

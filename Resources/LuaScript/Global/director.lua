@@ -25,11 +25,13 @@ function Director:pushPage(view, z)
 end
 
 --view 封装了 CCNode
-function Director:pushView(view, dark, autoPop, showDark)
+function Director:pushView(view, dark, autoPop, showDark, hideView)
     if #self.stack > 0 then
         local ov = self.stack[#self.stack]
-        ov.bg:retain()
-        ov.bg:removeFromParentAndCleanup(false)
+        if ov.hideView == nil then
+            ov.bg:retain()
+            ov.bg:removeFromParentAndCleanup(false)
+        end
     end
     if dark == 1 then
         print('pushView', dark)
@@ -40,9 +42,11 @@ function Director:pushView(view, dark, autoPop, showDark)
         temp.bg:addChild(view.bg)
         self.curScene.bg:addChild(temp.bg)
         temp.realView = view
+        temp.hideView = hideView
         table.insert(self.stack, temp)
     else
         self.curScene.bg:addChild(view.bg)
+        view.hideView = hideView
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end
@@ -65,8 +69,10 @@ function Director:popView()
         Event:sendMsg(EVENT_TYPE.CLOSE_DIALOG)
     else
         local ov = self.stack[#self.stack]
-        self.curScene.bg:addChild(ov.bg)
-        ov.bg:release()
+        if ov.hideView == nil then
+            self.curScene.bg:addChild(ov.bg)
+            ov.bg:release()
+        end
         if ov.realView ~= nil and ov.realView.refreshData ~= nil then
             ov.realView:refreshData()
         end

@@ -1,8 +1,10 @@
+require "model.Music"
 require "BirdUtil"
 require "Bird"
 require "BirdMenu"
 require "RunMenu"
 require "OverMenu"
+require "Ready"
 
 SCENE_STATE = {
     WAIT_START=0,
@@ -16,24 +18,30 @@ function BirdScene:ctor()
     local vs = getVS()
     local size = {width=768, height=1024}
     local sca = vs.height/size.height
+    self.scale = sca
+
+    self:initMusic()
+    self:initPic()
 
     self.bg = CCScene:create()
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
+    
+    self.backNode = addNode(self.bg)
 
     setPos(self.bg, {0, 0})
     local far = createSprite("far.png")
-    addChild(self.bg, far)
+    addChild(self.backNode, far)
     setPos(setAnchor(far, {0, 0}), {0, 0})
     setScale(far, sca)
 
     local far2 = createSprite("far.png")
-    addChild(self.bg, far2)
+    addChild(self.backNode, far2)
     setPos(setAnchor(far2, {0, 0}), {768*sca, 0})
     setScale(far2, sca)
 
     local far3 = createSprite("far.png")
-    addChild(self.bg, far3)
+    addChild(self.backNode, far3)
     setPos(setAnchor(far3, {0, 0}), {1536*sca, 0})
     setScale(far3, sca)
 
@@ -50,7 +58,7 @@ function BirdScene:ctor()
     addChild(mid, f1)
     addChild(mid, f2)
     addChild(mid, f3)
-    addChild(self.bg, mid)
+    addChild(self.backNode, mid)
     self.m1 = f1
     self.m2 = f2
     self.m3 = f3
@@ -59,32 +67,32 @@ function BirdScene:ctor()
     self.state = SCENE_STATE.WAIT_START
 
     local pipNode = CCNode:create()
-    addChild(self.bg, pipNode)
+    addChild(self.backNode, pipNode)
     self.pipNode = pipNode
 
     self.pipe = {}
     self.freePipe = {}
 
+    self:makeNear()
+
     --local far1 = createSprite()
-    local near = CCNode:create()
-    local n1 = createSprite("near.png")
-    setAnchor(setPos(n1, {0, 0}), {0, 0})
-    local n2 = createSprite("near.png")
-    setAnchor(setPos(n2, {768, 0}), {0, 0})
-    local n3 = createSprite("near.png")
-    setAnchor(setPos(n3, {1536, 0}), {0, 0})
-    addChild(near, n1)
-    addChild(near, n2)
-    addChild(near, n3)
-    addChild(self.bg, near)
-    self.near = near
-    self.n1 = n1
-    self.n2 = n2
-    self.n3 = n3
 
     --self.bird = Bird.new(self)
     --addChild(self.bg, self.bird.bg)
     --setVisible(self.bird.bg, false)
+
+    self.birdNode = addNode(self.bg)
+    self.nightNode = addNode(self.bg)
+
+    local n = math.ceil(vs.width/size.width)
+    local sy = vs.height/size.height
+    for i=1, n, 1 do
+        local night = createSprite("night.png")
+        addChild(self.nightNode, night)
+        --local sx = vs.width/size.width
+        setAnchor(setPos(setScale(night, sy), {768*sy*(i-1), 0}), {0, 0})
+    end
+    setVisible(self.nightNode, false)
 
     self.speed = 200
     self.lastPos = 1000
@@ -98,6 +106,36 @@ function BirdScene:ctor()
     self.needUpdate = true
     registerUpdate(self)
 end
+function BirdScene:initPic()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("greenbird.plist")
+    createAnimation("birdAni", "greenbirds%d.png", 1, 4, 1, 0.133, true)
+end
+function BirdScene:initMusic()
+    Music.preload("button.mp3")
+    Music.preload("crack.mp3")
+    Music.preload("jump.mp3")
+    Music.preload("fall.mp3")
+    Music.preload("score.mp3")
+end
+function BirdScene:makeNear()
+    local near = CCNode:create()
+    local n1 = createSprite("near.png")
+    setScale(setAnchor(setPos(n1, {0, 0}), {0, 0}), self.scale)
+    local n2 = createSprite("near.png")
+    setScale(setAnchor(setPos(n2, {768*self.scale, 0}), {0, 0}), self.scale)
+    local n3 = createSprite("near.png")
+    setScale(setAnchor(setPos(n3, {1536*self.scale, 0}), {0, 0}), self.scale)
+    addChild(near, n1)
+    addChild(near, n2)
+    addChild(near, n3)
+    addChild(self.backNode, near)
+    self.near = near
+    self.n1 = n1
+    self.n2 = n2
+    self.n3 = n3
+end
+
 function BirdScene:resetScene()
     self.score = 0
     removeSelf(self.mid)
@@ -105,6 +143,12 @@ function BirdScene:resetScene()
     removeSelf(self.near)
     removeSelf(self.bird.bg)
 
+    local rd = math.random(2)
+    if rd == 1 then
+        setVisible(self.nightNode, true)
+    else
+        setVisible(self.nightNode, false)
+    end
 
     local mid = CCNode:create()
     local f1 = createSprite("mid.png")
@@ -117,21 +161,23 @@ function BirdScene:resetScene()
     addChild(mid, f1)
     addChild(mid, f2)
     addChild(mid, f3)
-    addChild(self.bg, mid)
+    addChild(self.backNode, mid)
     self.m1 = f1
     self.m2 = f2
     self.m3 = f3
     self.mid = mid
 
     local pipNode = CCNode:create()
-    addChild(self.bg, pipNode)
+    addChild(self.backNode, pipNode)
     self.pipNode = pipNode
     
     for k, v in ipairs(self.pipe) do
         table.insert(self.freePipe, v)
     end
     self.pipe = {}
-
+    
+    self:makeNear()
+    --[[
     local near = CCNode:create()
     local n1 = createSprite("near.png")
     setAnchor(setPos(n1, {0, 0}), {0, 0})
@@ -142,23 +188,27 @@ function BirdScene:resetScene()
     addChild(near, n1)
     addChild(near, n2)
     addChild(near, n3)
-    addChild(self.bg, near)
+    addChild(self.backNode, near)
     self.near = near
     self.n1 = n1
     self.n2 = n2
     self.n3 = n3
-
+    --]]
 end
 function BirdScene:startGame()
     self.state = SCENE_STATE.FREE
     self.bird = Bird.new(self)
-    addChild(self.bg, self.bird.bg)
+    addChild(self.birdNode, self.bird.bg)
     --setVisible(self.bird.bg, false)
     --setVisible(self.bird.bg, true)
-
-    self.runMenu = RunMenu.new(s)
-    global.director:pushView(self.runMenu)
+    --显示数字
+    self.runMenu = RunMenu.new(self)
+    --不隐藏 RunMenu
+    global.director:pushView(self.runMenu, nil, nil, nil, false)
     self.runMenu:adjustScore(self.score)
+    
+    self.ready = Ready.new(self)
+    global.director:pushView(self.ready)
 end
 
 function BirdScene:update(diff)
@@ -176,6 +226,7 @@ function BirdScene:update(diff)
         if self.bird.state ~= BIRD_STATE.DEAD then
             self:adjustScene(diff)
         else
+            --弹出 得分菜单 RunMenu
             global.director:popView()
             global.director:pushView(OverMenu.new(self), 1)
             self.state = BIRD_STATE.OVER
@@ -198,8 +249,8 @@ function BirdScene:adjustScene(diff)
     local n1p = getPos(self.n1)
     local n2p = getPos(self.n2)
     local n3p = getPos(self.n3)
-    if n1p[1]+p[1]+768 < 0 then
-        setPos(self.n1, {n3p[1]+768, 0})
+    if n1p[1]+p[1]+768*self.scale < 0 then
+        setPos(self.n1, {n3p[1]+768*self.scale, 0})
         self.n1, self.n2, self.n3 = self.n2, self.n3, self.n1
     end
 
@@ -234,6 +285,7 @@ function BirdScene:generatePipe()
         end
     end
     if oldScore ~= self.score then
+        Music.playEffect("score.mp3")
         self.runMenu:adjustScore(self.score)
     end
 
@@ -258,16 +310,17 @@ function BirdScene:generatePipe()
         local rdLevel
         local vs = getVS()
         --下面管道的高度范围
-        local height = math.random(vs.height-330-172)+172
+        local height = math.random(vs.height-330*self.scale-172*self.scale)+172*self.scale
         print("height is what?", height)
 
         --local h1 = vs.height/2-132-sz.height
-        local h1 = height-sz.height
+        local h1 = height-sz.height*self.scale
         --local h2 = vs.height/2+132+sz.height
-        local h2 = height+258+sz.height
-        setAnchor(setPos(p1, {self.lastPos, h1}), {0.5, 0})
-        setAnchor(setPos(p2, {self.lastPos, h2}), {0.5, 0})
-        setScaleY(p2, -1)
+        local h2 = height+258*self.scale+sz.height*self.scale
+        print("h1 h2 is what", height, sz.height, self.scale, sz.height*self.scale, h1, h2)
+        setScale(setAnchor(setPos(p1, {self.lastPos, h1}), {0.5, 0}), self.scale)
+        setScale(setAnchor(setPos(p2, {self.lastPos, h2}), {0.5, 0}), self.scale)
+        setScaleY(p2, -self.scale)
 
         addChild(self.pipNode, p1)
         addChild(self.pipNode, p2)

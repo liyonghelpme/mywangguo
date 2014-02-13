@@ -7,19 +7,22 @@ BIRD_STATE = {
 function Bird:ctor(s)
     self.scene = s
 
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("greenbird.plist")
-    self.ani = createAnimation("birdAni", "greenbirds%d.png", 1, 4, 1, 0.133, true)
-
+    self.ani = getAnimation("birdAni")
     self.bg = createSprite("greenbirds1.png")
     setAnchor(self.bg, {378/768, (1024-360)/1024})
     self.bg:runAction(repeatForever(CCAnimate:create(self.ani)))
     --self.bg:setRotation(45)
 
     self.state = BIRD_STATE.FREE
-
+    local sz = {width=768, height=1024}
+    setScale(self.bg, self.scene.scale)
     local vs = getVS()
-    setPos(self.bg, {vs.width/2, vs.height/2})
+    local bx, by = screenXY(218, fixY(sz.height, 494))
+    print("screenXY", bx, by)
+    setPos(self.bg, {bx, by})
+    self.baseY = by
+    --setPos(self.bg, {218, fixY(sz.height, 494)})
+
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
     self.vy = 0
@@ -34,7 +37,7 @@ function Bird:ctor(s)
     self.targetDir = 0
     
     self.moveAni = nil
-
+    self.passTime = 0
     self.needUpdate = true
     registerEnterOrExit(self)
 end
@@ -48,6 +51,10 @@ function Bird:update(diff)
                 self.scene.state = SCENE_STATE.RUN 
                 return
             else
+                self.passTime = self.passTime+diff
+                local y = math.sin(self.passTime*3.14)*20+self.baseY
+                local p = getPos(self.bg)
+                setPos(self.bg, {p[1], y})
                 return
             end
         end
@@ -57,6 +64,7 @@ function Bird:update(diff)
         self.vy = self.vy -self.acc*diff
         if self.tap then
             self.tap = false
+            Music.playEffect("jump.mp3")
             --self.vy = 80
             self.vy = -40
             self.targetDir = -30
@@ -88,14 +96,17 @@ function Bird:update(diff)
             v2xy[1] = v2xy[1]+pp[1]
             print("v1xy v2xy", simple.encode(v1xy), simple.encode(v2xy))
             print("myp", simple.encode(p))
-            if intersectRect({p[1]-40, p[2]-36, 80, 72}, {v1xy[1]-68, v1xy[2], 136, 742}) then
+            --小鸟的位置是绝对屏幕位置
+            if intersectRect({p[1]-40*self.scene.scale, p[2]-36*self.scene.scale, 80*self.scene.scale, 72*self.scene.scale}, {v1xy[1]-68*self.scene.scale, v1xy[2], 136*self.scene.scale, 742*self.scene.scale}) then
                 self.state = BIRD_STATE.DEAD
+                Music.playEffect("crack.mp3")
                 --addBanner("你死了")
                 break
-            elseif intersectRect({p[1]-40, p[2]-36, 80, 72}, {v2xy[1]-68, v2xy[2]-742, 136, 742}) then
+            elseif intersectRect({p[1]-40*self.scene.scale, p[2]-36*self.scene.scale, 80*self.scene.scale, 72*self.scene.scale}, {v2xy[1]-68*self.scene.scale, v2xy[2]-742*self.scene.scale, 136*self.scene.scale, 742*self.scene.scale}) then
             --elseif p[1]+40 >= v2xy[1]-68 and p[2]-36 <= v2xy[2] and p[1]-40 <= v2xy[1]+68 and p[2]+36 >= v2xy[2]-742 then
                 self.state = BIRD_STATE.DEAD
                 --addBanner("你死了")
+                Music.playEffect("crack.mp3")
                 break
             end
 
@@ -118,8 +129,10 @@ function Bird:update(diff)
         --setRotation(self.bg, -math.floor(dir))
 
 
-        if p[2] <= 164 then
-            p[2] = 164
+        if p[2] <= 164*self.scene.scale then
+            p[2] = 164*self.scene.scale
+            Music.playEffect("fall.mp3")
+            Music.playEffect("crack.mp3")
             setPos(self.bg, p)
             self.state = BIRD_STATE.DEAD    
             --addBanner("你死了")
@@ -137,8 +150,8 @@ function Bird:update(diff)
         local p = getPos(self.bg)
         p[2] = p[2]+self.vy*diff
         setPos(self.bg, p)
-        if p[2] <= 164 then
-            p[2] = 164
+        if p[2] <= 164*self.scene.scale then
+            p[2] = 164*self.scene.scale
             setPos(self.bg, p)
         end
         

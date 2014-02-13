@@ -226,7 +226,7 @@ function ui.newButton(params)
     function obj:touchBegan(x, y)
         local p = sp:convertToNodeSpace(ccp(x, y))
         local ret = checkIn(p.x, p.y, sz)
-
+        Music.playEffect("button.mp3")
         if ret then
             local scaX = getScaleX(lay)
             local scaY = getScaleY(lay)
