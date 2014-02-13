@@ -58,15 +58,22 @@ function Bird:update(diff)
         if self.tap then
             self.tap = false
             --self.vy = 80
-            self.vy = -10
+            self.vy = -40
             self.targetDir = -30
 
-            if self.moveAni ~= nil then
-                self.bg:stopAction(self.moveAni)
+            local vs = getVS()
+            local p = getPos(self.bg)
+            --飞出天空则 停止飞行
+            if p[2] >= vs.height-40 then
+                 
+            else
+                if self.moveAni ~= nil then
+                    self.bg:stopAction(self.moveAni)
+                end
+                
+                self.moveAni = expinout(moveby(0.1, 0, 72))
+                self.bg:runAction(self.moveAni)
             end
-
-            self.moveAni = expinout(moveby(0.1, 0, 72))
-            self.bg:runAction(self.moveAni)
         end
 
         local p = getPos(self.bg)

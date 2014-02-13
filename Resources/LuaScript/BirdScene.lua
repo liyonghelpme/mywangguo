@@ -32,6 +32,11 @@ function BirdScene:ctor()
     setPos(setAnchor(far2, {0, 0}), {768*sca, 0})
     setScale(far2, sca)
 
+    local far3 = createSprite("far.png")
+    addChild(self.bg, far3)
+    setPos(setAnchor(far3, {0, 0}), {1536*sca, 0})
+    setScale(far3, sca)
+
     --远景调整占满屏幕 高度
 
     local mid = CCNode:create()
@@ -81,7 +86,7 @@ function BirdScene:ctor()
     --addChild(self.bg, self.bird.bg)
     --setVisible(self.bird.bg, false)
 
-    self.speed = 100
+    self.speed = 200
     self.lastPos = 1000
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
@@ -94,6 +99,7 @@ function BirdScene:ctor()
     registerUpdate(self)
 end
 function BirdScene:resetScene()
+    self.score = 0
     removeSelf(self.mid)
     removeSelf(self.pipNode)
     removeSelf(self.near)
@@ -251,8 +257,14 @@ function BirdScene:generatePipe()
         print("insert pipe")
         local rdLevel
         local vs = getVS()
-        local h1 = vs.height/2-132-sz.height
-        local h2 = vs.height/2+132+sz.height
+        --下面管道的高度范围
+        local height = math.random(vs.height-330-172)+172
+        print("height is what?", height)
+
+        --local h1 = vs.height/2-132-sz.height
+        local h1 = height-sz.height
+        --local h2 = vs.height/2+132+sz.height
+        local h2 = height+258+sz.height
         setAnchor(setPos(p1, {self.lastPos, h1}), {0.5, 0})
         setAnchor(setPos(p2, {self.lastPos, h2}), {0.5, 0})
         setScaleY(p2, -1)
@@ -277,5 +289,11 @@ function BirdScene:generatePipe()
         end
     end
 end
+--发一下 白色 接着 出现 GameOver 的界面 
 function BirdScene:shakeNow()
+    local function shakeOver()
+        self.shakeOver = true
+    end
+
+    self.bg:runAction(sequence({repeatN(sequence({moveby(0.05, -10, 0), moveby(0.05, 10, 0)}), 4)}, callfunc(nil, shakeOver)))
 end
