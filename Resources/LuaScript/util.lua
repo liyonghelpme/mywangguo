@@ -285,6 +285,11 @@ end
 function expin(act)
     return CCEaseExponentialIn:create(act)
 end
+
+function expinout(act)
+    return CCEaseExponentialInOut:create(act)
+end
+
 function fadein(t)
     return CCFadeIn:create(t)
 end
@@ -1867,4 +1872,8 @@ function initPlist()
     sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
+end
+
+function intersectRect(a, b)
+    return a[1] <= b[1]+b[3] and a[1]+a[3] >= b[1] and a[2] <= b[2]+b[4] and a[2]+a[4] >= b[2] 
 end

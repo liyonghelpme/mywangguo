@@ -17,12 +17,12 @@ function BirdScene:ctor()
     local far = createSprite("far.png")
     addChild(self.bg, far)
     setPos(setAnchor(far, {0, 0}), {0, 0})
-    setScaleY(far, sca)
+    setScale(far, sca)
 
     local far2 = createSprite("far.png")
     addChild(self.bg, far2)
     setPos(setAnchor(far2, {0, 0}), {768*sca, 0})
-    setScaleY(far2, sca)
+    setScale(far2, sca)
 
     --远景调整占满屏幕 高度
 
@@ -85,10 +85,13 @@ end
 
 function BirdScene:update(diff)
     if self.state == SCENE_STATE.FREE then
-        self.state = SCENE_STATE.RUN
+        --self.state = SCENE_STATE.RUN
+        self:adjustScene(diff)
     elseif self.state == SCENE_STATE.RUN then
         self:generatePipe()
-        self:adjustScene(diff)
+        if self.bird.state ~= BIRD_STATE.DEAD then
+            self:adjustScene(diff)
+        end
     end
 end
 
@@ -122,6 +125,10 @@ end
 
 function BirdScene:generatePipe()
     --生成4列管道 在某个位置
+    if #self.pipe == 0 then
+        local p = getPos(self.pipNode)
+        self.lastPos = -p[1]+1000
+    end
     if #self.pipe < 5 then
         --local p = getPos(self.near)
         --local vs = getVS()
@@ -166,4 +173,6 @@ function BirdScene:generatePipe()
             table.insert(self.freePipe, allP)
         end
     end
+end
+function BirdScene:shakeNow()
 end
