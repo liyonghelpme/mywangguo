@@ -7,7 +7,7 @@ function dict(arr)
     end
     return temp
 end
-require "data.String"
+--require "data.String"
 local sim = require "SimpleJson"
 function registerMultiTouch(obj)
     --x y id x y id  x y id

@@ -13,7 +13,7 @@ bool UpdateScene::init() {
     CCScene::init();
 	CCDirector *pDirector = CCDirector::sharedDirector();
     //背景黑框和屏幕一样大小
-    CCSprite *lm = CCSprite::create("black.png");
+    CCSprite *lm = CCSprite::create("loadBlack.png");
     addChild(lm);
     CCSize vs = pDirector->getVisibleSize();
     lm->setPosition(ccp(vs.width/2, vs.height/2));
@@ -21,14 +21,16 @@ bool UpdateScene::init() {
 
     lm->setScaleX(vs.width/sz.width);
     lm->setScaleY(vs.height/sz.height);
-    
+    /*
     CCLabelTTF *lab = CCLabelTTF::create("Loading...", "", 25);
     lab->setColor(ccc3(255, 255, 255));
     lab->enableShadow(CCSizeMake(1, 2), 1, 1, true);
     lab->setAnchorPoint(ccp(0, 0.5));
     lab->setPosition(ccp(16, 768-743));
     addChild(lab);
-    
+    */
+
+	/*
     CCSpriteFrameCache *sf = CCSpriteFrameCache::sharedSpriteFrameCache();
     sf->addSpriteFramesWithFile("loadAni.plist");
     CCAnimation *ani = CCAnimation::create();
@@ -39,13 +41,20 @@ bool UpdateScene::init() {
     }
     ani->setDelayPerUnit(2/20.0);
     ani->setRestoreOriginalFrame(true);
-
+	*/
+	
+	/*
     CCSprite *cat = CCSprite::createWithSpriteFrameName("load0.png");
     addChild(cat);
     cat->setPosition(ccp(vs.width-228, 101));
     cat->runAction(CCRepeatForever::create(CCAnimate::create(ani)));
-
-
+	*/
+	
+	CCSprite *sp = CCSprite::create("caelogo.png");
+	addChild(sp);
+	sp->setPosition(ccp(vs.width/2, vs.height/2));
+	sp->setScale(0.1);
+	sp->runAction(CCScaleTo::create(0.5, 1, 1));
 
     updateYet = false;
     scheduleUpdate();
