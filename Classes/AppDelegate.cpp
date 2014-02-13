@@ -65,9 +65,9 @@ bool AppDelegate::applicationDidFinishLaunching()
 
 	CCFileUtils::sharedFileUtils()->addSearchPath(CCFileUtils::sharedFileUtils()->getWritablePath().c_str());
     CCFileUtils::sharedFileUtils()->addSearchPath("birdImage");
-	CCFileUtils::sharedFileUtils()->addSearchPath("image2");
+	//CCFileUtils::sharedFileUtils()->addSearchPath("image2");
 	CCFileUtils::sharedFileUtils()->addSearchPath("images");
-	CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
+	//CCFileUtils::sharedFileUtils()->addSearchPath("miaoImages");
     CCFileUtils::sharedFileUtils()->addSearchPath("LuaScript");
 
     

@@ -10,7 +10,8 @@ function Bird:ctor(s)
     self.ani = getAnimation("birdAni"..rd)
     --随机一只鸟
     self.bg = createSprite("bird_"..rd.."_0.png")
-    setAnchor(self.bg, {378/768, (1024-360)/1024})
+    --setAnchor(self.bg, {378/768, (1024-360)/1024})
+    setAnchor(self.bg, {99/200, (200-108)/200})
     self.bg:runAction(repeatForever(CCAnimate:create(self.ani)))
     --self.bg:setRotation(45)
 
