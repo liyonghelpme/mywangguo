@@ -20,7 +20,6 @@ function Bird:ctor(s)
 
     local vs = getVS()
     setPos(self.bg, {vs.width/2, vs.height/2})
-    --setPos(self.bg, {0, 0})
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
     self.vy = 0
@@ -29,15 +28,21 @@ function Bird:ctor(s)
     self.touch = ui.newFullTouch({delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded = self.touchEnded})
     self.bg:addChild(self.touch.bg)
     local fallT = 1.329
-    self.acc = 360*2/(fallT*fallT)
+    --self.acc = 360*2/(fallT*fallT)
+    self.acc = 400
     self.vx = 100
     self.targetDir = 0
+    
+    self.moveAni = nil
 
     self.needUpdate = true
-    registerUpdate(self)
+    registerEnterOrExit(self)
 end
 function Bird:update(diff)
     if self.state == BIRD_STATE.FREE then
+        if self.scene.state == SCENE_STATE.WAIT_START then
+            return
+        end
         if self.scene.state == SCENE_STATE.FREE then
             if self.tap then
                 self.scene.state = SCENE_STATE.RUN 
@@ -47,12 +52,23 @@ function Bird:update(diff)
             end
         end
 
-        print("bird update")
-        self.vy = self.vy - self.acc*diff 
+        print("bird update", self.acc, diff, self.acc*diff)
+        --self.vy = self.vy - self.acc*diff 
+        self.vy = self.vy -self.acc*diff
         if self.tap then
             self.tap = false
-            self.vy = 80
+            --self.vy = 80
+            self.vy = -10
+            self.targetDir = -30
+
+            if self.moveAni ~= nil then
+                self.bg:stopAction(self.moveAni)
+            end
+
+            self.moveAni = expinout(moveby(0.1, 0, 72))
+            self.bg:runAction(self.moveAni)
         end
+
         local p = getPos(self.bg)
         p[2] = p[2]+self.vy*diff
         setPos(self.bg, p)
@@ -67,27 +83,28 @@ function Bird:update(diff)
             print("myp", simple.encode(p))
             if intersectRect({p[1]-40, p[2]-36, 80, 72}, {v1xy[1]-68, v1xy[2], 136, 742}) then
                 self.state = BIRD_STATE.DEAD
-                addBanner("你死了")
+                --addBanner("你死了")
                 break
             elseif intersectRect({p[1]-40, p[2]-36, 80, 72}, {v2xy[1]-68, v2xy[2]-742, 136, 742}) then
             --elseif p[1]+40 >= v2xy[1]-68 and p[2]-36 <= v2xy[2] and p[1]-40 <= v2xy[1]+68 and p[2]+36 >= v2xy[2]-742 then
                 self.state = BIRD_STATE.DEAD
-                addBanner("你死了")
+                --addBanner("你死了")
                 break
             end
 
         end
         --有个弹跳在里面的 不仅仅是速度  还有高度也决定了 旋转的角度
-        local dir = math.atan2(self.vy, self.vx)
-        dir =  dir*180/math.pi
-        print("dir is", self.vy, self.vx, dir)
+        --local dir = math.atan2(self.vy, self.vx)
+        --dir =  dir*180/math.pi
+        --print("dir is", self.vy, self.vx, dir)
         --local kd = dir
-        
+        self.targetDir = self.targetDir+3*180/math.pi*diff
+
         --if dir >= 88 then
         --    dir = 90
             --dir = self.oldDir*0.5+dir*0.5
         --end
-        self.targetDir = -dir
+        --self.targetDir = -dir
 
         --self.oldDir = dir
 
@@ -98,13 +115,18 @@ function Bird:update(diff)
             p[2] = 164
             setPos(self.bg, p)
             self.state = BIRD_STATE.DEAD    
-            addBanner("你死了")
+            --addBanner("你死了")
         end
     elseif self.state == BIRD_STATE.DEAD then
-        self.bg:stopAllActions()
+        if not self.stopFly then
+            self.stopFly = true
+            self.bg:stopAllActions()
+        end
         --继续修正速度 但是 不修正 方向了
         self.vy = self.vy - self.acc*diff 
-        self.targetDir = 90
+        --self.vy = self.vy -0.2
+        self.targetDir = self.targetDir+3*180/math.pi*diff
+        --self.targetDir = 90
         local p = getPos(self.bg)
         p[2] = p[2]+self.vy*diff
         setPos(self.bg, p)
@@ -132,8 +154,11 @@ function Bird:update(diff)
             self.scene:shakeNow()
         end
     end
+    if self.targetDir >= 90 then
+        self.targetDir = 90
+    end
     local cr = self.bg:getRotation() 
-    local smooth = math.min(1, 5*diff)
+    local smooth = math.min(1, 8*diff)
     local nr = cr*(1-smooth)+self.targetDir*smooth
     setRotation(self.bg, nr)
 end
