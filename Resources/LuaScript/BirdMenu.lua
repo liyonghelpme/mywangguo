@@ -37,5 +37,6 @@ function BirdMenu:onBut(p)
     elseif p == 1 then
     elseif p == 2 then
     elseif p == 3 then
+        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
     end
 end

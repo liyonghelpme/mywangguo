@@ -1,3 +1,4 @@
+require "Logic"
 require "model.Music"
 require "BirdUtil"
 require "Bird"
@@ -106,6 +107,22 @@ function BirdScene:ctor()
     self.needUpdate = true
     registerUpdate(self)
 end
+function BirdScene:onGet(rep, param)
+    self.getYet = true
+    if rep == nil then
+        return
+    end
+    local par = rep
+    Logic.params = {}
+    for k, v in ipairs(par.param) do
+        Logic.params[v.key] = v.value
+    end
+end
+function BirdScene:getParam()
+    self.inGet = true
+    self.getYet = false
+    sendReq("getParam", dict(), self.onGet, nil, self)
+end
 function BirdScene:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("allBird.plist")
@@ -197,7 +214,7 @@ function BirdScene:resetScene()
     self.n3 = n3
     --]]
 end
-function BirdScene:startGame()
+function BirdScene:realStart()
     self.state = SCENE_STATE.FREE
     self.bird = Bird.new(self)
     addChild(self.birdNode, self.bird.bg)
@@ -212,8 +229,16 @@ function BirdScene:startGame()
     self.ready = Ready.new(self)
     global.director:pushView(self.ready)
 end
+function BirdScene:startGame()
+    self:getParam()
+end
 
 function BirdScene:update(diff)
+    if self.inGet and self.getYet then
+        self.inGet = false
+        self:realStart()
+    end
+
     if self.state == SCENE_STATE.WAIT_START then
         self:adjustScene(diff)
         if not self.showMenu then

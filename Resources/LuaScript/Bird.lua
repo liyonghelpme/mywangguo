@@ -34,7 +34,7 @@ function Bird:ctor(s)
     self.bg:addChild(self.touch.bg)
     local fallT = 1.329
     --self.acc = 360*2/(fallT*fallT)
-    self.acc = 500
+    self.acc = getDefault(Logic.params, "fallAcc", 500)
     self.vx = 100
     self.targetDir = 0
     self.upTime = 0
@@ -71,24 +71,34 @@ function Bird:update(diff)
         --向下也有初速度
         --向下没有最大速度
         --向上有最大速度
-        if self.upTime > 0 then
-            self.vy = math.max(math.max(self.vy, 80), 150)
-            self.vy = self.vy+800*0.01666
-            self.vy = math.min(self.vy, 150)
-        else
-            self.vy = math.min(self.vy, -40)
-            self.vy = self.vy -self.acc*0.01666
-        end
-        --固定帧率 来做 物理计算根据时间 来确定 是否到特定的帧了
-        self.upTime = math.max(self.upTime-1, 0)
-        print("upTime is", self.upTime)
+        self.leftTime = self.leftTime+diff
+        while self.leftTime >= 0.01666 do
+            self.leftTime = self.leftTime-0.01666
+            if self.upTime > 0 then
+                self.vy = math.min(math.max(self.vy, 100), getDefault(Logic.params, "maxSpeed", 600))
+                self.vy = self.vy+getDefault(Logic.params, "accUp", 7000)*0.01666
+                self.vy = math.min(self.vy, getDefault(Logic.params, "maxSpeed", 600))
+            else
+                self.vy = math.min(self.vy, getDefault(Logic.params, "fallInitSpeed", -40))
+                self.vy = self.vy -self.acc*0.01666
+            end
+            --固定帧率 来做 物理计算根据时间 来确定 是否到特定的帧了
+            self.upTime = math.max(self.upTime-1, 0)
+            --print("upTime is", self.upTime)
+            print("vy is what", self.vy)
 
+            local p = getPos(self.bg)
+            p[2] = p[2]+self.vy*0.01666
+            setPos(self.bg, p)
+        end
+
+        local p = getPos(self.bg)
         if self.tap then
             self.targetDir = -45
         end
         if self.tap then
             self.tap = false
-            --Music.playEffect("jump.mp3")
+            Music.playEffect("jump.mp3")
             --self.vy = 80
             --self.vy = -40
 
@@ -110,16 +120,11 @@ function Bird:update(diff)
                 --end
                 --self.moveAni = sequence({moveby(0.1, 0, 72), callfunc(nil, clearMove)})
                 --self.vy = 0
-                self.upTime = self.upTime+5
+                self.upTime = self.upTime+getDefault(Logic.params, "holdTime", 4)
                 --self.moveAni = sequence({delaytime(0.1), callfunc(nil, clearMove)})
                 --self.bg:runAction(self.moveAni)
             end
         end
-        local p = getPos(self.bg)
-        --速度向上 冲量
-        --if not self.inUp then
-        p[2] = p[2]+self.vy*diff
-        setPos(self.bg, p)
         --end
         
         local pp = getPos(self.scene.pipNode)
@@ -177,6 +182,7 @@ function Bird:update(diff)
             self.bg:stopAllActions()
         end
         --继续修正速度 但是 不修正 方向了
+        self.vy = math.min(self.vy, -40)
         self.vy = self.vy - self.acc*diff 
         --self.vy = self.vy -0.2
         self.targetDir = self.targetDir+3*180/math.pi*diff
