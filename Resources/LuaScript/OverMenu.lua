@@ -27,6 +27,7 @@ function OverMenu:ctor(s)
     but:setContentSize(276, 106)
     setPos(addChild(butNode, but.bg), {550, fixY(sz.height, 725)})
     local function showBut()
+        self.showYet = true
         setVisible(butNode, true)
     end
     butNode:runAction(sequence({delaytime(1), callfunc(nil, showBut)}))
@@ -85,10 +86,12 @@ end
 
 function OverMenu:onBut(p) 
     if p == 1 then
-        global.director:popView()
-        --removeSelf(self.scene.bird.bg)
-        self.scene:resetScene()
-        self.scene:startGame()
+        if self.showYet then
+            global.director:popView()
+            --removeSelf(self.scene.bird.bg)
+            self.scene:resetScene()
+            self.scene:startGame()
+        end
     elseif p == 2 then
     elseif p == 3 then
         CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")

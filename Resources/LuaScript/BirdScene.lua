@@ -95,7 +95,7 @@ function BirdScene:ctor()
     end
     setVisible(self.nightNode, false)
 
-    self.speed = 150
+    self.speed = 240
     self.lastPos = 1000
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
@@ -230,7 +230,8 @@ function BirdScene:realStart()
     global.director:pushView(self.ready)
 end
 function BirdScene:startGame()
-    self:getParam()
+    --self:getParam()
+    self:realStart()
 end
 
 function BirdScene:update(diff)
@@ -333,18 +334,16 @@ function BirdScene:generatePipe()
             p2:retain()
         end
         local sz = p1:getContentSize()
-        print("insert pipe")
+        
         local rdLevel
         local vs = getVS()
         --下面管道的高度范围
         local height = math.random(vs.height-330*self.scale-172*self.scale)+172*self.scale
-        print("height is what?", height)
 
         --local h1 = vs.height/2-132-sz.height
         local h1 = height-sz.height*self.scale
         --local h2 = vs.height/2+132+sz.height
         local h2 = height+258*self.scale+sz.height*self.scale
-        print("h1 h2 is what", height, sz.height, self.scale, sz.height*self.scale, h1, h2)
         setScale(setAnchor(setPos(p1, {self.lastPos, h1}), {0.5, 0}), self.scale)
         setScale(setAnchor(setPos(p2, {self.lastPos, h2}), {0.5, 0}), self.scale)
         setScaleY(p2, -self.scale)
@@ -356,10 +355,10 @@ function BirdScene:generatePipe()
         self.lastPos = self.lastPos+432
         --end
     else
-        print(#self.pipe)
+        
         local pos = getPos(self.pipe[1][1])
         local bp = getPos(self.pipNode)
-        --print("remove old pipe", bp[1]+pos[1])
+        --
         if bp[1]+pos[1] < -100 then
             local allP = table.remove(self.pipe, 1)
             --p:retain()
