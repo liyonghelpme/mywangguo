@@ -53,8 +53,8 @@ bool UpdateScene::init() {
 	CCSprite *sp = CCSprite::create("caelogo.png");
 	addChild(sp);
 	sp->setPosition(ccp(vs.width/2, vs.height/2));
-	sp->setScale(0.1);
-	sp->runAction(CCScaleTo::create(0.25, 1, 1));
+	sp->setScale(0.4);
+	sp->runAction(CCScaleTo::create(0.2, 1, 1));
 
     updateYet = false;
     scheduleUpdate();
