@@ -20,9 +20,11 @@ public:
 	static void postNotification(int duration, const char* content);
 
 	static void clearLocalNotification();
-    
+
+
 private:
-    CCNative(void) {}
+    CCNative(void){
+    }
 };
 
 NS_CC_EXT_END

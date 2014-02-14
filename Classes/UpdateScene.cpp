@@ -1,5 +1,5 @@
 ﻿#include "UpdateScene.h"
-
+#include "MyPlugins.h"
 #include "CCLuaEngine.h"
 #include "AssetsManager.h"
 UpdateScene *UpdateScene::create() {
@@ -102,13 +102,13 @@ void UpdateScene::update(float diff) {
                     publicAssets->updateVersion();
                 }
             }
-            /*
+
 			CCDictionary *dict = CCDictionary::create();
-			CCDictionary *ads = CCDictionary::create();
-			ads->setObject(CCString::create("AdsAdmob"), "name");
+            //使用adsadmob的 sendCmd 模块发送命令记录日志
+            CCDictionary *ads = CCDictionary::create();
+			ads->setObject(CCString::create("CommonCmd"), "name");
 			dict->setObject(ads, "ads");
 			MyPlugins::getInstance()->loadPlugins(dict);
-            */
 		
 			CCLuaEngine* pEngine = CCLuaEngine::defaultEngine();
 

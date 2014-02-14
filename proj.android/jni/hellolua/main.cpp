@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "cocos2d.h"
+#include "PluginJniHelper.h"
 #include "platform/android/jni/JniHelper.h"
 #include <jni.h>
 #include <android/log.h>
@@ -15,6 +16,7 @@ extern "C"
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     JniHelper::setJavaVM(vm);
+    PluginJniHelper::setJavaVM(vm);
 
     return JNI_VERSION_1_4;
 }

@@ -4,6 +4,7 @@
 using namespace cocos2d;
 using namespace std;
 
+
 void setScriptTouchPriority(CCLayer *lay, int pri){
     CCLog("setScriptTouchPriority %d", pri);
     CCTouchScriptHandlerEntry *st = lay->getScriptTouchHandlerEntry();
