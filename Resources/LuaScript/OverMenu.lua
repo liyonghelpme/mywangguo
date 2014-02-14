@@ -66,12 +66,26 @@ function OverMenu:ctor(s)
     local sca = vs.width/sz.width
     local sp = setScale(setOpacity(setAnchor(setPos(addSprite(bottom, "intro.png"), {vs.width/2, 0}), {0.50, 0.0}), 255), sca)
 
+    self.touch = ui.newTouchLayer({size={vs.width, 100*self.scene.scale}, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded, delegate=self})
+    bottom:addChild(self.touch.bg)
+
     local butNode = addNode(self.bg)
     local but = ui.newButton({image="free.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=3, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(123, 47)
     setPos(addChild(butNode, but.bg), {657, fixY(sz.height, 992)})
     rightBottomUI(butNode)
 end
+
+--下载游戏
+function OverMenu:touchBegan()
+    CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
+    MyPlugins:getInstance():sendCmd("logUrl", '')
+end
+function OverMenu:touchMoved()
+end
+function OverMenu:touchEnded()
+end
+
 function OverMenu:adjustUI()
     if self.scene.score >= 50 then
         setTexture(self.medal, "goldMedal.png")

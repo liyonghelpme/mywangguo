@@ -83,7 +83,6 @@ echo "$1"
 if [ "$1" = "" ]; then
     cp "$APP_ROOT"/Resources/config-release.ini "$APP_ANDROID_ROOT"/assets/config.ini 
 fi
-cp libbspatch.so libs/armeabi/libbspatch.so
 
 if [[ "$buildexternalsfromsource" ]]; then
     echo "Building external dependencies from source"
@@ -94,3 +93,5 @@ else
     "$NDK_ROOT"/ndk-build -C "$APP_ANDROID_ROOT" \
         "NDK_MODULE_PATH=${COCOS2DX_ROOT}:${COCOS2DX_ROOT}/cocos2dx/platform/third_party/android/prebuilt:${COCOS2DX_ROOT}/plugin/publish"
 fi
+
+cp "$DIR"/libbspatch.so "$DIR"/libs/armeabi/

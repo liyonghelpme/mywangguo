@@ -14,10 +14,78 @@ SCENE_STATE = {
     OVER = 3,
 }
 BirdScene = class()
+function BirdScene:initStar()
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {298, fixY(self.sz.height, 66)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {418, fixY(self.sz.height, 144)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {522, fixY(self.sz.height, 300)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {668, fixY(self.sz.height, 184)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {360, fixY(self.sz.height, 286)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {248, fixY(self.sz.height, 202)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {108, fixY(self.sz.height, 260)}), {64, 64}), {0.50, 0.50}), 255)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.starNode, "star.png"), {100, fixY(self.sz.height, 136)}), {64, 64}), {0.50, 0.50}), 255)
+    centerTop(self.starNode)
+
+    local sub = self.starNode:getChildren()
+    local count = self.starNode:getChildrenCount()
+    for i=0, count-1, 1 do
+        local child = tolua.cast(sub:objectAtIndex(i), 'CCNode')
+        local p = getPos(child)
+        local startP = math.sin(p[1]*50)+1
+        local function doFade()
+            child:runAction(repeatForever(sinein(sequence({fadeout(1), fadein(1)}))))
+        end
+        child:runAction(sequence({delaytime(startP), callfunc(nil, doFade)}))
+        if i%2 == 0 then
+            setScale(child, 0.5)
+        end
+    end
+end
+function BirdScene:initFlash()
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {71, fixY(self.sz.height, 836)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {187, fixY(self.sz.height, 850)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {219, fixY(self.sz.height, 826)}), {32, 32}), {0.50, 0.50}), 255), 1)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {553, fixY(self.sz.height, 855)}), {32, 32}), {0.50, 0.50}), 255)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {607, fixY(self.sz.height, 859)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {642, fixY(self.sz.height, 870)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {656, fixY(self.sz.height, 822)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {655, fixY(self.sz.height, 856)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {688, fixY(self.sz.height, 839)}), {32, 32}), {0.50, 0.50}), 255)
+    local sp = setScale(setOpacity(setAnchor(setSize(setPos(addSprite(self.flashNode, "flash.png"), {739, fixY(self.sz.height, 882)}), {32, 32}), {0.50, 0.50}), 255), 0.5)
+    centerBottom(self.flashNode)
+    local sub = self.flashNode:getChildren()
+    local count = self.flashNode:getChildrenCount()
+    for i=0, count-1, 1 do
+        local child = tolua.cast(sub:objectAtIndex(i), 'CCNode')
+        local p = getPos(child)
+        local startP = math.sin(p[1]*50)+1
+        local function doFade()
+            local function rmv()
+                local dir = math.random(2)
+                if dir == 2 then
+                    dir = -1
+                end
+                local mx = (math.random(10)+10)*dir
+                local dir = math.random(2)
+                if dir == 2 then
+                    dir = -1
+                end
+                local my = (math.random(10)+10)*dir
+                child:runAction(sinein(sequence({moveby(1, mx, my), moveby(1, -mx, -my)})))
+            end
+            child:runAction(repeatForever(sequence({callfunc(nil, rmv), delaytime(2)})))
+        end
+        child:runAction(sequence({delaytime(startP), callfunc(nil, doFade)}))
+    end
+end
+
+function BirdScene:updateStar()
+end
+
 function BirdScene:ctor()
     self.score = 0
     local vs = getVS()
     local size = {width=768, height=1024}
+    self.sz = size
     local sca = vs.height/size.height
     self.scale = sca
 
@@ -45,6 +113,11 @@ function BirdScene:ctor()
     addChild(self.backNode, far3)
     setPos(setAnchor(far3, {0, 0}), {1536*sca, 0})
     setScale(far3, sca)
+    self.allFar = {far, far2, far3}
+
+    self.starNode = addNode(self.backNode)
+    self:initStar()
+    setVisible(self.starNode, false)
 
     --远景调整占满屏幕 高度
 
@@ -64,6 +137,7 @@ function BirdScene:ctor()
     self.m2 = f2
     self.m3 = f3
     self.mid = mid
+    self.allMid = {f1, f2, f3}
     
     self.state = SCENE_STATE.WAIT_START
 
@@ -84,7 +158,11 @@ function BirdScene:ctor()
 
     self.birdNode = addNode(self.bg)
     self.nightNode = addNode(self.bg)
-
+   
+    self.flashNode = addNode(self.bg)
+    self:initFlash()
+    setVisible(self.flashNode, false)
+    --[[
     local n = math.ceil(vs.width/size.width)
     local sy = vs.height/size.height
     for i=1, n, 1 do
@@ -94,8 +172,9 @@ function BirdScene:ctor()
         setAnchor(setPos(setScale(night, sy), {768*sy*(i-1), 0}), {0, 0})
     end
     setVisible(self.nightNode, false)
+    --]]
 
-    self.speed = 240
+    self.speed = 300*self.scale
     self.lastPos = 1000
 
     --self.bg:addChild(createSprite("greenbirds1.png"))
@@ -103,6 +182,7 @@ function BirdScene:ctor()
     
     --self.menu = BirdMenu.new(s)
     --self.bg:addChild(self.menu.bg)
+    --self:setNight(false)
 
     self.needUpdate = true
     registerUpdate(self)
@@ -153,66 +233,78 @@ function BirdScene:makeNear()
     self.n1 = n1
     self.n2 = n2
     self.n3 = n3
+
+    self.allNear = {n1, n2, n3}
 end
 
+function BirdScene:setNight(n)
+    if not n then
+        setVisible(self.starNode, false)
+        setVisible(self.flashNode, false)
+        local av = 255
+        for k, v in ipairs(self.allFar) do
+            setColor(v, {av, av, av})
+        end
+        for k, v in ipairs(self.allMid) do
+            setColor(v, {av, av, av})
+        end
+        for k, v in ipairs(self.allNear) do
+            setColor(v, {av, av, av})
+        end
+        --setColor(self.bird.bg, {av, av, av})
+
+    else
+        setVisible(self.starNode, true)
+        setVisible(self.flashNode, true)
+        local av = 255*0.7
+
+        for k, v in ipairs(self.allFar) do
+            setColor(v, {av, av, av})
+        end
+        for k, v in ipairs(self.allMid) do
+            setColor(v, {av, av, av})
+        end
+        for k, v in ipairs(self.allNear) do
+            setColor(v, {av, av, av})
+        end
+        --setColor(self.bird.bg, {av, av, av})
+    end
+end
 function BirdScene:resetScene()
     self.score = 0
-    removeSelf(self.mid)
-    removeSelf(self.pipNode)
-    removeSelf(self.near)
+    --removeSelf(self.mid)
+    --removeSelf(self.pipNode)
+    --removeSelf(self.near)
     removeSelf(self.bird.bg)
 
     local rd = math.random(2)
     if rd == 1 then
-        setVisible(self.nightNode, true)
+        --setVisible(self.nightNode, true)
+        self:setNight(true)
     else
-        setVisible(self.nightNode, false)
+        self:setNight(false)
+        --setVisible(self.nightNode, false)
     end
+    --self:setNight(true)
 
-    local mid = CCNode:create()
-    local f1 = createSprite("mid.png")
-    setAnchor(setPos(f1, {0, 0}), {0, 0})
-    local f2 = createSprite("mid.png")
-    setAnchor(setPos(f2, {768, 0}), {0, 0})
-    local f3 = createSprite("mid.png")
-    setAnchor(setPos(f3, {1536, 0}), {0, 0})
+    setPos(self.mid, {0, 0})
+    setPos(self.m1, {0, 0})
+    setPos(self.m2, {768, 0})
+    setPos(self.m3, {1536, 0})
 
-    addChild(mid, f1)
-    addChild(mid, f2)
-    addChild(mid, f3)
-    addChild(self.backNode, mid)
-    self.m1 = f1
-    self.m2 = f2
-    self.m3 = f3
-    self.mid = mid
+    setPos(self.near, {0, 0})
+    setPos(self.n1, {0, 0})
+    setPos(self.n2, {768*self.scale, 0})
+    setPos(self.n3, {1536*self.scale, 0})
 
-    local pipNode = CCNode:create()
-    addChild(self.backNode, pipNode)
-    self.pipNode = pipNode
+    setPos(self.pipNode, {0, 0})
     
     for k, v in ipairs(self.pipe) do
+        removeSelf(v[1])
+        removeSelf(v[2])
         table.insert(self.freePipe, v)
     end
     self.pipe = {}
-    
-    self:makeNear()
-    --[[
-    local near = CCNode:create()
-    local n1 = createSprite("near.png")
-    setAnchor(setPos(n1, {0, 0}), {0, 0})
-    local n2 = createSprite("near.png")
-    setAnchor(setPos(n2, {768, 0}), {0, 0})
-    local n3 = createSprite("near.png")
-    setAnchor(setPos(n3, {1536, 0}), {0, 0})
-    addChild(near, n1)
-    addChild(near, n2)
-    addChild(near, n3)
-    addChild(self.backNode, near)
-    self.near = near
-    self.n1 = n1
-    self.n2 = n2
-    self.n3 = n3
-    --]]
 end
 function BirdScene:realStart()
     self.state = SCENE_STATE.FREE
@@ -235,6 +327,8 @@ function BirdScene:startGame()
 end
 
 function BirdScene:update(diff)
+    --self:updateStar()
+
     if self.inGet and self.getYet then
         self.inGet = false
         self:realStart()
@@ -352,7 +446,7 @@ function BirdScene:generatePipe()
         addChild(self.pipNode, p2)
         --是否 计分过
         table.insert(self.pipe, {p1, p2, false})
-        self.lastPos = self.lastPos+432
+        self.lastPos = self.lastPos+432*self.scale
         --end
     else
         
