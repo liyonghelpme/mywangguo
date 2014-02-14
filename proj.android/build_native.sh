@@ -95,3 +95,5 @@ else
 fi
 
 cp "$DIR"/libbspatch.so "$DIR"/libs/armeabi/
+
+python miscFile.py
