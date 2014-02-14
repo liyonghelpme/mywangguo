@@ -74,7 +74,7 @@ public class CommonCmd implements InterfaceAds {
 		// TODO Auto-generated method stub
 		if(points == 7) {
 			Log.d("Interface", "log url");
-			MobclickAgent.onEvent(mContext, "NOZOMI_DOWNLOAD", "");
+			MobclickAgent.onEvent(mContext, "NOZOMI_DOWNLOAD");
 		}
 	}
 

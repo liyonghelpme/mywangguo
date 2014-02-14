@@ -230,8 +230,7 @@ function BirdScene:realStart()
     global.director:pushView(self.ready)
 end
 function BirdScene:startGame()
-    --self:getParam()
-    self:realStart()
+    self:getParam()
 end
 
 function BirdScene:update(diff)
