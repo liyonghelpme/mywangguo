@@ -26,6 +26,7 @@
 #import "cocos2d.h"
 #import "EAGLView.h"
 #import "AppDelegate.h"
+#import "MobClick.h"
 
 #import "RootViewController.h"
 
@@ -38,6 +39,7 @@
 static AppDelegate s_sharedApplication;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
+    [MobClick startWithAppkey:@"52fb27b056240b6ef319af4f"];
     
     // Override point for customization after application launch.
 

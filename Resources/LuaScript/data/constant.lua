@@ -3,6 +3,8 @@ MapWidth=3136
 FIX_HEIGHT = 128
 MapHeight=1700+FIX_HEIGHT
 --]]
+NOZOMI_URL = "https://itunes.apple.com/us/app/nozomi-clash-of-zombies/id608847384?mt=8"
+BIRD_URL = "https://itunes.apple.com/us/app/id821875082"
 FIGHT_HEAD_OFF = 220
 CAT_SPEED = 20
 FIGHT_CUT = 0.3

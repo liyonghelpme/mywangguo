@@ -78,7 +78,7 @@ end
 
 --下载游戏
 function OverMenu:touchBegan()
-    CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
+    CCNative:openURL(NOZOMI_URL)
     MyPlugins:getInstance():sendCmd("logUrl", '')
 end
 function OverMenu:touchMoved()
@@ -108,7 +108,7 @@ function OverMenu:onBut(p)
         end
     elseif p == 2 then
     elseif p == 3 then
-        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
+        CCNative:openURL(NOZOMI_URL)
         MyPlugins:getInstance():sendCmd("logUrl", '')
     end
 end

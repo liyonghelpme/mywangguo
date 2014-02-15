@@ -52,7 +52,7 @@ function BirdMenu:update(diff)
 end
 --下载游戏
 function BirdMenu:touchBegan()
-    CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
+    CCNative:openURL(NOZOMI_URL)
     MyPlugins:getInstance():sendCmd("logUrl", '')
 end
 function BirdMenu:touchMoved()
@@ -68,9 +68,9 @@ function BirdMenu:onBut(p)
         self.scene:startGame()
     elseif p == 1 then
     elseif p == 2 then
-        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.bird&hl=en")
+        CCNative:openURL(BIRD_URL)
     elseif p == 3 then
-        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
+        CCNative:openURL(NOZOMI_URL)
         MyPlugins:getInstance():sendCmd("logUrl", '')
     end
 end
