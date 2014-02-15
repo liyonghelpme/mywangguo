@@ -68,7 +68,7 @@ function BirdMenu:onBut(p)
         self.scene:startGame()
     elseif p == 1 then
     elseif p == 2 then
-        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.bird&hl=en")
+        CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.bird2&hl=en")
     elseif p == 3 then
         CCNative:openURL("https://play.google.com/store/apps/details?id=com.caesars.nozomi&hl=en")
         MyPlugins:getInstance():sendCmd("logUrl", '')

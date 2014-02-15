@@ -52,7 +52,7 @@ map<string, string> *handleIni(const char *data, long size) {
         CCLog("key value %s %s", key, value);
 
         while(start[0] == '\r' || start[0] == '\n') {
-            start = start++;
+            start = start+1;
             count++;
         }
     }
