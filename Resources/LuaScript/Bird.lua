@@ -66,7 +66,7 @@ function Bird:update(diff)
         end
 
         --只有重力
-        local downAcc = 2400*self.scene.scale
+        local downAcc = 3000*self.scene.scale
         --点击后的初始向上速度，向上动作持续时间
         local jumpSpeed, jumpTicks = 720*self.scene.scale, 30
         
@@ -85,7 +85,9 @@ function Bird:update(diff)
         end
         self.acc = downAcc
         --无响应 降落4帧 最多
-        self.leftTime = math.min(self.leftTime+diff, 0.03332)
+        --self.leftTime = math.min(self.leftTime+diff, 0.06664)
+        self.leftTime = self.leftTime+diff
+
         --jumpTicks 有30 帧要执行 0.5s时间
         --防止 帧率瞬间掉落 导致的 运行时间过长
         while self.leftTime >= 0.01666 do
