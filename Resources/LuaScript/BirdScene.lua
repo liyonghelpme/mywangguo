@@ -345,7 +345,7 @@ function BirdScene:update(diff)
         self:adjustScene(diff)
     elseif self.state == SCENE_STATE.RUN then
         self:generatePipe()
-        if self.bird.state ~= BIRD_STATE.DEAD then
+        if self.bird.state ~= BIRD_STATE.DEAD and self.bird.state ~= BIRD_STATE.CRACK then
             self:adjustScene(diff)
         else
             --弹出 得分菜单 RunMenu
