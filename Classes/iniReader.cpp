@@ -52,8 +52,8 @@ map<string, string> *handleIni(const char *data, long size) {
         CCLog("key value %s %s", key, value);
 
         while((start[0] == '\r' || start[0] == '\n') && count < size) {
-            CCLog("read return line");
-            start = start++;
+            CCLog("read return line %c", start[0]);
+            start = start+1;
             count++;
         }
     }
