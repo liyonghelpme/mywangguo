@@ -181,7 +181,7 @@ end
 --调整数字 和 banner 显示
 --从FightScene 获取数据
 function FightMenu2:adjustNum()
-    local sol = self.scene.soldiers
+    local sol = self.scene.menuSoldier
     local maxSol = self.scene.maxSoldier
 
     fightNumPro(self.eneFoot, sol[2][1], maxSol[2][1])
@@ -264,7 +264,7 @@ end
 
 --士兵死亡
 function FightMenu2:killSoldier(soldier, killNum, healthHurt)
-    local sol = self.scene.soldiers
+    local sol = self.scene.menuSoldier
     local maxSol = self.scene.maxSoldier
     print("killSoldier", soldier.color, soldier.id, killNum, healthHurt)
     if soldier.color == 0 then

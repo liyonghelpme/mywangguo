@@ -23,6 +23,8 @@ function MiaoPage:ctor(s)
     setContentSize(self.bg, {MapWidth, MapHeight})
     setAnchor(self.bg, {0, 0})
 
+    --setPos(self.bg, {-MapWidth/2})
+
     self.oldBuildPos = {}
 
     local col = math.ceil(MapWidth/64)
@@ -314,7 +316,49 @@ function MiaoPage:ctor(s)
 
     registerEnterOrExit(self)
     registerMultiTouch(self)
+
+
+
+    --缩放背景图到 0.5
     self.touchDelegate:scaleToMax(0.5)
+    self:moveToPoint(MapWidth/2, FIX_HEIGHT+200)
+end
+
+--开启一片新的 4个新手 村落
+function MiaoPage:restoreBuildAndMap()
+    local lastV = Logic.curVillage-1
+    local nm = {}
+    for k, v in ipairs(self.allMask) do
+        if v[2] <= lastV then
+            removeSelf(v[1])
+        else
+            table.insert(nm, v)
+        end
+    end
+    self.allMask = nm
+
+    local mg = self.buildLayer.mapGridController
+    local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
+    --print("len allB", #allB[])
+    for bk, bv in ipairs(allB) do
+        for k, v in pairs(bv) do
+            if k.blockId == lastV then
+                k:setOperatable(true)
+            end
+        end
+    end
+
+    local ns = {}
+    for k, v in ipairs(self.darkSlope) do
+        if v[2] == lastV then
+            setColor(v[1], {255, 255, 255})
+        else
+            table.insert(ns, v)
+        end
+    end
+    self.darkSlope = ns
+
+
 end
 
 --根据游戏 阶段 和 该阶段开启的地图数量 显示游戏地图大小
@@ -323,17 +367,19 @@ function MiaoPage:maskMap()
     --addChild(self.bg, self.maskNode)
     self.allMask = {}
     if Logic.gameStage == 1 then
-        local hideBlock = {8, 9, 10}
+        local hideBlock = {8, 10, 9}
         for hk, hv in ipairs(hideBlock) do
-            for k, v in ipairs(self.block[hv])  do
-                if v ~= 0 then
-                    local ax, ay = (k-1)%self.width, math.floor((k-1)/self.width)
-                    local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-                    local m = createSprite("blackArrow.png")
-                    addChild(self.buildLayer.buildingLayer, m)
-                    m:setZOrder(MAX_BUILD_ZORD-oldy)
-                    setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
-                    table.insert(self.allMask, m)
+            if hk >= Logic.curVillage then
+                for k, v in ipairs(self.block[hv])  do
+                    if v ~= 0 then
+                        local ax, ay = (k-1)%self.width, math.floor((k-1)/self.width)
+                        local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+                        local m = createSprite("blackArrow.png")
+                        addChild(self.buildLayer.buildingLayer, m)
+                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
+                        table.insert(self.allMask, {m, hk})
+                    end
                 end
             end
         end
@@ -346,7 +392,15 @@ function MiaoPage:maskMap()
             for k, v in pairs(bv) do
                 local ax, ay = k:getAxAyHeight()
                 local tid = axayToTid(ax, ay, self.width) 
-                print("mask Map", ax, ay, tid, self.block[8][tid])
+                --print("mask Map", ax, ay, tid, self.block[8][tid])
+                for hk, hv in ipairs(hideBlock) do
+                    if hk >= Logic.curVillage then
+                        if self.block[hv][tid] ~= 0 then
+                            k:setOperatable(false, hk)
+                        end
+                    end
+                end
+                --[[
                 if self.block[8][tid] ~= 0 then
                     k:setOperatable(false, 8)
                 elseif self.block[9][tid] ~= 0 then
@@ -354,6 +408,8 @@ function MiaoPage:maskMap()
                 elseif self.block[10][tid] ~= 0 then
                     k:setOperatable(false, 10)
                 end
+                --]]
+
             end
         end
 
@@ -368,8 +424,18 @@ function MiaoPage:maskMap()
             end
         end
         
+        self.darkSlope = {}
         for k, v in pairs(self.slopeData) do
             local tid = k
+            for hk, hv in ipairs(hideBlock) do
+                if hk >= Logic.curVillage then
+                    if self.block[hv][tid] ~= 0 then
+                        setColor(v.pic, {128, 128, 128})
+                        table.insert(self.darkSlope, {v.pic, hk})
+                    end
+                end
+            end
+            --[[
             if self.block[8][tid] ~= 0 then
                 setColor(v.pic, {128, 128, 128})
             elseif self.block[9][tid] ~= 0 then
@@ -377,8 +443,45 @@ function MiaoPage:maskMap()
             elseif self.block[10][tid] ~= 0 then
                 setColor(v.pic, {128, 128, 128})
             end
+            --]]
+        end
+        
+        local wid = self.width-11
+        local hei = self.height-17
+        --local maxWH = math.max(wid, hei)
+        local boundWid = SIZEX*(wid+hei)
+        --local boundWid = MapWidth
+        local boundLeft = MapWidth/2-wid*SIZEX 
+        local boundBottom = 0
+        --矩形地图MapPos 对照
+        local boundHeight = SIZEY*(wid+hei)+FIX_HEIGHT+OFF_HEIGHT*2+50
+        local br = {left=boundLeft, bottom = 0,width=boundWid, height=boundHeight}
+
+        print("bound range", simple.encode(br))
+        self.touchDelegate.boundRange = br
+
+        if Logic.curVillage < 4 then
+            local cc = Logic.villageCenter[Logic.curVillage]
+            local cx, cy = axyToCxyWithDepth(cc[1], cc[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+            local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onBut, param=1})
+            setPos(addChild(self.bg, sp.bg), {cx, cy})
+            self.fly = sp
         end
     end
+end
+
+
+function MiaoPage:adjustFly()
+    local c = Logic.villageCenter[Logic.curVillage]
+    local cx, cy = axyToCxyWithDepth(c[1], c[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+    setPos(self.fly.bg, {cx, cy})
+end
+
+function MiaoPage:onBut(p)
+    local function attackNow()
+    end
+    global.director:pushView(ConfigMenu.new(nil), 1, 0)
+    --global.director:pushView(SessionMenu.new("是否攻入该地区？",  attackNow, nil, true), 1, 0)
 end
 
 function MiaoPage:touchesCanceled(touches)

@@ -32,7 +32,9 @@ function TMXScene:ctor()
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
 
-    self.page:moveToPoint(1644, 384)
+    --self.page:moveToPoint(1644, 384)
+    --setPos(self.bg, {})
+
     delayCall(0.3, self.initDataNow, self)
     registerEnterOrExit(self)
     self.passTime = 0
@@ -139,6 +141,13 @@ function TMXScene:initData(rep, param)
         local rd = simple.decode(r)
         Logic.landBook = rd
     end
+
+    local r = u:getStringForKey('curVillage')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.curVillage = rd
+    end
+
 
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
@@ -419,4 +428,20 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("lastArenaTime", simple.encode(Logic.lastArenaTime)) 
     u:setStringForKey("date", simple.encode(Logic.date)) 
     u:setStringForKey("landBook", simple.encode(Logic.landBook)) 
+    u:setStringForKey("curVillage", simple.encode(Logic.curVillage)) 
+end
+
+function TMXScene:newVillageWin(w)
+    if w then
+        addBanner("村落攻略胜利啦")
+        Logic.curVillage = Logic.curVillage+1
+        if Logic.curVillage < 4 then
+            self.page:adjustFly()
+        else
+            removeSelf(self.page.fly)
+        end
+        self.page:restoreBuildAndMap()
+    else
+        addBanner("村落攻略失败啦")
+    end
 end

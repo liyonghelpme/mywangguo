@@ -713,12 +713,25 @@ Logic.landBook = 0
 Logic.attendHero = {
 }
 
-Logic.openVillage = {}
+Logic.curVillage = 1
 Logic.openMap = {}
 Logic.gameStage = 1
 
 Logic.stageRange = {
     {11, 17}
+}
+--村落能量
+Logic.villagePower = {
+    {2, 0, 0, 0},
+    {10, 0, 0, 0},
+    {7, 4, 0, 0},
+}
+Logic.newVillage = false
+
+Logic.villageCenter = {
+    {13, 24},
+    {12, 19},
+    {17, 19},
 }
 
 

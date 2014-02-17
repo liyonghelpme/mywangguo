@@ -160,6 +160,10 @@ function ConfigMenu:onArena()
     global.director:pushScene(FightScene.new())
 end
 
+function ConfigMenu:onVillage()
+    global.director:pushScene(FightScene.new())
+end
+
 function ConfigMenu:onBut(p)
     if p == 1 then
         global.director:pushView(ArmyMenu.new(), 1)
@@ -170,8 +174,13 @@ function ConfigMenu:onBut(p)
             addBanner("至少选择一个村民参战!")
             return
         end
+        --挑战 新手村
+        if self.city == nil then
+            Logic.newVillage = true
+            global.director:popView()
+            global.director:pushView(SessionMenu.new("开始攻略村落", self.onVillage, self), 1, 0)
         --挑战竞技场
-        if self.city.kind == 0 then
+        elseif self.city.kind == 0 then
             global.director:popView()
             Logic.challengeCity = self.city
             global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self), 1, 0)

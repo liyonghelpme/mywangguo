@@ -158,34 +158,35 @@ function FightLayer2:oneFail()
     self:stopCameraMove(left, right)
     --self.clone = false
 
+    local win = false
     if left == right then
         addBanner("平局")
     elseif left > 0 then
         addBanner("胜利")
         winCity()
+        win = true
     else
         addBanner("失败")
     end
 
     local function checkWin()
         print("oneFail checkWin")
-        if global.director.curScene.checkWin == nil then
-            global.director:pushScene(FightMap.new())
+        if Logic.newVillage then
+            Logic.newVillage = false
+            print("new Village win inform")
+            global.director.curScene:newVillageWin(win)
+        else
+            if global.director.curScene.checkWin == nil then
+                global.director:pushScene(FightMap.new())
+            end
+            global.director.curScene:checkWin()
         end
-        global.director.curScene:checkWin()
     end
     local function fightOver()
         print("fightOver")
         --如果scene 退出完了 则 push一个新的scene
         global.director:popScene()
-        --global.director.curScene.bg:runAction(sequence({delaytime(0.5), callfunc(nil, checkWin)}))
         delayCall(0.5, checkWin)
-        --[[
-        if global.director.curScene.checkWin == nil then
-            global.director:pushScene(FightMap.new())
-        end
-        global.director.curScene:checkWin()
-        --]]
     end
     print("why not call fightOver function here")
     self.bg:runAction(sequence({delaytime(5), callfunc(nil, fightOver)}))

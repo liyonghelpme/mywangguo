@@ -32,7 +32,10 @@ function FightScene:ctor()
     --挑战竞技场胜利 kind == 0 奖励物品 提升竞技场 
     --[[
     --]]
-    if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
+    --挑战新手村 只有 英雄
+    if Logic.newVillage then
+        self.soldiers = {{0, 0, 0, 0}, copyTable(Logic.villagePower[Logic.curVillage])}
+    elseif type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
         local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
         self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(cityData)}
     else
@@ -112,11 +115,21 @@ function FightScene:ctor()
             table.insert(self.heros[3], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         end
     end
+    print("attendSoldier", simple.encode(self.soldiers))
     print("attendHero", simple.encode(Logic.attendHero))
     print(simple.encode(self.heros))
 
-
+    --将英雄也算入到 maxSoldier中去 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
+    self.mySoldier = self.maxSoldier[1]
+    self.mySoldier[1] = self.mySoldier[1]+#self.heros[1]
+    self.mySoldier[2] = self.mySoldier[2]+#self.heros[2]
+    self.mySoldier[3] = self.mySoldier[3]+#self.heros[3]
+    self.mySoldier[4] = self.mySoldier[4]+#self.heros[4]
+    print("maxSoldierNum is", simple.encode(self.maxSoldier))
+
+    self.menuSoldier = simple.decode(simple.encode(self.maxSoldier))
+    
     self.bg = CCScene:create()
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)

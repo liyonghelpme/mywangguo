@@ -1662,7 +1662,7 @@ end
 function addEquipAttr(old, edata)
     local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot'}
     for k, v in ipairs(allAtt) do
-        old[v] = old[v]+edata[v]
+        old[v] = (old[v] or 0)+edata[v]
     end
 end
 
@@ -1676,9 +1676,9 @@ function calAttr(id, level, equip)
     brawn=data.brawn+data.brawnAdd*level}
     --近战 还是远程
     local weapKind = 0
+    local equipAttr = {}
     if equip ~= nil then
         if equip.weapon ~= nil then
-            addEquipAttr(temp, Logic.equip[equip.weapon])
             local edata = Logic.equip[equip.weapon]
             if edata.kind == 0 then
                 if edata.subKind == 0 or edata.subKind == 1 or edata.subKind == 4 then
@@ -1687,15 +1687,22 @@ function calAttr(id, level, equip)
                     weapKind = 1
                 end
             end
+
+            --装备自身的攻击力
+            addEquipAttr(equipAttr, Logic.equip[equip.weapon])
+            addEquipAttr(temp, Logic.equip[equip.weapon])
         end
         if equip.head ~= nil then
-            addEquipAttr(temp, Logic.equip[equip.head])
+            addEquipAttr(equipAttr, Logic.equip[equip.head])
+            addEquipAttr(temp, Logic.equip[equip.weapon])
         end
         if equip.body ~= nil then
-            addEquipAttr(temp, Logic.equip[equip.body])
+            addEquipAttr(equipAttr, Logic.equip[equip.body])
+            addEquipAttr(temp, Logic.equip[equip.weapon])
         end
         if equip.spe ~= nil then
-            addEquipAttr(temp, Logic.equip[equip.spe])
+            addEquipAttr(equipAttr, Logic.equip[equip.spe])
+            addEquipAttr(temp, Logic.equip[equip.weapon])
         end
     end
 
@@ -1706,6 +1713,10 @@ function calAttr(id, level, equip)
     else
         temp.attack = math.floor(temp.shoot/2)
     end
+    --加上装备的 属性 攻击力 = 自身属性/2 + 装备攻击力
+    temp.attack = temp.attack+(equipAttr.attack or 0)
+    --addEquipAttr(temp, equipAttr)
+
 
     local skill = getPeopleSkill(id, level)
     if skill == 0 then
