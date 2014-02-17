@@ -51,7 +51,7 @@ function ChooseMenu:updateTab()
     local att = Logic.attendHero
     local aYet = {}
     for k, v in ipairs(att) do
-        aYet[v] = true 
+        aYet[v.id] = true 
     end
 
     for k, v in ipairs(Logic.farmPeople) do
@@ -148,13 +148,13 @@ function ChooseMenu:adjustAttend(t)
 
     if v then
         for ak, av in ipairs(Logic.attendHero) do
-            if av == t then
+            if av.id == t then
                 table.remove(Logic.attendHero, ak)
                 break
             end
         end
     else
-        table.insert(Logic.attendHero, t)
+        table.insert(Logic.attendHero, {id=t, pos=0})
     end
     setVisible(word.attend, not v)
 end

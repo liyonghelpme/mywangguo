@@ -709,8 +709,11 @@ Logic.lastArenaTime = 0
 
 Logic.landBook = 0
 --参展英雄id 列表
+--{id=xx, pos=xx}
 Logic.attendHero = {
 }
+
+Logic.openMap = {}
 
 
 Logic.initYet = false

@@ -64,7 +64,7 @@ function FightScene:ctor()
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=45} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
     self.heros = {{}, {}, {}, {}}
     for k, v in ipairs(Logic.attendHero) do
-        local pdata = Logic.farmPeople[v]
+        local pdata = Logic.farmPeople[v.id]
         local equip = pdata
         local weapKind = 0 
         local ride = false
@@ -103,13 +103,13 @@ function FightScene:ctor()
             skillId = nil
         end
         if ride then
-            table.insert(self.heros[4], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+            table.insert(self.heros[4], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         elseif weapKind == 0 then
-            table.insert(self.heros[1], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+            table.insert(self.heros[1], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         elseif weapKind == 1 then
-            table.insert(self.heros[2], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+            table.insert(self.heros[2], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         elseif weapKind == 2 then
-            table.insert(self.heros[3], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId})
+            table.insert(self.heros[3], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         end
     end
     print("attendHero", simple.encode(Logic.attendHero))

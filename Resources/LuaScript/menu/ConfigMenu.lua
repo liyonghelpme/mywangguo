@@ -59,7 +59,7 @@ function ConfigMenu:initHero()
         --没有在farmPeople 中
         for k, v in ipairs(Logic.farmPeople) do
             if not inAtt[k] then
-                table.insert(en, k)
+                table.insert(en, {id=k, pos=0})
                 left = left-1
             end
             if left <= 0 then
@@ -91,7 +91,7 @@ function ConfigMenu:adjustAttend()
     for k, v in ipairs(Logic.attendHero) do
         local row = math.floor((k-1)/4)
         local col = (k-1)%4
-        local pData = Logic.farmPeople[v]
+        local pData = Logic.farmPeople[v.id]
         local sp = createSprite("cat_"..pData.id.."_rb_0.png")
         setAnchor(setPos(setScale(sp, 0.5), {bpos[1]-bsize[1]/2+initX+col*offX, bpos[2]-bsize[2]/2+initY+row*offY}), {257/512, (512-374)/512})
         addChild(self.hNode, sp)
