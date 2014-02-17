@@ -45,6 +45,8 @@ function MiaoBuild:ctor(m, data)
     self.sy = 1
     self.bid = data.bid
     self.colNow = 0
+    self.operate = true
+    self.blockId = nil
     --道路的状态
     self.value = 0
     self.name = 'b'..math.random(10000)
@@ -410,6 +412,22 @@ function MiaoBuild:getAxAyHeight()
         --return ax, ay, height
     end
     return self.ax, self.ay, self.height
+end
+function MiaoBuild:setOutOfStage(s)
+    self.operate = false
+    setVisible(self.bg, false)
+end
+--或者建筑物上面加上一个图
+function MiaoBuild:setOperatable(a, bid)
+    self.operate = a
+    self.blockId = bid
+    if not a then
+        --self.blackArrow = setSize(setAnchor(addChild(self.heightNode, createSprite("blackArrow.png")), {0.5, 0}), {SIZEX*2, SIZEY*2})
+        setColor(self.changeDirNode, {128, 128, 128})
+    else
+        --removeSelf(self.blackArrow)
+        setColor(self.changeDirNode, {255, 255, 255})
+    end
 end
 
 function MiaoBuild:touchesMoved(touches)

@@ -134,7 +134,14 @@ function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
     local width = self.scene.width
     local height = self.scene.height
-    local cx, cy = newAffineToCartesian(self.scene.width-3, 0, width, height, MapWidth/2, FIX_HEIGHT)
+    local bax, bay
+    if Logic.gameStage == 1 then
+        bax = self.scene.width-3
+        bay = 17
+    elseif Logic.gameStage == 2 then
+    else
+    end
+    local cx, cy = newAffineToCartesian(bax, bay, width, height, MapWidth/2, FIX_HEIGHT)
     --local cx, cy = affineToCartesian(21, 0)
     local p = normalizePos({cx, cy}, 1, 1)
     b:setPos(p)

@@ -116,20 +116,17 @@ function MiaoPage:ctor(s)
         end
     end
 
-    --[[
-    --affine 坐标计算mask2
-    local mask2 = layerName.mask2.data
-    local mask3 = layerName.mask3.data
-    for i=1, #mask2, 1 do
-        if mask2[i] ~= 0 then
-            self.mask[i] = 1
-        elseif mask3[i] ~= 0 then
-            self.mask[i] = 2
-        else
-            self.mask[i] = 0
+
+    self.block = {}
+    for k, v in pairs(layerName) do
+        if string.find(k, 'block') ~= nil then
+            local bId = tonumber(string.sub(k, 6))
+            self.block[bId] = v.data
         end
     end
-    --]]
+    self.publicPath = layerName.publicPath
+    self.publicSlope = layerName.publicSlope
+
 
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
@@ -168,6 +165,9 @@ function MiaoPage:ctor(s)
             end
        -- end
     end
+
+    self.invisibleSlope = {}
+    local sr = Logic.stageRange[Logic.gameStage]
     
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
@@ -188,6 +188,10 @@ function MiaoPage:ctor(s)
             local sz = pic:getContentSize()
             setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
             pic:setScale(1.02)
+            if w < sr[1] or h < sr[2] then
+                setVisible(pic, false)
+                table.insert(self.invisibleSlope, {pic, w, h})
+            end
         end
     end
 
@@ -202,6 +206,11 @@ function MiaoPage:ctor(s)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.tileMap:addChild(pic)
             setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.05)
+
+            if w < sr[1] or h < sr[2] then
+                setVisible(pic, false)
+                table.insert(self.invisibleSlope, {pic, w, h})
+            end
         end
     end
     for dk, dv in ipairs(layerName.sea.data) do
@@ -221,7 +230,7 @@ function MiaoPage:ctor(s)
         end
     end
 
-    
+
     self.slopeData = {}
     for dk, dv in ipairs(layerName.slop2.data) do
         if dv ~= 0 then
@@ -239,14 +248,20 @@ function MiaoPage:ctor(s)
             end
             --斜坡方向
             local hei = adjustNewHeight(self.mask, self.width, w, h)
-            self.slopeData[dk] = {dir, hei*OFF_HEIGHT+OFF_HEIGHT/2}
             --nil 没有斜坡
 
             local pic = CCSprite:createWithSpriteFrameName(pname)
+            self.slopeData[dk] = {dir, hei*OFF_HEIGHT+OFF_HEIGHT/2, pic=pic}
+
             self.tileMap:addChild(pic)
             local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             --print("cx cy", cx, cy)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+
+            if w < sr[1] or h < sr[2] then
+                setVisible(pic, false)
+                table.insert(self.invisibleSlope, {pic, w, h})
+            end
         end
     end
 
@@ -259,6 +274,11 @@ function MiaoPage:ctor(s)
             self.tileMap:addChild(pic)
             local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+
+            if w < sr[1] or h < sr[2] then
+                setVisible(pic, false)
+                table.insert(self.invisibleSlope, {pic, w, h})
+            end
         end
     end
 
@@ -276,6 +296,11 @@ function MiaoPage:ctor(s)
             self.tileMap:addChild(pic)
             local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
+
+            if w < sr[1] or h < sr[2] then
+                setVisible(pic, false)
+                table.insert(self.invisibleSlope, {pic, w, h})
+            end
         end
     end
 
@@ -292,6 +317,70 @@ function MiaoPage:ctor(s)
     self.touchDelegate:scaleToMax(0.5)
 end
 
+--根据游戏 阶段 和 该阶段开启的地图数量 显示游戏地图大小
+function MiaoPage:maskMap()
+    --self.maskNode = CCSpriteBatchNode:create("blackArrow.png")
+    --addChild(self.bg, self.maskNode)
+    self.allMask = {}
+    if Logic.gameStage == 1 then
+        local hideBlock = {8, 9, 10}
+        for hk, hv in ipairs(hideBlock) do
+            for k, v in ipairs(self.block[hv])  do
+                if v ~= 0 then
+                    local ax, ay = (k-1)%self.width, math.floor((k-1)/self.width)
+                    local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+                    local m = createSprite("blackArrow.png")
+                    addChild(self.buildLayer.buildingLayer, m)
+                    m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
+                    table.insert(self.allMask, m)
+                end
+            end
+        end
+
+        --一个块的 建筑 建筑物初始化的 时候 可以确定 所在的 块位置
+        local mg = self.buildLayer.mapGridController
+        local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
+        --print("len allB", #allB[])
+        for bk, bv in ipairs(allB) do
+            for k, v in pairs(bv) do
+                local ax, ay = k:getAxAyHeight()
+                local tid = axayToTid(ax, ay, self.width) 
+                print("mask Map", ax, ay, tid, self.block[8][tid])
+                if self.block[8][tid] ~= 0 then
+                    k:setOperatable(false, 8)
+                elseif self.block[9][tid] ~= 0 then
+                    k:setOperatable(false, 9)
+                elseif self.block[10][tid] ~= 0 then
+                    k:setOperatable(false, 10)
+                end
+            end
+        end
+
+        for bk, bv in ipairs(allB) do
+            for k, v in pairs(bv) do
+                local ax, ay = k:getAxAyHeight()
+                if ax < 11 or ay < 17 then
+                    --setVisible(k, false)
+                    k:setOutOfStage(Logic.gameStage)
+                    k:setOperatable(false)
+                end
+            end
+        end
+        
+        for k, v in pairs(self.slopeData) do
+            local tid = k
+            if self.block[8][tid] ~= 0 then
+                setColor(v.pic, {128, 128, 128})
+            elseif self.block[9][tid] ~= 0 then
+                setColor(v.pic, {128, 128, 128})
+            elseif self.block[10][tid] ~= 0 then
+                setColor(v.pic, {128, 128, 128})
+            end
+        end
+    end
+end
+
 function MiaoPage:touchesCanceled(touches)
     self.touchDelegate:tCanceled(touches)
 end
@@ -306,28 +395,6 @@ function MiaoPage:setPoint(x, y)
 end
 function MiaoPage:touchesCanceled(touches)
     self.touchDelegate:tCanceled(touches)
-end
---初始化地图遮罩部分 不用了 新的直接CCBatchNodeSprite 来绘制遮罩
-function MiaoPage:initTiles()
-    self.allIsland = {}
-    self.allMask = {}
-    for k=1, 8, 1 do
-        local nlayer = self.tileMap:layerNamed("dirt"..k)
-        nlayer:setupTiles()
-        self.allIsland[k] = nlayer
-        if k > 1 then
-            local mask = self.tileMap:layerNamed("mask"..k)
-            --setBatchColor(nlayer, {128, 128, 128})
-            mask:setupTiles()
-            self.allMask[k] = mask
-        end
-    end
-    self.smallMask = {}
-    for k=1, 3, 1 do
-        local sm = self.tileMap:layerNamed("mask1_"..k)
-        sm:setupTiles()
-        self.smallMask[k] = sm
-    end
 end
 
 function MiaoPage:enterScene()
@@ -414,7 +481,8 @@ function MiaoPage:touchesBegan(touches)
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
                 --移动地图 和 单纯的点击 地图
                 local cb = allCell[key][#allCell[key]][1]
-                if (cb.picName == 'build' or cb.picName == 't') and not cb.static then
+                --建筑为没有被禁止
+                if (cb.picName == 'build' or cb.picName == 't') and not cb.static and cb.operate then
                     self.touchBuild = allCell[key][#allCell[key]][1]
                     self.touchBuild:touchesBegan(touches)
                 end

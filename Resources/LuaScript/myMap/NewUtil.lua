@@ -160,3 +160,6 @@ function tidToTile(tid, normal, water, gidToTileName)
     end
     --]]
 end
+function axayToTid(ax, ay, width)
+    return ay*width+ax+1
+end

@@ -713,7 +713,13 @@ Logic.landBook = 0
 Logic.attendHero = {
 }
 
+Logic.openVillage = {}
 Logic.openMap = {}
+Logic.gameStage = 1
+
+Logic.stageRange = {
+    {11, 17}
+}
 
 
 Logic.initYet = false

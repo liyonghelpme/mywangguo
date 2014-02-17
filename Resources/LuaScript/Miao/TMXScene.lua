@@ -234,6 +234,7 @@ function TMXScene:initData(rep, param)
     --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
+    self.page:maskMap()
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
