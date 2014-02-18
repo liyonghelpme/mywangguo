@@ -10,20 +10,24 @@ function FightMap:ctor()
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
     
+    self.page = FightPage.new()
+    self.bg:addChild(self.page.bg)
+    self.menu = FightMenu.new(self)
+    self.bg:addChild(self.menu.bg)
     --initDataFromServer()
-    Logic.initYet = true
+    --Logic.initYet = true
     self.needUpdate = true
     registerEnterOrExit(self)
 end
+
 function FightMap:update(diff)
+    --[[
     if Logic.initYet then
         Logic.initYet = false
-        self.page = FightPage.new()
-        self.bg:addChild(self.page.bg)
-        self.menu = FightMenu.new(self)
-        self.bg:addChild(self.menu.bg)
     end
+    --]]
 end
+
 
 function FightMap:checkWin()
     print("FightMenu checkWin", Logic.challengeCity)

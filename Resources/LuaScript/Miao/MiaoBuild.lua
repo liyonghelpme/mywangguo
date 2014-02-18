@@ -349,6 +349,13 @@ function MiaoBuild:doSwitch()
     self.map.mapGridController:updateMap(self)
 end
 
+function MiaoBuild:clearState()
+    self.map.mapGridController:clearMap(self)
+end
+function MiaoBuild:resetState()
+    self.map.mapGridController:updateMap(self)
+end
+
 
 function MiaoBuild:touchesBegan(touches)
     self.lastPos = convertMultiToArr(touches)
@@ -413,10 +420,17 @@ function MiaoBuild:getAxAyHeight()
     end
     return self.ax, self.ay, self.height
 end
+function MiaoBuild:setInStage()
+    self.operate = true
+    setVisible(self.bg, true)
+    self:setOperatable(true)
+end
+
 function MiaoBuild:setOutOfStage(s)
     self.operate = false
     setVisible(self.bg, false)
 end
+
 --或者建筑物上面加上一个图
 function MiaoBuild:setOperatable(a, bid)
     self.operate = a

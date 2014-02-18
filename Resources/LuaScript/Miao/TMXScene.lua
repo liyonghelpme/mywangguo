@@ -148,6 +148,34 @@ function TMXScene:initData(rep, param)
         Logic.curVillage = rd
     end
 
+    local r = u:getStringForKey('gameStage')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.gameStage = rd
+    end
+
+    local r = u:getStringForKey('showMapYet')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.showMapYet = rd
+    end
+    local r = u:getStringForKey('attendHero')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.attendHero = rd
+    end
+
+    local r = u:getStringForKey("openMap")
+    if r ~= "" then
+        Logic.openMap = tableToDict(simple.decode(r))
+        --print("decode holdNum", simple.encode(Logic.holdNum))
+    end
+
+    local r = u:getStringForKey("showLand")
+    if r ~= "" then
+        Logic.showLand = tableToDict(simple.decode(r))
+        --print("decode holdNum", simple.encode(Logic.holdNum))
+    end
 
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
@@ -243,6 +271,7 @@ function TMXScene:initData(rep, param)
     --self.page.buildLayer:testCat()
     self.page:initDataOver()
     self.page.buildLayer:initDataOver()
+    self.page:initInvisibleSlope()
     self.page:maskMap()
 
     if Logic.inNew then
@@ -322,6 +351,18 @@ function TMXScene:update(diff)
     if Logic.paused then
         return
     end
+    if Logic.gameStage == 1 and Logic.landBook > 0 then
+        addBanner("获得土地产权证书 进入 第二阶段")
+        Logic.gameStage = 2
+        --显示几个黑色的块
+        self.page:stageOneToTwo()
+    end
+    if Logic.gameStage == 1 and Logic.curVillage >= 4 and not Logic.showMapYet then
+        addBanner("大地图功能开启了")
+        Logic.showMapYet = true
+        self.menu:adjustLeftShow()
+    end
+
     self:checkBattleTime(diff)
     self.passTime = self.passTime+diff
     --暂停状态不要 保存游戏即可
@@ -429,7 +470,14 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("date", simple.encode(Logic.date)) 
     u:setStringForKey("landBook", simple.encode(Logic.landBook)) 
     u:setStringForKey("curVillage", simple.encode(Logic.curVillage)) 
+    u:setStringForKey("gameStage", simple.encode(Logic.gameStage)) 
+    u:setStringForKey("showMapYet", simple.encode(Logic.showMapYet)) 
+    u:setStringForKey("attendHero", simple.encode(Logic.attendHero)) 
+    u:setStringForKey("openMap", simple.encode(dictToTable(Logic.openMap)))
+
+    u:setStringForKey("showLand", simple.encode(dictToTable(Logic.showLand)))
 end
+
 
 function TMXScene:newVillageWin(w)
     if w then
@@ -438,7 +486,7 @@ function TMXScene:newVillageWin(w)
         if Logic.curVillage < 4 then
             self.page:adjustFly()
         else
-            removeSelf(self.page.fly)
+            removeSelf(self.page.fly.bg)
         end
         self.page:restoreBuildAndMap()
     else

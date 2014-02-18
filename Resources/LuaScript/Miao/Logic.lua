@@ -45,6 +45,7 @@ Logic.inResearch = nil
 --[[
 --]]
 --商店可以直接购买的物品
+--包括装备 和 其它
 Logic.ownGoods = {
     --{0, 1}, 
     {0, 2}, {0, 3}, {0, 11},
@@ -716,10 +717,16 @@ Logic.attendHero = {
 Logic.curVillage = 1
 Logic.openMap = {}
 Logic.gameStage = 1
+Logic.showMapYet = false
 
+--gameStage
 Logic.stageRange = {
-    {11, 17}
+    {11, 17}, 
+    {5, 11},
+    {0, 11},
+    {0, 0},
 }
+
 --村落能量
 Logic.villagePower = {
     {2, 0, 0, 0},
@@ -732,6 +739,29 @@ Logic.villageCenter = {
     {13, 24},
     {12, 19},
     {17, 19},
+}
+
+Logic.stage2Center = {
+    {15, 13},
+    {7, 22},
+    {7, 17},
+    {8, 13},
+}
+
+Logic.stage2Block = {2, 3, 5, 6}
+Logic.extendBlock = {11, 12}
+Logic.extendCenter = {
+    {2, 22},
+    {1, 13},
+    {2, 5},
+    {8, 6},
+    {15, 5},
+}
+
+
+--当前显示的邻接land 而不是统一land
+--扩展陆地显示的情况
+Logic.showLand = {
 }
 
 

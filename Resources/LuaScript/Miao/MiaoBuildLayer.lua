@@ -135,12 +135,15 @@ function MiaoBuildLayer:initBackPoint()
     local width = self.scene.width
     local height = self.scene.height
     local bax, bay
+    bax = self.scene.width-3
+    bay = Logic.stageRange[Logic.gameStage][2]
+    --[[
     if Logic.gameStage == 1 then
-        bax = self.scene.width-3
-        bay = 17
     elseif Logic.gameStage == 2 then
     else
     end
+    --]]
+
     local cx, cy = newAffineToCartesian(bax, bay, width, height, MapWidth/2, FIX_HEIGHT)
     --local cx, cy = affineToCartesian(21, 0)
     local p = normalizePos({cx, cy}, 1, 1)
@@ -259,8 +262,6 @@ end
 function MiaoBuildLayer:initEnv()
     local width = self.scene.width
     local height = self.scene.height
-
-
     --篱笆 
     for dk, dv in ipairs(self.scene.layerName.fence.data) do
         if dv ~= 0 then
