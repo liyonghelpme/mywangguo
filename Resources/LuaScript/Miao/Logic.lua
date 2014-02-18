@@ -715,13 +715,13 @@ Logic.ownBuild = {
 
 Logic.lastArenaTime = 0
 
-Logic.landBook = 10
+Logic.landBook = 0
 --参展英雄id 列表
 --{id=xx, pos=xx}
 Logic.attendHero = {
 }
 
-Logic.curVillage = 4
+Logic.curVillage = 1
 Logic.openMap = {}
 Logic.gameStage = 1
 Logic.showMapYet = false
