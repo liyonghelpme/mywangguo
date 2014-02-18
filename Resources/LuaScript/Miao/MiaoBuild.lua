@@ -46,6 +46,7 @@ function MiaoBuild:ctor(m, data)
     self.bid = data.bid
     self.colNow = 0
     self.operate = true
+    self.inStage = true
     self.blockId = nil
     --道路的状态
     self.value = 0
@@ -421,28 +422,41 @@ function MiaoBuild:getAxAyHeight()
     return self.ax, self.ay, self.height
 end
 function MiaoBuild:setInStage()
-    self.operate = true
-    setVisible(self.bg, true)
-    self:setOperatable(true)
+    --之前不可见 现在可见了
+    if not self.inStage then
+        self.inStage = true
+        self.operate = true
+        setVisible(self.bg, true)
+        self:setOperatable(true)
+    end
 end
 
 function MiaoBuild:setOutOfStage(s)
-    self.operate = false
-    setVisible(self.bg, false)
+    if self.inStage then
+        self.inStage = false
+        self.operate = false
+        setVisible(self.bg, false)
+    end
 end
 
 --或者建筑物上面加上一个图
 function MiaoBuild:setOperatable(a, bid)
-    self.operate = a
-    self.blockId = bid
-    if not a then
-        --self.blackArrow = setSize(setAnchor(addChild(self.heightNode, createSprite("blackArrow.png")), {0.5, 0}), {SIZEX*2, SIZEY*2})
-        setColor(self.changeDirNode, {128, 128, 128})
-    else
-        --removeSelf(self.blackArrow)
-        setColor(self.changeDirNode, {255, 255, 255})
+    if self.operate ~= a then
+        self.operate = a
+        --设定建筑物所在块的id
+        if bid ~= nil then
+            self.blockId = bid
+        end
+
+        if not a then
+            --self.blackArrow = setSize(setAnchor(addChild(self.heightNode, createSprite("blackArrow.png")), {0.5, 0}), {SIZEX*2, SIZEY*2})
+            setColor(self.changeDirNode, {128, 128, 128})
+        else
+            --removeSelf(self.blackArrow)
+            setColor(self.changeDirNode, {255, 255, 255})
+        end
+        self.funcBuild:setOperatable(a)
     end
-    self.funcBuild:setOperatable(a)
 end
 
 function MiaoBuild:touchesMoved(touches)
@@ -523,6 +537,7 @@ end
 
 
 --伐木场和 采矿场需要判定多个网格不冲突
+--检测当前地图是否开放
 function MiaoBuild:checkRiverOrSlopeCol()
     local pos = getPos(self.bg)
     local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
@@ -536,7 +551,7 @@ function MiaoBuild:checkRiverOrSlopeCol()
     end
     print("checkRiverOrSlopeCol", simple.encode(allCoord))
 
-    --超出边界
+    --超出边界 左下右下边界
     for k, v in ipairs(allCoord) do
         if not self.static and (v[1] < 0 or v[2] < 0 or v[1] >= self.map.scene.width or v[2] >= self.map.scene.height or v[1] >= self.map.scene.width-4) then
             --print("out of range")
@@ -545,6 +560,72 @@ function MiaoBuild:checkRiverOrSlopeCol()
             return true
         end
     end
+
+    --河流 和 斜坡之前首先 判定 是否在可建造的范围内
+    --超出可建造边界
+    --初始化建筑物的 时候 不检测
+    if not global.director.curScene.initDataing then
+        addBanner("check game stage 1 collision", Logic.gameStage)
+        local allBlock = self.map.scene.block
+        local mwid = self.map.scene.width
+
+        local hideBlock1 = Logic.villageBlock
+        local hideBlock2 = concateTable(concateTable(Logic.stage2Block, Logic.extendBlock), Logic.extendBlock2)
+        for k, v in ipairs(allCoord) do
+            if Logic.gameStage == 1 then
+                local sr = Logic.stageRange[Logic.gameStage]
+                if v[1] < sr[1] or v[2] < sr[2] then
+                    addBanner("超出边界")
+                    self.colNow = 1
+                    self:setColor(0)
+                    return true
+                end
+                local gk = v[2]*mwid+v[1]+1
+                for hk, hv in ipairs(hideBlock1) do
+                    print("allBlock hv gk ", Logic.curVillage, hv, gk)
+                    if hk >= Logic.curVillage then
+                        print("value", allBlock[hv][gk])
+                        if allBlock[hv][gk] ~= 0 then
+                            addBanner("不能在黑色区域建造"..hv)
+                            self.colNow = 1
+                            self:setColor(0)
+                            return true
+                        end
+                    end
+                end
+            else
+                local sr
+                if Logic.showLand[13] and Logic.showLand[11] then
+                    sr = Logic.stageRange[4]
+                elseif Logic.showLand[11] and not Logic.showLand[13] then
+                    sr = Logic.stageRange[3]
+                elseif Logic.showLand[13] and not Logic.showLand[11] then
+                    sr = Logic.stageRange[5]
+                else
+                    sr = Logic.stageRange[2]
+                end
+                if v[1] < sr[1] or v[2] < sr[2] then
+                    addBanner("超出边界stage 2")
+                    self.colNow = 1
+                    self:setColor(0)
+                    return true
+                end
+                local gk = v[2]*mwid+v[1]+1
+                for hk, hv in ipairs(hideBlock2) do
+                    if not Logic.openMap[hv] then
+                        if allBlock[hv][gk] ~= 0 then
+                            addBanner("不能在stage2黑色区域"..hv)
+                            self.colNow = 1
+                            self:setColor(0)
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+
     --河流
     local layer = self.map.scene.layerName.water
     for k, v in ipairs(allCoord) do
@@ -558,6 +639,7 @@ function MiaoBuild:checkRiverOrSlopeCol()
         end
     end
 
+    --斜坡
     for k, v in ipairs(allCoord) do
         local gk = v[2]*self.map.scene.width+v[1]+1
         local sd = self.map.scene.slopeData[gk]
@@ -596,51 +678,6 @@ function MiaoBuild:setColPos()
         print("no building col check river")
         local col = self:checkRiverOrSlopeCol()
     end
-    --[[
-    local pos = getPos(self.bg)
-    local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
-    
-    --综合考虑建筑物所有的网格
-    if not self.static and (ax < 0 or ay < 0 or ax >= self.map.scene.width or ay >= self.map.scene.height or ax >= self.map.scene.width-4) then
-        print("out of range")
-        self.colNow = 1
-        self:setColor(0)
-        return
-    end
-    local layer = self.map.scene.layerName.water
-    local gk = ay*self.map.scene.width+ax+1
-    local gid = layer.data[gk]
-    --有水 不能建造 桥梁除外
-    if gid ~= 0 then
-        self.colNow = 1
-        self:setColor(0)
-        return
-    end
-    local layer = self.map.scene.layerName.grass
-    local gid = layer.data[gk]
-    print("slop1 gid type ax, ay ", ax, ay, gid)
-    local name = tidToTile(gid, self.map.scene.normal, self.map.scene.water)
-    --]]
-
-    --local name = self.map.scene.tileName[gid]
-    --基本上全部是草地
-    --草地才检测 是否可以建造建筑物
-    --if name == 'tile0.png' then
-    --end
-    --没有和建筑物冲突 接着检查是否和 斜坡冲突
-    --[[
-    if self.colNow == 0 then
-        local sd = self.map.scene.slopeData[gk]
-        if sd ~= nil then
-            print("collision with slope")
-            self.colNow = 1
-            self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
-            --不能建造
-            self:setColor(0)
-            return
-        end
-    end
-    --]]
 end
 
 function MiaoBuild:touchesEnded(touches)

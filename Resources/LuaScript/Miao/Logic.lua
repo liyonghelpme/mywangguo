@@ -79,14 +79,18 @@ function getBuyableBuild()
     return temp
 end
 
+
 --建筑物的数量
 --在商店里面购买这种建筑物
 --保存游戏
+--树木的 数量 和 坑道的数量
+--树木根据 land数量来增加
 Logic.buildNum = {
-    [24]=2,
-    [28]=2,
-    [29]=2,
+    [24]=0,
+    [28]=0,
+    [29]=0,
 }
+
 
 function changeBuildNum(id, n)
     Logic.buildNum[id] = (Logic.buildNum[id] or 0)+n
@@ -102,13 +106,16 @@ end
 function getTotalBuildNum(id)
     return Logic.buildNum[id] or 0
 end
+--树木属于 operate 
 function getAvaBuildNum(id)
     local total = Logic.buildNum[id] or 0
     local allB = global.director.curScene.page.buildLayer.mapGridController.allBuildings
     print("getAvaBuildNum", id, allB)
+    print("total is", total)
     for k, v in pairs(allB) do
         --print("k.id", k.id)
-        if k.id == id then
+        if k.id == id and k.operate then
+            print("such build", k.bid, k.id)
             total = total-1
         end
     end
@@ -700,7 +707,7 @@ Logic.fightNum = 4
 
 --不同条件
 Logic.ownBuild = {
-    1, 2, 
+    1, 2, 15, 
     4, 
     5, 
     6, 7,
@@ -708,23 +715,29 @@ Logic.ownBuild = {
 
 Logic.lastArenaTime = 0
 
-Logic.landBook = 0
+Logic.landBook = 10
 --参展英雄id 列表
 --{id=xx, pos=xx}
 Logic.attendHero = {
 }
 
-Logic.curVillage = 1
+Logic.curVillage = 4
 Logic.openMap = {}
 Logic.gameStage = 1
 Logic.showMapYet = false
 
 --gameStage
+--新手村
+--开始stage2 获得一块土地证书
+--开启左边
+--开启全部
+--开启右边
 Logic.stageRange = {
     {11, 17}, 
     {5, 11},
     {0, 11},
     {0, 0},
+    {5, 0},
 }
 
 --村落能量
@@ -750,16 +763,22 @@ Logic.stage2Center = {
 
 Logic.stage2Block = {2, 3, 5, 6}
 Logic.extendBlock = {11, 12}
-Logic.extendBlock2 = {13, 14, 15}
+Logic.extendBlock2 = {14, 15}
+Logic.lastBlock = {13}
 Logic.extendCenter = {
     {2, 22},
     {1, 13},
 }
 Logic.extendCenter2 = {
-    {2, 5},
     {8, 6},
     {15, 5},
 }
+Logic.lastCenter = {
+    {2, 5},
+}
+
+
+Logic.villageBlock = {8, 10, 9}
 
 
 --当前显示的邻接land 而不是统一land

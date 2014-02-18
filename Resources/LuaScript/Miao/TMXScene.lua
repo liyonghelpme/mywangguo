@@ -7,9 +7,8 @@ TMXScene = class()
 
 function TMXScene:initDataNow()
     print("initDataNow")
-    sendReq('login', dict(), self.initData, nil, self)
+    --sendReq('login', dict(), self.initData, nil, self)
     
-    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -17,7 +16,6 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
-    --]]
 
     --sendReq('login', dict(), self.initData, nil, self)
 end
@@ -267,6 +265,8 @@ function TMXScene:initData(rep, param)
         Logic.skill[v.id] = v
     end
 
+    self.initDataing = true
+
     print("start init Menu")
     self.menu:initDataOver()
     --self.page.buildLayer:testCat()
@@ -280,6 +280,8 @@ function TMXScene:initData(rep, param)
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
+
+    self.initDataing = false
 end
 
 function TMXScene:gotoFight()
