@@ -50,7 +50,7 @@ function MiaoPage:ctor(s)
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("grassOne.plist")
     sf:addSpriteFramesWithFile("fenceOne.plist")
-    CCSpriteFrameCache:sharedSpriteFrameCache():addSpriteFramesWithFile("t512.plist")
+    sf:addSpriteFramesWithFile("t512.plist")
 
 
     self.grassMap = CCSpriteBatchNode:create("grassOne.png")
