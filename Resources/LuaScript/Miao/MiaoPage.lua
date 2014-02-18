@@ -538,7 +538,10 @@ function MiaoPage:onLand(p)
 end
 
 --类似于调用onLand 之后显示showLand 的信息
+--也会调整道路信息
 function MiaoPage:initExtendLand()
+
+
     if Logic.showLand[11] then
         local hideBlock = Logic.extendBlock
         
@@ -559,6 +562,7 @@ function MiaoPage:initExtendLand()
             end
         end
 
+        local sr = Logic.stageRange[3]
         --在范围内  但是不一定 可以 被操作
 
         --建筑物 显示在range 中 包括树木 矿洞 和 樱花树
@@ -569,7 +573,7 @@ function MiaoPage:initExtendLand()
             for k, v in pairs(bv) do
                 local ax, ay = k:getAxAyHeight()
                 print("out of stageRange", ax, ay)
-                if ax < Logic.stageRange[2][1] or ay < Logic.stageRange[2][2] then
+                if ax < Logic.stageRange[3][1] or ay < Logic.stageRange[3][2] then
                     k:setOutOfStage(Logic.gameStage)
                     k:setOperatable(false)
                 else
@@ -598,7 +602,6 @@ function MiaoPage:initExtendLand()
         --显示gameStage 相关的visible 信息 stage == 3
         --stage 可能会 分叉根据 开启的 地图不同决定的
         local invS = {}
-        local sr = Logic.stageRange[3]
         for k, v in ipairs(self.invisibleSlope) do
             local pic, w, h = v[1], v[2], v[3]
             if w < sr[1] or h < sr[2] then
@@ -634,122 +637,211 @@ function MiaoPage:initExtendLand()
                 self.allFly[Logic.extendBlock[k]] = sp
             end
         end
+
+        --添加新的darkSlope
+        --self.darkSlope = {}
+        for k, v in pairs(self.slopeData) do
+            local tid = k
+            for hk, hv in ipairs(hideBlock) do
+                if Logic.openMap[hv] then
+                else
+                    if self.block[hv][tid] ~= 0 then
+                        setColor(v.pic, {128, 128, 128})
+                        table.insert(self.darkSlope, {v.pic, hk})
+                    end
+                end
+            end
+        end
     end
+
+    if Logic.showLand[13] then
+        local hideBlock = Logic.extendBlock2
+        
+        for hk, hv in ipairs(hideBlock) do
+            if Logic.openMap[hv] then
+            else
+                for k, v in ipairs(self.block[hv]) do
+                    if v ~= 0 then
+                        local ax, ay = (k-1)%self.width, math.floor((k-1)/self.width)
+                        local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+                        local m = createSprite("blackArrow.png")
+                        addChild(self.buildLayer.buildingLayer, m)
+                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
+                        table.insert(self.allMask, {m, hk})
+                    end
+                end
+            end
+        end
+        --stageRange 建筑物范围
+
+        --在范围内  但是不一定 可以 被操作
+
+        --建筑物 显示在range 中 包括树木 矿洞 和 樱花树
+        local mg = self.buildLayer.mapGridController
+        local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
+        --在范围内
+        for bk, bv in ipairs(allB) do
+            for k, v in pairs(bv) do
+                local ax, ay = k:getAxAyHeight()
+                print("out of stageRange", ax, ay)
+                if ax < Logic.stageRange[4][1] or ay < Logic.stageRange[4][2] then
+                    k:setOutOfStage(Logic.gameStage)
+                    k:setOperatable(false)
+                else
+                    k:setInStage()
+                end
+            end
+        end
+        
+        for bk, bv in ipairs(allB) do
+            for k, v in pairs(bv) do
+                local ax, ay = k:getAxAyHeight()
+                local tid = axayToTid(ax, ay, self.width) 
+                --print("mask Map", ax, ay, tid, self.block[8][tid])
+                for hk, hv in ipairs(hideBlock) do
+                    if Logic.openMap[hv] then
+                    else
+                        if self.block[hv][tid] ~= 0 then
+                            k:setOperatable(false, hk)
+                        end
+                    end
+                end
+            end
+        end
+
+
+        --显示gameStage 相关的visible 信息 stage == 3
+        --stage 可能会 分叉根据 开启的 地图不同决定的
+        local invS = {}
+        local sr = Logic.stageRange[4]
+        for k, v in ipairs(self.invisibleSlope) do
+            local pic, w, h = v[1], v[2], v[3]
+            if w < sr[1] or h < sr[2] then
+                table.insert(invS, v)
+            else
+                setVisible(pic, true)
+            end
+        end
+        self.invisibleSlope = invS
+        
+        local wid = self.width-Logic.stageRange[4][1]
+        local hei = self.height-Logic.stageRange[4][2]
+        --local maxWH = math.max(wid, hei)
+        local boundWid = SIZEX*(wid+hei)
+        --local boundWid = MapWidth
+        local boundLeft = MapWidth/2-wid*SIZEX 
+        local boundBottom = 0
+        --矩形地图MapPos 对照
+        local boundHeight = SIZEY*(wid+hei)+FIX_HEIGHT+OFF_HEIGHT*4+50
+        local br = {left=boundLeft, bottom = 0,width=boundWid, height=boundHeight}
+
+        print("bound range", simple.encode(br))
+        self.touchDelegate.boundRange = br
+
+        local newCenter = Logic.extendCenter2
+        --初始化 v 土地块的编号
+        for k, v in ipairs(newCenter) do
+            if not Logic.openMap[hideBlock[k]] then
+                local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+                local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onExtendLand2, param=Logic.extendBlock2[k]})
+                setPos(addChild(self.bg, sp.bg), {cx, cy})
+                --对应地图块编号的 fly
+                self.allFly[Logic.extendBlock2[k]] = sp
+            end
+        end
+
+        --添加新的darkSlope
+        --self.darkSlope = {}
+        for k, v in pairs(self.slopeData) do
+            local tid = k
+            for hk, hv in ipairs(hideBlock) do
+                if Logic.openMap[hv] then
+                else
+                    if self.block[hv][tid] ~= 0 then
+                        setColor(v.pic, {128, 128, 128})
+                        table.insert(self.darkSlope, {v.pic, hk})
+                    end
+                end
+            end
+        end
+
+        local bp = self.buildLayer.backPoint
+        bp:clearState()
+        local bax, bay
+        bax = self.width-3
+        bay = Logic.stageRange[Logic.gameStage][4]
+        local cx, cy = newAffineToCartesian(bax, bay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
+        bp:setPos({cx, cy})
+        bp:resetState()
+
+    end
+
 end
 --初始化游戏的将相邻的块也要显示出来
 --开启地图块3 5 之后连接的 块也显示
 
 --类似第一阶段 进入 第二阶段 调整地图大小 和 黑色
 --gameStage 进入第三阶段
+--darkSlope 
 function MiaoPage:openNearLand(p)
     local lr = Logic.stage2Block[p]
     if lr == 2 or lr == 6 then
-        if not Logic.showLand[11] then
-
+        if not Logic.showLand[13] then
+            Logic.showLand[13] = true
+            self:initExtendLand()
         end
 
     elseif lr == 3 or lr == 5 then
         if not Logic.showLand[11] then
             Logic.showLand[11] = true
             self:initExtendLand()
-
-            local hideBlock = Logic.extendBlock
-            
-            for hk, hv in ipairs(hideBlock) do
-                if Logic.openMap[hv] then
-                else
-                    for k, v in ipairs(self.block[hv]) do
-                        if v ~= 0 then
-                            local ax, ay = (k-1)%self.width, math.floor((k-1)/self.width)
-                            local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-                            local m = createSprite("blackArrow.png")
-                            addChild(self.buildLayer.buildingLayer, m)
-                            m:setZOrder(MAX_BUILD_ZORD-oldy)
-                            setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
-                            table.insert(self.allMask, {m, hk})
-                        end
-                    end
-                end
-            end
-
-            --在范围内  但是不一定 可以 被操作
-
-            --建筑物 显示在range 中 包括树木 矿洞 和 樱花树
-            local mg = self.buildLayer.mapGridController
-            local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
-            --在范围内
-            for bk, bv in ipairs(allB) do
-                for k, v in pairs(bv) do
-                    local ax, ay = k:getAxAyHeight()
-                    print("out of stageRange", ax, ay)
-                    if ax < Logic.stageRange[2][1] or ay < Logic.stageRange[2][2] then
-                        k:setOutOfStage(Logic.gameStage)
-                        k:setOperatable(false)
-                    else
-                        k:setInStage()
-                    end
-                end
-            end
-            
-            for bk, bv in ipairs(allB) do
-                for k, v in pairs(bv) do
-                    local ax, ay = k:getAxAyHeight()
-                    local tid = axayToTid(ax, ay, self.width) 
-                    --print("mask Map", ax, ay, tid, self.block[8][tid])
-                    for hk, hv in ipairs(hideBlock) do
-                        if Logic.openMap[hv] then
-                        else
-                            if self.block[hv][tid] ~= 0 then
-                                k:setOperatable(false, hk)
-                            end
-                        end
-                    end
-                end
-            end
-
-
-            --显示gameStage 相关的visible 信息 stage == 3
-            --stage 可能会 分叉根据 开启的 地图不同决定的
-            local invS = {}
-            local sr = Logic.stageRange[3]
-            for k, v in ipairs(self.invisibleSlope) do
-                local pic, w, h = v[1], v[2], v[3]
-                if w < sr[1] or h < sr[2] then
-                    table.insert(invS, v)
-                else
-                    setVisible(pic, true)
-                end
-            end
-            self.invisibleSlope = invS
-            
-            local wid = self.width-Logic.stageRange[3][1]
-            local hei = self.height-Logic.stageRange[3][2]
-            --local maxWH = math.max(wid, hei)
-            local boundWid = SIZEX*(wid+hei)
-            --local boundWid = MapWidth
-            local boundLeft = MapWidth/2-wid*SIZEX 
-            local boundBottom = 0
-            --矩形地图MapPos 对照
-            local boundHeight = SIZEY*(wid+hei)+FIX_HEIGHT+OFF_HEIGHT*2+50
-            local br = {left=boundLeft, bottom = 0,width=boundWid, height=boundHeight}
-
-            print("bound range", simple.encode(br))
-            self.touchDelegate.boundRange = br
-
-            local newCenter = Logic.extendCenter
-            --初始化 v 土地块的编号
-            for k, v in ipairs(newCenter) do
-                if not Logic.openMap[hideBlock[k]] then
-                    local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-                    local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onExtendLand, param=Logic.extendBlock[k]})
-                    setPos(addChild(self.bg, sp.bg), {cx, cy})
-                    --对应地图块编号的 fly
-                    self.allFly[Logic.extendBlock[k]] = sp
-                end
-            end
         end
     end    
 end
+
+function MiaoPage:onExtendLand2(p)
+    local landId = p
+    if Logic.landBook <= 0 then
+        addBanner("土地产权证书不足")
+    else
+        addBanner("开放土地块"..landId)
+
+        Logic.landBook = Logic.landBook-1
+        Logic.openMap[landId] = true
+        --去掉地面的 遮罩
+        local nm = {}
+        for k, v in ipairs(self.allMask) do
+            if v[2] == landId then
+                removeSelf(v[1])
+            else
+                table.insert(nm, v)
+            end
+        end
+        self.allMask = nm
+
+        --建筑物不用 显示在阶段2
+        
+        --显示黑色的斜坡 和地面
+        local nds = {}
+        for k, v in ipairs(self.darkSlope) do
+            if v[2] == p then
+                setColor(v[1], {255, 255, 255})
+            else
+                table.insert(nds, v)
+            end
+        end
+        self.darkSlope = nds
+
+        --移除地面的通知
+        removeSelf(self.allFly[landId].bg)
+        self.allFly[landId]= nil
+        
+        --是否显示邻近陆地呢？
+        --self:openNearLand(p)
+    end
+end
+
 function MiaoPage:onExtendLand(p)
     local landId = p
     if Logic.landBook <= 0 then

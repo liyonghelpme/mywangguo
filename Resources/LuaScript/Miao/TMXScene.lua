@@ -267,9 +267,12 @@ function TMXScene:initData(rep, param)
         Logic.skill[v.id] = v
     end
 
+    print("start init Menu")
     self.menu:initDataOver()
     --self.page.buildLayer:testCat()
+    print("start init Page")
     self.page:initDataOver()
+    print("start init buildLayer")
     self.page.buildLayer:initDataOver()
     self.page:initInvisibleSlope()
     self.page:maskMap()

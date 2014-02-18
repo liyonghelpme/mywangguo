@@ -750,9 +750,12 @@ Logic.stage2Center = {
 
 Logic.stage2Block = {2, 3, 5, 6}
 Logic.extendBlock = {11, 12}
+Logic.extendBlock2 = {13, 14, 15}
 Logic.extendCenter = {
     {2, 22},
     {1, 13},
+}
+Logic.extendCenter2 = {
     {2, 5},
     {8, 6},
     {15, 5},

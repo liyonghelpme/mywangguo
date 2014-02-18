@@ -5,12 +5,20 @@ function Wood:ctor(b)
     self.lastTime = 0
 end
 
+function Wood:setOperatable(a)
+    if a then
+        setColor(self.fence, {255, 255, 255})
+    else
+        setColor(self.fence, {128, 128, 128})
+    end
+end
 function Wood:initView()
     print("Wood Tree")
     local sz = self.baseBuild.changeDirNode:getContentSize()
     setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0, SIZEY})
     local fence = setPos(createSprite("treeFence.png"), {512, 384})
     self.baseBuild.changeDirNode:addChild(fence, -1) 
+    self.fence = fence
 end
 --砍伐结束 阶段 = 0
 --降低建筑物更新频率

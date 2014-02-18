@@ -442,6 +442,7 @@ function MiaoBuild:setOperatable(a, bid)
         --removeSelf(self.blackArrow)
         setColor(self.changeDirNode, {255, 255, 255})
     end
+    self.funcBuild:setOperatable(a)
 end
 
 function MiaoBuild:touchesMoved(touches)
