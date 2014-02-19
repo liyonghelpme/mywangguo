@@ -196,7 +196,7 @@ function MiaoBuild:ctor(m, data)
         self.changeDirNode = setPos(CCSprite:create("build21.png"), {0, SIZEY})
         self.funcBuild = MoveBuild.new(self) 
     elseif self.picName == 'backPoint' then
-        self.changeDirNode = setColor(setSize(setAnchor(CCSprite:create("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
+        self.changeDirNode = setColor(setSize(setAnchor(createSprite("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
         self.funcBuild = FuncBuild.new(self) 
     elseif self.picName == 'remove' then
         self.changeDirNode = setPos(CCSprite:create("build20.png"), {0, SIZEY})
@@ -565,7 +565,7 @@ function MiaoBuild:checkRiverOrSlopeCol()
     --超出可建造边界
     --初始化建筑物的 时候 不检测
     if not global.director.curScene.initDataing then
-        addBanner("check game stage 1 collision", Logic.gameStage)
+        --addBanner("check game stage 1 collision", Logic.gameStage)
         local allBlock = self.map.scene.block
         local mwid = self.map.scene.width
 
