@@ -110,7 +110,8 @@ function TMXMenu2:receiveMsg(msg, para)
         self.mbut.shadowWord:setString("返回")
     elseif msg == EVENT_TYPE.CLOSE_DIALOG then
         self.mbut.text:setString("菜单")
-        setVisible(self.leftBut.bg, true)
+        self:adjustLeftShow()
+        --setVisible(self.leftBut.bg, true)
         self.mbut.shadowWord:setString("菜单")
     end
 end
