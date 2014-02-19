@@ -280,3 +280,5 @@ end
 function FuncBuild:exitStore()
     self.inMerchant = nil
 end
+function FuncBuild:setOperatable()
+end

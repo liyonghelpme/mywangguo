@@ -37,12 +37,11 @@ local function main()
     require 'myMap.FightMap'
 
     local director = CCDirector:sharedDirector()
-
     local sc = TMXScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
-    
-    --[[
+
+    --[[ 
     local sc = FightScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)

@@ -1,6 +1,9 @@
 require "Miao.FightFunc"
 require "Miao.FightArrow2"
 require "Miao.FightFoot"
+require "Miao.FightMagic"
+require "Miao.FightCavalry"
+require "Miao.Hero"
 FIGHT_SOL_STATE = {
     FREE=0,
     START_ATTACK=1,
@@ -21,11 +24,29 @@ FIGHT_SOL_STATE = {
     FOOT_MOVE_TO = 13,
 
     ARROW_WAIT = 14,
+    
+    --骑兵等待返回
+    WAIT_BACK = 15,
+    MOVE_BACK = 16,
 }
 
+
 FightSoldier2 = class()
+function FightSoldier2:initSoldierNet()
+    self.map.soldierNet[getMapKey(self.col, self.row)] = self
+end
+
+function FightSoldier2:initLeftRight()
+    local left = getMapKey(self.col-1, self.row)
+    local right = getMapKey(self.col+1, self.row)
+    self.left = self.map.soldierNet[left]
+    self.right = self.map.soldierNet[right]
+    print("left right is", left, right)
+end
+
+
 --调整每个士兵的左右 我方的 右侧 敌方的左侧
-function FightSoldier2:ctor(m, id, col, row, data, sid)
+function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
     self.sid = sid
     self.id = id
     self.map = m
@@ -34,6 +55,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     --up low 敌方所在行 我方可能已经没有了士兵
     self.up = nil
     self.low = nil
+    self.isHero = isHero
+    self.heroData = heroData
 
     --print('left right', self.left, self.right)
     self.health = 20
@@ -41,6 +64,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     --所在列
     self.col = col
     self.row = row
+    self:initSoldierNet()
+
     --相当于几个士兵的能力
     self.data = data
     self.color = data.color
@@ -48,7 +73,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.speed = 300
     self.smooth = 2
     self.arrowHurt = 0
-
+    --level 就是 power信息
     local myab = getSolAbility(self.id+1, self.data.level, self.map.scene.maxSoldier[self.color+1][self.id+1])
     self.health = myab.health
     self.maxHealth = myab.health
@@ -56,20 +81,36 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
     self.defense = myab.defense
     --地图记录每个网格状态 
     --士兵类型kind
+    --英雄只有 1个 人物
+    if isHero then
+        self.health = self.heroData.health 
+        self.maxHealth = self.heroData.health 
+        self.attack = self.heroData.attack
+        self.defense = self.heroData.defense
+        self.data.level = 1
+    end
+
+    self.oldAttack = self.attack
+
     if self.id == 0  then
         self.funcSoldier = FightFoot.new(self)
     elseif self.id == 1 then
         self.funcSoldier = FightArrow2.new(self)
+    elseif self.id == 2 then
+        self.funcSoldier = FightMagic.new(self)
+    elseif self.id == 3 then
+        self.funcSoldier = FightCavalry.new(self)
     end
 
     self.bg = CCNode:create()
     self.funcSoldier:initView()
     self.bg:addChild(self.changeDirNode)
     setAnchor(self.changeDirNode, {262/512, (512-352)/512})
+
     self.state = FIGHT_SOL_STATE.FREE
-    self.shadow = CCSprite:create("roleShadow2.png")
-    self.bg:addChild(self.shadow,  -1)
-    setSize(self.shadow, {70, 44})
+
+    self.funcSoldier:initShadow()
+
     self.needUpdate = true
     registerEnterOrExit(self)
     
@@ -86,7 +127,7 @@ function FightSoldier2:ctor(m, id, col, row, data, sid)
         self.bg:addChild(self.sidLabel)
         setPos(self.sidLabel, {0, 100})
 
-        self.colLabel = ui.newBMFontLabel({text=self.col, font="bound.fnt", size=24, color={128, 128, 0}})
+        self.colLabel = ui.newBMFontLabel({text='cr'..self.col..' '..self.row, font="bound.fnt", size=24, color={128, 128, 0}})
         addChild(self.bg, self.colLabel)
         setPos(self.colLabel, {0, 130})
     end
@@ -155,23 +196,35 @@ function FightSoldier2:setZord()
     self.bg:setZOrder(MAX_BUILD_ZORD-p[2])
 end
 function FightSoldier2:setDir()
+    local scaY = getScaleY(self.changeDirNode)
     if self.color == 1 then
-        setScaleX(self.changeDirNode, -1)
+        setScaleX(self.changeDirNode, -scaY)
     else
-        setScaleX(self.changeDirNode, 1)
+        setScaleX(self.changeDirNode, scaY)
     end
 end
 function FightSoldier2:doRunAndAttack(day)
     if not self.dead then
+        print("startAttack", day, self.id)
         --先弓箭 接着 步兵
-        if day == 0 and self.id == 1 then
+        if day == 1 and self.id == 1 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
             if DEBUG_FIGHT then
                 self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
             end
-        elseif day == 1 and self.id == 0 then
+        elseif day == 2 and self.id == 0 then
             self.state = FIGHT_SOL_STATE.START_ATTACK
             print("Arrow start Attack")
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
+        elseif day == 0 and self.id == 2 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
+            if DEBUG_FIGHT then
+                self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
+            end
+        elseif day == 3 and self.id == 3 then
+            self.state = FIGHT_SOL_STATE.START_ATTACK
             if DEBUG_FIGHT then
                 self.changeDirNode:runAction(sequence({itintto(1, 255, 0, 0), itintto(1, 255, 255, 255)}))
             end
@@ -182,7 +235,8 @@ function FightSoldier2:updateLabel()
     if not DEBUG_FIGHT then
         return
     end
-    local s = self.sid..' '
+    --local s = self.sid..' '
+    local s = ''
     if self.left ~= nil then
         s = s..'l '..self.left.sid
     end
@@ -196,11 +250,12 @@ function FightSoldier2:updateLabel()
     s = s..'x:'..math.floor(p[1])..' '..math.floor(p[2])
     --self.stateLabel:setString(s)
 
+
     local tid
     if self.attackTarget ~= nil then
         tid = self.attackTarget.sid
     end
-    self.stateLabel:setString(self.state.." "..str(tid).." "..str(self.funcSoldier.isHead))
+    self.stateLabel:setString(self.state.." "..str(tid).." "..str(self.funcSoldier.isHead)..'\n'..s)
 
 
     --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
@@ -221,6 +276,28 @@ end
 
 function FightSoldier2:startAttack(diff)
     if self.state == FIGHT_SOL_STATE.START_ATTACK then
+        if self.isHero and self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            local rate = 1
+            if skData.kind == 6 and (self.id == 0 or self.id == 3 ) then
+                rate = skData.effect 
+            elseif skData.kind == 7 and (self.id == 1 or self.id == 2) then
+                rate = skData.effect
+            end
+            --finishAttack 
+            if rate > 1 then
+                local sp = createSprite("ap0")
+                local bf = ccBlendFunc()
+                bf.src = GL_ONE
+                bf.dst = GL_ONE
+                sp:setBlendFunc(bf)
+                self.bg:addChild(sp)
+                setAnchor(sp, {102/192, (192-153)/192})
+                sp:runAction(repeatForever(CCAnimate:create(getAnimation("attackPower"))))
+                self.skillAni = sp
+            end
+        end
+
         --步兵移动
         if self.id == 0 then
             self.moveAni = repeatForever(CCAnimate:create(self.runAni))
@@ -235,14 +312,22 @@ function FightSoldier2:startAttack(diff)
 
             --因为 不是head 所以不能攻击这
             --寻找第一个非死亡对象 步兵  同行
-            self.attackTarget = self:findFastTarget()
+            --self.attackTarget = self:findFastTarget()
+            local isHead, att = self.funcSoldier:checkIsHead()
+            --头部 步兵 寻找最近的 步兵 攻击 没有则 寻找 普通士兵
+            --TODO 优化 记录是否存在敌对步兵
+            if isHead then
+                self.attackTarget = self.funcSoldier:findNearFoot()
+            else
+                self.attackTarget = att
+            end
             if self.color == 0 then
                 offX = -40+self.row*5
             else
                 offX  = 40-self.row*5
             end
 
-            --同行没有
+            --没有步兵 可以 攻击 则 选择 其它兵种
             if self.attackTarget == nil then
                 print("start Attack find near row")
                 self.attackTarget = self:findNearRow()
@@ -251,6 +336,7 @@ function FightSoldier2:startAttack(diff)
             if self.attackTarget ~= nil then 
                 if self.attackTarget.color ~= self.color then
                     enePos = getPos(self.attackTarget.bg)
+                    --步兵互相靠近
                     if self.attackTarget.id == 0 then
                         local midPoint = (self.oldPos[1]+enePos[1])/2
                         midPoint = midPoint+offX+math.random(20)-10
@@ -260,6 +346,7 @@ function FightSoldier2:startAttack(diff)
                         self.bg:runAction(self.moveAct)
                         self.midPoint = midPoint
                         print("attack MidPoint", self.midPoint)
+                    --步兵 和 其它兵种 移动靠近对方
                     else
                         local offE = -110
                         if self.color == 1 then
@@ -287,6 +374,10 @@ end
 --跟随我前面的 我方士兵
 function FightSoldier2:update(diff)
     self:updateLabel()
+    --弓箭手 步兵 
+    --骑士 步兵 之间的 防御 步兵 靠近骑兵的攻击
+    --只有骑兵的 优先级 是 低于 步兵的 优先级
+    --self:doFree(diff)
     self:startAttack(diff)
     self:doPose(diff)
     self:doMove(diff)
@@ -301,6 +392,9 @@ function FightSoldier2:update(diff)
     self:doMoveTo(diff)
     self.funcSoldier:doWaitMove(diff)
     self.funcSoldier:doWaitArrow(diff)
+    self.funcSoldier:doWaitBack(diff)
+    self.funcSoldier:doMoveBack(diff)
+    self.funcSoldier:doFree(diff)
 end
 
 function FightSoldier2:doPose(diff)
@@ -336,6 +430,24 @@ function FightSoldier2:runAction(act, loop)
     end
 end
 
+function FightSoldier2:getAttack()
+    local realAttack = self.attack
+    local rate = 1
+    if self.isHero then
+        if self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            if skData.kind == 6 and (self.id == 0 or self.id == 3 ) then
+                rate = skData.effect 
+            elseif skData.kind == 7 and (self.id == 1 or self.id == 2) then
+                rate = skData.effect
+            end
+        end
+    end
+    realAttack = realAttack*rate
+    print("realAttack", realAttack, rate)
+    return realAttack
+end
+
 function FightSoldier2:doHarm()
     --自己没死才能造成伤害
     if not self.dead then
@@ -345,7 +457,9 @@ function FightSoldier2:doHarm()
             --敌人没挂 才出攻击动作
             self:showAttackEffect()
         end
-        self.attackTarget:doHurt(self.attack, false, self)
+        local realAttack = self:getAttack()
+        self.attackTarget:doHurt(realAttack, false, self)
+
         local dir = 1
         if self.color == 1 then
             dir = -1
@@ -366,21 +480,59 @@ function FightSoldier2:calHurt(harm)
     return math.max(1, harm-self.defense)
 end
 --谁攻击高 对方就受到 被动伤害
-function FightSoldier2:doHurt(harm, showBomb, whoAttack)
+function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     --死亡了就不接受 伤害了
     if self.dead then
         return
     end
+    --远程攻击无效
+    if self.isHero and self.heroData.skill ~= nil then
+        if self.heroData.skill == 39 then
+            if whoAttack.id == 1 and isArrow then
+                return
+            end
+        elseif self.heroData.skill == 40 then
+            if whoAttack.id == 2 and isArrow then
+                return
+            end
+        elseif self.heroData.skill == 41 then
+            if (whoAttack.id == 1 or whoAttack.id == 2) and isArrow then
+                return
+            end
+        end
+        --local skData = Logic.skill[self.heroData.skill]
+    end
+
     local rd = math.random(2)
     if rd == 1 or showBomb then
         self:showBombEffect()
     end
 
     print("doHurt", harm, self.defense, self.health)
-    local harm = harm-self.defense
+    harm = harm+math.random(3)
+    
+    local realDefense = self.defense
+    local addRate = 0
+    --根据是谁 发动的 攻击 步兵 弓箭手 魔法师 骑兵 来决定  是否有伤害免疫
+    for k, v in ipairs(self.extraEffect) do
+        --步兵减免伤害 可以叠加效果
+        if v.kind == 2 and whoAttack.id == 0 then
+            addRate = addRate+v.effect
+        elseif v.kind == 3 and whoAttack.id == 1 then
+            addRate = addRate+v.effect
+        elseif v.kind == 4 and whoAttack.id == 2 then
+            addRate = addRate+v.effect
+        elseif v.kind == 5 and whoAttack.id == 3 then
+            addRate = addRate+v.effect
+        end
+    end
+    realDefense = math.floor(realDefense*(100+addRate)/100)
+    print("realDefense is", realDefense, self.defense, addRate)
+
+    local harm = harm-realDefense
     harm = math.max(harm, 1)
     --伤害小于 生命值上限
-    harm = math.min(self.health, harm)
+    harm = math.floor(math.min(self.health, harm))
     print("real hurt", harm)
     local lastHealth = self.health
     self.health = self.health-harm
@@ -461,30 +613,34 @@ end
 
 function FightSoldier2:doMove(diff)
     if self.state == FIGHT_SOL_STATE.IN_MOVE then
-        if self.attackTarget.color ~= self.color then
-            local p = getPos(self.bg)
-            print("not same color move", p[1], self.midPoint)
-            --停止移动了 才可以
-            if self.beginMove ~= nil and not self.beginMove then
-                beginMove = nil
-                self.inMove = false
-                --self.bg:stopAction(self.moveAct)
-                self.changeDirNode:stopAction(self.moveAni)
-                self.state = FIGHT_SOL_STATE.IN_ATTACK
-                local rd = math.random(2)
-                local aa 
-                if rd == 1 then
-                    aa = self.attackA
-                else
-                    aa = self.attackB
+        if self.id == 0 then 
+            if self.attackTarget.color ~= self.color then
+                local p = getPos(self.bg)
+                print("not same color move", p[1], self.midPoint)
+                --停止移动了 才可以
+                if self.beginMove ~= nil and not self.beginMove then
+                    beginMove = nil
+                    self.inMove = false
+                    --self.bg:stopAction(self.moveAct)
+                    self.changeDirNode:stopAction(self.moveAni)
+                    self.state = FIGHT_SOL_STATE.IN_ATTACK
+                    local rd = math.random(2)
+                    local aa 
+                    if rd == 1 then
+                        aa = self.attackA
+                    else
+                        aa = self.attackB
+                    end
+                    self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
+                    self.oneAttack = false
+                    self:showAttackEffect()
                 end
-                self.changeDirNode:runAction(sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)}))
-                self.oneAttack = false
-                self:showAttackEffect()
+            --同方士兵 
+            else
+                self.state = FIGHT_SOL_STATE.FOOT_MOVE_TO 
             end
-        --同方士兵 
         else
-            self.state = FIGHT_SOL_STATE.FOOT_MOVE_TO 
+            self.funcSoldier:doMove(diff)
         end
     end
 end
@@ -572,10 +728,14 @@ function FightSoldier2:findNearRow()
     local eneList = {}
     if self.color == 0 then
         table.insert(eneList, self.map.eneSoldiers)
+        table.insert(eneList, self.map.eneMagicSoldiers)
         table.insert(eneList, self.map.eneArrowSoldiers)
+        table.insert(eneList, self.map.eneCavalrySoldiers)
     else
         table.insert(eneList, self.map.mySoldiers)
+        table.insert(eneList, self.map.myMagicSoldiers)
         table.insert(eneList, self.map.myArrowSoldiers)
+        table.insert(eneList, self.map.myCavalrySoldiers)
     end
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do
@@ -743,16 +903,20 @@ function FightSoldier2:moveOneStep(diff)
         dis = self.oldDis*(1-smooth)+dis*smooth
     end
     self.oldDis = cdis
-
-    if dis > FIGHT_OFFX then
+    --两个士兵相距的距离 大于mx 移动距离
+    if dis > FIGHT_OFFX+math.abs(mx) then
         setPos(self.bg, {p[1]+mx, p[2]})
     end
 end
 
 function FightSoldier2:doMoveTo(diff)
     if self.state == FIGHT_SOL_STATE.FOOT_MOVE_TO then
+        --如果 同行 死掉了 则 寻找 foot 或者 其它兵种
         if self.attackTarget == nil or self.attackTarget.dead then
-            self.attackTarget = self:findNearRow()
+            self.attackTarget = self.funcSoldier:findNearFoot()
+            if self.attackTarget == nil then
+                self.attackTarget = self:findNearRow()
+            end
         --逐步靠经目标
         else
             --紧随我方目标身后
@@ -858,6 +1022,31 @@ function FightSoldier2:doDead(diff)
 end
 
 function FightSoldier2:finishAttack()
+    if self.skillAni ~= nil then
+        removeSelf(self.skillAni)
+        self.skillAni = nil
+    end
+    --技能恢复生命值 草药
+    if not self.dead then
+        if self.isHero and self.heroData.skill ~= nil then
+            local skData = Logic.skill[self.heroData.skill]
+            if skData.kind == 8 and self.health < self.maxHealth then
+                print("health skill", self.sid, self.health)
+                local sp = createSprite("skillHealth0")
+                local bf = ccBlendFunc()
+                bf.src = GL_ONE
+                bf.dst = GL_ONE
+                sp:setBlendFunc(bf)
+                self.bg:addChild(sp)
+                setAnchor(sp, {112/192, (192-114)/192})
+                --英雄对应的 士兵power = 1 所以有伤害增加 但是 没有 人物损失
+                self.health = math.min(self.maxHealth, self.health+self.maxHealth*skData.effect/100)
+                sp:runAction(sequence({CCAnimate:create(getAnimation("skillHealth")), callfunc(nil, removeSelf, sp)}))
+            end
+        end
+    end
+
+    self.attack = self.oldAttack
     self.funcSoldier:finishAttack()
 end
 
@@ -893,3 +1082,62 @@ function FightSoldier2:doWinMove(left, right)
         end
     end
 end
+function FightSoldier2:showSkillEffect(positive)
+    if self.color == 0 then
+        local day = self.map.day
+        if (day == 0 and self.id == 2) or (day == 1 and self.id == 1) or (day == 2 and self.id == 0) or (day == 3 and self.id == 3) then
+            local bf = ccBlendFunc()
+            bf.src = GL_ONE
+            bf.dst = GL_ONE
+            local sp = createSprite("skillEffect0")
+            sp:setBlendFunc(bf)
+            sp:runAction(sequence({CCAnimate:create(getAnimation("skillEffect")), callfunc(nil, removeSelf, sp)}))
+            self.bg:addChild(sp)
+            setPos(sp, {0, 100})
+            if positive[1].kind == 1 then
+                self.attack = math.floor(self.attack*(100+positive[1].effect)/100)
+                print("attack increase")
+            --这个技能 持续有效 步兵 防御力 被动技能
+            --需要在 开战之前就已经确定了
+            --elseif self.map.skillEffect.kind == 2 then
+            --    self.extraEffect = {kind=2, effect=self.map.skillEffect.effect}
+            end
+        end
+    end
+end
+
+function FightSoldier2:initPassivitySkill()
+    self.extraEffect = {}
+    local heros = self.map.allHero
+    local he
+    if self.id == 0 then
+        he = heros[1]
+    elseif self.id == 1 then
+        he = heros[2]
+    elseif self.id == 2 then
+        he = heros[3]
+    elseif self.id == 3 then
+        he = heros[4]
+    end
+
+    --被动防御 步兵 的 技能
+    --检查我部队 中了英雄 是否 活着 以及技能
+    for k, v in ipairs(he) do
+        if not v.dead and v.heroData.skill ~= nil then
+            local skData = Logic.skill[v.heroData.skill]
+            print("initPassivitySkill", self.sid, simple.encode(skData))
+            --耐步兵 弓箭 魔法 骑兵
+            if skData.kind == 2 then
+                table.insert(self.extraEffect, {kind=2, effect=skData.effect})
+            elseif skData.kind == 3 then
+                table.insert(self.extraEffect, {kind=3, effect=skData.effect})
+            elseif skData.kind == 4 then
+                table.insert(self.extraEffect, {kind=4, effect=skData.effect})
+            elseif skData.kind == 5 then
+                table.insert(self.extraEffect, {kind=5, effect=skData.effect})
+            end
+        end
+    end
+end
+
+

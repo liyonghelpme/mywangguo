@@ -1,7 +1,8 @@
 SessionMenu = class()
-function SessionMenu:ctor(word, callback, del)
+function SessionMenu:ctor(word, callback, del, okBut)
     self.callback = callback
     self.del = del
+    self.okBut = okBut
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
@@ -17,6 +18,12 @@ function SessionMenu:ctor(word, callback, del)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogCat.png"), {740, fixY(sz.height, 500)}), {101, 157}), {0.50, 0.50}), 255)
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="忍者喵", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {603, fixY(sz.height, 546)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sessionTitle.png"), {523, fixY(sz.height, 233)}), {194, 38}), {0.50, 0.50}), 255)
+
+    --[[
+    if self.okBut then
+        local but = ui.newButton({image="butc.png", })
+    end
+    --]]
     centerUI(self)
     registerEnterOrExit(self)
 end

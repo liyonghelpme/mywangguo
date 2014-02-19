@@ -8,6 +8,9 @@ function StandardTouchHandler:ctor()
     self.scaMin = math.max(0.5, math.max(vs.width/MapWidth, vs.height/MapHeight))
     --self.scaMin = 0.5
     self.bg = nil
+
+    self.boundRange = nil
+
     self.targetMove = nil
     self.targetScale = nil
     self.targetAnchor = nil
@@ -104,30 +107,31 @@ function StandardTouchHandler:MoveBack(difx, dify)
         self.targetMove = getPos(self.bg)
     end
     self.targetMove = {self.targetMove[1]+difx, self.targetMove[2]+dify}
-    local sz = self.bg:getContentSize() 
+    local sz
+    if self.boundRange == nil then
+        sz = self.bg:getContentSize() 
+        sz.left = 0
+        sz.bottom = 0
+    else
+        sz = self.boundRange
+    end
     --要使用目标scale
     --local sca = self.bg:getScale()
     local sca = self.targetScale or self.bg:getScale()
     local wid = sca*sz.width
     local hei = sca*sz.height
+    local left = sz.left*sca
     local vs = getVS()
     local tm = self.targetMove
     --保护边界
     ----print("target Move is ", sim:encode(tm))
-    if tm[1] >= -5  then
+    if (tm[1]+left) >= -5  then
         --self.targetMove[1] = tm[1]-difx
-        self.targetMove[1] = math.min(-5, tm[1]-difx)
+        self.targetMove[1] = math.min(-5-left, tm[1]-difx)
     end
     --应该clamp 到边界内
-    if tm[1]+wid <= vs.width+5 then
-        --[[
-        if difx < 0 then
-            --self.targetMove[1] = tm[1]-difx    
-            self.targetMove[1] = math.max(tm[1]-difx, vs.width+5-wid)
-        else
-        end
-        --]]
-        self.targetMove[1] = math.max(tm[1]-difx, vs.width+5-wid)
+    if (tm[1]+left)+wid <= vs.width+5 then
+        self.targetMove[1] = math.max(tm[1]-difx, vs.width+5-wid-left)
     end
     --zoom up dify < 0 but dify 
     --dify < 0 
@@ -270,5 +274,6 @@ end
 
 function StandardTouchHandler:scaleToMax(sm)
     self.bg:setScale(sm)
+    self.targetScale = sm
 end
 

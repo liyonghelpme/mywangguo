@@ -1,12 +1,15 @@
 --邻居点是从MapEdge 这个表里面获得的
 --MapNode 表里面是所有定点数据
---参考MiaoPeople 寻路和 FightPath 
-FightPath = class()
-function FightPath:ctor(t)
+--参考MiaoPeople 寻路和 PagePath 
+
+--根据占领状态
+--连通性 决定 可以看到的 城市
+PagePath = class()
+function PagePath:ctor(t)
     self.target = t
 end
 --只有Road 信息
-function FightPath:calcG(key)
+function PagePath:calcG(key)
     local data = self.cells[key]
     local parent = data.parent
     dist = 10
@@ -14,16 +17,16 @@ function FightPath:calcG(key)
     self.cells[key] = data
 end
 --没有启发值都一样
-function FightPath:calcH(key)
+function PagePath:calcH(key)
     local data = self.cells[key]
     data.hScore = 0
     self.cells[key] = data
 end
-function FightPath:calcF(key)
+function PagePath:calcF(key)
     local data = self.cells[key]
     data.fScore = data.gScore+data.hScore
 end
-function FightPath:pushQueue(key)
+function PagePath:pushQueue(key)
     local fScore = self.cells[key].fScore
     heapq.heappush(self.openList, fScore)
     local fDict = self.pqDict[fScore]
@@ -36,21 +39,31 @@ end
 
 --传入的NodeId MapEdge 里面搜索
 --edge
-function FightPath:checkNeibor(nid)
+function PagePath:checkNeibor(nid)
+    --当前定点的邻居顶点 如果是城市则 检测城市是否可达
     local neibors = MapEdge[nid]
     local curKey = nid
     print("checkNeibor", nid, simple.encode(MapEdge))
     for n, nv in ipairs(neibors) do
         local key = nv
         --找到目标点
-        --[[
-        if nv == self.attackTarget then
-            self.endPoint = nv
-            break
+        local isCity = MapNode[key][3]
+        local ins = true
+        --未占领的城市 不具有扩展功能
+        if isCity and not Logic.ownCity[key] then
+            ins = false
         end
-        --]]
+        --当前所有占领的城市检查邻居是否占领如果没有占领则显示
+        if isCity then
+            self.accessCity[key] = true
+        end
+        --竞技场
+        if MapNode[key][4] == 0 then
+            ins = true
+        end
+
         --使用最短路径 更新parent信息 第一次邻居信息  
-        if self.cells[key] == nil then
+        if ins and self.cells[key] == nil then
             self.cells[key] = {}
             self.cells[key].parent = curKey
             self:calcG(nv)
@@ -61,11 +74,9 @@ function FightPath:checkNeibor(nid)
     end
 end
 
---startNode id  开启点
---目标点
 --node id
 --MapNode
-function FightPath:init(nid, tid)
+function PagePath:init(nid, tid)
     self.startPoint = nid 
     self.attackTarget = tid
     self.endPoint = nil
@@ -76,24 +87,28 @@ function FightPath:init(nid, tid)
     self.cells = {}
     self.nearby = {}
 
+    self.accessCity = {}
+
     local sk = nid
     self.cells[sk] = {}
     self.cells[sk].gScore = 0
     self:calcH(nid)
     self:calcF(nid)
     self:pushQueue(nid)
+    self.accessCity[nid] = true
 
     self.searchYet = false
     self.inSearch = true
 end
 
 
+--checkNeibor 如果自身不可达则 不能再 find了 
 --checkNeibor 不超过10个深度
-function FightPath:update()
+function PagePath:update()
     local n = 1
     --所有建筑物  水面 道路
-    --print("FightPath update")
-    while n < 10 do
+    --print("PagePath update")
+    while true do
         if #self.openList == 0 then
             break
         end
@@ -121,7 +136,7 @@ function FightPath:update()
 end
 
 --到该点的路径
-function FightPath:getPath()
+function PagePath:getPath()
     if self.endPoint ~= nil then
         local path = {self.endPoint}
         local parent = self.cells[self.endPoint].parent

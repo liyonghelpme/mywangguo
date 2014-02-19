@@ -9,6 +9,7 @@ function TMXScene:initDataNow()
     print("initDataNow")
     --sendReq('login', dict(), self.initData, nil, self)
     
+    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -16,8 +17,9 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
-
-    --sendReq('login', dict(), self.initData, nil, self)
+    --]]
+    --
+    sendReq('login', dict(), self.initData, nil, self)
 end
 function TMXScene:ctor()
     self.name = "TMXScene"
@@ -30,7 +32,9 @@ function TMXScene:ctor()
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
 
-    self.page:moveToPoint(1644, 384)
+    --self.page:moveToPoint(1644, 384)
+    --setPos(self.bg, {})
+
     delayCall(0.3, self.initDataNow, self)
     registerEnterOrExit(self)
     self.passTime = 0
@@ -77,9 +81,16 @@ function TMXScene:initData(rep, param)
     local r = u:getStringForKey("ownCity")
     if r ~= "" then
         print("ownCity", r)
-        local rd = dictKeyToNum(simple.decode(r))
+        local rd = tableToDict(simple.decode(r))
         Logic.ownCity = rd
     end
+
+    local r = u:getStringForKey("ownVillage")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.ownVillage = rd
+    end
+
     local r = u:getStringForKey("catData")
     if r ~= "" and r ~= "null" then
         print("catData", r)
@@ -96,6 +107,83 @@ function TMXScene:initData(rep, param)
         Logic.ownPeople = rd
     end
 
+    local r = u:getStringForKey('ownBuild')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownBuild = rd
+    end
+
+    local r = u:getStringForKey('fightNum')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.fightNum = rd
+    end
+
+    local r = u:getStringForKey('arenaLevel')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.arenaLevel = rd
+    end
+
+    local r = u:getStringForKey('ownTech')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownTech = rd
+    end
+
+    local r = u:getStringForKey('lastArenaTime')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.lastArenaTime = rd
+    end
+
+    local r = u:getStringForKey('date')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.date = rd
+    end
+
+    local r = u:getStringForKey('landBook')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.landBook = rd
+    end
+
+    local r = u:getStringForKey('curVillage')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.curVillage = rd
+    end
+
+    local r = u:getStringForKey('gameStage')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.gameStage = rd
+    end
+
+    local r = u:getStringForKey('showMapYet')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.showMapYet = rd
+    end
+    local r = u:getStringForKey('attendHero')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.attendHero = rd
+    end
+
+    local r = u:getStringForKey("openMap")
+    if r ~= "" then
+        Logic.openMap = tableToDict(simple.decode(r))
+        --print("decode holdNum", simple.encode(Logic.holdNum))
+    end
+
+    local r = u:getStringForKey("showLand")
+    if r ~= "" then
+        Logic.showLand = tableToDict(simple.decode(r))
+        --print("decode holdNum", simple.encode(Logic.holdNum))
+    end
+
     local r = u:getStringForKey("soldiers")
     if r ~= "" then
         local rd = simple.decode(r)
@@ -110,6 +198,13 @@ function TMXScene:initData(rep, param)
         table.insert(CityData, {v.foot, v.arrow, v.magic, v.cav})
     end
     print("cityGoods", #Logic.cityGoods)
+
+    Logic.villageGoods = {}
+    for k, v in ipairs(rep.villageReward) do
+        v.goods = simple.decode(v.goods)
+        Logic.villageGoods[v.id] = v
+    end
+    print("villageGoods", #Logic.villageGoods)
 
 
     GoodsName = {}
@@ -151,7 +246,9 @@ function TMXScene:initData(rep, param)
             table.insert(df, v.id)
         end
     end
-
+    
+    --Logic.techGoods = {}
+    
     Logic.allEquip = rep.equip
     for k, v in ipairs(rep.equip) do
         Logic.equip[v.id] = v
@@ -164,21 +261,43 @@ function TMXScene:initData(rep, param)
         elseif v.kind == 3 then
             table.insert(Logic.allSpe, v)
         end
+        v.getMethod = simple.decode(v.getMethod)
+        --[[
+        local gm = simple.decode(v.getMethod)
+        for gk, gv in ipairs(gm) do
+            --技术等级
+            local tg = getDefault(Logic.techGoods, gv[1]..gv[2], {})
+            table.insert(tg, v.id)
+        end
+        --]]
     end
+    --print("equips", simple.encode(Logic.techGoods))
+    
+    --local tt = checkTechNewEquip('sword', 1)
+    --print("equips", simple.encode(tt))
 
     Logic.allSkill = rep.skill
     for k, v in ipairs(rep.skill) do
         Logic.skill[v.id] = v
     end
 
+    self.initDataing = true
+
+    print("start init Menu")
     self.menu:initDataOver()
     --self.page.buildLayer:testCat()
+    print("start init Page")
     self.page:initDataOver()
+    print("start init buildLayer")
     self.page.buildLayer:initDataOver()
+    self.page:initInvisibleSlope()
+    self.page:maskMap()
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
+
+    self.initDataing = false
 end
 
 function TMXScene:gotoFight()
@@ -202,10 +321,17 @@ function TMXScene:checkBattleTime(diff)
         lc.moveTime = lc.moveTime - self.checkTime
         self.checkTime = 0
 
+        --cid 信息
         --cid inkScape 边关系中的id信息
         --realId gimp 中的id信息
         Logic.challengeCity = path[#path]
-        Logic.challengeNum = CityData[MapNode[Logic.challengeCity][5]]
+        local cityInfo = MapNode[Logic.challengeCity]
+        if cityInfo[4] == 1 then
+            Logic.challengeNum = CityData[cityInfo[5]]
+        else
+            Logic.challengeNum = Logic.MapVillagePower[math.min(#Logic.MapVillagePower, cityInfo[5])]
+        end
+
         if lc.moveTime <= 0 then
             local nextPoint = curPoint+1
             --尴尬的bug 在开战的时候 不应该弹出这个对话框的
@@ -252,6 +378,18 @@ function TMXScene:update(diff)
     if Logic.paused then
         return
     end
+    if Logic.gameStage == 1 and Logic.landBook > 0 then
+        addBanner("获得土地产权证书 进入 第二阶段")
+        Logic.gameStage = 2
+        --显示几个黑色的块
+        self.page:stageOneToTwo()
+    end
+    if Logic.curVillage >= 4 and not Logic.showMapYet then
+        addBanner("大地图功能开启了")
+        Logic.showMapYet = true
+        self.menu:adjustLeftShow()
+    end
+
     self:checkBattleTime(diff)
     self.passTime = self.passTime+diff
     --暂停状态不要 保存游戏即可
@@ -348,7 +486,53 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
     u:setStringForKey("inSell", simple.encode(Logic.inSell))
     u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
-    u:setStringForKey("ownCity", simple.encode(Logic.ownCity)) 
+    u:setStringForKey("ownCity", simple.encode(dictToTable(Logic.ownCity))) 
+
     u:setStringForKey("catData", simple.encode(Logic.catData)) 
     u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
+    u:setStringForKey("ownBuild", simple.encode(Logic.ownBuild)) 
+    u:setStringForKey("fightNum", simple.encode(Logic.fightNum)) 
+    u:setStringForKey("arenaLevel", simple.encode(Logic.arenaLevel)) 
+    u:setStringForKey("ownTech", simple.encode(Logic.ownTech)) 
+    u:setStringForKey("lastArenaTime", simple.encode(Logic.lastArenaTime)) 
+    u:setStringForKey("date", simple.encode(Logic.date)) 
+    u:setStringForKey("landBook", simple.encode(Logic.landBook)) 
+    u:setStringForKey("curVillage", simple.encode(Logic.curVillage)) 
+    u:setStringForKey("gameStage", simple.encode(Logic.gameStage)) 
+    u:setStringForKey("showMapYet", simple.encode(Logic.showMapYet)) 
+    u:setStringForKey("attendHero", simple.encode(Logic.attendHero)) 
+    u:setStringForKey("openMap", simple.encode(dictToTable(Logic.openMap)))
+    u:setStringForKey("showLand", simple.encode(dictToTable(Logic.showLand)))
+     
+    u:setStringForKey("ownVillage", simple.encode(dictToTable(Logic.ownVillage))) 
+end
+
+
+function TMXScene:newVillageWin(w)
+    if w then
+        addBanner("村落攻略胜利啦")
+        
+        --新手村 获得人口
+        local cp = Logic.newPeople[Logic.curVillage+1]
+        if cp ~= nil then
+            print("newPeople is who", simple.encode(Logic.newPeople), cp)
+            Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+            --showPeopleInfo(cp)
+            for k, v in ipairs(cp) do
+                local pd = Logic.people[v]
+                addBanner("可以启用"..pd.name)
+            end
+        end
+
+
+        Logic.curVillage = Logic.curVillage+1
+        if Logic.curVillage < 4 then
+            self.page:adjustFly()
+        else
+            removeSelf(self.page.fly.bg)
+        end
+        self.page:restoreBuildAndMap()
+    else
+        addBanner("村落攻略失败啦")
+    end
 end

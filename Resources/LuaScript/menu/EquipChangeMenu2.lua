@@ -81,12 +81,14 @@ function EquipChangeMenu2:updateTab()
     self.oldEquipId = nil
     self.oldEquip = nil
     local tempAllData = {}
+    local count = 1
 	for k, v in ipairs(allData) do
         --装备研究过才能显示
-        if Logic.researchEquip[v.id]  == true then
+        --hold的也显示
+        if Logic.researchEquip[v.id] or Logic.holdNum[v.id] ~= nil then
             table.insert(tempAllData, v)
-            local row = math.floor((k-1)/rowWidth)
-            local col = (k-1)%rowWidth
+            local row = math.floor((count-1)/rowWidth)
+            local col = (count-1)%rowWidth
 
             local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
             local back = setOpacity(setAnchor(setSize(setPos(addSprite(panel, "listB.png"), {306, fixY(sz.height, 26)}), {479, 52}), {0.50, 0.50}), 255)
@@ -135,13 +137,16 @@ function EquipChangeMenu2:updateTab()
                 w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text='', size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {279, fixY(sz.height, 24)})
             end
             local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=(Logic.holdNum[v.id] or 0).."个", size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {1.00, 0.50}), {528, fixY(sz.height, 24)})
-            panel:setTag(k)
+            panel:setTag(count)
             setContentSize(panel, {sz.width, sz.height})
 
             table.insert(self.data, {back, w1, w2, w3, v.id})
             self.flowHeight = self.flowHeight+offY
+
+            count = count+1
         end
     end
+    print("equip Num", #tempAllData, simple.encode(tempAllData))
 
     self.allData = tempAllData
 end
@@ -333,7 +338,12 @@ function EquipChangeMenu2:touchEnded(x, y)
                     addBanner(self.people.data.name.."装备"..edata.name..'成功')
                     self:refreshData()
                 else
-                    global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                    --研究过 商店可以购买
+                    if Logic.researchEquip[eid] then
+                        global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                    else
+                        addBanner("该装备 剩余数量不足 商店不能购买")
+                    end
                 end
                 return
             end

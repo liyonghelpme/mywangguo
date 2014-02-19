@@ -108,7 +108,8 @@ function NewBuildMenu3:setSel(s)
         self.selBuild = s
         self.data[self.selBuild][1]:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
         self.data[self.selBuild][2]:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
-        local bd = Logic.buildList[self.data[self.selBuild][3]]
+        local bd = Logic.ownBuild[self.data[self.selBuild][3]]
+        bd = Logic.buildings[bd]
         local n = bd.name
         local p = bd.silver
         self.name:setString(n)
@@ -156,7 +157,9 @@ function NewBuildMenu3:updateTab()
     local sz = {width=184, height=183}
     local dataNum = 1
     print("building List")
-    for k, v in ipairs(Logic.buildList) do
+    --for k, v in ipairs(Logic.buildList) do
+    for k, bv in ipairs(Logic.ownBuild) do
+        local v = Logic.buildings[bv]
         if v.tab == self.selTab-1 then
             local row = math.floor((dataNum-1)/3)
             local col = (dataNum-1)%3
@@ -210,7 +213,8 @@ function NewBuildMenu3:touchEnded(x, y)
             if self.selBuild ~= t then
                 self:setSel(t)
             else
-                local buildData = Logic.buildList[self.data[self.selBuild][3]]
+                local buildData = Logic.ownBuild[self.data[self.selBuild][3]]
+                buildData = Logic.buildings[buildData]
                 local p = buildData.silver
                 local countOk = true
                 if buildData.countNum == 1 then

@@ -75,9 +75,9 @@ function MiaoPeople:ctor(m, data)
     self.bg = CCNode:create()
     self.heightNode = addNode(self.bg)
     print("init MiaoPeople", self.id)
-    if self.id == 1 then
-        self.funcPeople = Worker.new(self)
-    elseif self.data.kind == 2 then
+    --if self.id == 1 then
+    --    self.funcPeople = Worker.new(self)
+    if self.data.kind == 2 then
         self.funcPeople = Merchant.new(self) 
     --elseif self.id == 3 then
     --    self.funcPeople = Cat.new(self)
@@ -665,6 +665,15 @@ function MiaoPeople:doMove(diff)
                 --检测如果是伐木场之类的 人物要在建筑物上面 
                 if nextPoint == #self.path then
                     moved = self:checkMoved()
+                    --目标移动了 就不检测 为 伐木场 或者 矿场了
+                    if self.realTarget.id == 28 then
+                        isMine = true
+                    end
+                    --伐木场 和 采矿场 不能遮挡人物
+                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
+                        isQuaOrWoo = true
+                    end
+
                     if moved or self.realTarget.deleted then
                         deleted = true
                         --self:clearStateStack()
@@ -674,13 +683,6 @@ function MiaoPeople:doMove(diff)
                     --不是商人的返回点
                     elseif self.realTarget.data ~= nil and self.realTarget.data.IsStore == 1 and self.realTarget.funcBuild.inMerchant ~= nil then
                          wait = true
-                    end
-                    if self.realTarget.id == 28 then
-                        isMine = true
-                    end
-                    --伐木场 和 采矿场 不能遮挡人物
-                    if self.realTarget.id == 19 or self.realTarget.id == 12 then
-                        isQuaOrWoo = true
                     end
                 end
 

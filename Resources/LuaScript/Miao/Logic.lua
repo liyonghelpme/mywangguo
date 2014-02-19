@@ -31,8 +31,9 @@ Logic.holdNum = {}
 Logic.buyNum = {}
 
 --待研究的物品 类型 id
+--0 装备
 Logic.researchGoods = {
-    {0, 2}, {0, 3}, {0, 4},
+    --{0, 2}, {0, 3}, {0, 11},
 }
 --正在研究的物品
 Logic.inResearch = nil
@@ -43,8 +44,17 @@ Logic.inResearch = nil
 --1 商店卖出物品
 --[[
 --]]
+--商店可以直接购买的物品
+--包括装备 和 其它
 Logic.ownGoods = {
-    {0, 1}, {0, 2}, {0, 28}, {0, 29}, {0, 47}, {0, 48}, {0, 67}, {0, 68},
+    --{0, 1}, 
+    {0, 2}, {0, 3}, {0, 11},
+    {0, 28}, {0, 30}, {0, 31},
+    {0, 47}, 
+    --{0, 48}, 
+    {0, 59},
+    {0, 67}, 
+    --{0, 68},
 }
 Logic.allOwnBuild = {
 
@@ -69,14 +79,18 @@ function getBuyableBuild()
     return temp
 end
 
+
 --建筑物的数量
 --在商店里面购买这种建筑物
 --保存游戏
+--树木的 数量 和 坑道的数量
+--树木根据 land数量来增加
 Logic.buildNum = {
-    [24]=2,
-    [28]=2,
-    [29]=2,
+    [24]=0,
+    [28]=0,
+    [29]=0,
 }
+
 
 function changeBuildNum(id, n)
     Logic.buildNum[id] = (Logic.buildNum[id] or 0)+n
@@ -92,13 +106,16 @@ end
 function getTotalBuildNum(id)
     return Logic.buildNum[id] or 0
 end
+--树木属于 operate 
 function getAvaBuildNum(id)
     local total = Logic.buildNum[id] or 0
     local allB = global.director.curScene.page.buildLayer.mapGridController.allBuildings
     print("getAvaBuildNum", id, allB)
+    print("total is", total)
     for k, v in pairs(allB) do
         --print("k.id", k.id)
-        if k.id == id then
+        if k.id == id and k.operate then
+            print("such build", k.bid, k.id)
             total = total-1
         end
     end
@@ -113,6 +130,7 @@ Logic.buildBuyNum = {}
 
 --初始化已经研究的物品
 --研究结束更新
+--商店显示 hold的装备 不仅仅是 research的装备 只hold的装备不能购买
 Logic.researchEquip = {}
 function initResearchEquip()
     Logic.researchEquip = {}
@@ -420,12 +438,22 @@ Logic.inSell = {
     stone=true,
 }
 
+--[[
 SoldierAbility = {
     {attack=40, defense=30, health=30},
     {attack=35, defense=10, health=15},
     {attack=50, defense=10, health=10},
     {attack=40, defense=30, health=30},
 }
+--]]
+--基本上是 生命值数量 起作用
+SoldierAbility = {
+    {attack=10, defense=1, health=45},
+    {attack=17, defense=1, health=23},
+    {attack=25, defense=1, health=15},
+    {attack=20, defense=1, health=45},
+}
+
 IncEffect = {
     {attack=2, defense=1, health=1},
     {attack=3, defense=0, health=0},
@@ -455,7 +483,9 @@ end
 --根据 path 和 curPoint 计算方向
 --test CatData
 --Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+--
 Logic.catData = nil
+
 
 --计算合战剩余时间
 function getLeftTime()
@@ -515,12 +545,23 @@ Logic.cityNum = {}
 
 --占领的城市
 Logic.ownCity = {}
+--挑战竞技场胜利
+Logic.winArena = false
+
+--占领的村落
+Logic.ownVillage = {}
 
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
     print("winCity of scene", Logic.challengeCity)
     if Logic.challengeCity ~= nil then
-        Logic.ownCity[Logic.challengeCity] = true
+        --竞技场
+        --挑战 竞技场 kind = 0
+        if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
+            Logic.winArena = true
+        else
+            Logic.ownCity[Logic.challengeCity] = true
+        end
     end
     --table.insert(Logic.ownCity, Logic.challengeCity)
 end
@@ -530,16 +571,18 @@ end
 
 function initCityData()
     if not MapDataInitYet then
-        --local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
+        --整个地图大小
         local sz = {3072, 2304}
         --getContentSize(tex)
         MapDataInitYet = true
         MapNode = tableToDict(MapNode)
+        --匹配MapCoord 城堡坐标 和 MapNode 的坐标进行重合处理
+        --MapCoord 最靠近 MapNode 坐标之后 将MapCoord 坐标设置成 MapNode 的坐标
         for k, v in pairs(MapNode) do
             print("MapNode is", k, v)
             v[2] = sz[2]-v[2] 
             --x y  city or path  kind(mainCity village fightPoint)
-            if v[4] ~= nil then
+            if v[4] ~= nil and v[4] ~= 4 then
                 local md = 9999
                 local minNode
                 for ck, cv in ipairs(MapCoord) do
@@ -549,6 +592,23 @@ function initCityData()
                         minNode = cv
                     end
                 end
+                --x坐标 y 坐标 路径还是城堡节点 kind城堡类型 realId 实际对应的城堡的Id
+                v[1] = minNode[1]
+                v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
+            --村落坐标对应
+            elseif v[4] == 4 then
+                local md = 9999
+                local minNode
+                for ck, cv in ipairs(VillageCoord) do
+                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
+                    if dis < md then
+                        md = dis
+                        minNode = cv
+                    end
+                end
+                --x坐标 y 坐标 路径还是城堡节点 kind城堡类型 realId 实际对应的城堡的Id
                 v[1] = minNode[1]
                 v[2] = minNode[2]
                 --realId cityData 中使用的Id
@@ -558,6 +618,13 @@ function initCityData()
         print("allNode")
         print(simple.encode(MapNode))
         MapEdge = tableToDict(MapEdge)
+        
+        --村落坐标
+        local vc = {}
+        for k, v in ipairs(VillageCoord) do
+            vc[v[3]] = v
+        end
+        VillageCoord = vc
     end
 end
 
@@ -585,8 +652,10 @@ function getSkillIcon(sid)
 end
 
 --当前可以启用的村民
-Logic.ownPeople = {11, 20, 21, 22, 23}
---
+--Logic.ownPeople = {11, 20, 21, 22, 23}
+--Logic.ownPeople = {14, 18, 20, 23}
+Logic.ownPeople = {}
+
 Logic.ownTech = {
 sword=0,
 spear=0,
@@ -595,5 +664,351 @@ bow=0,
 armour=0,
 ninja=0,
 }
+Logic.techId = {
+sword=40,
+spear=41,
+magic=42,
+bow=43,
+armour=44,
+ninja=45,
+}
+
 --每个城市奖励的物品
 Logic.cityGoods = {}
+--技术等级对应的物品
+--sword1 ----> goodsList 
+--sword2 ----> goodsList
+Logic.techGoods = {
+}
+
+function checkTechNewEquip(techName, techLevel)
+    local temp = {}
+    for k, v in pairs(Logic.equip) do
+        local gm = v.getMethod
+        local findMatch = false
+        local otherOk = nil
+        --需要这个新的 技术 满足了
+        --并且其它条件已经满足了
+
+        for gk, gv in ipairs(gm) do
+            if techName == gv[1] and techLevel == gv[2] then
+                findMatch = true
+            elseif Logic.ownTech[gv[1]] == gv[2] then
+            else
+                otherOk = false
+            end
+        end
+        --匹配了技术 并且 其它技术满足条件
+        --新增的 装备
+        if findMatch and otherOk ~= false then
+            table.insert(temp, v.id)
+        end
+    end
+    print("new Equip is", simple.encode(temp))
+    return temp
+end
+
+
+
+--竞技场兵力
+Logic.arena = {
+    {48, 31, 0, 0},
+    {65, 43, 0, 0},
+    {72, 60, 5, 1},
+    {85, 68, 4, 11},
+    {105, 76, 4, 13},
+}
+
+--根据当前占领的城堡数量 以及当前 占领的村落数量
+--ownVillage 和 ownCity分离开来
+Logic.arenaLevel = 1
+--挑战获得的物品包括
+--奖励silver 500 + 50
+--kind: equip goods gold
+--id
+--number
+require "arenaData.lua"
+Logic.arenaReward = {}
+for k, v in ipairs(ArenaReward) do
+    Logic.arenaReward[v[1]] = v[2]
+end
+
+function getArenaReward()
+end
+
+--参加合战士兵数量
+Logic.fightNum = 4
+
+--不同条件
+Logic.ownBuild = {
+    1, 2, 15, 
+    4, 
+    5, 
+    6, 7,
+}
+
+Logic.lastArenaTime = 0
+
+Logic.landBook = 0
+--参展英雄id 列表
+--{id=xx, pos=xx}
+Logic.attendHero = {
+}
+
+Logic.curVillage = 1
+Logic.openMap = {}
+Logic.gameStage = 1
+Logic.showMapYet = false
+
+--gameStage
+--新手村
+--开始stage2 获得一块土地证书
+--开启左边
+--开启全部
+--开启右边
+Logic.stageRange = {
+    {11, 17}, 
+    {5, 11},
+    {0, 11},
+    {0, 0},
+    {5, 0},
+}
+
+--村落能量
+Logic.villagePower = {
+    {2, 0, 0, 0},
+    {10, 0, 0, 0},
+    {7, 4, 0, 0},
+}
+Logic.newVillage = false
+
+Logic.villageCenter = {
+    {13, 24},
+    {12, 19},
+    {17, 19},
+}
+
+Logic.stage2Center = {
+    {15, 13},
+    {7, 22},
+    {7, 17},
+    {8, 13},
+}
+
+Logic.stage2Block = {2, 3, 5, 6}
+Logic.extendBlock = {11, 12}
+Logic.extendBlock2 = {14, 15}
+Logic.lastBlock = {13}
+Logic.extendCenter = {
+    {2, 22},
+    {1, 13},
+}
+Logic.extendCenter2 = {
+    {8, 6},
+    {15, 5},
+}
+Logic.lastCenter = {
+    {2, 5},
+}
+
+
+Logic.villageBlock = {8, 10, 9}
+
+
+--当前显示的邻接land 而不是统一land
+--扩展陆地显示的情况
+Logic.showLand = {
+}
+
+
+Logic.initYet = false
+local function initData(rep, param)
+    initCityData()
+    print("initData", rep, param)
+
+    local u = CCUserDefault:sharedUserDefault()
+    local r = u:getStringForKey("resource")
+    if r ~= "" then
+        Logic.resource = simple.decode(r)
+    end
+    local r = u:getStringForKey("holdNum")
+    if r ~= "" then
+        Logic.holdNum = tableToDict(simple.decode(r))
+        print("decode holdNum", simple.encode(Logic.holdNum))
+    end
+    local r = u:getStringForKey("researchData")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.researchGoods = rd.researchGoods
+        Logic.inResearch = rd.inResearch
+        Logic.ownGoods = rd.ownGoods
+    end
+    initResearchEquip() 
+
+    local r = u:getStringForKey("inSell")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.inSell = rd
+    end
+
+    local r = u:getStringForKey("buildNum")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.buildNum = rd
+    end
+    local r = u:getStringForKey("ownCity")
+    if r ~= "" then
+        print("ownCity", r)
+        local rd = dictKeyToNum(simple.decode(r))
+        Logic.ownCity = rd
+    end
+    local r = u:getStringForKey("catData")
+    if r ~= "" and r ~= "null" then
+        print("catData", r)
+        local rd = simple.decode(r)
+        Logic.catData = rd
+        print("encode catData", simple.encode(Logic.catData))
+    else
+        Logic.catData = nil
+    end
+
+    local r = u:getStringForKey("ownPeople")
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownPeople = rd
+    end
+
+    local r = u:getStringForKey('ownBuild')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownBuild = rd
+    end
+
+    local r = u:getStringForKey('fightNum')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.fightNum = rd
+    end
+
+    local r = u:getStringForKey('arenaLevel')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.arenaLevel = rd
+    end
+
+    local r = u:getStringForKey('ownTech')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.ownTech = rd
+    end
+
+    local r = u:getStringForKey('lastArenaTime')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.lastArenaTime = rd
+    end
+
+    local r = u:getStringForKey('date')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.date = rd
+    end
+
+    local r = u:getStringForKey('landBook')
+    if r ~= "" and r ~= "null" then
+        local rd = simple.decode(r)
+        Logic.landBook = rd
+    end
+
+    local r = u:getStringForKey("soldiers")
+    if r ~= "" then
+        local rd = simple.decode(r)
+        Logic.soldiers = rd
+    end
+
+    Logic.cityGoods = {}
+    CityData = {}
+    for k, v in ipairs(rep.cityData) do
+        v.goods = simple.decode(v.goods)
+        Logic.cityGoods[v.id] = v
+        table.insert(CityData, {v.foot, v.arrow, v.magic, v.cav})
+    end
+    print("cityGoods", #Logic.cityGoods)
+
+
+    GoodsName = {}
+    for k, v in ipairs(rep.goods) do
+        GoodsName[v.id] = v
+    end
+
+    Logic.buildings = {}
+    for k, v in ipairs(rep.build) do
+        v.goodsList = simple.decode(v.goodsList)
+        Logic.buildings[v.id] = v 
+    end
+
+    Logic.buildList = {}
+    for k, v in ipairs(rep.build) do
+        if v.deleted == 0 then
+            table.insert(Logic.buildList, v)
+        end
+    end
+    --城堡
+    Logic.castlePeople = {}
+    --村庄
+    Logic.villagePeople = {}
+    --新手村
+    Logic.newPeople = {}
+
+    Logic.people = {}
+    Logic.allPeople = rep.people
+    print("allPeople", #Logic.allPeople)
+    for k, v in ipairs(rep.people) do
+        Logic.people[v.id] = v
+        if v.cityKind == 0 then
+            local df = getDefault(Logic.castlePeople, v.appear, {} )
+            table.insert(df, v.id)
+        elseif v.cityKind == 1 then
+            local df = getDefault(Logic.villagePeople, v.appear, {} )
+            table.insert(df, v.id)
+        else
+            local df = getDefault(Logic.newPeople, v.appear, {} )
+            table.insert(df, v.id)
+        end
+    end
+    
+    Logic.allEquip = rep.equip
+    for k, v in ipairs(rep.equip) do
+        Logic.equip[v.id] = v
+        if v.kind == 0 then
+            table.insert(Logic.allWeapon, v)
+        elseif v.kind == 1 then
+            table.insert(Logic.allHead, v)
+        elseif v.kind == 2 then
+            table.insert(Logic.allBody, v)
+        elseif v.kind == 3 then
+            table.insert(Logic.allSpe, v)
+        end
+        v.getMethod = simple.decode(v.getMethod)
+    end
+
+    Logic.allSkill = rep.skill
+    for k, v in ipairs(rep.skill) do
+        Logic.skill[v.id] = v
+    end
+
+    Logic.initYet = true
+end
+function initDataFromServer()
+    sendReq('login', dict(), initData, nil, nil)
+end
+
+
+--大地图 村落的 兵力
+Logic.MapVillagePower = {
+    {1, 1, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+}

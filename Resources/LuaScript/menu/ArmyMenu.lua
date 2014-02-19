@@ -44,7 +44,9 @@ function ArmyMenu:updateTab()
 	self.data = {}
     local sz = {width=546, height=52}
     local rowWidth = 1
-    for k, v in ipairs(Logic.farmPeople) do
+    for k, av in ipairs(Logic.attendHero) do
+        local v = Logic.farmPeople[av.id]
+
 		local row = math.floor((k-1)/rowWidth)
 		local col = (k-1)%rowWidth
 
@@ -55,6 +57,13 @@ function ArmyMenu:updateTab()
         local w1 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.level+1, size=26, color={255, 241, 0}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {92, fixY(sz.height, 25)})
         local w2 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.data.name, size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {133, fixY(sz.height, 24)})
         local w3 = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text="前", size=24, color={240, 196, 92}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {468, fixY(sz.height, 24)})
+        if av.pos == 0 then
+            w3:setString("前")
+        elseif av.pos == 1 then
+            w3:setString("中")
+        elseif av.pos == 2 then
+            w3:setString("后")
+        end
         local but = ui.newButton({image="lefta.png", text="", font="f1", size=18, delegate=self, callback=self.onLeft, param=k, shadowColor={0, 0, 0}, color={255, 255, 255}})
         setScriptTouchPriority(but.bg, -256)
         but:setContentSize(45, 51)
@@ -69,7 +78,7 @@ function ArmyMenu:updateTab()
         setContentSize(panel, {sz.width, sz.height})
 
         --0 1 2
-        table.insert(self.data, {listback, w1, w2, w3, pdata=pdata, vdata=v, pos=0})
+        table.insert(self.data, {listback, w1, w2, w3, pdata=pdata, vdata=v, pos=av.pos})
 		self.flowHeight = self.flowHeight+offY
     end
 end
@@ -79,6 +88,7 @@ function ArmyMenu:onLeft(p)
     local n = {'前', '中', '后'}
     word.pos = word.pos-1
     word.pos = word.pos%3
+    Logic.attendHero[p].pos = word.pos 
     word[4]:setString(n[word.pos+1])
 end
 function ArmyMenu:onRight(p)
@@ -86,6 +96,7 @@ function ArmyMenu:onRight(p)
     local n = {'前', '中', '后'}
     word.pos = word.pos+1
     word.pos = word.pos%3
+    Logic.attendHero[p].pos = word.pos 
     word[4]:setString(n[word.pos+1])
 end
 

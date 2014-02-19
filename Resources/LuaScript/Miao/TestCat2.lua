@@ -92,16 +92,12 @@ function Cat2:initView()
     self.carrbMove = createAnimation("car_rb", "car_rb_%d.png", 0, 9, 1, 1, true)
     self.carrtMove = createAnimation("car_rt", "car_rt_%d.png", 0, 9, 1, 1, true)
 
-
-    local banner = setSize(CCSprite:create("probg.png"), {200, 38})
-    local pro = display.newScale9Sprite("pro1.png")
-    banner:addChild(pro)
-    setAnchor(setPos(pro, {27, fixY(76, 40)}), {0, 0.5})
-    setPos(banner, {271, fixY(280, 91)})
+    local banner, pro = createFacBanner()
     self.banner = banner
-    setPos(self.banner, {0, 200})
-    self.people.heightNode:addChild(self.banner)
     self.pro = pro
+
+    self.people.heightNode:addChild(self.banner)
+    setPos(self.banner, {0, 200})
 
     self.people.actionLabel = ui.newBMFontLabel({text=str(0), color={255, 0, 0}, size=25})
     self.people.heightNode:addChild(self.people.actionLabel, 1)
@@ -112,7 +108,7 @@ function Cat2:initView()
     end
 end
 function Cat2:updateState(diff)
-    setProNum(self.pro, self.people.health, self.people.maxHealth)
+    setFacProNum(self.pro, self.people.health, self.people.maxHealth)
 end
 
 function Cat2:checkWork(k)

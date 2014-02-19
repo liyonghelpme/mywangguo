@@ -26,6 +26,7 @@ function TMXMenu2:ctor(s)
     setPos(addChild(self.left, but.bg), {76, fixY(sz.height, 706)})
     self.leftBut = but
     leftBottomUI(self.left)
+    
 
     self.right = addNode(self.bg)
     local but = ui.newButton({image="buta.png", text="菜单", font="f2", size=30, shadowColor={255, 255, 255}, color=hexToDec('ce4e00'), delegate=self, callback=self.onMenu})
@@ -88,12 +89,14 @@ function TMXMenu2:update(diff)
 end
 
 function TMXMenu2:onLeft()
-    print("onLeft", self.inBuild)
+    print("onLeft showMapYet", self.inBuild, Logic.showMapYet)
     if self.inBuild then
         global.director.curScene.page.curBuild:doSwitch()
     else
-        if global.director.curScene.name == "TMXScene" then
-            global.director:pushScene(FightMap.new())
+        if Logic.showMapYet then
+            if global.director.curScene.name == "TMXScene" then
+                global.director:pushScene(FightMap.new())
+            end
         end
     end
 end
@@ -107,7 +110,8 @@ function TMXMenu2:receiveMsg(msg, para)
         self.mbut.shadowWord:setString("返回")
     elseif msg == EVENT_TYPE.CLOSE_DIALOG then
         self.mbut.text:setString("菜单")
-        setVisible(self.leftBut.bg, true)
+        self:adjustLeftShow()
+        --setVisible(self.leftBut.bg, true)
         self.mbut.shadowWord:setString("菜单")
     end
 end
@@ -126,6 +130,7 @@ function TMXMenu2:beginBuild()
     self.leftBut.text:setString("旋转")
     self.leftBut.shadowWord:setString("旋转")
     self.inBuild = true
+    self:adjustLeftShow()
 end
 
 function TMXMenu2:finishBuild()
@@ -134,11 +139,20 @@ function TMXMenu2:finishBuild()
     self.leftBut.text:setString("地图")
     self.leftBut.shadowWord:setString("地图")
     self.inBuild = false
+    self:adjustLeftShow()
 end
 
+function TMXMenu2:adjustLeftShow()
+    if not Logic.showMapYet then
+        setVisible(self.leftBut.bg, false)
+    else
+        setVisible(self.leftBut.bg, true)
+    end
+end
 function TMXMenu2:initDataOver()
     self:updateText()
     self:updateYear()
+    self:adjustLeftShow()
 end
 
 function TMXMenu2:updateText()

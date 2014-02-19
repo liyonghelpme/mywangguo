@@ -1662,26 +1662,62 @@ end
 function addEquipAttr(old, edata)
     local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot'}
     for k, v in ipairs(allAtt) do
-        old[v] = old[v]+edata[v]
+        old[v] = (old[v] or 0)+(edata[v] or 0)
     end
 end
 
 function calAttr(id, level, equip)
     local data = Logic.people[id]
-    local temp = {health=data.health+data.healthAdd*level, labor=data.labor+data.laborAdd*level, attack=math.floor((data.brawn+data.brawnAdd*level)/2),
+    local battack = math.floor((data.brawn+data.brawnAdd*level)/2)
+    local sattack = math.floor((data.shoot+data.shootAdd*level)/2)
+    --根据 腕力 射击 装备类型 决定 攻击力
+    local temp = {health=data.health+data.healthAdd*level, labor=data.labor+data.laborAdd*level, attack=battack,
     defense=0, shoot=data.shoot+data.shootAdd*level, 
     brawn=data.brawn+data.brawnAdd*level}
+    --近战 还是远程
+    local weapKind = 0
+    local equipAttr = {}
     if equip ~= nil then
         if equip.weapon ~= nil then
+            local edata = Logic.equip[equip.weapon]
+            if edata.kind == 0 then
+                if edata.subKind == 0 or edata.subKind == 1 or edata.subKind == 4 then
+                    weapKind = 0
+                else
+                    weapKind = 1
+                end
+            end
+
+            --装备自身的攻击力
+            addEquipAttr(equipAttr, Logic.equip[equip.weapon])
             addEquipAttr(temp, Logic.equip[equip.weapon])
         end
         if equip.head ~= nil then
+            addEquipAttr(equipAttr, Logic.equip[equip.head])
             addEquipAttr(temp, Logic.equip[equip.head])
         end
         if equip.body ~= nil then
+            addEquipAttr(equipAttr, Logic.equip[equip.body])
             addEquipAttr(temp, Logic.equip[equip.body])
         end
+        if equip.spe ~= nil then
+            addEquipAttr(equipAttr, Logic.equip[equip.spe])
+            addEquipAttr(temp, Logic.equip[equip.spe])
+        end
     end
+
+    --使用近战武器还是 远程武器
+    if weapKind == 0 then
+        local battack = math.floor(temp.brawn/2)
+        temp.attack = battack
+    else
+        temp.attack = math.floor(temp.shoot/2)
+    end
+    --加上装备的 属性 攻击力 = 自身属性/2 + 装备攻击力
+    temp.attack = temp.attack+(equipAttr.attack or 0)
+    --addEquipAttr(temp, equipAttr)
+
+
     local skill = getPeopleSkill(id, level)
     if skill == 0 then
     else

@@ -114,6 +114,7 @@ end
 function IncSoldierMenu:onBut(param)
     if self.selNum ~= param then
         self.selNum = param
+        self:selTab(self.selNum)
     else
         local solData = Logic.soldiers[self.selNum]
         if solData[1] == 0 then

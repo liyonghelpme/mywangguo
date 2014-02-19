@@ -2,14 +2,26 @@ require "Miao.Arrow"
 
 FightArrow2 = class(FightFunc)
 function FightArrow2:ctor(s)
-    self.soldier.attackA = createAnimation("cat_arrow_attackA", "cat_arrow_attackA_%d.png", 0, 14, 1, 1, true)
-    self.soldier.runAni = createAnimation("cat_arrow_run", 'cat_arrow_run_%d.png', 0, 12, 1, 1, true)
-    self.soldier.idleAni = createAnimation("cat_arrow_idle", 'cat_arrow_idle_%d.png', 0, 20, 1, 1, true)
-    self.soldier.deadAni = createAnimation("cat_arrow_dead", 'cat_arrow_dead_%d.png', 0, 10, 1, 1, true)
-    self.soldier.deadAni:setRestoreOriginalFrame(false)
+    if not self.soldier.isHero then
+        self.soldier.attackA = createAnimation("cat_arrow_attackA", "cat_arrow_attackA_%d.png", 0, 14, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_arrow_run", 'cat_arrow_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_arrow_idle", 'cat_arrow_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_arrow_dead", 'cat_arrow_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+    else
+        self.soldier.attackA = createAnimation("cat_hero_arrow_attackA", "cat_hero_arrow_attackA_%d.png", 0, 20, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_arrow_run", 'cat_hero_arrow_run_%d.png', 0, 12, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_arrow_idle", 'cat_hero_arrow_idle_%d.png', 0, 20, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_arrow_dead", 'cat_hero_arrow_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.deadAni:setRestoreOriginalFrame(false)
+    end
 end
 function FightArrow2:initView()
-    self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_arrow_idle_0.png")
+    if not self.soldier.isHero then
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_arrow_idle_0.png")
+    else
+        self.soldier.changeDirNode = CCSprite:createWithSpriteFrameName("cat_hero_arrow_idle_0.png")
+    end
 end
 --屏幕应该移动到 弓箭手 然后 开始 攻击动画
 --快速滑动屏幕 到最后的所有弓箭手
@@ -40,7 +52,7 @@ function FightArrow2:startAttack()
         --自动追踪 屏幕移动镜头 根据弓箭位置
         local function addArrow()
             print("addArrow", self.soldier.sid, self.soldier.attackTarget.sid)
-            local a = Arrow.new()
+            local a = Arrow.new(self.soldier)
             local abg = a.bg
             self.soldier.map.battleScene:addChild(a.bg, MAX_BUILD_ZORD)
             local p = getPos(self.soldier.bg)
@@ -61,7 +73,7 @@ function FightArrow2:startAttack()
             --y 方向相对偏移
             a.changeDirNode:runAction(sequence({jumpBy(tt, tpos[1]-p[1], tpos[2]-p[2], 150+math.random(30), 1), callfunc(a, a.doHarm)}))
             a.color = self.soldier.color
-            a.soldier = self.soldier
+            --a.soldier = self.soldier
             a.target = ene
             self.soldier.map:traceArrow(a)
             
@@ -97,10 +109,14 @@ function FightArrow2:findNearEnemy()
     local eneList = {}
     if self.soldier.color == 0 then
         table.insert(eneList, self.soldier.map.eneSoldiers)
+        table.insert(eneList, self.soldier.map.eneMagicSoldiers)
         table.insert(eneList, self.soldier.map.eneArrowSoldiers)
+        table.insert(eneList, self.soldier.map.eneCavalrySoldiers)
     else
         table.insert(eneList, self.soldier.map.mySoldiers)
+        table.insert(eneList, self.soldier.map.myMagicSoldiers)
         table.insert(eneList, self.soldier.map.myArrowSoldiers)
+        table.insert(eneList, self.soldier.map.myCavalrySoldiers)
     end
     --这两个状态 不累计arrowHurt数值
     --local inNext = (self.state == FIGHT_SOL_STATE.NEXT_TARGET or self.state == FIGHT_SOL_STATE.WAIT_ATTACK)
@@ -174,78 +190,158 @@ function FightArrow2:findSameRow()
     end
     return ene
 end
-function FightArrow2:checkSide(s)
-    while self.soldier[s] ~= nil do
-        if self.soldier[s].dead then
-            self.soldier[s] = self.soldier[s][s]
-        else
-            break
-        end
-    end
-    return self.soldier[s]
-end
 
 --距离远则放弓箭 否则 就近身战斗
 function FightArrow2:waitAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
-        if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
-            --射击完之后清空attackTarget 属性
-            local isHead = false
-            local att
-            if not self.isHead then
-                if self.soldier.color == 0 then
-                    self:checkSide('right')
-                    att = self.soldier.right
-                    if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
-                        isHead = true
+        if self.soldier.map.day == 2 then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+                --射击完之后清空attackTarget 属性
+                local isHead = false
+                local att
+                if not self.isHead then
+                    if self.soldier.color == 0 then
+                        self:checkSide('right')
+                        att = self.soldier.right
+                        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    else
+                        self:checkSide('left')
+                        att = self.soldier.left
+                        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                            isHead = true
+                        end
                     end
+                end
+                self.isHead = isHead
+                
+                --寻找头部的步兵敌人
+                if isHead then
+                    self.soldier.attackTarget = self:findNearFoot()
+                --就是我的左侧或者右侧的朋友
                 else
-                    self:checkSide('left')
-                    att = self.soldier.left
-                    if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
-                        isHead = true
-                    end
+                    self.soldier.attackTarget = att
                 end
-            end
-            self.isHead = isHead
-            
-            --寻找头部的步兵敌人
-            if isHead then
-                self.soldier.attackTarget = self:findNearEnemy()
-            --就是我的左侧或者右侧的朋友
             else
-                self.soldier.attackTarget = att
+                --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
+                if self.soldier.attackTarget.color ~= self.soldier.color then
+                    local p = getPos(self.soldier.bg)
+                    local mp = getPos(self.soldier.attackTarget.bg)
+                    local dis = self.soldier:getDis(p, mp) 
+                    --射箭攻击
+                    if dis >=400 and dis <= 500 then
+                        local dy = math.abs(p[2]-mp[2])
+                        --同行才能fightback
+                        if dy < 5 then
+                            self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                        end
+                    elseif dis <= FIGHT_NEAR_RANGE then
+                        self.soldier.changeDirNode:stopAllActions()
+                        self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                        print("WAIT_MOVE  NEAR_ATTACK")
+                        self.oneAttack = false
+                        self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
+                        self.soldier.changeDirNode:runAction(self.attackAni)
+                    --足够靠近才反击
+                    elseif dis < 400 then
+                        --攻击目标已经开始 攻击别人了 则 我主动靠近即可
+                        if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
+                            self.soldier:moveOneStep(diff)
+                        end
+                    end
+
+                --移动靠近我的 弓箭手 
+                elseif self.soldier.attackTarget.id == 1 then
+                    self.soldier:moveOneStep(diff)
+                end
             end
-        else
-            --敌人攻击 攻击范围内 400-500 则放弓箭攻击 否则 移动攻击
-            if self.soldier.attackTarget.color ~= self.soldier.color then
-                local p = getPos(self.soldier.bg)
-                local mp = getPos(self.soldier.attackTarget.bg)
-                local dis = self.soldier:getDis(p, mp) 
-                --射箭攻击
-                if dis >=400 and dis <= 500 then
-                    self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
-                elseif dis <= FIGHT_NEAR_RANGE then
-                    self.soldier.changeDirNode:stopAllActions()
-                    self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
-                    print("WAIT_MOVE  NEAR_ATTACK")
-                    self.oneAttack = false
-                    self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
-                    self.soldier.changeDirNode:runAction(self.attackAni)
-                --足够靠近才反击
-                elseif dis < 400 then
-                    --攻击目标已经开始 攻击别人了 则 我主动靠近即可
-                    if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
-                        self.soldier:moveOneStep(diff)
+        elseif self.soldier.map.day == 3 then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+                local isHead = false
+                local att
+                if not self.isHead then
+                    if self.soldier.color == 0 then
+                        self:checkSide('right')
+                        att = self.soldier.right
+                        if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
+                            isHead = true
+                        end
+                    else
+                        self:checkSide('left')
+                        att = self.soldier.left
+                        if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
+                            isHead = true
+                        end
                     end
                 end
-
-            --移动靠近我的 弓箭手 
-            elseif self.soldier.attackTarget.id == 1 then
-                self.soldier:moveOneStep(diff)
+                self.isHead = isHead
+                --寻找就近的骑兵
+                if isHead then
+                    self.soldier.attackTarget = self:findNearCavalry()
+                --就是我的左侧或者右侧的朋友
+                else
+                    --不反抗
+                    --self.soldier.attackTarget = att
+                end
+            else
+                --射箭攻击 骑兵
+                if self.soldier.attackTarget.color ~= self.soldier.color then
+                    local p = getPos(self.soldier.bg)
+                    local mp = getPos(self.soldier.attackTarget.bg)
+                    local dis = self.soldier:getDis(p, mp) 
+                    --射箭攻击
+                    if dis >=400 and dis <= 500 then
+                        local dy = math.abs(p[2]-mp[2])
+                        --同行才能fightback
+                        if dy < 5 then
+                            self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
+                        end
+                    end
+                end
             end
         end
     end
+end
+
+--只射击 同行的 骑兵
+function FightArrow2:findNearCavalry()
+    local dx = 999999
+    local dy = 999999
+    local p = getPos(self.soldier.bg)
+    local ene
+    local eneList = {}
+    if self.soldier.color == 0 then
+        table.insert(eneList, self.soldier.map.eneCavalrySoldiers)
+    else
+        table.insert(eneList, self.soldier.map.myCavalrySoldiers)
+    end
+    
+    --print("findNearEnemy isStart", isStart)
+    --local firstEnable
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                --没有在近战中 才考虑arrowHurt问题
+                if not cv.dead then
+                    local ep = getPos(cv.bg)
+                    local tdisy = math.abs(ep[2]-p[2]) 
+                    local tdisx = math.abs(ep[1]-p[1])
+                    --同行
+                    if tdisy < 5 then
+                        if tdisx < dx then
+                            dx = tdisx
+                            ene = cv
+                        end
+                    end
+                end
+            end
+        end
+        if ene ~= nil then
+            return ene
+        end
+    end
+    return ene
 end
 
 
@@ -254,109 +350,6 @@ end
 --确定 是进入步兵回合了
 --确定步兵进入移动攻击状态了
 --isHead 了则等待 检测 连接的 敌方步兵是否会过来
---[[
-function FightArrow2:waitAttack(diff)
-    if self.soldier.state == FIGHT_SOL_STATE.WAIT_ATTACK then
-        --目标不存在或者目标已经死亡了
-        --我是当前 部队 的 头部 
-        --检测 地方不对 是否向我开进了
-        --left = nil left.dead = true
-        --还要考虑我方步兵的 是否是我的left
-        local isHead = false
-        --isHead 但是同一行没有找到士兵
-        if not self.isHead then
-            --考虑 我的 right 是否阵亡了 checkSide and fix Side
-            --全部挂掉了则没有 isHead 的意义了
-            --print("self. sid check head", self.isHead)
-            if self.soldier.color == 0 then
-                self:checkSide('right')
-                if self.soldier.right == nil or self.soldier.right.color ~= self.soldier.color then
-                    isHead = true
-                end
-            else
-                --步兵数量比较少 没有占够1列导致 我的前方没有士兵么 dead 士兵也行呀
-                self:checkSide('left')
-                if self.soldier.left == nil or self.soldier.left.color ~= self.soldier.color then
-                    isHead = true
-                end
-            end
-            --当left right == nil 同一行没有敌人那么也在head 位置了
-            print("isHead", isHead, self.soldier.sid)
-            if isHead then
-                --对付步兵 和 骑兵的fightback 时使用 这时候不用 增加arrowHurt
-                local ene = self:findSameRow()
-                self.soldier.attackTarget = ene
-            end
-            self.isHead = isHead
-        end
-        isHead = self.isHead
-        
-        --头排 会 FightBack 攻击
-        --后排会 移动攻击 WAIT_ATTACK
-
-        --对方向我移动中检测 一下距离 步兵正在向我靠近么 不一定可能正在向 地方
-        --对方也在向我攻击移动
-        --对方颜色 不同
-        --整个部队的头部 所以敌方 必然是 color 不同
-        --对方已经靠近攻击我方部队 这时候 我就向前移动攻击 而不是 
-        --淡化远程攻击FIGHT_BACK 也可以这样做 < 400 FIGHT_BACK即可
-        if isHead then
-            --对方等我上前移动攻击
-            --对方正在攻击我方 部队 肉搏近身战的特性是什么呢？
-            --距离
-            --第一次测试距离就小于400则已经进入了近身肉搏战状态
-            print("arrow is head do what", self.firstCheckYet, self.soldier.attackTarget)
-            --若同行存在 步兵则等待fightback
-
-            if not self.firstCheckYet then
-                self.firstCheckYet = true
-                if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
-                    local ap = getPos(self.soldier.attackTarget.bg)
-                    local mp = getPos(self.soldier.bg)
-                    local dx = math.abs(ap[1]-mp[1])
-                    --print("other is not my color so attack it!", dx)
-                    --第一次就<400 则近战攻击
-                    if dx <= 400 then
-                        self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
-                        print("waitAttack firstCheckYet attackTarget", self.soldier.attackTarget.sid)
-                    end
-                --第一次没有找到目标 可能两种情况 远程 射击没有找到目标 则等待对方靠近了 再攻击  等待近战
-                --近战攻击没有找到同行目标 则再找一下目标 如果找到了 接着判定是否在 400 距离内  接着找不同行目标 找到 并且距离 小于400 则是 可以肉搏的目标 靠近攻击
-                else
-                    self.soldier.attackTarget = self:findNearEnemy() 
-                    if self.soldier.attackTarget ~= nil then
-                        local ap = getPos(self.soldier.attackTarget.bg)
-                        local mp = getPos(self.soldier.bg)
-                        local dx = math.abs(ap[1]-mp[1])
-                        if dx <= 400 then
-                            print("firstCheckYet no attackTarget ", self.soldier.attackTarget.sid)
-                            self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE 
-                        --等待步兵移动过来攻击之 不在同一排  确信是在等待步兵 但是状态没有调整过来为什么？
-                        else
-                            print("firstCheck not find attackTarget then search all Enemy if far away then wait enemy move here")
-                            self.soldier.state = FIGHT_SOL_STATE.WAIT_MOVE
-                            self.nearTime = 0
-                        end
-                    end
-                end
-            else
-                if self.soldier.attackTarget ~= nil and not self.soldier.attackTarget.dead then
-                    local ap = getPos(self.soldier.attackTarget.bg)
-                    local mp = getPos(self.soldier.bg)
-                    local dx = math.abs(ap[1]-mp[1])
-                    print("other is not my color so attack it! after check soldier never go near me so fight back", dx)
-                    if dx <= 400 then
-                        self.firstCheckYet = false
-                        self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
-                    end
-                --WAIT_MOVE 状态
-                --或者NEAR_MOVE 状态 等待对方靠近
-                end
-            end
-        end
-    end
-end
---]]
 
 function FightArrow2:doNearMove(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_MOVE then
@@ -473,22 +466,11 @@ function FightArrow2:doFightBack(diff)
             --local p = getPos(self.soldier.bg)
             --local ap = getPos(self.soldier.attackTarget.bg)
             --控制动画频率
-            if not self.inFightBack then
-                self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
-                --[[
-                if math.abs(p[1]-ap[1]) < FIGHT_NEAR_RANGE then
-                    self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
-                    print('FIGHT_BACK NEAR_ATTACK')
-                    self.shootYet = false
-                    self.oneAttack = false
-                    self.soldier.changeDirNode:stopAllActions()
-                    --又开始执行另外的攻击动作了 执行的太多了
-                    self.soldier.changeDirNode:runAction(sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)}))
-                --对方超出攻击范围 且已经靠近则移动近战攻击
-                else
-
+            --对上步兵 才会近战攻击
+            if self.soldier.map.day == 2 then
+                if not self.inFightBack then
+                    self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
                 end
-                --]]
             end
         end
     end
@@ -498,7 +480,7 @@ function FightArrow2:doHarm()
     if not self.dead then
         self.oneAttack = true
         --self:showAttackEffect()
-        self.soldier.attackTarget:doHurt(self.soldier.attack)
+        self.soldier.attackTarget:doHurt(self.soldier.attack, nil, self.soldier)
         local dir = self.soldier.map:getAttackDir(self.soldier, self.soldier.attackTarget)
         local rd = math.random(2)+2
         self.soldier.bg:runAction(moveby(0.2, dir*rd, 0))
@@ -508,12 +490,12 @@ end
 --类似步兵的处理方案
 function FightArrow2:doNearAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_ATTACK then
-        print("doNearAttack", self.soldier.attackTarget.sid)
+        --print("doNearAttack", self.soldier.attackTarget.sid)
         if self.oneAttack then
             self.oneAttack = false
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
-            if self.soldier.attackTarget.dead then
+            if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
                 self.soldier.state = FIGHT_SOL_STATE.NEXT_TARGET
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()

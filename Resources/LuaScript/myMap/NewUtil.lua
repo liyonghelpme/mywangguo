@@ -132,31 +132,7 @@ function tidToTile(tid, normal, water, gidToTileName)
         waterPic = gidToTileName[tid]..'.png'
     end
     return waterPic
-
-    --[[
-    for i=#water, 1, -1 do
-        if tid > water[i] then
-            tid = 
-        end
-    end
-    if tid < 65 then
-        tid = tid-1
-        return 'tile'..tid..'.png'
-    elseif tid < 130 then
-        tid = tid-65
-        return 'tile'..tid..".png"
-    elseif tid < 213 then
-        tid = tid-135
-        return 'tile'..tid..'.png'
-    elseif tid < 280 then
-        tid = tid-213
-        return 'tile'..tid..'.png'
-    elseif tid < 345 then
-        tid = tid-280
-        return 'tile'..tid..'.png'
-    else
-        tid = tid-345
-        return 'tile'..tid..'.png'
-    end
-    --]]
+end
+function axayToTid(ax, ay, width)
+    return ay*width+ax+1
 end

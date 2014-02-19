@@ -181,7 +181,7 @@ end
 --调整数字 和 banner 显示
 --从FightScene 获取数据
 function FightMenu2:adjustNum()
-    local sol = self.scene.soldiers
+    local sol = self.scene.menuSoldier
     local maxSol = self.scene.maxSoldier
 
     fightNumPro(self.eneFoot, sol[2][1], maxSol[2][1])
@@ -264,7 +264,7 @@ end
 
 --士兵死亡
 function FightMenu2:killSoldier(soldier, killNum, healthHurt)
-    local sol = self.scene.soldiers
+    local sol = self.scene.menuSoldier
     local maxSol = self.scene.maxSoldier
     print("killSoldier", soldier.color, soldier.id, killNum, healthHurt)
     if soldier.color == 0 then
@@ -276,6 +276,14 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
             sol[1][2] = sol[1][2]-killNum
             fightNumPro(self.myArrow, sol[1][2], maxSol[1][2])
             self.myArrowNum:setString(sol[1][2])
+        elseif soldier.id == 2 then
+            sol[1][3] = sol[1][3]-killNum
+            fightNumPro(self.myMagic, sol[1][3], maxSol[1][3])
+            self.myMagicNum:setString(sol[1][3])
+        elseif soldier.id == 3 then
+            sol[1][4] = sol[1][4]-killNum
+            fightNumPro(self.myCav, sol[1][4], maxSol[1][4])
+            self.myCavNum:setString(sol[1][4])
         end
         --有个跳动频率 
         --有个触发条件
@@ -292,6 +300,14 @@ function FightMenu2:killSoldier(soldier, killNum, healthHurt)
             sol[2][2] = sol[2][2]-killNum
             fightNumPro(self.eneArrow, sol[2][2], maxSol[2][2])
             self.eneArrowNum:setString(sol[2][2])
+        elseif soldier.id == 2 then
+            sol[2][3] = sol[2][3]-killNum
+            fightNumPro(self.eneMagic, sol[2][3], maxSol[2][3])
+            self.eneMagicNum:setString(sol[2][3])
+        elseif soldier.id == 3 then
+            sol[2][4] = sol[2][4]-killNum
+            fightNumPro(self.eneCav, sol[2][4], maxSol[2][4])
+            self.eneCavNum:setString(sol[2][4])
         end
         self.rightHurt = self.rightHurt+healthHurt
         self.totalRight = self.totalRight+healthHurt

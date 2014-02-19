@@ -194,6 +194,7 @@ function PeopleInfo2:setPeople()
     local pdata = Logic.farmPeople[self.selPeople]
     self.name:setString(pdata.data.name)
     local att = calAttr(pdata.id, pdata.level, pdata)
+    print("people Info is ", simple.encode(att))
     self.attack:setString(att.attack)
     self.defense:setString(att.defense)
     self.health:setString(att.health)
