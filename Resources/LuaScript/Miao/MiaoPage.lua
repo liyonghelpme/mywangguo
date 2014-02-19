@@ -634,6 +634,12 @@ function MiaoPage:initExtendLand()
             newCenter = concateTable(concateTable(Logic.lastCenter, Logic.extendCenter2), Logic.extendCenter)
         end
         sr = Logic.stageRange[4]
+    else
+        --没有扩充任何 土地 则返回
+        hideBlock = {}
+        newCenter = {}
+        sr = nil
+        return 
     end
         
         for hk, hv in ipairs(hideBlock) do

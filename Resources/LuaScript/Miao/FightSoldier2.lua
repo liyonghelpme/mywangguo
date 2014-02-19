@@ -532,7 +532,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     local harm = harm-realDefense
     harm = math.max(harm, 1)
     --伤害小于 生命值上限
-    harm = math.min(self.health, harm)
+    harm = math.floor(math.min(self.health, harm))
     print("real hurt", harm)
     local lastHealth = self.health
     self.health = self.health-harm
@@ -1030,7 +1030,7 @@ function FightSoldier2:finishAttack()
     if not self.dead then
         if self.isHero and self.heroData.skill ~= nil then
             local skData = Logic.skill[self.heroData.skill]
-            if skData.kind == 8 then
+            if skData.kind == 8 and self.health < self.maxHealth then
                 print("health skill", self.sid, self.health)
                 local sp = createSprite("skillHealth0")
                 local bf = ccBlendFunc()

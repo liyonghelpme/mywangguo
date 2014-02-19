@@ -1662,7 +1662,7 @@ end
 function addEquipAttr(old, edata)
     local allAtt = {'defense', 'attack', 'health', 'brawn', 'labor', 'shoot'}
     for k, v in ipairs(allAtt) do
-        old[v] = (old[v] or 0)+edata[v]
+        old[v] = (old[v] or 0)+(edata[v] or 0)
     end
 end
 
@@ -1694,15 +1694,15 @@ function calAttr(id, level, equip)
         end
         if equip.head ~= nil then
             addEquipAttr(equipAttr, Logic.equip[equip.head])
-            addEquipAttr(temp, Logic.equip[equip.weapon])
+            addEquipAttr(temp, Logic.equip[equip.head])
         end
         if equip.body ~= nil then
             addEquipAttr(equipAttr, Logic.equip[equip.body])
-            addEquipAttr(temp, Logic.equip[equip.weapon])
+            addEquipAttr(temp, Logic.equip[equip.body])
         end
         if equip.spe ~= nil then
             addEquipAttr(equipAttr, Logic.equip[equip.spe])
-            addEquipAttr(temp, Logic.equip[equip.weapon])
+            addEquipAttr(temp, Logic.equip[equip.spe])
         end
     end
 

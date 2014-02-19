@@ -89,7 +89,7 @@ function TMXMenu2:update(diff)
 end
 
 function TMXMenu2:onLeft()
-    print("onLeft", self.inBuild)
+    print("onLeft showMapYet", self.inBuild, Logic.showMapYet)
     if self.inBuild then
         global.director.curScene.page.curBuild:doSwitch()
     else

@@ -6,6 +6,7 @@ require "myMap.MapCat"
 require "MapCoord"
 --CityData 每个城堡的 士兵初始数据 
 require 'cityData'
+require "myMap.PagePath"
 
 FightPage = class()
 function FightPage:ctor()
@@ -45,39 +46,16 @@ function FightPage:ctor()
     self:initData()
 end
 function FightPage:initData()
-    if not MapDataInitYet then
-        MapDataInitYet = true
-        local sz = getContentSize(self.bg)
-        MapNode = tableToDict(MapNode)
-        for k, v in pairs(MapNode) do
-            print("MapNode is", k, v)
-            v[2] = sz[2]-v[2] 
-            --x y  city or path  kind(mainCity village fightPoint)
-            if v[4] ~= nil then
-                local md = 9999
-                local minNode
-                for ck, cv in ipairs(MapCoord) do
-                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
-                    if dis < md then
-                        md = dis
-                        minNode = cv
-                    end
-                end
-                v[1] = minNode[1]
-                v[2] = minNode[2]
-                --realId cityData 中使用的Id
-                v[5] = minNode[3] 
-            end
-        end
-        print("allNode")
-        print(simple.encode(MapNode))
-        MapEdge = tableToDict(MapEdge)
-    end
+    initCityData()
+    --不联通的城市 不显示但是存在的
     self.allCity = {}
     --根据城堡id 查找城堡对象
     self.cidToCity = {}
     for k, v in pairs(MapNode) do
-        if v[3] == true then
+        --城堡 主城 竞技场 村落 初始化
+        --kind == 4 是村落 村落不在这里初始化
+        if v[3] == true and v[4] ~= 4 then
+            print("v data", v[4])
             local ci = MapCity.new(self, v, k)
             self.bg:addChild(ci.bg)
             table.insert(self.allCity, ci)
@@ -87,11 +65,55 @@ function FightPage:initData()
             self.cidToCity[ci.cid] = ci
         end
     end
+
+    --初始化村落
+    --vid to village
+    self.allVillage = {}
+    --cid 是 MapNode 中的编号 mapData 里面有
+    for k, v in pairs(MapNode) do
+        if v[3] == true and v[4] == 4 then
+            print("addVillage", v[5])
+            local vil = MapCity.new(self, v, k, true)
+            self.bg:addChild(vil.bg)
+            --realId
+            self.allVillage[vil.realId] = vil
+            self.cidToCity[vil.cid] = vil
+        end
+    end
+
+
     if Logic.catData ~= nil then
         local path = Logic.catData.path
+        --传入城堡基本信息
+        --或者新手村落
         self:sendCat(self.cidToCity[path[#path]])
     end
+    self:checkConnection()
 end
+
+--确定可达的 城市
+--不可达的城市隐藏即可
+--Logic 里面可以缓存 可以到达的城市
+--也可以每个城市检测是否和 已经own的城市相邻或者 相邻主城市 或者相邻竞技场
+function FightPage:checkConnection()
+    self.pagePath = PagePath.new(self)
+    self.pagePath:init(self.mainCity.cid, nil)
+    self.pagePath:update()
+    self.accessCity = self.pagePath.accessCity 
+
+    for k, v in ipairs(self.allCity) do
+        v:checkAccess()
+    end
+end
+function FightPage:showNewCity()
+    self.pagePath:init(self.mainCity.cid, nil)
+    self.pagePath:update()
+    self.accessCity = self.pagePath.accessCity
+    for k, v in ipairs(self.allCity) do
+        v:checkAccess()
+    end
+end
+
 
 function FightPage:updateDebugNode(p)
     if not DEBUG_FIGHT then
@@ -109,6 +131,12 @@ end
 --从主城到其它城市
 function FightPage:sendCat(city)
     local cat = MapCat.new(self, self.mainCity, city, false)
+    self.cat = cat
+    self.bg:addChild(cat.bg)
+end
+
+function FightPage:sendCatToVillage(city)
+    local cat = MapCat.new(self, self.mainCity, city, false, true)
     self.cat = cat
     self.bg:addChild(cat.bg)
 end
@@ -133,6 +161,19 @@ function FightPage:touchesBegan(touches)
                 break
             end
         end
+        if self.touchBuild == nil then
+            print("test allVillage", #self.allVillage)
+            for k, v in pairs(self.allVillage) do
+                local sz = v.changeDirNode:getContentSize()
+                local tn = v.changeDirNode:convertToNodeSpace(tp) 
+                if tn.x > 0 and tn.x < sz.width and tn.y > 0 and tn.y < sz.height then
+                    print("touch In Castle", v.cid, v.realId)
+                    self.touchBuild = v
+                    break
+                end
+            end
+        end
+
         if self.touchBuild ~= nil then
             self.touchBuild:touchBegan(touchBegan)
         end

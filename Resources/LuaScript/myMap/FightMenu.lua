@@ -86,7 +86,9 @@ function FightMenu:onBut(p)
         end
     end
 end
+
 --显示竞技场数据
+--竞技场的士兵数量 自己增长
 function FightMenu:showArenaInfo(city)
     if self.city == nil and self.finAni then
         self.city = city
@@ -158,6 +160,88 @@ function FightMenu:showArenaInfo(city)
         end
     end
 end
+
+--显示村落信息
+function FightMenu:showVillageInfo(city)
+    if self.city == nil and self.finAni then
+        self.city = city
+        setVisible(self.leftCenter, true)
+        local sca = getScale(self.leftCenter)
+        local sz = self.lm:getContentSize()
+        local p = getPos(self.leftCenter)
+        setPos(self.leftCenter, {-sz.width, p[2]})
+        self.leftCenter:runAction(expout(moveto(0.5, 0, p[2])))
+
+        local ownNum = #Logic.ownVillage
+        --每占领城堡对应兵力增加
+        local bn = math.floor(city.cityData[1]*math.pow(1.1, ownNum))
+        self.buw:setString(bn)
+        local gn = math.floor(city.cityData[2]*math.pow(1.1, ownNum))
+        self.gongw:setString(gn)
+        local mn = math.floor(city.cityData[3]*math.pow(1.1, ownNum))
+        self.maw:setString(mn)
+        local qn = math.floor(city.cityData[4]*math.pow(1.1, ownNum))
+        self.qiw:setString(qn)
+
+        --奖励技术 奖励 装饰 奖励马匹
+        local cg = Logic.villageGoods[city.realId]
+        if cg ~= nil then
+            cg = cg.goods
+            print("village goods", simple.encode(cg))
+            local gid = 1
+            for k, v in ipairs(cg.equip) do
+                if gid >= 3 then
+                    break
+                end
+                local edata = Logic.equip[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'equip'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
+            end
+            print("gid", gid)
+            for k, v in ipairs(cg.goods) do
+                if gid >= 3 then
+                    break
+                end
+                print("goods is what? 148")
+                local edata = GoodsName[v]
+                self['goods'..gid]:setString(edata.name)
+                setDisplayFrame(self['g'..gid], 'storeGoods'..edata.id..'.png')
+                setScale(self['g'..gid], 1)
+                gid = gid+1
+            end
+            print("gid", gid)
+            for k, v in ipairs(cg.build) do
+                if gid >= 3 then
+                    break
+                end
+                local edata = Logic.buildings[v]
+                self['goods'..gid]:setString(edata.name)
+                setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
+                local sca = getSca(self['g'..gid], {21, 18})
+                setScale(self['g'..gid], sca)
+                gid = gid+1
+            end
+            for i=1, gid-1, 1 do
+                setVisible(self['goods'..i], true)
+                setVisible(self['g'..i], true)
+                setVisible(self['ib'..i], true)
+            end
+            print("gid is what", gid)
+            for i=gid, 2, 1 do
+                setVisible(self['goods'..i], false)
+                setVisible(self['g'..i], false)
+                setVisible(self['ib'..i], false)
+            end
+        end
+
+    end
+end
+
+--城堡的数量根据ownCity 来增长
+--村落 和 城堡有什么关系呢？村落是基于事件而出现的 而城堡是本身就会出现的
+--攻击下一个 城堡之后 对应的野外村落就会开启了
 function FightMenu:showCityInfo(city)
     --无相关城堡数据
     print("city info", city, self.finAni, city.cityData)
@@ -170,11 +254,18 @@ function FightMenu:showCityInfo(city)
         setPos(self.leftCenter, {-sz.width, p[2]})
         self.leftCenter:runAction(expout(moveto(0.5, 0, p[2])))
 
-        self.buw:setString(city.cityData[1])
-        self.gongw:setString(city.cityData[2])
-        self.maw:setString(city.cityData[3])
-        self.qiw:setString(city.cityData[4])
-
+        local ownNum = #Logic.ownCity
+        --每占领城堡对应兵力增加
+        local bn = math.floor(city.cityData[1]*math.pow(1.1, ownNum))
+        self.buw:setString(bn)
+        local gn = math.floor(city.cityData[2]*math.pow(1.1, ownNum))
+        self.gongw:setString(gn)
+        local mn = math.floor(city.cityData[3]*math.pow(1.1, ownNum))
+        self.maw:setString(mn)
+        local qn = math.floor(city.cityData[4]*math.pow(1.1, ownNum))
+        self.qiw:setString(qn)
+        
+        --奖励技术 奖励 装饰 奖励马匹
         local cg = Logic.cityGoods[city.realId]
         if cg ~= nil then
             cg = cg.goods
@@ -226,6 +317,9 @@ function FightMenu:showCityInfo(city)
                 setVisible(self['ib'..i], false)
             end
         end
+        
+
+
     end
 end
 function FightMenu:closeMenu()

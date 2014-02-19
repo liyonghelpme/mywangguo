@@ -570,6 +570,8 @@ function FightLayer2:initSoldier()
     self.soldierNet = {}
 
 
+    --allHero foot magic arrow cavalry
+    --按照部队阵列 摆放的 allHero 位置
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum-1
     --每一列
     --我方步兵的列编号

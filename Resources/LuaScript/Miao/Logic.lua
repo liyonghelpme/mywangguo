@@ -130,6 +130,7 @@ Logic.buildBuyNum = {}
 
 --初始化已经研究的物品
 --研究结束更新
+--商店显示 hold的装备 不仅仅是 research的装备 只hold的装备不能购买
 Logic.researchEquip = {}
 function initResearchEquip()
     Logic.researchEquip = {}
@@ -482,7 +483,9 @@ end
 --根据 path 和 curPoint 计算方向
 --test CatData
 --Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
+--
 Logic.catData = nil
+
 
 --计算合战剩余时间
 function getLeftTime()
@@ -545,6 +548,9 @@ Logic.ownCity = {}
 --挑战竞技场胜利
 Logic.winArena = false
 
+--占领的村落
+Logic.ownVillage = {}
+
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
     print("winCity of scene", Logic.challengeCity)
@@ -565,16 +571,18 @@ end
 
 function initCityData()
     if not MapDataInitYet then
-        --local tex = CCTextureCache:sharedTextureCache():addImage("bigMap.png")
+        --整个地图大小
         local sz = {3072, 2304}
         --getContentSize(tex)
         MapDataInitYet = true
         MapNode = tableToDict(MapNode)
+        --匹配MapCoord 城堡坐标 和 MapNode 的坐标进行重合处理
+        --MapCoord 最靠近 MapNode 坐标之后 将MapCoord 坐标设置成 MapNode 的坐标
         for k, v in pairs(MapNode) do
             print("MapNode is", k, v)
             v[2] = sz[2]-v[2] 
             --x y  city or path  kind(mainCity village fightPoint)
-            if v[4] ~= nil then
+            if v[4] ~= nil and v[4] ~= 4 then
                 local md = 9999
                 local minNode
                 for ck, cv in ipairs(MapCoord) do
@@ -584,6 +592,23 @@ function initCityData()
                         minNode = cv
                     end
                 end
+                --x坐标 y 坐标 路径还是城堡节点 kind城堡类型 realId 实际对应的城堡的Id
+                v[1] = minNode[1]
+                v[2] = minNode[2]
+                --realId cityData 中使用的Id
+                v[5] = minNode[3] 
+            --村落坐标对应
+            elseif v[4] == 4 then
+                local md = 9999
+                local minNode
+                for ck, cv in ipairs(VillageCoord) do
+                    local dis = math.abs(v[1]-cv[1])+math.abs(v[2]-cv[2])
+                    if dis < md then
+                        md = dis
+                        minNode = cv
+                    end
+                end
+                --x坐标 y 坐标 路径还是城堡节点 kind城堡类型 realId 实际对应的城堡的Id
                 v[1] = minNode[1]
                 v[2] = minNode[2]
                 --realId cityData 中使用的Id
@@ -593,6 +618,13 @@ function initCityData()
         print("allNode")
         print(simple.encode(MapNode))
         MapEdge = tableToDict(MapEdge)
+        
+        --村落坐标
+        local vc = {}
+        for k, v in ipairs(VillageCoord) do
+            vc[v[3]] = v
+        end
+        VillageCoord = vc
     end
 end
 
@@ -620,7 +652,9 @@ function getSkillIcon(sid)
 end
 
 --当前可以启用的村民
-Logic.ownPeople = {11, 20, 21, 22, 23}
+--Logic.ownPeople = {11, 20, 21, 22, 23}
+--Logic.ownPeople = {14, 18, 20, 23}
+Logic.ownPeople = {}
 
 Logic.ownTech = {
 sword=0,
@@ -925,6 +959,7 @@ local function initData(rep, param)
     Logic.villagePeople = {}
     --新手村
     Logic.newPeople = {}
+
     Logic.people = {}
     Logic.allPeople = rep.people
     print("allPeople", #Logic.allPeople)
@@ -967,3 +1002,13 @@ end
 function initDataFromServer()
     sendReq('login', dict(), initData, nil, nil)
 end
+
+
+--大地图 村落的 兵力
+Logic.MapVillagePower = {
+    {1, 1, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+    {31, 13, 0, 0},
+}

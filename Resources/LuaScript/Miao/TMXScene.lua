@@ -9,6 +9,7 @@ function TMXScene:initDataNow()
     print("initDataNow")
     --sendReq('login', dict(), self.initData, nil, self)
     
+    --[[
     if not DEBUG then
         local rep = getFileData("data.txt")
         rep = simple.decode(rep)
@@ -16,8 +17,9 @@ function TMXScene:initDataNow()
     else
         sendReq('login', dict(), self.initData, nil, self)
     end
-
-    --sendReq('login', dict(), self.initData, nil, self)
+    --]]
+    --
+    sendReq('login', dict(), self.initData, nil, self)
 end
 function TMXScene:ctor()
     self.name = "TMXScene"
@@ -79,9 +81,16 @@ function TMXScene:initData(rep, param)
     local r = u:getStringForKey("ownCity")
     if r ~= "" then
         print("ownCity", r)
-        local rd = dictKeyToNum(simple.decode(r))
+        local rd = tableToDict(simple.decode(r))
         Logic.ownCity = rd
     end
+
+    local r = u:getStringForKey("ownVillage")
+    if r ~= "" then
+        local rd = tableToDict(simple.decode(r))
+        Logic.ownVillage = rd
+    end
+
     local r = u:getStringForKey("catData")
     if r ~= "" and r ~= "null" then
         print("catData", r)
@@ -189,6 +198,13 @@ function TMXScene:initData(rep, param)
         table.insert(CityData, {v.foot, v.arrow, v.magic, v.cav})
     end
     print("cityGoods", #Logic.cityGoods)
+
+    Logic.villageGoods = {}
+    for k, v in ipairs(rep.villageReward) do
+        v.goods = simple.decode(v.goods)
+        Logic.villageGoods[v.id] = v
+    end
+    print("villageGoods", #Logic.villageGoods)
 
 
     GoodsName = {}
@@ -309,7 +325,13 @@ function TMXScene:checkBattleTime(diff)
         --cid inkScape 边关系中的id信息
         --realId gimp 中的id信息
         Logic.challengeCity = path[#path]
-        Logic.challengeNum = CityData[MapNode[Logic.challengeCity][5]]
+        local cityInfo = MapNode[Logic.challengeCity]
+        if cityInfo[4] == 1 then
+            Logic.challengeNum = CityData[cityInfo[5]]
+        else
+            Logic.challengeNum = Logic.MapVillagePower[math.min(#Logic.MapVillagePower, cityInfo[5])]
+        end
+
         if lc.moveTime <= 0 then
             local nextPoint = curPoint+1
             --尴尬的bug 在开战的时候 不应该弹出这个对话框的
@@ -362,7 +384,7 @@ function TMXScene:update(diff)
         --显示几个黑色的块
         self.page:stageOneToTwo()
     end
-    if Logic.gameStage == 1 and Logic.curVillage >= 4 and not Logic.showMapYet then
+    if Logic.curVillage >= 4 and not Logic.showMapYet then
         addBanner("大地图功能开启了")
         Logic.showMapYet = true
         self.menu:adjustLeftShow()
@@ -464,7 +486,8 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("soldiers", simple.encode(Logic.soldiers))
     u:setStringForKey("inSell", simple.encode(Logic.inSell))
     u:setStringForKey("buildNum", simple.encode(dictToTable(Logic.buildNum)))
-    u:setStringForKey("ownCity", simple.encode(Logic.ownCity)) 
+    u:setStringForKey("ownCity", simple.encode(dictToTable(Logic.ownCity))) 
+
     u:setStringForKey("catData", simple.encode(Logic.catData)) 
     u:setStringForKey("ownPeople", simple.encode(Logic.ownPeople)) 
     u:setStringForKey("ownBuild", simple.encode(Logic.ownBuild)) 
@@ -479,14 +502,29 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("showMapYet", simple.encode(Logic.showMapYet)) 
     u:setStringForKey("attendHero", simple.encode(Logic.attendHero)) 
     u:setStringForKey("openMap", simple.encode(dictToTable(Logic.openMap)))
-
     u:setStringForKey("showLand", simple.encode(dictToTable(Logic.showLand)))
+     
+    u:setStringForKey("ownVillage", simple.encode(dictToTable(Logic.ownVillage))) 
 end
 
 
 function TMXScene:newVillageWin(w)
     if w then
         addBanner("村落攻略胜利啦")
+        
+        --新手村 获得人口
+        local cp = Logic.newPeople[Logic.curVillage+1]
+        if cp ~= nil then
+            print("newPeople is who", simple.encode(Logic.newPeople), cp)
+            Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+            --showPeopleInfo(cp)
+            for k, v in ipairs(cp) do
+                local pd = Logic.people[v]
+                addBanner("可以启用"..pd.name)
+            end
+        end
+
+
         Logic.curVillage = Logic.curVillage+1
         if Logic.curVillage < 4 then
             self.page:adjustFly()

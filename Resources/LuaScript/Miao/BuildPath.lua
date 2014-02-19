@@ -204,7 +204,8 @@ function BuildPath:getAllFreeFactory()
     local temp = {}
     local count = 0
     for k, v in pairs(self.nearby) do
-        if k.id == 5 and k.owner == nil then
+        --工厂处于可以工作的范围
+        if k.id == 5 and k.owner == nil and k.operate then
             --table.insert(temp, k)
             temp[k] = true
             count = count+1

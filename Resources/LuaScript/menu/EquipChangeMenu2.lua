@@ -84,7 +84,8 @@ function EquipChangeMenu2:updateTab()
     local count = 1
 	for k, v in ipairs(allData) do
         --装备研究过才能显示
-        if Logic.researchEquip[v.id]  == true then
+        --hold的也显示
+        if Logic.researchEquip[v.id] or Logic.holdNum[v.id] ~= nil then
             table.insert(tempAllData, v)
             local row = math.floor((count-1)/rowWidth)
             local col = (count-1)%rowWidth
@@ -337,7 +338,12 @@ function EquipChangeMenu2:touchEnded(x, y)
                     addBanner(self.people.data.name.."装备"..edata.name..'成功')
                     self:refreshData()
                 else
-                    global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                    --研究过 商店可以购买
+                    if Logic.researchEquip[eid] then
+                        global.director:pushView(BuyMenu.new(self.people, self.allData[self.selPanel]), 1)
+                    else
+                        addBanner("该装备 剩余数量不足 商店不能购买")
+                    end
                 end
                 return
             end

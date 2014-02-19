@@ -33,14 +33,39 @@ function FightScene:ctor()
     --[[
     --]]
     --挑战新手村 只有 英雄
+    local isVillage = false
     if Logic.newVillage then
         self.soldiers = {{0, 0, 0, 0}, copyTable(Logic.villagePower[Logic.curVillage])}
+    --竞技场
     elseif type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
         local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
         self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(cityData)}
+    --城堡 或者 村落 根据 MapNode 里面的kind决定
     else
-        self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
+        local cityInfo = MapNode[Logic.challengeCity]
+        local on
+        if cityInfo[4] == 1 then
+            on = #Logic.ownCity
+            local cn = copyTable(Logic.challengeNum)
+            cn[1] = math.floor(cn[1]*math.pow(1.1, on))
+            cn[2] = math.floor(cn[2]*math.pow(1.1, on))
+            cn[3] = math.floor(cn[3]*math.pow(1.1, on))
+            cn[4] = math.floor(cn[4]*math.pow(1.1, on))
+            self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, cn}
+        --挑战村落 我方只有英雄
+        elseif cityInfo[4] == 4 then
+            on = #Logic.ownVillage
+            isVillage = true
+            local cn = copyTable(Logic.challengeNum)
+            cn[1] = math.floor(cn[1]*math.pow(1.1, on))
+            cn[2] = math.floor(cn[2]*math.pow(1.1, on))
+            cn[3] = math.floor(cn[3]*math.pow(1.1, on))
+            cn[4] = math.floor(cn[4]*math.pow(1.1, on))
+            self.soldiers = {{0, 0, 0, 0}, cn}
+            print("village challenge num is ", simple.encode(Logic.challengeNum))
+        end
     end
+
     
     --self.soldiers = {{0, 0, 5, 0}, {0, 10, 0, 0}}
     --self.soldiers = {{0, 0, 0, 5}, {0, 0, 0, 5}}
@@ -87,7 +112,7 @@ function FightScene:ctor()
         end
         local equipSkill
         if equip.spe ~= nil then
-            local edata = Logic.equip[equip.weapon]
+            local edata = Logic.equip[equip.spe]
             ride = edata.ride == 1
             if edata.skillId ~= 0 then
                 equipSkill = edata.skillId
@@ -105,6 +130,7 @@ function FightScene:ctor()
         if skillId == 0 then
             skillId = nil
         end
+        --步兵 弓箭 魔法 骑兵
         if ride then
             table.insert(self.heros[4], {attack=attr.attack, defense=attr.defense, health=attr.health, skill=skillId, pos=v.pos})
         elseif weapKind == 0 then

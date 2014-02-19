@@ -115,7 +115,7 @@ function ConfigMenu:adjustAttend()
             end
         end
         if equip.spe ~= nil then
-            local edata = Logic.equip[equip.weapon]
+            local edata = Logic.equip[equip.spe]
             ride = edata.ride == 1
         end
         if ride then
@@ -184,9 +184,15 @@ function ConfigMenu:onBut(p)
             global.director:popView()
             Logic.challengeCity = self.city
             global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self), 1, 0)
-        else
+        --挑战 城堡 realId 或者 kind = 4 challengeCity challengeKind
+        elseif self.city.kind == 1 then
             print("fight menu city")
             global.director.curScene.page:sendCat(self.city)
+            global.director:popView()
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+        elseif self.city.kind == 4 then
+            print("fight menu city")
+            global.director.curScene.page:sendCatToVillage(self.city)
             global.director:popView()
             global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
         end

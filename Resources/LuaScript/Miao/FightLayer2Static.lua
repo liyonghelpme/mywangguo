@@ -230,10 +230,21 @@ function FightLayer2:initSkill()
     local he
     --步兵技能 暂时只实现步兵
     --TODO
+    --步兵
     if self.day == 2 then
         ss = self.mySoldiers
         he = heros[1]
+    elseif self.day == 0 then
+        ss = self.myMagicSoldiers
+        he = heros[2]
+    elseif self.day == 1 then
+        ss = self.myArrowSoldiers
+        he = heros[3]
+    elseif self.day == 3 then
+        ss = self.myCavalrySoldiers
+        he = heros[4]
     end
+
 
     local positive = {}
     for k, v in ipairs(he) do
@@ -953,7 +964,11 @@ function FightLayer2:cavalryScript(diff)
     local ls = self.leftCamera.startPoint[1]
     --镜头移动移动到目标位置了 则播放跑步动画
     if math.abs(ls-self.leftCamera.moveTarget) < 5 then
-        if not self.animateYet then
+        if not self.skillYet then
+            self.skillYet = true
+            self:initSkill()
+        end
+        if self.skillOver and not self.animateYet then
             self.animateYet = true
             for k, v in ipairs(self.allSoldiers) do
                 --开始跑步和攻击
@@ -1178,13 +1193,19 @@ function FightLayer2:arrowScript(diff)
     --进入 动画状态
     local p = getPos(self.battleScene)
     --print("battleScene pos and moveTarget", p[1], self.moveTarget)
-    if not self.animateYet and math.abs(self.leftCamera.startPoint[1]-self.leftCamera.moveTarget) < 5 then
-        self.animateYet = true
-        for k, v in ipairs(self.allSoldiers) do
-            --开始跑步和攻击
-            v:doRunAndAttack(self.day)
+    if math.abs(self.leftCamera.startPoint[1]-self.leftCamera.moveTarget) < 5 then
+        if not self.skillYet then
+            self.skillYet = true
+            self:initSkill()
         end
-        print("arrow animation state doRunAndAttack", self.animateYet)
+        if self.skillOver and not self.animateYet then
+            self.animateYet = true
+            for k, v in ipairs(self.allSoldiers) do
+                --开始跑步和攻击
+                v:doRunAndAttack(self.day)
+            end
+            print("arrow animation state doRunAndAttack", self.animateYet)
+        end
     end
 
     --trace Arrow 位置

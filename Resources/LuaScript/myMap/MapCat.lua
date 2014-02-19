@@ -7,20 +7,22 @@ MAP_STATE = {
     MOVE = 2,
 }
 MapCat = class()
-function MapCat:ctor(s, st, ed, fake)
+function MapCat:ctor(s, st, ed, fake, isV)
     self.scene = s
     self.start = st
     self.endCity = ed
     self.fake = fake
     self.state = MAP_STATE.FREE
     self.speed = CAT_SPEED
+    --self.isVillage = isV
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("cat_foot.plist")
     self.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 1, 1, true)
 
-    if not self.fake then
-        --self.bg = CCSprite:create("soldier3.png")
+    --村落也有cid
+    --村落只是出现方式不同而已 路径什么是一样的 cid
+    if self.endCity.kind == 4 then
         self.bg = CCNode:create()
         self.changeDirNode = CCSprite:createWithSpriteFrameName("cat_foot_run_0.png")
         addChild(self.bg, self.changeDirNode)
@@ -45,9 +47,35 @@ function MapCat:ctor(s, st, ed, fake)
         registerEnterOrExit(self)
         Logic.challengeCity = self.endCity.cid
         Logic.challengeNum = self.endCity.cityData
+
     else
+        self.bg = CCNode:create()
+        self.changeDirNode = CCSprite:createWithSpriteFrameName("cat_foot_run_0.png")
+        addChild(self.bg, self.changeDirNode)
+        self.changeDirNode:runAction(repeatForever(CCAnimate:create(self.runAni)))
+        setAnchor(self.changeDirNode, {262/512, (512-352)/512})
+
+        self.shadow = CCSprite:create("roleShadow2.png")
+        self.bg:addChild(self.shadow,  -1)
+        setSize(self.shadow, {70, 44})
+
+        --setAnchor(self.bg, {0.5, 0})
+        setScale(self.bg, 0.5)
+
+        local p = getPos(self.start.bg)
+        setPos(self.bg, p)
+        self.moveTime = 0
+        self.curPoint = 1
+        self.path = {self.start.cid, self.endCity.cid}
+        self.needUpdate = true
+        self.endCid = self.endCity.cid
+        self.fightPath = FightPath.new(self)
+        registerEnterOrExit(self)
+        Logic.challengeCity = self.endCity.cid
+        Logic.challengeNum = self.endCity.cityData
+    --else
         --self.bg = CCNode:create()
-        self.endCid = self.endCity
+    --    self.endCid = self.endCity
     end
 end
 
