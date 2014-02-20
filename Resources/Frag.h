@@ -21,6 +21,18 @@ void main() {
     int i, j;
     vec4 sum = vec4(0);
     for(i=-4; i<4; i++) {
+        for(j=-4; j<4; j++) {
+            sum += texture2D(CC_Texture0, v_texCoord+vec2(j, i)*0.01)*0.015625;
+        }
+    }
+    vec4 col = texture2D(CC_Texture0, v_texCoord);
+    gl_FragColor = lerp(sum, vec4(0), (sin(CC_Time.g*5.0)+1.0)/2.0)+col;
+
+    
+    /*
+    int i, j;
+    vec4 sum = vec4(0);
+    for(i=-4; i<4; i++) {
         for(j=-3; j<3; j++) {
             sum += texture2D(CC_Texture0, v_texCoord+vec2(j, i)*0.004)*0.15;
         }
@@ -37,4 +49,5 @@ void main() {
         }
     }
     gl_FragColor = lerp(newCol, col, (sin(CC_Time.g*5.0)+1.0)/2.0);
+    */
 }
