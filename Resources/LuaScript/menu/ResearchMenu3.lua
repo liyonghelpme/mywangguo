@@ -16,7 +16,7 @@ function ResearchMenu3:ctor()
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "researchTitle.png"), {530, fixY(sz.height, 148)}), {97, 42}), {0.50, 0.50}), 255)
 
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
     local listSize = {width=546, height=319}
     self.listSize = listSize

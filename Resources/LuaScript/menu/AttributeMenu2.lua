@@ -32,7 +32,7 @@ function AttributeMenu2:ctor()
     but.attDark = sp
     self.tabs = {self.baseAtt, self.skillAtt}
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
     local listSize = {width=544, height=319}
     self.listSize = listSize
@@ -56,7 +56,7 @@ end
 --禁止缩放
 function AttributeMenu2:onTab(p)
 end
-function createScroll(temp, sz)
+function createScroll(temp, sz, content)
     local myscroll = {}
     local ssz = {width=35, height=327, maxY = 304, minY=28, totalHeight=304-28}
     local banner = setAnchor(setSize(setPos(addSprite(temp, "scrollBack.png"), {806, fixY(sz.height, 423)}), {35, 327}), {0.50, 0.50})
@@ -71,6 +71,41 @@ function createScroll(temp, sz)
     function myscroll:resetScroll()
         setPos(self.scrollPro, {ssz.width/2, fixY(ssz.height, 28)})
     end
+
+    function myscroll:touchBegan(x, y)
+        self.lastPoints = {x, y}
+    end
+    function myscroll:touchMoved(x, y)
+        print("myscroll moved")
+        if content ~= nil then
+            if content.flowHeight < content.HEIGHT then
+
+            else
+                local sca = temp:getScale()
+                local oldPoints = self.lastPoints
+                self.lastPoints = {x, y}
+                --屏幕上1像素 高度 对应的新的高度是 1/sca
+                local dy = (self.lastPoints[2]-oldPoints[2])/sca
+                local oxy = getPos(self.scrollPro)
+                local ty = math.min(math.max(28, oxy[2]+dy), 304)
+                setPos(self.scrollPro, {oxy[1], ty})
+
+                local rate = (ty-28)/(304-28) 
+                print("rate is what", rate)
+                setPos(content.flowNode, {0, lerp(content.flowHeight, content.HEIGHT, rate)})
+            end
+        end
+    end
+
+    function myscroll:touchEnded(x, y)
+    end
+    local scrollTouch = ui.newTouchLayer({size={35, 327}, delegate=myscroll, touchBegan=myscroll.touchBegan, touchMoved=myscroll.touchMoved, touchEnded=myscroll.touchEnded})
+    banner:addChild(scrollTouch.bg)
+    --[[
+    setPos(scrollTouch, {0, 0})
+    --]]
+
+    print("init myscroll over")
     return myscroll
 end
 

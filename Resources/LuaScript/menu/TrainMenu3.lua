@@ -16,7 +16,7 @@ function TrainMenu3:ctor()
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "lvpng.png"), {339, fixY(sz.height, 216)}), {49, 43}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "catLevelUp.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50}), 255)
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
 
     local listSize = {width=546, height=319}
