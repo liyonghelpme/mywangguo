@@ -60,6 +60,8 @@ function createScroll(temp, sz, content)
     local myscroll = {}
     local ssz = {width=35, height=327, maxY = 304, minY=28, totalHeight=304-28}
     local banner = setAnchor(setSize(setPos(addSprite(temp, "scrollBack.png"), {806, fixY(sz.height, 423)}), {35, 327}), {0.50, 0.50})
+    setGLProgram(banner, "blur", "Vert.h", "Frag.h")
+
     local sp = setAnchor(setSize(setPos(addSprite(banner, "scrollPro.png"), {ssz.width/2, fixY(ssz.height, 28)}), {49, 45}), {0.50, 0.50})
     myscroll.ssz = ssz
     myscroll.banner = banner
