@@ -62,6 +62,7 @@ function OverMenu:ctor(s)
     centerNode(self.temp)
 
 
+    --[[
     local bottom = addNode(self.bg)
     local sca = vs.width/sz.width
     local sp = setScale(setOpacity(setAnchor(setPos(addSprite(bottom, "intro.png"), {vs.width/2, 0}), {0.50, 0.0}), 255), sca)
@@ -74,6 +75,7 @@ function OverMenu:ctor(s)
     but:setContentSize(123, 47)
     setPos(addChild(butNode, but.bg), {657, fixY(sz.height, 992)})
     rightBottomUI(butNode)
+    --]]
 end
 
 --下载游戏

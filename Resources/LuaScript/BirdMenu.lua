@@ -24,18 +24,21 @@ function BirdMenu:ctor(s)
     setPos(addChild(self.temp, but.bg), {383, fixY(sz.height, 765)})
 
 
-
+    
+    --[[
     local bottom = addNode(self.bg)
     local sca = vs.width/sz.width
     local sp = setScale(setOpacity(setAnchor(setPos(addSprite(bottom, "intro.png"), {vs.width/2, 0}), {0.50, 0.0}), 255), sca)
     self.touch = ui.newTouchLayer({size={vs.width, 100*self.scene.scale}, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded, delegate=self})
     bottom:addChild(self.touch.bg)
 
+
     local butNode = addNode(self.bg)
     local but = ui.newButton({image="free.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, param=3, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(123, 47)
     setPos(addChild(butNode, but.bg), {657, fixY(sz.height, 992)})
     rightBottomUI(butNode)
+    --]]
 
     centerNode(self.temp)
 
