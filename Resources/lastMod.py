@@ -2,6 +2,9 @@ import os.path, time
 print "last modified: %s" % time.ctime(os.path.getmtime("../Resources"))
 
 #copy all Image and lua script files
+
+os.system('echo hah > a.test')
+os.system('rm a.test')
 f = os.listdir('.')
 for i in f:
     if os.path.isdir(i):

@@ -51,8 +51,8 @@ map<string, string> *handleIni(const char *data, long size) {
         (*nm)[(char*)key] = (char*)value; 
         CCLog("key value %s %s", key, value);
 
-        while(start[0] == '\r' || start[0] == '\n') {
-            start = start++;
+        while((start[0] == '\r' || start[0] == '\n') && count < size) {
+            start = start+1;
             count++;
         }
     }

@@ -65,8 +65,10 @@ function MapCity:ctor(s, data, cid, isV)
     --self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     --self.changeDirNode:addChild(self.touch.bg)
 
-    self.stateLabel = ui.newBMFontLabel({text=str(self.realId), size=30, color={128, 0, 0}, font='bound.fnt'})
-    setPos(addChild(self.bg, self.stateLabel), {0, 40})
+    if DEBUG then
+        self.stateLabel = ui.newBMFontLabel({text=str(self.realId), size=30, color={128, 0, 0}, font='bound.fnt'})
+        setPos(addChild(self.bg, self.stateLabel), {0, 40})
+    end
 end
 function MapCity:setColor(c)
     self.color = c
