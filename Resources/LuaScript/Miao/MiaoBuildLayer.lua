@@ -125,7 +125,9 @@ function MiaoBuildLayer:initCat()
             self.mapGridController:addSoldier(p)
             if v.hid ~= nil then
                 p.myHouse = self.mapGridController.bidToBuilding[v.hid]
-                p.myHouse:setOwner(p)
+                if p.myHouse ~= nil then
+                    p.myHouse:setOwner(p)
+                end
             end
         end
     end
@@ -155,6 +157,44 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
+    local mbid = 0
+    print("bdata is what", #Logic.bdata)
+    for k, v in ipairs(Logic.bdata) do
+        if v.kind == 2 then
+        local dir = v.dir or 0
+        v.dir = 1-dir
+        v.id = v.kind
+        v.kind = nil
+        v.px = v.ax
+        v.py = v.ay
+        v.ax = nil
+        v.ay = nil
+
+        --work data
+        local b = MiaoBuild.new(self, v)
+        b:setWork(v)
+
+        local p = {v.px, v.py}
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        --道路需要调用这个调整斜坡
+        b.funcBuild:whenColNow()
+        
+        b.funcBuild:adjustRoad()
+        b:finishBuild()
+        --调整建筑物方向
+        b:doSwitch()
+        mbid = math.max(v.bid, mbid)
+        end
+    end
+    mbid = mbid+1
+    Logic.maxBid = mbid
+end
+
+--[[
+function MiaoBuildLayer:initBuild()
     if Logic.inNew then
         local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
         local p = normalizePos({1344, 384}, 1, 1)
@@ -179,6 +219,7 @@ function MiaoBuildLayer:initBuild()
         return
     end
 
+    --初始化建筑物信息
     local u = CCUserDefault:sharedUserDefault()
     local build = u:getStringForKey("build")
     local mbid = 0
@@ -229,6 +270,7 @@ function MiaoBuildLayer:initBuild()
     end
 
 end
+--]]
 
 function MiaoBuildLayer:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
@@ -286,6 +328,10 @@ function MiaoBuildLayer:initEnv()
 end
 --road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
 function MiaoBuildLayer:initRoad() 
+    --新手建筑物 从服务器获得
+    if true then
+        return
+    end
     local u = CCUserDefault:sharedUserDefault()
     local initRoadYet = u:getBoolForKey("initRoadYet")
     if initRoadYet == true then

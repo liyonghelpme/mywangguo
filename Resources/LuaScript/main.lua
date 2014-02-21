@@ -15,9 +15,9 @@ end
 
 OldPrint = print
 function print(...)
-    if DEBUG then
+    --if DEBUG then
         OldPrint(...)
-    end
+    --end
 end
 
 

@@ -5,7 +5,7 @@ require "Miao.House"
 require "Miao.Farm"
 require "Miao.Road"
 require "Miao.Factory"
-require "Miao.Slope"
+--require "Miao.Slope"
 require "menu.BuildInfo"
 require "menu.HouseInfo"
 require "Miao.MineStore"
@@ -39,8 +39,9 @@ function MiaoBuild:setWork(wd)
     self.funcBuild:updateGoods()
 end
 function MiaoBuild:ctor(m, data)
+    print("init building", simple.encode(data))
     self.map = m
-    self.privData = data
+    --self.privData = data
     self.sx = 1
     self.sy = 1
     self.bid = data.bid
@@ -51,14 +52,21 @@ function MiaoBuild:ctor(m, data)
     --道路的状态
     self.value = 0
     self.name = 'b'..math.random(10000)
-    self.setYet = data.setYet
-    self.static = data.static
-    if data.picName == 'build' and data.id == 15 then
+    --self.setYet = data.setYet
+    self.setYet = false
+    if data.static == 0 then
+        self.static = false
+    else
+        self.static = data.static
+    end
+    --没有t 开头的建筑物了
+
+    --data.picName = 'build'
+    if data.id == 15 then
         data.picName = 't'
         --data.id = nil
     end
-
-    self.picName = data.picName
+    self.picName = data.picName or 'build'
     self.id = data.id
     self.owner = nil
     self.workNum = 0
@@ -74,13 +82,12 @@ function MiaoBuild:ctor(m, data)
     --记录开始生长的时间
     self.lifeStage = data.lifeStage or 0
     --篱笆数据
-    print("buildkind", self.id)
+    print("buildkind", self.id, self.data)
     if self.data ~= nil then
         self.sx = self.data.sx
         self.sy = self.data.sy
     end
     self.belong = {}
-
 
     self.food = 0
     self.wood = 0
@@ -207,14 +214,18 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild:initView()
 
         --self.changeDirNode = setAnchor(CCSprite:create(self.picName.."0.png"), {0.5, (128-108)/128})
+    --slope 使用slopedata实现
     --包括斜坡方向属性
     --dir == 0 1 可以建造道路 其它的不能建造道路 dir = 2
+    --[[
     elseif self.picName == 'slope' then
         self.dir = data.dir
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
         local sz = self.changeDirNode:getContentSize()
         setAnchor(self.changeDirNode, {170/512, 0})
         self.funcBuild = Slope.new(self)
+    --]]
+    --篱笆建筑物的数据是本地的数据加载的
     elseif self.picName == 'fence' then
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {170/512, 0})
         self.funcBuild = Fence.new(self)
@@ -729,7 +740,7 @@ function MiaoBuild:update(diff)
                 local p = getPos(self.bg)
                 local ax, ay = self:calAff()
                 self.posLabel:setString(self.id.." "..ax.." "..ay)
-                self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum)
+                self.stateLabel:setString("w "..self.workNum.."m "..self.maxNum.."b"..simple.encode(map))
                 --self.stateLabel:setString(map[3].." "..map[4])
                 local s = ''
                 for k, v in ipairs(self.belong) do

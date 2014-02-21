@@ -1201,12 +1201,17 @@ function MiaoPage:touchesBegan(touches)
             local map = getPosMap(1, 1, cx, cy)
             local key = getMapKey(map[3], map[4])
             print("allCell state", map[3], map[4], allCell[key])
+            local scon = map[3].." "..map[4]..' '..str(allCell[key])
+            global.director.curScene.menu.stateLabel:setString(scon)
             --点击到某个建筑物
             if allCell[key] ~= nil then
                 --如果在移动状态 点击某个建筑物 那么 选中的是 Move 的建筑物
                 --移动地图 和 单纯的点击 地图
                 local cb = allCell[key][#allCell[key]][1]
                 --建筑为没有被禁止
+                scon = scon..str(cb.static)
+                global.director.curScene.menu.stateLabel:setString(scon)
+
                 if (cb.picName == 'build' or cb.picName == 't') and not cb.static and cb.operate then
                     self.touchBuild = allCell[key][#allCell[key]][1]
                     self.touchBuild:touchesBegan(touches)
