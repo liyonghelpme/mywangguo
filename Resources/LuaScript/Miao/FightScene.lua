@@ -7,6 +7,7 @@ function FightScene:ctor()
     initCityData()
     --local testData = CityData[17]
     local ms = Logic.soldiers 
+    initPlist()
     --self.soldiers = {{ms[1][2], ms[2][2], ms[3][2], ms[4][2]}, copyTable(Logic.challengeNum)}
     --self.soldiers = {{testData[1], testData[2]-5, testData[3], testData[4]}, testData}
     --self.soldiers = {{10, 0, 0, 0}, {10, 0, 0, 0}}
@@ -34,7 +35,11 @@ function FightScene:ctor()
     --挑战竞技场胜利 kind == 0 奖励物品 提升竞技场 
     --[[
     --]]
+    --
+    --根据挑战胜利的村落数量调整士兵数值
     --挑战新手村 只有 英雄
+    --
+    --[[
     local isVillage = false
     if Logic.newVillage then
         self.soldiers = {{0, 0, 0, 0}, copyTable(Logic.villagePower[Logic.curVillage])}
@@ -67,7 +72,7 @@ function FightScene:ctor()
             print("village challenge num is ", simple.encode(Logic.challengeNum))
         end
     end
-
+    --]]
     
     --self.soldiers = {{0, 0, 5, 0}, {0, 10, 0, 0}}
     --self.soldiers = {{0, 0, 0, 5}, {0, 0, 0, 5}}
@@ -83,16 +88,29 @@ function FightScene:ctor()
     --self.soldiers = {{10, 5, 5, 5}, {10, 5, 5, 5}}
     --self.soldiers = {{10, 10, 10, 10}, {10, 10, 10, 10}}
     --self.soldiers = {{10, 20, 10, 10}, {15, 10, 10, 10}}
+    
     --self.soldiers = {{20, 20, 20, 20}, {20, 20, 20, 20}}
+    --self.soldiers = {{0, 0, 0, 0}, {5, 0, 0, 0}}
+    self.soldiers = {{90, 0, 0, 0}, {90, 0, 0, 0}}
     
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
-    --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=2} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
     
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=6} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=41} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    
     --self.heros = {{{attack=6*5, defense=0, health=66*5, skill=45} }, {{attack=6*5, defense=0, health=66*5, skill=38} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+
+    --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
+    --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {}, {{attack=6*5, defense=0, health=66*5}}}
+
+    --self.heros = {{}, {}, {}, {{attack=6*5, defense=0, health=66*5}}}
+    --self.heros = {{}, {}, {{attack=6*5, defense=0, health=66*5}}, {}}
     self.heros = {{}, {}, {}, {}}
+
+    --[[
+    self.heros = {{}, {}, {}, {}}
+    --设置参战士兵属性
     for k, v in ipairs(Logic.attendHero) do
         local pdata = Logic.farmPeople[v.id]
         local equip = pdata
@@ -146,15 +164,17 @@ function FightScene:ctor()
     print("attendSoldier", simple.encode(self.soldiers))
     print("attendHero", simple.encode(Logic.attendHero))
     print(simple.encode(self.heros))
-
+   --]]
+   --
     --将英雄也算入到 maxSoldier中去 
     self.maxSoldier = simple.decode(simple.encode(self.soldiers))
     self.mySoldier = self.maxSoldier[1]
+    print("oldMySoldierNum", simple.encode(self.mySoldier))
     self.mySoldier[1] = self.mySoldier[1]+#self.heros[1]
     self.mySoldier[2] = self.mySoldier[2]+#self.heros[2]
     self.mySoldier[3] = self.mySoldier[3]+#self.heros[3]
     self.mySoldier[4] = self.mySoldier[4]+#self.heros[4]
-    print("maxSoldierNum is", simple.encode(self.maxSoldier))
+    print("maxSoldierNum is", simple.encode(self.mySoldier))
 
     self.menuSoldier = simple.decode(simple.encode(self.maxSoldier))
     

@@ -1878,6 +1878,7 @@ function initPlist()
     sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
+    sf:addSpriteFramesWithFile("whiteGeo.plist")
 end
 function intToNil(i)
     if i == 0 then

@@ -129,7 +129,6 @@ function MiaoPage:ctor(s)
     self.publicPath = layerName.publicPath
     self.publicSlope = layerName.publicSlope
 
-
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     local debug = CCSpriteBatchNode:create("whiteGeo.png")
     self.bg:addChild(debug, 10)

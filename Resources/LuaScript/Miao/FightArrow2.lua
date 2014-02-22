@@ -453,7 +453,7 @@ function FightArrow2:doFightBack(diff)
                 local tt = math.abs(tpos[1]-p[1])/as
                 a.bg:runAction(sequence({moveto(tt, tpos[1], tpos[2]), callfunc(nil, removeSelf, a.bg)}))
             end
-            if not self.dead then
+            if not self.soldier.dead then
                 self.soldier.changeDirNode:stopAllActions()
                 self.inFightBack = true
                 local function clearFightBack()
@@ -477,7 +477,7 @@ function FightArrow2:doFightBack(diff)
 end
 
 function FightArrow2:doHarm()
-    if not self.dead then
+    if not self.soldier.dead then
         self.oneAttack = true
         --self:showAttackEffect()
         self.soldier.attackTarget:doHurt(self.soldier.attack, nil, self.soldier)

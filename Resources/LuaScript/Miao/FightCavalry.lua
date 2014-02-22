@@ -189,7 +189,7 @@ function FightCavalry:doMove(diff)
 end
 
 function FightCavalry:harmOne(ene)
-    if not self.dead then
+    if not self.soldier.dead then
         --显示一个攻击动作么？
         --self.beginAttack = true
         local ra = self.soldier:getAttack()
@@ -420,7 +420,7 @@ end
 function FightCavalry:doNearAttack(diff)
     if self.soldier.state == FIGHT_SOL_STATE.NEAR_ATTACK then
         --print("cavalry doNearAttack", self.soldier.attackTarget.sid)
-        if self.oneAttack then
+        if self.oneAttack and not self.soldier.dead then
             self.oneAttack = false
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
@@ -447,9 +447,23 @@ function FightCavalry:doNearAttack(diff)
     end
 end
 
+function FightCavalry:doHarm()
+    if not self.soldier.dead then
+        print("cavalry doHarm")
+        self.oneAttack = true
+        --self:showAttackEffect()
+        self.soldier.attackTarget:doHurt(self.soldier.attack, nil, self.soldier)
+        local dir = self.soldier.map:getAttackDir(self.soldier, self.soldier.attackTarget)
+        local rd = math.random(2)+2
+        self.soldier.bg:runAction(moveby(0.2, dir*rd, 0))
+    end
+end
+
 function FightCavalry:finishAttack(oneDead)
     --步兵移动会影响所有士兵的状态 包括弓箭手类型 所以弓箭手也要调整状态
-    self.soldier.state = FIGHT_SOL_STATE.FREE
+    if not self.soldier.dead then
+        self.soldier.state = FIGHT_SOL_STATE.FREE
+    end
     print("finishAttack moveTime", self.soldier.sid, self.moveTime)
     self.moveTime = nil
     self.isHead = false 

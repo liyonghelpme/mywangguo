@@ -85,6 +85,11 @@ function Camera:update(diff)
         local smooth = diff*CAMERA_SMOOTH
         smooth = math.min(smooth, 1)
         local dx = math.abs(pos[1]-self.moveTarget)
+        --[[
+        if dx <= 5 then
+            self.inFastMove = false
+        end
+        --]]
         local px = pos[1]*(1-smooth)+self.moveTarget*smooth
         self.startPoint = {px, pos[2]}
         --调整 battleScene 位置主要是为了 背景多个层次摆放位置 渲染
@@ -133,6 +138,7 @@ end
 --快速从a 移动到 b 战斗场景
 function Camera:fastMoveTo(a, b)
     print("fastMoveTo", simple.encode(a), simple.encode(b))
+    --self.inFastMove = true
     self.startPoint = a
     self.moveTarget = b
 end

@@ -94,6 +94,7 @@ function FightLayer2:checkOneDead()
     print("check OneDead", left, right)
     return true
 end
+--一方失败了则 停止运动镜头
 function FightLayer2:stopCameraMove(left, right)
     local vs = self.mainCamera.renderTexture:isVisible()
     if not vs then
@@ -348,26 +349,27 @@ function FightLayer2:footScript(diff)
         end
     end
 
-    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil then
-        local ls = self.leftCamera.startPoint[1]
+    local ls = self.leftCamera.startPoint[1]
+    if math.abs(ls-self.leftCamera.moveTarget) < 5 then
+        --最简单的箭头效果 图片
+        if not self.skillYet then
+            self.skillYet = true
+            self:initSkill()
+        end
+
+        if self.skillOver and not self.animateYet then
+            self.animateYet = true
+            for k, v in ipairs(self.allSoldiers) do
+                --开始跑步和攻击
+                v:doRunAndAttack(self.day)
+            end
+        end
+    end
+
+    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil and self.skillYet then
         --镜头移动移动到目标位置了 则播放跑步动画
         --播放 技能 效果 skillEffect Yet 
         --skillEffect Yet over 接着 进入正题
-        if math.abs(ls-self.leftCamera.moveTarget) < 5 then
-            --最简单的箭头效果 图片
-            if not self.skillYet then
-                self.skillYet = true
-                self:initSkill()
-            end
-
-            if self.skillOver and not self.animateYet then
-                self.animateYet = true
-                for k, v in ipairs(self.allSoldiers) do
-                    --开始跑步和攻击
-                    v:doRunAndAttack(self.day)
-                end
-            end
-        end
 
         local vs = getVS()
         local ls = -self.leftCamera.startPoint[1]
@@ -377,8 +379,8 @@ function FightLayer2:footScript(diff)
         local lp = getPos(self.leftCamera.renderTexture)
         local rp = getPos(self.rightCamera.renderTexture)
         print("leftCamera rightCamera", ls, rs, lw, rw, simple.encode(lp), simple.encode(rp))
-        --镜头相交
-        if not self.mergeYet and not self.clone then
+        --镜头相交 结束了第一个阶段 镜头快速移动 skillYet
+        if not self.mergeYet and not self.clone and self.skillYet then
             if ls <= rs+rw and ls+lw >= rs then
                 print("merge left right in foot")
                 self:mergeCamera()
@@ -836,15 +838,24 @@ function FightLayer2:magicScript(diff)
                     self:cloneRightCamera()
                 end
             end
+        --右侧没有士兵则镜头相交则合并 
         elseif not right then
             if not self.mergeYet then
+                --[[
                 if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
                     self:mergeCamera()
                 end
+                --]]
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --并不clone 直接攻击即可
+                --[[
                 if (ls+lw) >= bmid+vs.width/2 then
                     self:cloneLeftCamera()
                 end
+                --]]
             end
         else
             --镜头相交
@@ -979,7 +990,7 @@ function FightLayer2:cavalryScript(diff)
 
     --模仿trace 步兵  merge 
     --模仿弓箭 split
-    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil and not self.finishAttack then
+    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil and not self.finishAttack and self.skillYet then
         local vs = getVS()
         local ls = -self.leftCamera.startPoint[1]
         local rs = -self.rightCamera.startPoint[1]
@@ -994,28 +1005,46 @@ function FightLayer2:cavalryScript(diff)
         --左侧没有弓箭手
         --战场中心不是 WIDTH/2 而是 LEFTWIDHT + vs.width*1.5/2 的位置
         local bmid = self.leftWidth+vs.width*1.5/2
+        --因为我的镜头没有放到屏幕中心而是放到了对方部队的头部
+        --骑兵只有冲过去才合并镜头
         if not left then
             print("magic left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
             if not self.mergeYet then
+                --[[
                 if rs <= bmid and rs > bmid-vs.width/2 then
                     print("magic no left arrow so merge Right Camera ")
                     self:mergeRightCamera()
                 end
+                --]]
+
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --[[
                 if rs <= bmid-vs.width/2 then
                     print("magic no left arrow begin clone Right Camera")
                     self:cloneRightCamera()
                 end
+                --]]
             end
         elseif not right then
             if not self.mergeYet then
+                --[[
                 if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
                     self:mergeCamera()
                 end
+                --]]
+
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --[[
                 if (ls+lw) >= bmid+vs.width/2 then
                     self:cloneLeftCamera()
                 end
+                --]]
             end
         else
             --镜头相交
@@ -1099,6 +1128,7 @@ end
 --当前的命令队列 cmdList 解释命令 执行命令  
 function FightLayer2:arrowScript(diff)
     if self.passTime == 0 then
+        print("arrowScript")
         local ad, left, right = self:checkOneArrowDead()
         if left == 0 and right == 0 then
             self.day = 2
@@ -1135,7 +1165,7 @@ function FightLayer2:arrowScript(diff)
     end
     self.passTime = self.passTime+diff
     --两个镜头已经分离了再合并
-    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil then
+    if self.leftCamera.startPoint ~= nil and self.rightCamera.startPoint ~= nil and self.skillYet then
         local vs = getVS()
         local ls = -self.leftCamera.startPoint[1]
         local rs = -self.rightCamera.startPoint[1]
@@ -1150,28 +1180,44 @@ function FightLayer2:arrowScript(diff)
         --左侧没有弓箭手
         --战场中心不是 WIDTH/2 而是 LEFTWIDHT + vs.width*1.5/2 的位置
         local bmid = self.leftWidth+vs.width*1.5/2
+        --当一方没有弓箭的时候 进行合并
         if not left then
             print("left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
             if not self.mergeYet then
+                --[[
                 if rs <= bmid and rs > bmid-vs.width/2 then
                     print("no left arrow so merge Right Camera ")
                     self:mergeRightCamera()
                 end
+                --]]
+
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --[[
                 if rs <= bmid-vs.width/2 then
                     print("no left arrow begin clone Right Camera")
                     self:cloneRightCamera()
                 end
+                --]]
             end
         elseif not right then
             if not self.mergeYet then
+                --[[
                 if (ls+lw) >= bmid and (ls+lw) < bmid+vs.width/2 then
                     self:mergeCamera()
                 end
+                --]]
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --[[
                 if (ls+lw) >= bmid+vs.width/2 then
                     self:cloneLeftCamera()
                 end
+                --]]
             end
         else
             --镜头相交
@@ -1294,31 +1340,6 @@ function FightLayer2:finishArrow()
         self:clearState()
     end
 end
-
---追踪 魔法飞行
---[[
-function FightLayer2:traceMagic(mag)
-    if .color == 0 then
-        if self.mag ~= nil then
-            local ap = getPos(self.arrow.bg)
-            local np = getPos(arr.bg)
-            --按照左侧追踪 我方镜头表现
-            if np[1] > ap[1] then
-                if DEBUG_FIGHT then
-                    setColor(self.arrow.changeDirNode, {255, 0, 0})
-                end
-                self.arrow = arr
-                if DEBUG_FIGHT then
-                    setColor(self.arrow.changeDirNode, {0, 255, 0})
-                end
-            else
-            end
-
-        else
-        end
-    end
-end
---]]
 
 --可能有多个 arrow
 --先追踪 我方的弓箭

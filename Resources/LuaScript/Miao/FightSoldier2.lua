@@ -259,7 +259,7 @@ function FightSoldier2:updateLabel()
 
 
     --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
-    self.sLabel:setString(self.arrowHurt.." "..self.health)
+    self.sLabel:setString(self.arrowHurt.." "..self.health.."de"..str(self.dead))
 end
 function FightSoldier2:findFastTarget()
     local temp
@@ -937,7 +937,16 @@ function FightSoldier2:doMoveTo(diff)
                 self.oldDis = cdis
 
                 if dis > FIGHT_OFFX then
-                    setPos(self.bg, {p[1]+mx, p[2]})
+                    local tx = p[1]+mx
+                    --距离要大于FIGHT_OFFX
+                    if math.abs(mp[1]-tx) < FIGHT_OFFX then
+                        if self.color == 0 then
+                            tx = mp[1]-FIGHT_OFFX
+                        else
+                            tx = mp[1]+FIGHT_OFFX
+                        end
+                    end
+                    setPos(self.bg, {tx, p[2]})
                 end
 
             else
