@@ -103,6 +103,30 @@ function MiaoBuildLayer:testCat()
     self:addPeople(21)
     self:addPeople(22)
 end
+
+function MiaoBuildLayer:initCat()
+    for k, v in ipairs(Logic.pdata) do
+        v.needAppear = false
+        v.id = v.kind
+        local p = MiaoPeople.new(self, v)
+        Logic.farmPeople[v.pid] = p
+        --table.insert(Logic.farmPeople, p)
+
+        self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+        local pos = normalizePos({v.px, v.py}, 1, 1)
+        p:setPos(pos)
+        p:setZord()
+        self.mapGridController:addSoldier(p)
+        if v.hid ~= 0 then
+            p.myHouse = self.mapGridController.bidToBuilding[v.hid]
+            if p.myHouse ~= nil then
+                p.myHouse:setOwner(p)
+            end
+        end
+    end
+end
+
+--[[
 function MiaoBuildLayer:initCat()
     if Logic.inNew then
         self:addPeople(3)
@@ -132,6 +156,8 @@ function MiaoBuildLayer:initCat()
         end
     end
 end
+--]]
+
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
     local width = self.scene.width
@@ -160,7 +186,7 @@ function MiaoBuildLayer:initBuild()
     local mbid = 0
     print("bdata is what", #Logic.bdata)
     for k, v in ipairs(Logic.bdata) do
-        if v.kind == 2 then
+        --if v.kind == 2 then
         local dir = v.dir or 0
         v.dir = 1-dir
         v.id = v.kind
@@ -181,13 +207,12 @@ function MiaoBuildLayer:initBuild()
         b:setPos(p)
         --道路需要调用这个调整斜坡
         b.funcBuild:whenColNow()
-        
         b.funcBuild:adjustRoad()
         b:finishBuild()
         --调整建筑物方向
         b:doSwitch()
         mbid = math.max(v.bid, mbid)
-        end
+        --end
     end
     mbid = mbid+1
     Logic.maxBid = mbid
@@ -435,11 +460,12 @@ function MiaoBuildLayer:initRoad()
     u:setBoolForKey("initRoadYet", true)
 end
 function MiaoBuildLayer:addPeople(param)
-    local p = MiaoPeople.new(self, {id=param})
+    local p = MiaoPeople.new(self, {id=param, pid=#Logic.farmPeople+1})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
     
     local data = Logic.people[param]
     local pos
+    --村民需要设定pid值
     if data.kind == 1 then
         table.insert(Logic.farmPeople, p)
         local vs = getVS()

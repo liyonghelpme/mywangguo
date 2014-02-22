@@ -3,6 +3,8 @@ require "myMap.FightPage"
 require "myMap.FightMenu"
 FightMap = class()
 function FightMap:ctor()
+    self.name = "FightMap"
+
     initPlist()
 
     self.bg = CCScene:create()

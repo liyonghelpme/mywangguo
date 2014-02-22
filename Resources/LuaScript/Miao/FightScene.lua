@@ -2,6 +2,8 @@ require "Miao.FightLayer2"
 require "Miao.FightMenu2"
 FightScene = class()
 function FightScene:ctor()
+    self.name = "FightScene"
+
     initCityData()
     --local testData = CityData[17]
     local ms = Logic.soldiers 

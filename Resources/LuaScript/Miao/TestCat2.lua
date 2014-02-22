@@ -41,7 +41,7 @@ function Cat2:initView()
     --在当前基础上再缩小0.8 倍率 0.64 * 0.8 = 0.512 尺寸 然后是位置
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 0.8), {0, SIZEY})
     
-    if self.people.privData.needAppear == false then
+    if self.people.needAppear == false then
     else
         self.people.changeDirNode:runAction(CCAnimate:create(ani))
     end

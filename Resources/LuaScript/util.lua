@@ -1879,3 +1879,10 @@ function initPlist()
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
 end
+function intToNil(i)
+    if i == 0 then
+        return nil
+    else
+        return i
+    end
+end

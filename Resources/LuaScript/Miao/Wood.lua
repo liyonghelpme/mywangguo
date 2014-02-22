@@ -27,6 +27,7 @@ function Wood:updateStage(diff)
     if self.lastTime > 1 then
         if self.baseBuild.state == BUILD_STATE.FREE then
             self.baseBuild.lifeStage = self.baseBuild.lifeStage+diff
+            self.baseBuild:setDirty()
             --4 个阶段 每8s 一个阶段
             local s = math.floor(self.baseBuild.lifeStage/8)
             s = math.min(s, 3)
@@ -46,6 +47,7 @@ function Wood:updateGoods()
     if self.baseBuild.workNum == 0 then
         self.showState = -1
         self.baseBuild.lifeStage = 0
+        self.baseBuild:setDirty()
     end
 
     local show = math.floor(3*self.baseBuild.workNum/self.baseBuild.maxNum)

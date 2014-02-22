@@ -38,6 +38,13 @@ function MiaoBuild:setWork(wd)
     self.workNum = wd.workNum or 0
     self.funcBuild:updateGoods()
 end
+
+function MiaoBuild:setDirty()
+    if not global.director.curScene.initDataing then
+        self.dirty = true
+    end
+end
+
 function MiaoBuild:ctor(m, data)
     print("init building", simple.encode(data))
     self.map = m
@@ -49,6 +56,7 @@ function MiaoBuild:ctor(m, data)
     self.operate = true
     self.inStage = true
     self.blockId = nil
+    self.dirty = false
     --道路的状态
     self.value = 0
     self.name = 'b'..math.random(10000)
@@ -350,15 +358,10 @@ function MiaoBuild:doSwitch()
     end
 
     local sz = self.changeDirNode:getContentSize()
-    --[[
-    if self.dir == 0 then
-        setPos(setAnchor(self.changeDirNode, {(self.data.ax)/sz.width, (sz.height-self.data.ay)/sz.height}), {0, SIZEY})
-    else
-        setPos(setAnchor(self.changeDirNode, {(sz.width-self.data.ax)/sz.width, (sz.height-self.data.ay)/sz.height}), {0, SIZEY})
-    end
-    --]]
     self.funcBuild:doSwitch()
     self.map.mapGridController:updateMap(self)
+
+    self:setDirty()
 end
 
 function MiaoBuild:clearState()
@@ -775,6 +778,8 @@ function MiaoBuild:setPos(p)
     self.bg:setZOrder(zord)
     self.funcBuild:setPos()
     self.zord = zord
+
+    self:setDirty()
 end
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
@@ -1015,17 +1020,20 @@ end
 function MiaoBuild:takeWorkNum(n)
     self.workNum = self.workNum-n
     self.funcBuild:updateGoods()
+    self:setDirty()
 end
 
 function MiaoBuild:takeAllWorkNum()
     self.workNum = 0
     self.funcBuild:updateGoods()
+    self:setDirty()
 end
 function MiaoBuild:changeWorkNum(n)
     self.workNum = self.workNum+n
     self.workNum = math.min(self.workNum, self.maxNum)
     print("changeWorkNum", n, self.workNum)
     self.funcBuild:updateGoods()
+    self:setDirty()
 end
 --如果没有确认建造则不要移除效果
 function MiaoBuild:removeSelf()
@@ -1081,6 +1089,7 @@ function MiaoBuild:setGoodsKind(k)
         self.goodsKind = k
         self.workNum = 0
         self.funcBuild:updateGoods()
+        self:setDirty()
     end
 end
 function MiaoBuild:showNoGoods()

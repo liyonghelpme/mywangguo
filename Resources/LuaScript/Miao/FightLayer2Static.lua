@@ -173,7 +173,7 @@ function FightLayer2:oneFail()
         print("oneFail checkWin")
         if Logic.newVillage then
             Logic.newVillage = false
-            print("new Village win inform")
+            print("new Village win inform", global.director.curScene.name)
             global.director.curScene:newVillageWin(win)
         else
             if global.director.curScene.checkWin == nil then
