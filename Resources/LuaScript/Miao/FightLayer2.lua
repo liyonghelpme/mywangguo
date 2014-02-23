@@ -679,6 +679,7 @@ function FightLayer2:initSoldier()
     hData = self.allHero[3]
     local footWidth = #self.myFootNum
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum-1
+    --优先级反向加入即可
     for k, v in ipairs(self.myMagicNum) do
         local temp = {}
         table.insert(self.myMagicSoldiers, temp)
@@ -727,6 +728,16 @@ function FightLayer2:initSoldier()
         end
         colId = colId-1
     end
+    
+    --反向加入magic的更新函数
+    --或者等待所有的children 重新加入一次enterScene 调用
+    for k, v in ipairs(reverse(self.myMagicSoldiers)) do
+        for ek, ev in ipairs(v) do
+            if not ev.dead then
+                registerUpdate(ev) 
+            end
+        end
+    end
 
     local footWidth = #self.eneFootNum
     --更新状态 检测 myArrow eneArrowSoldiers
@@ -761,6 +772,13 @@ function FightLayer2:initSoldier()
         colId = colId+1
     end
 
+    for k, v in ipairs(reverse(self.eneMagicSoldiers)) do
+        for ek, ev in ipairs(v) do
+            if not ev.dead then
+                registerUpdate(ev) 
+            end
+        end
+    end
 
 
     --士兵死亡动态调整 左右两侧

@@ -111,7 +111,11 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
 
     self.funcSoldier:initShadow()
 
-    self.needUpdate = true
+    --调度之后所有的flush一次优先级队列即可
+    --魔法师的优先级需要手动修改
+    if self.id ~= 2 then
+        self.needUpdate = true
+    end
     registerEnterOrExit(self)
     
     if DEBUG_FIGHT then
@@ -132,6 +136,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
         setPos(self.colLabel, {0, 130})
     end
 end
+
+
 
 function FightSoldier2:finishPose()
     self.finPos = true
@@ -191,6 +197,7 @@ function FightSoldier2:showPose(x)
 end
 --]]
 
+--只会影响渲染优先级不会影响更新的优先级的
 function FightSoldier2:setZord()
     local p = getPos(self.bg)
     --左侧士兵col 越大 zord 越 大 优先级越高
