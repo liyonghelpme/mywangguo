@@ -340,6 +340,71 @@ function FightCavalry:findCloseEnemy()
     return ene, firstEnable
 end
 
+function FightCavalry:doNearMove(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.NEAR_MOVE then
+        --近战攻击的步兵如果死亡了 则 重新寻找新的FOOT
+        if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+            self.soldier.attackTarget = self:findNearFoot()
+        --
+        else
+            if not self.inMove then
+                self.inMove = true
+                self.soldier.changeDirNode:stopAction(self.idleAction)
+                self.moveAni = repeatForever(CCAnimate:create(self.soldier.runAni))
+                self.soldier.changeDirNode:runAction(self.moveAni)
+            end
+            
+            local mx = self.soldier:getSpeed()*diff
+            local p = getPos(self.soldier.bg)
+            local mp = getPos(self.soldier.attackTarget.bg)
+            
+            if self.soldier:getDis(p, mp) > FIGHT_NEAR_RANGE then
+                local sceneLeft = self.soldier.map.mainCamera.startPoint[1]
+                local vs = getVS()
+                --屏幕中心
+                local midScene = -sceneLeft+vs.width/2
+                local hr = FIGHT_NEAR_RANGE/2
+                --print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
+                --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
+                local tx = p[1]+mx
+                if math.abs(mp[1]-tx) < FIGHT_OFFX then
+                    if self.color == 0 then
+                        tx = mp[1]-FIGHT_OFFX
+                    else
+                        tx = mp[1]+FIGHT_OFFX
+                    end
+                end
+
+                if self.soldier.color == 0 then
+                    if p[1] < midScene-hr then
+                        setPos(self.soldier.bg, {tx, p[2]})
+                    end
+                else
+                    if p[1] > midScene+hr then
+                        setPos(self.soldier.bg, {tx, p[2]})
+                    end
+                end
+            else
+                self.inMove = false
+                self.soldier.changeDirNode:stopAllActions()
+                self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                print("NEAR_MOVE NEAR_ATTACK")
+                self.oneAttack = false
+
+                local rd = math.random(2)
+                local aa 
+                if rd == 1 then
+                    aa = self.soldier.attackA
+                else
+                    aa = self.soldier.attackB
+                end
+                self.attackAni = sequence({CCAnimate:create(aa), callfunc(self, self.doHarm)})
+                self.soldier.changeDirNode:runAction(self.attackAni)
+            end
+        end
+    end
+end
+
 --后排的 步兵 只是 移动靠近 我方士兵
 function FightCavalry:doFree(diff)
     if self.soldier.state == FIGHT_SOL_STATE.FREE then
@@ -384,6 +449,7 @@ function FightCavalry:doFree(diff)
                     local dis = self.soldier:getDis(p, mp) 
                     --准备近战攻击步兵
                     print("cavalry dis is",  self.soldier.sid, dis)
+                    --[[
                     if dis <= FIGHT_NEAR_RANGE then
                         self.soldier.changeDirNode:stopAllActions()
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
@@ -402,12 +468,18 @@ function FightCavalry:doFree(diff)
                         --self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
                         --self.soldier.changeDirNode:runAction(self.attackAni)
                     --足够靠近才反击
-                    elseif dis < 400 then
+                    else
+                    --]]
+                    if dis < 200 and self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE then
+                        self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
+                        --[[
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可
                         if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
                             self.soldier:moveOneStep(diff)
                         end
+                        --]]
                     end
+
                 --移动靠近我的 骑兵 
                 elseif self.soldier.attackTarget.id == self.soldier.id then
                     self.soldier:moveOneStep(diff)
@@ -425,7 +497,7 @@ function FightCavalry:doNearAttack(diff)
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
             if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
-                self.soldier.state = FIGHT_SOL_STATE.FREE
+                self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()
                 self.soldier.changeDirNode:runAction(self.idleAction)

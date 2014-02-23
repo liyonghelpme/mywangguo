@@ -216,7 +216,7 @@ function FightMagic:doNearAttack(diff)
             --nearAttack 结束的时候 才会找下一个
             --近战攻击 等待下一个 靠近
             if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
-                self.soldier.state = FIGHT_SOL_STATE.NEXT_TARGET
+                self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
                 self.idleAction = repeatForever(CCAnimate:create(self.soldier.idleAni))
                 self.soldier.changeDirNode:stopAllActions()
                 self.soldier.changeDirNode:runAction(self.idleAction)
@@ -276,6 +276,7 @@ function FightMagic:waitAttack(diff)
                         if dy < 5 then
                             self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
                         end
+                    --[[
                     elseif dis <= FIGHT_NEAR_RANGE then
                         self.soldier.changeDirNode:stopAllActions()
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
@@ -283,12 +284,14 @@ function FightMagic:waitAttack(diff)
                         self.oneAttack = false
                         self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
                         self.soldier.changeDirNode:runAction(self.attackAni)
+                    --]]
                     --足够靠近才反击
                     elseif dis < 400 then
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可
-                        if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
-                            self.soldier:moveOneStep(diff)
-                        end
+                        --if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
+                        self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
+                        --self.soldier:moveOneStep(diff)
+                        --end
                     end
 
                 --移动靠近我的 弓箭手 
@@ -301,6 +304,54 @@ function FightMagic:waitAttack(diff)
         end
     end
 end
+--控制在屏幕中心位置发生战斗如果
+function FightMagic:doNearMove(diff)
+    if self.soldier.state == FIGHT_SOL_STATE.NEAR_MOVE then
+        if self.soldier.attackTarget == nil or self.soldier.attackTarget.dead then
+            self.soldier.attackTarget = self:findNearFoot()
+        else
+            if not self.inMove then
+                self.inMove = true
+                --self.soldier.changeDirNode:stopAction(self.idleAction)
+                self.soldier.changeDirNode:stopAllActions()
+                self.moveAni = repeatForever(CCAnimate:create(self.soldier.runAni))
+                self.soldier.changeDirNode:runAction(self.moveAni)
+            end
+            
+            local mx = self.soldier:getSpeed()*diff
+            local p = getPos(self.soldier.bg)
+            local mp = getPos(self.soldier.attackTarget.bg)
+            
+            if self.soldier:getDis(p, mp) > FIGHT_NEAR_RANGE then
+                local sceneLeft = self.soldier.map.mainCamera.startPoint[1]
+                local vs = getVS()
+                --屏幕中心
+                local midScene = -sceneLeft+vs.width/2
+                local hr = FIGHT_NEAR_RANGE/2
+                --print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
+                --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
+                if self.soldier.color == 0 then
+                    if p[1] < midScene-hr then
+                        setPos(self.soldier.bg, {p[1]+mx, p[2]})
+                    end
+                else
+                    if p[1] > midScene+hr then
+                        setPos(self.soldier.bg, {p[1]+mx, p[2]})
+                    end
+                end
+            else
+                self.inMove = false
+                self.soldier.changeDirNode:stopAllActions()
+                self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
+                print("NEAR_MOVE NEAR_ATTACK")
+                self.oneAttack = false
+                self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
+                self.soldier.changeDirNode:runAction(self.attackAni)
+            end
+        end
+    end
+end
+
 
 function FightMagic:findNearCavalry()
     local dx = 999999
