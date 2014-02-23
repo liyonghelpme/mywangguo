@@ -443,13 +443,14 @@ Logic.inSell = {
     stone=true,
 }
 
+--[[
 SoldierAbility = {
     {attack=40, defense=30, health=30},
     {attack=35, defense=10, health=15},
     {attack=50, defense=10, health=10},
     {attack=40, defense=30, health=30},
 }
---[[
+--]]
 --基本上是 生命值数量 起作用
 SoldierAbility = {
     {attack=10, defense=1, health=45},
@@ -457,7 +458,6 @@ SoldierAbility = {
     {attack=25, defense=1, health=15},
     {attack=20, defense=1, health=45},
 }
---]]
 
 IncEffect = {
     {attack=2, defense=1, health=1},

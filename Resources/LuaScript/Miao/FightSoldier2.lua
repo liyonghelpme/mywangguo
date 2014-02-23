@@ -949,12 +949,30 @@ function FightSoldier2:doMoveTo(diff)
                     setPos(self.bg, {tx, p[2]})
                 end
 
+            --根据屏幕数据 靠近屏幕中心攻击敌方
             else
                 local mx = self:getSpeed()*diff
                 local p = getPos(self.bg)
                 local mp = getPos(self.attackTarget.bg)
+
                 if self:getDis(p, mp) > FIGHT_NEAR_RANGE then
-                    setPos(self.bg, {p[1]+mx, p[2]})
+                    --向屏幕中心移动
+                    local sceneLeft = self.map.mainCamera.startPoint[1]
+                    local vs = getVS()
+                    --屏幕中心
+                    local midScene = -sceneLeft+vs.width/2
+                    local hr = FIGHT_NEAR_RANGE/2
+                    print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
+                    --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
+                    if self.color == 0 then
+                        if p[1] < midScene-hr then
+                            setPos(self.bg, {p[1]+mx, p[2]})
+                        end
+                    else
+                        if p[1] > midScene+hr then
+                            setPos(self.bg, {p[1]+mx, p[2]})
+                        end
+                    end
                 --开打
                 else
                     print("begin to attack with near enemy")
@@ -991,25 +1009,6 @@ function FightSoldier2:doAttack(diff)
                 self.moveAni = repeatForever(CCAnimate:create(self.runAni))
                 self.changeDirNode:runAction(self.moveAni)
 
-                --[[
-                if self.color == 1 then
-                    if self.attackTarget.left ~= nil then
-                        self.left = getSidest(self.attackTarget, 'left')
-                        self.attackTarget = self.left
-                    else
-                        self.left = nil
-                        self.attackTarget = nil
-                    end
-                else
-                    if self.attackTarget.right ~= nil then
-                        self.right = getSidest(self.attackTarget, 'right')
-                        self.attackTarget = self.right
-                    else
-                        self.right = nil
-                        self.attackTarget = nil
-                    end
-                end
-                --]]
             else
                 local rd = math.random(2)
                 local aa 

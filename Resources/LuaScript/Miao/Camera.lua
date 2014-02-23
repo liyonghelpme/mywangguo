@@ -84,8 +84,8 @@ function Camera:update(diff)
         --smooth 总是无法达到
         local smooth = diff*CAMERA_SMOOTH
         smooth = math.min(smooth, 1)
-        local dx = math.abs(pos[1]-self.moveTarget)
         --[[
+        local dx = math.abs(pos[1]-self.moveTarget)
         if dx <= 5 then
             self.inFastMove = false
         end
