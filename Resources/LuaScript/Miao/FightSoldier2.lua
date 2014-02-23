@@ -193,7 +193,14 @@ end
 
 function FightSoldier2:setZord()
     local p = getPos(self.bg)
-    self.bg:setZOrder(MAX_BUILD_ZORD-p[2])
+    --左侧士兵col 越大 zord 越 大 优先级越高
+    --右侧士兵相反
+    --update 执行的顺序
+    if self.color == 0 then
+        self.bg:setZOrder(MAX_BUILD_ZORD-p[2]+self.col)
+    else
+        self.bg:setZOrder(MAX_BUILD_ZORD-p[2]-self.col)
+    end
 end
 function FightSoldier2:setDir()
     local scaY = getScaleY(self.changeDirNode)

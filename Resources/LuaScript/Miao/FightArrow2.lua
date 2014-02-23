@@ -38,11 +38,10 @@ end
 function FightArrow2:startAttack()
     local ene, firstEnable = self:findNearEnemy()
     print("Arrow start Attack", self.soldier.sid, ene, firstEnable)
-    self.soldier.attackTarget = ene
     if ene == nil then
         ene = firstEnable
     end
-
+    self.soldier.attackTarget = ene
     print("near ene", ene, firstEnable)
     if ene ~= nil then
         print("ene sid", ene.sid)

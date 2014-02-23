@@ -86,10 +86,10 @@ function FightMagic:findNearEnemy()
 end
 function FightMagic:startAttack()
     local ene, firstEnable = self:findNearEnemy()
-    self.soldier.attackTarget = ene
     if ene == nil then
         ene = firstEnable
     end
+    self.soldier.attackTarget = ene
     if ene ~= nil then
         print("magic ene sid", ene.sid)
         self.soldier.changeDirNode:stopAllActions()

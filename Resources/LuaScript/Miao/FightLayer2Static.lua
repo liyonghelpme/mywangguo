@@ -764,6 +764,64 @@ function FightLayer2:checkOneMagicDead()
     print("check Magic Dead", left, right)
     return true, left, right
 end
+
+--根据findNearEnemy 的结果来做即可
+function FightLayer2:getRightHead()
+    local eneList = {}
+    table.insert(eneList, self.eneSoldiers)
+    table.insert(eneList, self.eneMagicSoldiers)
+    table.insert(eneList, self.eneArrowSoldiers)
+    table.insert(eneList, self.eneCavalrySoldiers)
+
+    local minX = nil 
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                if not cv.dead then
+                    minX = getPos(cv.bg)[1]
+                    break
+                end
+            end
+        end
+        if minX ~= nil then
+            return minX 
+        end
+    end
+    return minX
+end
+function FightLayer2:getLeftHead()
+    local eneList = {}
+    table.insert(eneList, self.mySoldiers)
+    table.insert(eneList, self.myMagicSoldiers)
+    table.insert(eneList, self.myArrowSoldiers)
+    table.insert(eneList, self.myCavalrySoldiers)
+
+    local minX = nil 
+    for ek, ev in ipairs(eneList) do
+        for k, v in ipairs(ev) do
+            for ck, cv in ipairs(v) do
+                if not cv.dead then
+                    minX = getPos(cv.bg)[1]
+                    break
+                end
+            end
+        end
+        if minX ~= nil then
+            return minX 
+        end
+    end
+    return minX
+end
+function FightLayer2:getLeftArrowHead()
+    for k, v in ipairs(self.myArrowSoldiers) do
+        for ck, cv in ipairs(v) do
+            if not cv.dead then
+                return getPos(cv.bg)[1]
+            end
+        end
+    end
+end
+
 function FightLayer2:magicScript(diff)
     if self.passTime == 0 then
         print("magicScript", self.day, diff)
@@ -773,14 +831,21 @@ function FightLayer2:magicScript(diff)
             return
         end
 
-        local p = getPos(self.battleScene)
+        local p
+        if self.leftCamera.startPoint ~= nil then
+            p = copyTable(self.leftCamera.startPoint)
+        else
+            p = getPos(self.battleScene)
+        end
+
         local vs = getVS()
         --快速回到 双方部队头部
         --这种类型部队的头部
         if left == 0 then
-            self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
+            --self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
             self:showLeftCamera()
-            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            --self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            self.leftCamera:fastMoveTo(p, -(self:getLeftHead()+FIGHT_OFFX-vs.width/2)) 
         else
             local fw = #self.myFootNum*FIGHT_OFFX
             local bp = self.leftWidth-fw
@@ -792,10 +857,11 @@ function FightLayer2:magicScript(diff)
             --然后恢复场景位置
             self.leftCamera:fastMoveTo(p, self.moveTarget) 
         end
-
+        --右侧没有魔法师则显示右侧敌方部队当前的头部
         if right == 0 then
             self:showRightCamera()
-            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+            --self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self:getRightHead()-FIGHT_OFFX)) 
         else
             --右侧镜头位置当前屏幕的左侧
             self:showRightCamera()
@@ -828,15 +894,23 @@ function FightLayer2:magicScript(diff)
         if not left then
             print("magic left not arrow rightCamera ", rs, bmid, self.WIDTH/2, self.WIDTH/2-vs.width/2, self.mergeYet, self.clone)
             if not self.mergeYet then
+                --[[
                 if rs <= bmid and rs > bmid-vs.width/2 then
                     print("magic no left arrow so merge Right Camera ")
                     self:mergeRightCamera()
                 end
+                --]]
+
+                if ls < rs+rw and ls+lw > rs then
+                    self:mergeCamera()
+                end
             else
+                --[[
                 if rs <= bmid-vs.width/2 then
                     print("magic no left arrow begin clone Right Camera")
                     self:cloneRightCamera()
                 end
+                --]]
             end
         --右侧没有士兵则镜头相交则合并 
         elseif not right then
@@ -1142,15 +1216,16 @@ function FightLayer2:arrowScript(diff)
             self:showLeftCamera()
             self.leftCamera:fastMoveTo(p, self.moveTarget) 
         else
-            local fw = (#self.myMagicNum+#self.myFootNum)*FIGHT_OFFX
-            local bp = self.leftWidth-fw
+            --local fw = (#self.myMagicNum+#self.myFootNum)*FIGHT_OFFX
+            --local bp = self.leftWidth-fw
             --该种士兵的第一行的头部加上 一定偏移值 第一排要显示完全
-            self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
-            print("self.leftWidth ", self.moveTarget)
+            --self.moveTarget = -(bp-(vs.width/2-FIGHT_HEAD_OFF))
+            --print("self.leftWidth ", self.moveTarget)
             self:showLeftCamera() 
             --快速移动到 镜头到场景某个位置 同时 修正 battleScene 中相关对象的位置
             --然后恢复场景位置
-            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            --self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            self.leftCamera:fastMoveTo(p, -(self:getLeftArrowHead()+FIGHT_OFFX-vs.width/2)) 
         end
         if right == 0 then
             self:showRightCamera()
