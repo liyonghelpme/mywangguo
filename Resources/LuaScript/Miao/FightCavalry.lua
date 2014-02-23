@@ -358,7 +358,7 @@ function FightCavalry:doNearMove(diff)
             local p = getPos(self.soldier.bg)
             local mp = getPos(self.soldier.attackTarget.bg)
             
-            if self.soldier:getDis(p, mp) > FIGHT_NEAR_RANGE then
+            if self.soldier:getDis(p, mp) > FIGHT_NEAR_RANGE+math.abs(mx) then
                 local sceneLeft = self.soldier.map.mainCamera.startPoint[1]
                 local vs = getVS()
                 --屏幕中心
@@ -367,11 +367,11 @@ function FightCavalry:doNearMove(diff)
                 --print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
                 --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
                 local tx = p[1]+mx
-                if math.abs(mp[1]-tx) < FIGHT_OFFX then
+                if math.abs(mp[1]-tx) < FIGHT_NEAR_RANGE then
                     if self.color == 0 then
-                        tx = mp[1]-FIGHT_OFFX
+                        tx = mp[1]-FIGHT_NEAR_RANGE
                     else
-                        tx = mp[1]+FIGHT_OFFX
+                        tx = mp[1]+FIGHT_NEAR_RANGE
                     end
                 end
 
@@ -470,7 +470,7 @@ function FightCavalry:doFree(diff)
                     --足够靠近才反击
                     else
                     --]]
-                    if dis < 200 and self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE then
+                    if dis < 300 and self.soldier.attackTarget.state ~= FIGHT_SOL_STATE.IN_MOVE then
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
                         --[[
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可

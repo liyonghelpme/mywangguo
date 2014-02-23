@@ -91,6 +91,7 @@ function FightScene:ctor()
     
     --self.soldiers = {{20, 20, 20, 20}, {20, 20, 20, 20}}
     --self.soldiers = {{0, 0, 0, 0}, {5, 0, 0, 0}}
+    --self.soldiers = {{0, 0, 0, 90}, {90, 0, 0, 0}}
     self.soldiers = {{0, 0, 0, 90}, {90, 0, 0, 0}}
     
     --attack defense health 前 中 后 默认都在前方布局  技能属性
