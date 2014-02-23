@@ -778,17 +778,16 @@ function FightLayer2:getRightHead()
         for k, v in ipairs(ev) do
             for ck, cv in ipairs(v) do
                 if not cv.dead then
-                    minX = getPos(cv.bg)[1]
-                    break
+                    --setColor(cv.changeDirNode, {255, 0, 0})
+
+                    return getPos(cv.bg)[1]
                 end
             end
         end
-        if minX ~= nil then
-            return minX 
-        end
     end
-    return minX
 end
+
+--从头开始计算列
 function FightLayer2:getLeftHead()
     local eneList = {}
     table.insert(eneList, self.mySoldiers)
@@ -796,26 +795,32 @@ function FightLayer2:getLeftHead()
     table.insert(eneList, self.myArrowSoldiers)
     table.insert(eneList, self.myCavalrySoldiers)
 
-    local minX = nil 
     for ek, ev in ipairs(eneList) do
         for k, v in ipairs(ev) do
             for ck, cv in ipairs(v) do
                 if not cv.dead then
-                    minX = getPos(cv.bg)[1]
-                    break
+                    setColor(cv.changeDirNode, {255, 0, 0})
+                    return getPos(cv.bg)[1]
                 end
             end
         end
-        if minX ~= nil then
-            return minX 
-        end
     end
-    return minX
 end
+
 function FightLayer2:getLeftArrowHead()
     for k, v in ipairs(self.myArrowSoldiers) do
         for ck, cv in ipairs(v) do
             if not cv.dead then
+                return getPos(cv.bg)[1]
+            end
+        end
+    end
+end
+function FightLayer2:getRightArrowHead()
+    for k, v in ipairs(self.eneArrowSoldiers) do
+        for ck, cv in ipairs(v) do
+            if not cv.dead then
+                setColor(cv.changeDirNode, {255, 0, 0})
                 return getPos(cv.bg)[1]
             end
         end
@@ -1209,12 +1214,20 @@ function FightLayer2:arrowScript(diff)
             return
         end
 
-        local p = getPos(self.battleScene)
+        --local p = getPos(self.battleScene)
+        local p
+        if self.leftCamera.startPoint ~= nil then
+            p = copyTable(self.leftCamera.startPoint)
+        else
+            p = getPos(self.battleScene)
+        end
+
         local vs = getVS()
         if left == 0 then
-            self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
+            --self.moveTarget = -(self.leftWidth-(vs.width/2-FIGHT_HEAD_OFF)) 
             self:showLeftCamera()
-            self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            --self.leftCamera:fastMoveTo(p, self.moveTarget) 
+            self.leftCamera:fastMoveTo(p, -(self:getLeftHead()+FIGHT_OFFX-vs.width/2)) 
         else
             --local fw = (#self.myMagicNum+#self.myFootNum)*FIGHT_OFFX
             --local bp = self.leftWidth-fw
@@ -1229,13 +1242,15 @@ function FightLayer2:arrowScript(diff)
         end
         if right == 0 then
             self:showRightCamera()
-            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+            --self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self.WIDTH-self.rightWidth-FIGHT_HEAD_OFF)) 
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self:getRightHead()-FIGHT_OFFX)) 
         else
             --右侧镜头位置当前屏幕的左侧
             self:showRightCamera()
-            local fw = (#self.eneFootNum+#self.eneMagicNum)*FIGHT_OFFX
-            local ahead = self.WIDTH-self.rightWidth+fw
-            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_HEAD_OFF))
+            --local fw = (#self.eneFootNum+#self.eneMagicNum)*FIGHT_OFFX
+            --local ahead = self.WIDTH-self.rightWidth+fw
+            --self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(ahead-FIGHT_HEAD_OFF))
+            self.rightCamera:fastMoveTo({p[1]-vs.width/2-2, p[2]}, -(self:getRightArrowHead()-FIGHT_OFFX))
         end
     end
     self.passTime = self.passTime+diff
@@ -1265,7 +1280,6 @@ function FightLayer2:arrowScript(diff)
                     self:mergeRightCamera()
                 end
                 --]]
-
                 if ls < rs+rw and ls+lw > rs then
                     self:mergeCamera()
                 end
