@@ -1,18 +1,18 @@
 FightCavalry = class(FightFunc)
 function FightCavalry:ctor(s)
     if not self.soldier.isHero then
-        self.soldier.attackA = createAnimation("cat_cavalry_attackA", "cat_cavalry_attackA_%d.png", 0, 16, 1, 1, true)
-        self.soldier.attackB = createAnimation("cat_cavalry_attackB", "cat_cavalry_attackB_%d.png", 0, 20, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_cavalry_run", 'cat_cavalry_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_cavalry_idle", 'cat_cavalry_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_cavalry_dead", 'cat_cavalry_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_cavalry_attackA", "cat_cavalry_attackA_%d.png", 0, 16, 2, 1, true)
+        self.soldier.attackB = createAnimation("cat_cavalry_attackB", "cat_cavalry_attackB_%d.png", 0, 20, 2, 1, true)
+        self.soldier.runAni = createAnimation("cat_cavalry_run", 'cat_cavalry_run_%d.png', 0, 12, 2, 1, true)
+        self.soldier.idleAni = createAnimation("cat_cavalry_idle", 'cat_cavalry_idle_%d.png', 0, 20, 2, 1, true)
+        self.soldier.deadAni = createAnimation("cat_cavalry_dead", 'cat_cavalry_dead_%d.png', 0, 10, 2, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
     else
-        self.soldier.attackA = createAnimation("cat_hero_cavalry_attackA", "cat_hero_cavalry_attackA_%d.png", 0, 16, 1, 1, true)
-        self.soldier.attackB = createAnimation("cat_hero_cavalry_attackB", "cat_hero_cavalry_attackB_%d.png", 0, 20, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_hero_cavalry_run", 'cat_hero_cavalry_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_hero_cavalry_idle", 'cat_hero_cavalry_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_hero_cavalry_dead", 'cat_hero_cavalry_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_hero_cavalry_attackA", "cat_hero_cavalry_attackA_%d.png", 0, 6, 1, 1, true)
+        self.soldier.attackB = createAnimation("cat_hero_cavalry_attackB", "cat_hero_cavalry_attackB_%d.png", 0, 5, 1, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_cavalry_run", 'cat_hero_cavalry_run_%d.png', 0, 5, 1, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_cavalry_idle", 'cat_hero_cavalry_idle_%d.png', 0, 4, 1, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_cavalry_dead", 'cat_hero_cavalry_dead_%d.png', 0, 2, 1, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
     end
 end

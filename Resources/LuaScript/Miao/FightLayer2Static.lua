@@ -779,7 +779,6 @@ function FightLayer2:getRightHead()
             for ck, cv in ipairs(v) do
                 if not cv.dead then
                     --setColor(cv.changeDirNode, {255, 0, 0})
-
                     return getPos(cv.bg)[1]
                 end
             end
@@ -799,7 +798,9 @@ function FightLayer2:getLeftHead()
         for k, v in ipairs(ev) do
             for ck, cv in ipairs(v) do
                 if not cv.dead then
-                    setColor(cv.changeDirNode, {255, 0, 0})
+                    if DEBUG_FIGHT then
+                        setColor(cv.changeDirNode, {255, 0, 0})
+                    end
                     return getPos(cv.bg)[1]
                 end
             end
@@ -820,7 +821,9 @@ function FightLayer2:getRightArrowHead()
     for k, v in ipairs(self.eneArrowSoldiers) do
         for ck, cv in ipairs(v) do
             if not cv.dead then
-                setColor(cv.changeDirNode, {255, 0, 0})
+                if DEBUG_FIGHT then
+                    setColor(cv.changeDirNode, {255, 0, 0})
+                end
                 return getPos(cv.bg)[1]
             end
         end

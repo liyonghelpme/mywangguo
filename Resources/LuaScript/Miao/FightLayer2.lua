@@ -83,6 +83,9 @@ function FightLayer2:convertNumToSoldier(n, h)
     local leftNum = 0
     print("left Number is", n, num, pow, leftNum)
 
+    if pow == 0 then
+        num = 0
+    end
     local curCol
     local totalNum = num+hn
     --前 hn 个是 英雄特殊值
@@ -113,42 +116,6 @@ function FightLayer2:convertNumToSoldier(n, h)
         end
     end
     
-    --[[
-    for i =0, num-1, 1 do
-        local col = math.floor(i/5)
-        local row = math.floor(i%5)
-        if row == 0 then
-            curCol = {}
-            local leftRow = num-col*5
-            --最后剩余的数量 也占用 1行
-            if leftNum > 0 then
-                leftRow = leftRow+1
-            end
-            --剩余数量 居中显示
-            if leftRow < 4 then
-                for pad=0, math.floor((5-leftRow)/2)-1, 1 do
-                    table.insert(curCol, 0)
-                end
-            end
-            table.insert(temp, curCol)
-        end
-        --每个士兵实力5
-        table.insert(curCol, pow)
-    end
-    --]]
-    --保证所有士兵都有left 或者 right连接 至少有一个空列
-    --[[
-    if leftNum > 0 then
-        local col = math.floor(num/5)
-        local row = math.floor(num%5)
-        if row == 0 then
-            --居中显示
-            curCol = {0, 0}
-            table.insert(temp, curCol)
-        end
-        table.insert(curCol, leftNum)
-    end
-    --]]
     --补全当前列
     while #curCol < 5 do
         table.insert(curCol, 0)

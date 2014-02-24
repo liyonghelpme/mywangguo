@@ -35,5 +35,5 @@ void setTextureRect(CCSprite *, CCRect, bool, CCSize);
 void enableShadow(CCLabelTTF *, CCSize , float, float, bool, int r, int g, int b);
 void setFontFillColor(CCLabelTTF *, ccColor3B, bool);
 
-int setGLProgram(CCSprite *, const char *, const char *, const char *);
+int setGLProgram(CCNode *, const char *, const char *, const char *);
 #endif // __CC_EXTENSION_CCNATIVE_H_

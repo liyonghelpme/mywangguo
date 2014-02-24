@@ -1,18 +1,18 @@
 FightFoot = class(FightFunc)
 function FightFoot:ctor(s)
     if not self.soldier.isHero then
-        self.soldier.attackA = createAnimation("cat_foot_attackA", "cat_foot_attackA_%d.png", 0, 14, 1, 1, true)
-        self.soldier.attackB = createAnimation("cat_foot_attackB", "cat_foot_attackB_%d.png", 0, 14, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_foot_idle", 'cat_foot_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_foot_dead", 'cat_foot_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_foot_attackA", "cat_foot_attackA_%d.png", 0, 14, 2, 1, true)
+        self.soldier.attackB = createAnimation("cat_foot_attackB", "cat_foot_attackB_%d.png", 0, 14, 2, 1, true)
+        self.soldier.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 2, 1, true)
+        self.soldier.idleAni = createAnimation("cat_foot_idle", 'cat_foot_idle_%d.png', 0, 20, 2, 1, true)
+        self.soldier.deadAni = createAnimation("cat_foot_dead", 'cat_foot_dead_%d.png', 0, 10, 2, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
     else
-        self.soldier.attackA = createAnimation("cat_hero_foot_attackA", "cat_hero_foot_attackA_%d.png", 0, 16, 1, 1, true)
-        self.soldier.attackB = createAnimation("cat_hero_foot_attackB", "cat_hero_foot_attackB_%d.png", 0, 16, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_hero_foot_run", 'cat_hero_foot_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_hero_foot_idle", 'cat_hero_foot_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_hero_foot_dead", 'cat_hero_foot_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_hero_foot_attackA", "cat_hero_foot_attackA_%d.png", 0, 16, 2, 1, true)
+        self.soldier.attackB = createAnimation("cat_hero_foot_attackB", "cat_hero_foot_attackB_%d.png", 0, 16, 2, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_foot_run", 'cat_hero_foot_run_%d.png', 0, 12, 2, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_foot_idle", 'cat_hero_foot_idle_%d.png', 0, 20, 2, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_foot_dead", 'cat_hero_foot_dead_%d.png', 0, 10, 2, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
 
     end

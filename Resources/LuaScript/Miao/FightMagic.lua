@@ -2,17 +2,17 @@ require "Miao.Magic"
 FightMagic = class(FightFunc)
 function FightMagic:ctor(s)
     if not self.soldier.isHero then
-        self.soldier.attackA = createAnimation("cat_magic_attackA", "cat_magic_attackA_%d.png", 0, 20, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_magic_run", 'cat_magic_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_magic_idle", 'cat_magic_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_magic_dead", 'cat_magic_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_magic_attackA", "cat_magic_attackA_%d.png", 0, 20, 2, 1, true)
+        self.soldier.runAni = createAnimation("cat_magic_run", 'cat_magic_run_%d.png', 0, 12, 2, 1, true)
+        self.soldier.idleAni = createAnimation("cat_magic_idle", 'cat_magic_idle_%d.png', 0, 20, 2, 1, true)
+        self.soldier.deadAni = createAnimation("cat_magic_dead", 'cat_magic_dead_%d.png', 0, 10, 2, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
         self.showMagicTime = 0.76
     else
-        self.soldier.attackA = createAnimation("cat_hero_magic_attackA", "cat_hero_magic_attackA_%d.png", 0, 20, 1, 1, true)
-        self.soldier.runAni = createAnimation("cat_hero_magic_run", 'cat_hero_magic_run_%d.png', 0, 12, 1, 1, true)
-        self.soldier.idleAni = createAnimation("cat_hero_magic_idle", 'cat_hero_magic_idle_%d.png', 0, 20, 1, 1, true)
-        self.soldier.deadAni = createAnimation("cat_hero_magic_dead", 'cat_hero_magic_dead_%d.png', 0, 10, 1, 1, true)
+        self.soldier.attackA = createAnimation("cat_hero_magic_attackA", "cat_hero_magic_attackA_%d.png", 0, 20, 2, 1, true)
+        self.soldier.runAni = createAnimation("cat_hero_magic_run", 'cat_hero_magic_run_%d.png', 0, 12, 2, 1, true)
+        self.soldier.idleAni = createAnimation("cat_hero_magic_idle", 'cat_hero_magic_idle_%d.png', 0, 20, 2, 1, true)
+        self.soldier.deadAni = createAnimation("cat_hero_magic_dead", 'cat_hero_magic_dead_%d.png', 0, 10, 2, 1, true)
         self.soldier.deadAni:setRestoreOriginalFrame(false)
     end
 end

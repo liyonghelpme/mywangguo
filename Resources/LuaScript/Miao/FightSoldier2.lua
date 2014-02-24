@@ -174,28 +174,6 @@ function FightSoldier2:showPose(x)
         end
     end
 end
---[[
-function FightSoldier2:showPose(x)
-    if not self.showYet then
-        local vs = getVS()
-        local p = getPos(self.bg)
-        --print("my pos", p[1], x)
-        self.finPos = false
-        if p[1]-vs.width-50 <= math.abs(x) then
-            if self.map.poseRowNum == self.col then
-                print("pose Act")
-                self:poseAct()
-            elseif self.map.poseRowNum == self.col-1 then
-                if self.map.poseRowTime >= 1 then
-                    self.map.poseRowNum = self.col
-                    self.map.poseRowTime = 0
-                    self:poseAct()
-                end
-            end
-        end
-    end
-end
---]]
 
 --只会影响渲染优先级不会影响更新的优先级的
 function FightSoldier2:setZord()
@@ -968,8 +946,8 @@ function FightSoldier2:doMoveTo(diff)
                 local mx = self:getSpeed()*diff
                 local p = getPos(self.bg)
                 local mp = getPos(self.attackTarget.bg)
-
-                if self:getDis(p, mp) > FIGHT_NEAR_RANGE then
+                local dis = self:getDis(p, mp)
+                if dis > FIGHT_NEAR_RANGE then
                     --向屏幕中心移动
                     local sceneLeft = self.map.mainCamera.startPoint[1]
                     local vs = getVS()
@@ -978,17 +956,24 @@ function FightSoldier2:doMoveTo(diff)
                     local hr = FIGHT_NEAR_RANGE/2
                     print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
                     --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
-                    if self.color == 0 then
-                        if p[1] < midScene-hr then
-                            setPos(self.bg, {p[1]+mx, p[2]})
-                        end
-                    else
-                        if p[1] > midScene+hr then
-                            setPos(self.bg, {p[1]+mx, p[2]})
+                    --当两者距离相差超过300的时候则 忽略掉屏幕中心的限制 努力向前靠近
+                    if dis > 300 or self.footFar then
+                        self.footFar = true  
+                        setPos(self.bg, {p[1]+mx, p[2]})
+                    else   
+                        if self.color == 0 then
+                            if p[1] < midScene-hr then
+                                setPos(self.bg, {p[1]+mx, p[2]})
+                            end
+                        else
+                            if p[1] > midScene+hr then
+                                setPos(self.bg, {p[1]+mx, p[2]})
+                            end
                         end
                     end
                 --开打
                 else
+                    self.footFar = false
                     print("begin to attack with near enemy")
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     self.changeDirNode:stopAction(self.moveAni)
@@ -1048,6 +1033,7 @@ function FightSoldier2:finishAttack()
         removeSelf(self.skillAni)
         self.skillAni = nil
     end
+    self.footFar = false
     --技能恢复生命值 草药
     if not self.dead then
         if self.isHero and self.heroData.skill ~= nil then

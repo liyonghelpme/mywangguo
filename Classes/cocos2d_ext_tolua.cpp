@@ -44,7 +44,7 @@ static int tolua_Cocos2d_setGLProgram00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
 	tolua_Error tolua_err;
 	if (
-		!tolua_isusertype(tolua_S,1, "CCSprite",0,&tolua_err) ||
+		!tolua_isusertype(tolua_S,1, "CCNode",0,&tolua_err) ||
         !tolua_isstring(tolua_S,2,0,&tolua_err) ||
         !tolua_isstring(tolua_S,3,0,&tolua_err) ||
         !tolua_isstring(tolua_S,4,0,&tolua_err) ||
@@ -54,7 +54,7 @@ static int tolua_Cocos2d_setGLProgram00(lua_State* tolua_S)
 	else
 #endif
 	{
-        CCSprite *sp = (CCSprite*)tolua_tousertype(tolua_S, 1, 0);
+        CCNode *sp = (CCNode*)tolua_tousertype(tolua_S, 1, 0);
         const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
         const char* vert = ((const char*)  tolua_tostring(tolua_S,3,0));
         const char* frag = ((const char*)  tolua_tostring(tolua_S,4,0));

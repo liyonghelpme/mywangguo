@@ -42,7 +42,7 @@ void setFontFillColor(CCLabelTTF *lab, ccColor3B c, bool u) {
     lab->setFontFillColor(c, u);
 }
 
-int setGLProgram(CCSprite *sp, const char *name, const char *vert, const char *frag) {
+int setGLProgram(CCNode *sp, const char *name, const char *vert, const char *frag) {
     CCLog("setGLProgram %s %s %s", name, vert, frag);
     CCShaderCache *sc = CCShaderCache::sharedShaderCache();
     CCGLProgram *prog = (CCGLProgram*)sc->programForKey(name);

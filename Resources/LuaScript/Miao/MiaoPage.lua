@@ -61,6 +61,10 @@ function MiaoPage:ctor(s)
     self.bg:addChild(self.tileMap)
     setPos(self.tileMap, {MapWidth/2, FIX_HEIGHT})
 
+    self.waterMap = CCSpriteBatchNode:create("t512.png")
+    self.bg:addChild(self.waterMap)
+    setPos(self.waterMap, {MapWidth/2, FIX_HEIGHT})
+
     self.fenceMap = CCSpriteBatchNode:create("fenceOne.png")
     self.bg:addChild(self.fenceMap)
     setPos(self.fenceMap, {MapWidth/2, FIX_HEIGHT})
@@ -215,14 +219,9 @@ function MiaoPage:ctor(s)
             setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.05)
 
             table.insert(self.allSlopeAndWater, {pic, w, h})
-            --[[
-            if w < sr[1] or h < sr[2] then
-                setVisible(pic, false)
-                table.insert(self.invisibleSlope, {pic, w, h})
-            end
-            --]]
         end
     end
+
     for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
             local pname = tidToTile(dv, self.normal, self.water)
@@ -269,12 +268,6 @@ function MiaoPage:ctor(s)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
 
             table.insert(self.allSlopeAndWater, {pic, w, h})
-            --[[
-            if w < sr[1] or h < sr[2] then
-                setVisible(pic, false)
-                table.insert(self.invisibleSlope, {pic, w, h})
-            end
-            --]]
         end
     end
 
@@ -289,17 +282,12 @@ function MiaoPage:ctor(s)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
 
             table.insert(self.allSlopeAndWater, {pic, w, h})
-            --[[
-            if w < sr[1] or h < sr[2] then
-                setVisible(pic, false)
-                table.insert(self.invisibleSlope, {pic, w, h})
-            end
-            --]]
         end
     end
 
     --河流图片
     --调整河流的zord 来进行遮挡
+    --播放河流的动画
     for dk, dv in ipairs(layerName.water.data) do
         if dv ~= 0 then
             print("water pid", dv)
@@ -309,19 +297,13 @@ function MiaoPage:ctor(s)
             local h = math.floor((dk-1)/width)
             print("water pname", pname)
             local pic = CCSprite:createWithSpriteFrameName(pname)
-            self.tileMap:addChild(pic)
+            self.waterMap:addChild(pic)
             local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
-
             table.insert(self.allSlopeAndWater, {pic, w, h})
-            --[[
-            if w < sr[1] or h < sr[2] then
-                setVisible(pic, false)
-                table.insert(self.invisibleSlope, {pic, w, h})
-            end
-            --]]
         end
     end
+    setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
 
 
     self.touchDelegate = StandardTouchHandler.new()
