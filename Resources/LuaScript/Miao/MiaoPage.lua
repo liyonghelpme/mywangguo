@@ -51,13 +51,14 @@ function MiaoPage:ctor(s)
     sf:addSpriteFramesWithFile("grassOne.plist")
     sf:addSpriteFramesWithFile("fenceOne.plist")
     sf:addSpriteFramesWithFile("t512.plist")
+    sf:addSpriteFramesWithFile("daoyin.plist")
 
 
     self.grassMap = CCSpriteBatchNode:create("grassOne.png")
     self.bg:addChild(self.grassMap)
     setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
     
-    self.seaMap = CCSpriteBatchNode:create("t512.png")
+    self.seaMap = CCSpriteBatchNode:create("daoyin.png")
     self.bg:addChild(self.seaMap)
     setPos(self.seaMap, {MapWidth/2, FIX_HEIGHT})
 
@@ -212,8 +213,20 @@ function MiaoPage:ctor(s)
             setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.05)
 
             table.insert(self.allSlopeAndWater, {pic, w, h})
+
+            local p2Name = string.gsub(pname, 'tile', 'dao')
+            local pic2 = CCSprite:createWithSpriteFrameName(p2Name)
+            self.seaMap:addChild(pic2)
+            if pname == 'tile11.png' then
+                setAnchor(setPos(pic2, {cx, cy-103}), {170/512, 0})
+            elseif pname == 'tile9.png' then
+                setScaleX(setAnchor(setPos(setRotation(setScaleY(pic2, -1.05), 53), {cx, cy+67}), {170/512, 0}), 1.05)
+            else
+                setScaleX(setAnchor(setPos(setRotation(setScaleY(pic2, -1), -53), {cx, cy+67}), {170/512, 0}), 1.05)
+            end
         end
     end
+    setGLProgram(self.seaMap, "blurReflect", "Vert.h", "BlurFrag.h")
 
     for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
