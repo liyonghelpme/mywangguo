@@ -14,7 +14,7 @@ FIGHT_ROW_OFFY = 35
 FIGHT_NEAR_RANGE = 120
 DEBUG_FIGHT = false 
 
-DEBUG_SOL = true
+DEBUG_SOL = false
 
 ANDROID = true
 

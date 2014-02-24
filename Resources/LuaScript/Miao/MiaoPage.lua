@@ -56,6 +56,10 @@ function MiaoPage:ctor(s)
     self.grassMap = CCSpriteBatchNode:create("grassOne.png")
     self.bg:addChild(self.grassMap)
     setPos(self.grassMap, {MapWidth/2, FIX_HEIGHT})
+    
+    self.seaMap = CCSpriteBatchNode:create("t512.png")
+    self.bg:addChild(self.seaMap)
+    setPos(self.seaMap, {MapWidth/2, FIX_HEIGHT})
 
     self.tileMap = CCSpriteBatchNode:create("t512.png")
     self.bg:addChild(self.tileMap)
@@ -171,12 +175,7 @@ function MiaoPage:ctor(s)
        -- end
     end
 
-    --self.invisibleSlope = {}
-    --local sr = Logic.stageRange[Logic.gameStage]
-    --print("visible Slope", sr[1], sr[2])
-
     self.allSlopeAndWater = {}
-    
     for dk, dv in ipairs(layerName.grass.data) do
         if dv ~= 0 then
             --local pname = tidToTile(dv, self.normal, self.water)
@@ -197,12 +196,6 @@ function MiaoPage:ctor(s)
             setAnchor(setPos(pic, {cx, cy+hei*103}), {170/512, 0})
             pic:setScale(1.02)
             table.insert(self.allSlopeAndWater, {pic, w, h})
-            --[[
-            if w < sr[1] or h < sr[2] then
-                setVisible(pic, false)
-                table.insert(self.invisibleSlope, {pic, w, h})
-            end
-            --]]
         end
     end
 

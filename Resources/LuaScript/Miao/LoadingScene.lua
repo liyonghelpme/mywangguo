@@ -5,6 +5,21 @@ function LoadingScene:ctor()
     local username = u:getStringForKey("username")
     Logic.username = username
 
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("loadAni.plist")
+    local ani = createAnimation("loadingAni", "load%d.png", 0, 8, 1, 2, true)
+    local sp = createSprite("load0.png")
+    addChild(self.bg, sp)
+    local vs = getVS()
+    setScale(setPos(sp, {vs.width-228*0.7, 101*0.7}), 1)
+    sp:runAction(repeatForever(CCAnimate:create(ani)))
+
+    local lab = ui.newTTFLabel({text="Loading...", size=25})
+    setAnchor(setPos(addChild(self.bg, lab), {16, 768-743}), {0, 0.5})
+
+
+
+
     self.needUpdate = true
     registerEnterOrExit(self)
 end
@@ -64,6 +79,11 @@ function LoadingScene:signin(rep, param)
 end
 
 function LoadingScene:update(diff)
+    --[[
+    if true then
+        return
+    end
+    --]]
     if Logic.username ~= nil and Logic.username ~= '' and not self.initYet then
         self.initYet = true
         print("User username is", Logic.username)
