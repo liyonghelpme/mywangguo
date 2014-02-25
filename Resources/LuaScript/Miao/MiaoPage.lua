@@ -70,9 +70,14 @@ function MiaoPage:ctor(s)
     self.bg:addChild(self.waterMap)
     setPos(self.waterMap, {MapWidth/2, FIX_HEIGHT})
 
+
     self.fenceMap = CCSpriteBatchNode:create("fenceOne.png")
     self.bg:addChild(self.fenceMap)
     setPos(self.fenceMap, {MapWidth/2, FIX_HEIGHT})
+
+    self.buildLayer = MiaoBuildLayer.new(self)
+    self.bg:addChild(self.buildLayer.bg)
+
 
 
     local mj = simple.decode(getFileData("big512.json"))
@@ -245,6 +250,32 @@ function MiaoPage:ctor(s)
         end
     end
 
+    self.newFence = {}
+    --self.blockFence = {}
+    for dk, dv in ipairs(layerName.newFence.data) do
+        if dv ~= 0 then
+            local pname = tidToTile(dv, self.normal, self.water, self.gidToTileName)
+            local w = (dk-1)%width
+            local h = math.floor((dk-1)/width)
+
+            local pic = createSprite(pname)
+            self.fenceMap:addChild(pic)
+            local cx, cy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
+            --print("cx cy", cx, cy)
+            setScale(setAnchor(setPos(pic, {cx, cy}), {170/512, 0}), 1.1)
+            table.insert(self.newFence, {pic, w, h})
+            
+            --[[
+            for bk, bv in pairs(self.block) do
+                self.blockFence[bk] = {}
+                if bv[dk] ~= 0 then
+                    local df = table.insert(self.blockFence[bk], pic)
+                end
+            end
+            --]]
+        end
+    end
+
 
     self.slopeData = {}
     for dk, dv in ipairs(layerName.slop2.data) do
@@ -316,8 +347,6 @@ function MiaoPage:ctor(s)
     self.touchDelegate:setBg(self.bg)
     self.blockMove = false
     
-    self.buildLayer = MiaoBuildLayer.new(self)
-    self.bg:addChild(self.buildLayer.bg)
 
     registerEnterOrExit(self)
     registerMultiTouch(self)
@@ -347,6 +376,7 @@ end
 
 --开启一片新的 4个新手 村落
 --新手村落加入到openMap里面
+--移除特定的建筑物
 function MiaoPage:restoreBuildAndMap()
     local lastV = Logic.curVillage-1
     --8 10 9
@@ -384,6 +414,22 @@ function MiaoPage:restoreBuildAndMap()
         end
     end
     self.darkSlope = ns
+
+    self:removeFence(landId)
+end
+
+--移除该土地块的篱笆建筑物
+function MiaoPage:removeFence(landId)
+    local bdata = self.block[landId]
+    local nf = {}
+    for k, v in ipairs(self.newFence) do
+        if bdata[axayToTid(v[2], v[3], self.width)] ~= 0 then
+            removeSelf(v[1])
+        else
+            table.insert(nf, v)
+        end
+    end
+    self.newFence = nf
 end
 
 
@@ -415,6 +461,7 @@ function MiaoPage:initGameStage()
         end
     end
     
+
     local mg = self.buildLayer.mapGridController
     local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
     --print("len allB", #allB[])
@@ -434,15 +481,23 @@ function MiaoPage:initGameStage()
         end
     end
 
+    local sr = Logic.stageRange[2]
     for bk, bv in ipairs(allB) do
         for k, v in pairs(bv) do
             local ax, ay = k:getAxAyHeight()
             print("out of stageRange", ax, ay)
-            if ax < Logic.stageRange[2][1] or ay < Logic.stageRange[2][2] then
+            if ax < sr[1] or ay < sr[2] then
                 --setVisible(k, false)
                 k:setOutOfStage(Logic.gameStage)
                 k:setOperatable(false)
             end
+        end
+    end
+
+    --第二阶段初始化 将所有block 超出第二阶段的 篱笆消除
+    for k, v in ipairs(self.newFence) do
+        if v[2] < sr[1] or v[3] < sr[2] then
+            setVisible(v[1], false)
         end
     end
 
@@ -496,6 +551,13 @@ function MiaoPage:onLand(p)
     if Logic.landBook <= 0 then
         addBanner("土地产权证书不足")
     else
+        if landId == 6 then
+            if not Logic.openMap[5] and not Logic.openMap[2] then
+                addBanner("请先开发临近的块")
+                return
+            end
+        end
+
         addBanner("开放土地块"..landId)
 
         Logic.landBook = Logic.landBook-1
@@ -536,6 +598,7 @@ function MiaoPage:onLand(p)
         --包含有采矿场
         --local landId = Logic.stage2Block[p]
         self:initWoodAndMine(landId, mg)
+        self:removeOpenMapFence()
     end
 end
 function MiaoPage:initWoodAndMine(landId)
@@ -558,6 +621,8 @@ function MiaoPage:initWoodAndMine(landId)
         end
     end
     print("land has", landHasWood, landHasMine)
+    
+    --self:showFence(landId)
     
     local hasWood = false
     for bk, bv in ipairs(Logic.ownBuild) do
@@ -626,6 +691,7 @@ function MiaoPage:initExtendLand()
         hideBlock = {}
         newCenter = {}
         sr = nil
+        self:removeOpenMapFence()
         return 
     end
         
@@ -665,6 +731,18 @@ function MiaoPage:initExtendLand()
                 end
             end
         end
+
+        self:showFence(sr)
+        --[[
+        --扩展地图块 将扩展地图块的篱笆显示出来
+        for k, v in ipairs(self.newFence) do
+            if v[2] < sr[1] or v[3] < sr[2] then
+                setVisible(v[1], false)
+            else
+                setVisible(v[1], true)
+            end
+        end
+        --]]
         
         for bk, bv in ipairs(allB) do
             for k, v in pairs(bv) do
@@ -682,6 +760,17 @@ function MiaoPage:initExtendLand()
             end
         end
 
+        for k, v in ipairs(self.newFence) do
+            local tid = axayToTid(v[2], v[3], self.width)
+            for hk, hv in ipairs(hideBlock) do
+                if Logic.openMap[hv] then
+                else
+                    if self.block[hv][tid] ~= 0 then
+                        setVisible(v[1], true)
+                    end
+                end
+            end
+        end
 
         --显示gameStage 相关的visible 信息 stage == 3
         --stage 可能会 分叉根据 开启的 地图不同决定的
@@ -745,8 +834,20 @@ function MiaoPage:initExtendLand()
         local cx, cy = newAffineToCartesian(bax, bay, self.width, self.height, MapWidth/2, FIX_HEIGHT)
         bp:setPos({cx, cy})
         bp:resetState()
+
+        --移除第二阶段不用的fence
+        self:removeOpenMapFence()
 end
 
+function MiaoPage:showFence(sr)
+    for k, v in ipairs(self.newFence) do
+        if v[2] < sr[1] or v[3] < sr[2] then
+            setVisible(v[1], false)
+        else
+            setVisible(v[1], true)
+        end
+    end
+end
 --初始化游戏的将相邻的块也要显示出来
 --开启地图块3 5 之后连接的 块也显示
 
@@ -776,6 +877,27 @@ function MiaoPage:onExtendLand2(p)
     if Logic.landBook <= 0 then
         addBanner("土地产权证书不足")
     else
+        if landId == 13 then
+            if not Logic.openMap[14] and not Logic.openMap[12] then
+                addBanner("请先开发临近的块")
+                return
+            end
+        end
+        if Logic.blockNeibor[landId] ~= nil then
+            local oy = false
+            for k, v in ipairs(Logic.blockNeibor[landId]) do
+                if Logic.openMap[v] then
+                    oy = true
+                    break
+                end
+            end
+            if not oy then
+                addBanner("请先开发临近的块")
+                return
+            end
+        end
+         
+
         addBanner("开放土地块"..landId)
 
         Logic.landBook = Logic.landBook-1
@@ -813,6 +935,7 @@ function MiaoPage:onExtendLand2(p)
         --self:openNearLand(p)
 
         self:initWoodAndMine(landId)
+        self:removeOpenMapFence()
     end
 end
 
@@ -831,48 +954,6 @@ function MiaoPage:addBuildNum(landId)
 end
 
 
-function MiaoPage:onExtendLand(p)
-    local landId = p
-    if Logic.landBook <= 0 then
-        addBanner("土地产权证书不足")
-    else
-        addBanner("开放土地块"..landId)
-
-        Logic.landBook = Logic.landBook-1
-        Logic.openMap[landId] = true
-        --去掉地面的 遮罩
-        local nm = {}
-        for k, v in ipairs(self.allMask) do
-            if v[2] == p then
-                removeSelf(v[1])
-            else
-                table.insert(nm, v)
-            end
-        end
-        self.allMask = nm
-
-        --建筑物不用 显示在阶段2
-        
-        --显示黑色的斜坡 和地面
-        local nds = {}
-        for k, v in ipairs(self.darkSlope) do
-            if v[2] == p then
-                setColor(v[1], {255, 255, 255})
-            else
-                table.insert(nds, v)
-            end
-        end
-        self.darkSlope = nds
-
-        --移除地面的通知
-        removeSelf(self.allFly[landId].bg)
-        self.allFly[landId]= nil
-        
-        --是否显示邻近陆地呢？
-        --self:openNearLand(p)
-        self:initWoodAndMine(landId)
-    end
-end
 
 
 --从第一阶段 进入 第二阶段
@@ -900,13 +981,14 @@ function MiaoPage:stageOneToTwo()
 
     local mg = self.buildLayer.mapGridController
     local allB = {mg.allBuildings, mg.allRoad, mg.allEnvTile}
-
+    
+    local sr = Logic.stageRange[2]
     --在范围内
     for bk, bv in ipairs(allB) do
         for k, v in pairs(bv) do
             local ax, ay = k:getAxAyHeight()
             print("out of stageRange", ax, ay)
-            if ax < Logic.stageRange[2][1] or ay < Logic.stageRange[2][2] then
+            if ax < sr[1] or ay < sr[2] then
                 --setVisible(k, false)
                 k:setOutOfStage(Logic.gameStage)
                 k:setOperatable(false)
@@ -916,6 +998,10 @@ function MiaoPage:stageOneToTwo()
             end
         end
     end
+
+    --第一阶段 进入 第二阶段 将 部分篱笆显示出来
+    self:showFence(sr)
+
     
     --是否可以操作
     --print("len allB", #allB[])
@@ -1028,17 +1114,30 @@ function MiaoPage:maskMap()
             end
         end
 
+        local sr = Logic.stageRange[1]
         for bk, bv in ipairs(allB) do
             for k, v in pairs(bv) do
                 local ax, ay = k:getAxAyHeight()
-                if ax < Logic.stageRange[1][1] or ay < Logic.stageRange[1][2] then
+                if ax < sr[1] or ay < sr[2] then
                     --setVisible(k, false)
                     k:setOutOfStage(Logic.gameStage)
                     k:setOperatable(false)
                 end
             end
         end
-        
+
+        --第一阶段 将超出范围的篱笆隐藏起来
+        print("set newFence out of stage")
+        self:showFence(sr)
+        --[[
+        for fk, fv in ipairs(self.newFence) do
+            local ax, ay = fv[2], fv[3]
+            if ax < sr[1] or ay < sr[2] then
+                setVisible(fv[1], false)
+            end
+        end
+        --]]
+
         self.darkSlope = {}
         for k, v in pairs(self.slopeData) do
             local tid = k
@@ -1073,9 +1172,24 @@ function MiaoPage:maskMap()
             setPos(addChild(self.bg, sp.bg), {cx, cy})
             self.fly = sp
         end
+        
+        --删除对应的新手村的 fence 对象
+        self:removeOpenMapFence()
+
     elseif Logic.gameStage == 2 then
         --block 2 3 5 6
         self:initGameStage()
+        --self:removeOpenMapFence()
+    end
+end
+
+function MiaoPage:removeOpenMapFence()
+    --删除第二阶段里面 和 第一阶段里面的所有篱笆
+    for hk, hv in pairs(self.block) do
+        if Logic.openMap[hk] then
+            print("remove OpenMap fence", hk)
+            self:removeFence(hk)
+        end
     end
 end
 

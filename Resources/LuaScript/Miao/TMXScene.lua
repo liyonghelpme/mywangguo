@@ -24,6 +24,24 @@ function TMXScene:ctor()
     self.bg = CCScene:create()
     self.page = MiaoPage.new(self)
     self.bg:addChild(self.page.bg)
+    
+    self.cameraLight = addNode(self.bg)
+    local vs = getVS()
+    local sp1 = CCSprite:create("light.png")
+    local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE
+    sp1:setBlendFunc(bf)
+    addChild(self.cameraLight, sp1)
+    setScale(sp1, 10)
+    setAnchor(setPos(sp1, {0, 0}), {0, 0.5})
+    setRotation(sp1, -33)
+    setColor(sp1, {224/3, 172/3, 32/3})
+
+    sp1:runAction(repeatForever(sequence({scaleto(0.5, 11, 11), scaleto(0.5, 10, 10)})))
+    sp1:runAction(repeatForever(sequence({rotateby(3, -15), rotateby(3, 15)})))
+
+
     self.menu = TMXMenu2.new(self)
     self.bg:addChild(self.menu.bg)
     self.dialogController = DialogController.new(self)

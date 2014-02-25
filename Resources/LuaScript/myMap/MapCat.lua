@@ -18,7 +18,7 @@ function MapCat:ctor(s, st, ed, fake, isV)
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("cat_foot.plist")
-    self.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 1, 1, true)
+    self.runAni = createAnimation("cat_foot_run", 'cat_foot_run_%d.png', 0, 12, 2, 1, true)
 
     --村落也有cid
     --村落只是出现方式不同而已 路径什么是一样的 cid

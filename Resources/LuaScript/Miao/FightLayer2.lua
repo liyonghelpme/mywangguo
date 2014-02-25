@@ -86,6 +86,10 @@ function FightLayer2:convertNumToSoldier(n, h)
     if pow == 0 then
         num = 0
     end
+
+    --剩余的兵力 补偿给最后一个普通士兵
+    leftNum = n-pow*num
+
     local curCol
     local totalNum = num+hn
     --前 hn 个是 英雄特殊值
@@ -109,10 +113,16 @@ function FightLayer2:convertNumToSoldier(n, h)
         end
         --每个士兵实力5
         --print("insert hero", i, hn, curCol, hero[i+1])
+        --英雄配置在最前面
         if i < hn then
             table.insert(curCol, hero[i+1])
         else
-            table.insert(curCol, pow)
+            --剩余的兵力 分配给 最后的士兵
+            if i == totalNum-1 then
+                table.insert(curCol, pow+leftNum)
+            else
+                table.insert(curCol, pow)
+            end
         end
     end
     
