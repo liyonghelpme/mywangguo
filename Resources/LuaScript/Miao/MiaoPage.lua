@@ -219,6 +219,7 @@ function MiaoPage:ctor(s)
 
             table.insert(self.allSlopeAndWater, {pic, w, h})
 
+            --[[
             local p2Name = string.gsub(pname, 'tile', 'dao')
             local pic2 = CCSprite:createWithSpriteFrameName(p2Name)
             self.seaMap:addChild(pic2)
@@ -229,9 +230,11 @@ function MiaoPage:ctor(s)
             else
                 setScaleX(setAnchor(setPos(setRotation(setScaleY(pic2, -1), -53), {cx, cy+67}), {170/512, 0}), 1.05)
             end
+            --]]
+
         end
     end
-    setGLProgram(self.seaMap, "blurReflect", "Vert.h", "BlurFrag.h")
+    --setGLProgram(self.seaMap, "blurReflect", "Vert.h", "BlurFrag.h")
 
     for dk, dv in ipairs(layerName.sea.data) do
         if dv ~= 0 then
@@ -340,7 +343,7 @@ function MiaoPage:ctor(s)
             table.insert(self.allSlopeAndWater, {pic, w, h})
         end
     end
-    setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
+    --setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
 
 
     self.touchDelegate = StandardTouchHandler.new()
