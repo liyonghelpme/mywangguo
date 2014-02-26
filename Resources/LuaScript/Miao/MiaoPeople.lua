@@ -34,12 +34,13 @@ PEOPLE_STATE = {
 }
 function MiaoPeople:ctor(m, data)
     self.map = m
-    self.privData = data
+    self.needAppear = data.needAppear
     self.state = PEOPLE_STATE.APPEAR
     self.id = data.id
     self.data = Logic.people[self.id]
     self.passTime = 0
     self.level = data.level or 0
+    self.pid = data.pid
 
     self.health = data.health or 0
     self.maxHealth = Logic.people[self.id].health+self.data.healthAdd*self.level
@@ -54,10 +55,10 @@ function MiaoPeople:ctor(m, data)
     self.wood = 0
     self.workNum = 0
     self.lastVisible = true
-    self.weapon = data.weapon
-    self.head = data.head
-    self.body = data.body
-    self.spe = data.spe
+    self.weapon = intToNil(data.weapon)
+    self.head = intToNil(data.head)
+    self.body = intToNil(data.body)
+    self.spe = intToNil(data.spe)
 
     --修习之后就升级
     self.ignoreTerrian = false
@@ -360,7 +361,7 @@ function MiaoPeople:initFind(diff)
                 self:clearStateStack()
             end
         --寻找住宅
-        elseif self.tired then
+        elseif self.data.kind == 1 and (self.tired or self.myHouse == nil or self.myHouse.deleted) then
             self:findHouse()
         else
             --寻找要去收割的建筑物

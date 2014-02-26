@@ -33,7 +33,7 @@ bool UpdateScene::init() {
     sf->addSpriteFramesWithFile("loadAni.plist");
     CCAnimation *ani = CCAnimation::create();
     char name[100];
-    for(int i = 0; i <= 20; i++) {
+    for(int i = 0; i <= 8; i++) {
         sprintf(name, "load%d.png", i);
         ani->addSpriteFrame(sf->spriteFrameByName(name));
     }
@@ -42,9 +42,9 @@ bool UpdateScene::init() {
 
     CCSprite *cat = CCSprite::createWithSpriteFrameName("load0.png");
     addChild(cat);
-    cat->setPosition(ccp(vs.width-228, 101));
+    cat->setPosition(ccp(vs.width-228*0.7, 101*0.7));
     cat->runAction(CCRepeatForever::create(CCAnimate::create(ani)));
-
+	cat->setScale(1);
 
 
     updateYet = false;

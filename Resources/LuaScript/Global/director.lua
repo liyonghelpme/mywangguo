@@ -121,9 +121,12 @@ end
 function Director:replaceScene(view)
     CCDirector:sharedDirector():replaceScene(view.bg)
     self.curScene = view
+    table.remove(self.sceneStack, #self.sceneStack)
+    table.insert(self.sceneStack, view)
     self.stack = {}
     print("replace", #self.sceneStack) 
 end
+
 function Director:pushScene(view)
     CCDirector:sharedDirector():pushScene(view.bg)
     self.curScene = view

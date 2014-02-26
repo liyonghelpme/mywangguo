@@ -37,6 +37,40 @@ static int tolua_Cocos2d_convertToSprite00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_setGLProgram00
+static int tolua_Cocos2d_setGLProgram00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+	tolua_Error tolua_err;
+	if (
+		!tolua_isusertype(tolua_S,1, "CCNode",0,&tolua_err) ||
+        !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+        !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+        !tolua_isstring(tolua_S,4,0,&tolua_err) ||
+		!tolua_isnoobj(tolua_S,5,&tolua_err)
+	)
+	 goto tolua_lerror;
+	else
+#endif
+	{
+        CCNode *sp = (CCNode*)tolua_tousertype(tolua_S, 1, 0);
+        const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
+        const char* vert = ((const char*)  tolua_tostring(tolua_S,3,0));
+        const char* frag = ((const char*)  tolua_tostring(tolua_S,4,0));
+
+        int res = setGLProgram(sp, name, vert, frag);
+		tolua_pushnumber(tolua_S, (lua_Number)res);
+	}
+	return 1;
+#ifndef TOLUA_RELEASE
+     tolua_lerror:
+     tolua_error(tolua_S,"#ferror in function 'setGLProgram'", &tolua_err);
+     return 0;
+#endif
+}
+#endif
+
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_enableShadow00
 static int tolua_Cocos2d_enableShadow00(lua_State* tolua_S)
 {
@@ -1563,8 +1597,75 @@ tolua_lerror:
 #endif //#ifndef TOLUA_DISABLE
 
 
+/* method: getInstance of class  MyPlugins */
+#ifndef TOLUA_DISABLE_tolua_Cocos2dExt_MyPlugins_getInstance00
+static int tolua_Cocos2dExt_MyPlugins_getInstance00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"MyPlugins",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   MyPlugins* tolua_ret = (MyPlugins*)  MyPlugins::getInstance();
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"MyPlugins");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'getInstance'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+
+
+/* method: sendCmd of class  MyPlugins */
+#ifndef TOLUA_DISABLE_tolua_Cocos2dExt_MyPlugins_sendCmd00
+static int tolua_Cocos2dExt_MyPlugins_sendCmd00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"MyPlugins",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  MyPlugins* self = (MyPlugins*)  tolua_tousertype(tolua_S,1,0);
+  const char* cmd = ((const char*)  tolua_tostring(tolua_S,2,0));
+  const char* arg = ((const char*)  tolua_tostring(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'sendCmd'", NULL);
+#endif
+  {
+   self->sendCmd(cmd, arg);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'sendCmd'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+
 TOLUA_API int tolua_ext_reg_types(lua_State* tolua_S)
 {
+ tolua_usertype(tolua_S,"MyPlugins");
  tolua_usertype(tolua_S,"CCExtendNode");
  tolua_usertype(tolua_S,"CCExtendSprite");
  tolua_usertype(tolua_S,"CCExtendLabelTTF");
@@ -1587,6 +1688,7 @@ TOLUA_API int tolua_ext_reg_types(lua_State* tolua_S)
 TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
+  tolua_function(tolua_S,"setGLProgram", tolua_Cocos2d_setGLProgram00);
 
   tolua_function(tolua_S,"enableShadow", tolua_Cocos2d_enableShadow00);
   tolua_function(tolua_S,"setFontFillColor", tolua_Cocos2d_setFontFillColor00);
@@ -1685,6 +1787,13 @@ TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
   tolua_cclass(tolua_S,"Scissor","Scissor","CCNode",NULL);
   tolua_beginmodule(tolua_S,"Scissor");
    tolua_function(tolua_S,"create",tolua_Cocos2d_Scissor_create00);
+  tolua_endmodule(tolua_S);
+
+
+  tolua_cclass(tolua_S,"MyPlugins","MyPlugins","",NULL);
+  tolua_beginmodule(tolua_S,"MyPlugins");
+   tolua_function(tolua_S,"getInstance",tolua_Cocos2dExt_MyPlugins_getInstance00);
+   tolua_function(tolua_S,"sendCmd",tolua_Cocos2dExt_MyPlugins_sendCmd00);
   tolua_endmodule(tolua_S);
   return 1;
 }

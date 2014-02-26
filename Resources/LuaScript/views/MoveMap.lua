@@ -159,13 +159,16 @@ function MoveMap:fastAddBuilding(chd, z)
     self.mapGridController:addBuilding(chd)
 end
 function MoveMap:addBuilding(chd, z)
-    print('MoveMap addBuilding', chd, z)
+    print('MoveMap addBuilding', chd, z, chd.data, chd.id)
     if chd.picName == 'build' or chd.picName == 'fence' then
         if chd.id == 2 then
             self.farmLayer:addChild(chd.bg, z)
-        --斜坡
+        --没有斜坡了 只有普通建筑物
+        --[[
         elseif chd.data.kind == 1 then
             self.roadLayer:addChild(chd.bg, z)
+        --]]
+        --普通建筑物
         else
             self.buildingLayer:addChild(chd.bg, z)
         end

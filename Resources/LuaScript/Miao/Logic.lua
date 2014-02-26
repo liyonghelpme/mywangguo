@@ -30,12 +30,16 @@ Logic.holdNum = {}
 --购买的装备数量 = 装备的 和 持有的
 Logic.buyNum = {}
 
+--rpc callback
+
 --待研究的物品 类型 id
---0 装备
+--0 装备 物品id
 Logic.researchGoods = {
     --{0, 2}, {0, 3}, {0, 11},
 }
+
 --正在研究的物品
+--researchGoodsNum time
 Logic.inResearch = nil
 
 --已经研究的物品 商店可以购买
@@ -46,6 +50,7 @@ Logic.inResearch = nil
 --]]
 --商店可以直接购买的物品
 --包括装备 和 其它
+--各种装备
 Logic.ownGoods = {
     --{0, 1}, 
     {0, 2}, {0, 3}, {0, 11},
@@ -475,7 +480,8 @@ function getSolAbility(kind, num, total)
     temp.health = se.health+ae.health*addEffect
 
     temp.attack = temp.attack*num
-    temp.defense = temp.defense*num
+    --防御力不会乘
+    --temp.defense = temp.defense*num
     temp.health = temp.health*num
     return temp
 end
@@ -756,6 +762,7 @@ Logic.attendHero = {
 }
 
 Logic.curVillage = 1
+--开放的地图
 Logic.openMap = {}
 Logic.gameStage = 1
 Logic.showMapYet = false
@@ -1011,4 +1018,12 @@ Logic.MapVillagePower = {
     {31, 13, 0, 0},
     {31, 13, 0, 0},
     {31, 13, 0, 0},
+}
+
+Logic.blockNeibor = {
+[14] = {6, 15, 13},
+[12] = {11, 6, 13},
+[13] = {12, 14},
+[15] = {14, 2},
+[11] = {3, 12},
 }

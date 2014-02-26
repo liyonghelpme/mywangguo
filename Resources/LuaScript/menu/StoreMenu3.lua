@@ -32,7 +32,7 @@ function StoreMenu3:ctor()
     self.flowHeight = 0
     self:updateTab()
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
     self:setSel(1)
     centerUI(self)

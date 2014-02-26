@@ -39,7 +39,7 @@ function EquipMenu3:ctor()
 
     self:setSel(1)
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
     centerUI(self)
 end
 

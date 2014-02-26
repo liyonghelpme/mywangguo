@@ -111,7 +111,11 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
 
     self.funcSoldier:initShadow()
 
-    self.needUpdate = true
+    --调度之后所有的flush一次优先级队列即可
+    --魔法师的优先级需要手动修改
+    if self.id ~= 2 then
+        self.needUpdate = true
+    end
     registerEnterOrExit(self)
     
     if DEBUG_FIGHT then
@@ -132,6 +136,8 @@ function FightSoldier2:ctor(m, id, col, row, data, sid, isHero, heroData)
         setPos(self.colLabel, {0, 130})
     end
 end
+
+
 
 function FightSoldier2:finishPose()
     self.finPos = true
@@ -168,32 +174,18 @@ function FightSoldier2:showPose(x)
         end
     end
 end
---[[
-function FightSoldier2:showPose(x)
-    if not self.showYet then
-        local vs = getVS()
-        local p = getPos(self.bg)
-        --print("my pos", p[1], x)
-        self.finPos = false
-        if p[1]-vs.width-50 <= math.abs(x) then
-            if self.map.poseRowNum == self.col then
-                print("pose Act")
-                self:poseAct()
-            elseif self.map.poseRowNum == self.col-1 then
-                if self.map.poseRowTime >= 1 then
-                    self.map.poseRowNum = self.col
-                    self.map.poseRowTime = 0
-                    self:poseAct()
-                end
-            end
-        end
-    end
-end
---]]
 
+--只会影响渲染优先级不会影响更新的优先级的
 function FightSoldier2:setZord()
     local p = getPos(self.bg)
-    self.bg:setZOrder(MAX_BUILD_ZORD-p[2])
+    --左侧士兵col 越大 zord 越 大 优先级越高
+    --右侧士兵相反
+    --update 执行的顺序
+    if self.color == 0 then
+        self.bg:setZOrder(MAX_BUILD_ZORD-p[2]+self.col)
+    else
+        self.bg:setZOrder(MAX_BUILD_ZORD-p[2]-self.col)
+    end
 end
 function FightSoldier2:setDir()
     local scaY = getScaleY(self.changeDirNode)
@@ -259,7 +251,7 @@ function FightSoldier2:updateLabel()
 
 
     --self.sLabel:setString(self.state..' '..str(tid)..' '..str(self.funcSoldier.isHead))
-    self.sLabel:setString(self.arrowHurt.." "..self.health)
+    self.sLabel:setString(self.arrowHurt.." "..self.health.."de"..str(self.dead))
 end
 function FightSoldier2:findFastTarget()
     local temp
@@ -937,17 +929,51 @@ function FightSoldier2:doMoveTo(diff)
                 self.oldDis = cdis
 
                 if dis > FIGHT_OFFX then
-                    setPos(self.bg, {p[1]+mx, p[2]})
+                    local tx = p[1]+mx
+                    --距离要大于FIGHT_OFFX
+                    if math.abs(mp[1]-tx) < FIGHT_OFFX then
+                        if self.color == 0 then
+                            tx = mp[1]-FIGHT_OFFX
+                        else
+                            tx = mp[1]+FIGHT_OFFX
+                        end
+                    end
+                    setPos(self.bg, {tx, p[2]})
                 end
 
+            --根据屏幕数据 靠近屏幕中心攻击敌方
             else
                 local mx = self:getSpeed()*diff
                 local p = getPos(self.bg)
                 local mp = getPos(self.attackTarget.bg)
-                if self:getDis(p, mp) > FIGHT_NEAR_RANGE then
-                    setPos(self.bg, {p[1]+mx, p[2]})
+                local dis = self:getDis(p, mp)
+                if dis > FIGHT_NEAR_RANGE then
+                    --向屏幕中心移动
+                    local sceneLeft = self.map.mainCamera.startPoint[1]
+                    local vs = getVS()
+                    --屏幕中心
+                    local midScene = -sceneLeft+vs.width/2
+                    local hr = FIGHT_NEAR_RANGE/2
+                    print("midScene", self.sid, sceneLeft, midScene, hr, p[1])
+                    --士兵距离屏幕中心的偏移距离比较小则步兵向屏幕中心靠拢
+                    --当两者距离相差超过300的时候则 忽略掉屏幕中心的限制 努力向前靠近
+                    if dis > 300 or self.footFar then
+                        self.footFar = true  
+                        setPos(self.bg, {p[1]+mx, p[2]})
+                    else   
+                        if self.color == 0 then
+                            if p[1] < midScene-hr then
+                                setPos(self.bg, {p[1]+mx, p[2]})
+                            end
+                        else
+                            if p[1] > midScene+hr then
+                                setPos(self.bg, {p[1]+mx, p[2]})
+                            end
+                        end
+                    end
                 --开打
                 else
+                    self.footFar = false
                     print("begin to attack with near enemy")
                     self.state = FIGHT_SOL_STATE.IN_ATTACK
                     self.changeDirNode:stopAction(self.moveAni)
@@ -982,25 +1008,6 @@ function FightSoldier2:doAttack(diff)
                 self.moveAni = repeatForever(CCAnimate:create(self.runAni))
                 self.changeDirNode:runAction(self.moveAni)
 
-                --[[
-                if self.color == 1 then
-                    if self.attackTarget.left ~= nil then
-                        self.left = getSidest(self.attackTarget, 'left')
-                        self.attackTarget = self.left
-                    else
-                        self.left = nil
-                        self.attackTarget = nil
-                    end
-                else
-                    if self.attackTarget.right ~= nil then
-                        self.right = getSidest(self.attackTarget, 'right')
-                        self.attackTarget = self.right
-                    else
-                        self.right = nil
-                        self.attackTarget = nil
-                    end
-                end
-                --]]
             else
                 local rd = math.random(2)
                 local aa 
@@ -1026,6 +1033,7 @@ function FightSoldier2:finishAttack()
         removeSelf(self.skillAni)
         self.skillAni = nil
     end
+    self.footFar = false
     --技能恢复生命值 草药
     if not self.dead then
         if self.isHero and self.heroData.skill ~= nil then

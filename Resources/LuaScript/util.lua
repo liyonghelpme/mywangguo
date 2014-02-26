@@ -1873,9 +1873,17 @@ function initPlist()
     sf:addSpriteFramesWithFile("buildThree.plist")
     sf:addSpriteFramesWithFile("buildFour.plist")
     sf:addSpriteFramesWithFile("skillOne.plist")
-    sf:addSpriteFramesWithFile("catOne.plist")
+    --sf:addSpriteFramesWithFile("catOne.plist")
     sf:addSpriteFramesWithFile("goodsOne.plist")
     sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
+    sf:addSpriteFramesWithFile("whiteGeo.plist")
+end
+function intToNil(i)
+    if i == 0 then
+        return nil
+    else
+        return i
+    end
 end

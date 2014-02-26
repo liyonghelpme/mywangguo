@@ -103,6 +103,30 @@ function MiaoBuildLayer:testCat()
     self:addPeople(21)
     self:addPeople(22)
 end
+
+function MiaoBuildLayer:initCat()
+    for k, v in ipairs(Logic.pdata) do
+        v.needAppear = false
+        v.id = v.kind
+        local p = MiaoPeople.new(self, v)
+        Logic.farmPeople[v.pid] = p
+        --table.insert(Logic.farmPeople, p)
+
+        self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
+        local pos = normalizePos({v.px, v.py}, 1, 1)
+        p:setPos(pos)
+        p:setZord()
+        self.mapGridController:addSoldier(p)
+        if v.hid ~= 0 then
+            p.myHouse = self.mapGridController.bidToBuilding[v.hid]
+            if p.myHouse ~= nil then
+                p.myHouse:setOwner(p)
+            end
+        end
+    end
+end
+
+--[[
 function MiaoBuildLayer:initCat()
     if Logic.inNew then
         self:addPeople(3)
@@ -125,11 +149,15 @@ function MiaoBuildLayer:initCat()
             self.mapGridController:addSoldier(p)
             if v.hid ~= nil then
                 p.myHouse = self.mapGridController.bidToBuilding[v.hid]
-                p.myHouse:setOwner(p)
+                if p.myHouse ~= nil then
+                    p.myHouse:setOwner(p)
+                end
             end
         end
     end
 end
+--]]
+
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
     local width = self.scene.width
@@ -155,6 +183,43 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
+    local mbid = 0
+    print("bdata is what", #Logic.bdata)
+    for k, v in ipairs(Logic.bdata) do
+        --if v.kind == 2 then
+        local dir = v.dir or 0
+        v.dir = 1-dir
+        v.id = v.kind
+        v.kind = nil
+        v.px = v.ax
+        v.py = v.ay
+        v.ax = nil
+        v.ay = nil
+
+        --work data
+        local b = MiaoBuild.new(self, v)
+        b:setWork(v)
+
+        local p = {v.px, v.py}
+        b:setPos(p)
+        b:setColPos()
+        self:addBuilding(b, MAX_BUILD_ZORD)
+        b:setPos(p)
+        --道路需要调用这个调整斜坡
+        b.funcBuild:whenColNow()
+        b.funcBuild:adjustRoad()
+        b:finishBuild()
+        --调整建筑物方向
+        b:doSwitch()
+        mbid = math.max(v.bid, mbid)
+        --end
+    end
+    mbid = mbid+1
+    Logic.maxBid = mbid
+end
+
+--[[
+function MiaoBuildLayer:initBuild()
     if Logic.inNew then
         local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
         local p = normalizePos({1344, 384}, 1, 1)
@@ -179,6 +244,7 @@ function MiaoBuildLayer:initBuild()
         return
     end
 
+    --初始化建筑物信息
     local u = CCUserDefault:sharedUserDefault()
     local build = u:getStringForKey("build")
     local mbid = 0
@@ -229,18 +295,22 @@ function MiaoBuildLayer:initBuild()
     end
 
 end
+--]]
 
 function MiaoBuildLayer:initPic()
+    --[[
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("buildOne.plist")
     sf:addSpriteFramesWithFile("buildTwo.plist")
     sf:addSpriteFramesWithFile("buildThree.plist")
     sf:addSpriteFramesWithFile("buildFour.plist")
     sf:addSpriteFramesWithFile("skillOne.plist")
-    sf:addSpriteFramesWithFile("catOne.plist")
+    --sf:addSpriteFramesWithFile("catOne.plist")
     sf:addSpriteFramesWithFile("goodsOne.plist")
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
+    --]]
+    initPlist()
 end
 
 --道路始终 放在 建筑物 下面的 所以先初始化road 再初始化建筑物 如果建筑物 和 road 重叠了 则需要直接取消掉road
@@ -286,6 +356,10 @@ function MiaoBuildLayer:initEnv()
 end
 --road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
 function MiaoBuildLayer:initRoad() 
+    --新手建筑物 从服务器获得
+    if true then
+        return
+    end
     local u = CCUserDefault:sharedUserDefault()
     local initRoadYet = u:getBoolForKey("initRoadYet")
     if initRoadYet == true then
@@ -389,11 +463,12 @@ function MiaoBuildLayer:initRoad()
     u:setBoolForKey("initRoadYet", true)
 end
 function MiaoBuildLayer:addPeople(param)
-    local p = MiaoPeople.new(self, {id=param})
+    local p = MiaoPeople.new(self, {id=param, pid=#Logic.farmPeople+1})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
     
     local data = Logic.people[param]
     local pos
+    --村民需要设定pid值
     if data.kind == 1 then
         table.insert(Logic.farmPeople, p)
         local vs = getVS()

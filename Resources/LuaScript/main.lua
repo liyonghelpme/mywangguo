@@ -35,17 +35,19 @@ local function main()
     --require "myMap.MapScene"
     require 'Miao.FightScene'
     require 'myMap.FightMap'
+    require "Miao.LoadingScene"
 
     local director = CCDirector:sharedDirector()
-    local sc = TMXScene.new()
-    director:replaceScene(sc.bg)
-    global.director:onlyRun(sc)
 
-    --[[ 
-    local sc = FightScene.new()
-    director:replaceScene(sc.bg)
-    global.director:onlyRun(sc)
-    --]]
+    if not DEBUG_SOL then
+        local sc = LoadingScene.new()
+        director:replaceScene(sc.bg)
+        global.director:onlyRun(sc)
+    else
+        local sc = FightScene.new()
+        director:replaceScene(sc.bg)
+        global.director:onlyRun(sc)
+    end
 
     --[[
     local sc = FightMap.new()

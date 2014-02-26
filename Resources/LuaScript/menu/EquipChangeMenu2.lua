@@ -22,7 +22,7 @@ function EquipChangeMenu2:ctor(p, changeKind)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "equipCh1.png"), {549, fixY(sz.height, 147)}), {297, 43}), {0.50, 0.50}), 255)
     self.total = sp
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
     local listSize = {width=546, height=319}
     self.listSize = listSize

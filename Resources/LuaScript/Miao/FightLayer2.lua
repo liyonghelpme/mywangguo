@@ -83,6 +83,13 @@ function FightLayer2:convertNumToSoldier(n, h)
     local leftNum = 0
     print("left Number is", n, num, pow, leftNum)
 
+    if pow == 0 then
+        num = 0
+    end
+
+    --剩余的兵力 补偿给最后一个普通士兵
+    leftNum = n-pow*num
+
     local curCol
     local totalNum = num+hn
     --前 hn 个是 英雄特殊值
@@ -106,49 +113,19 @@ function FightLayer2:convertNumToSoldier(n, h)
         end
         --每个士兵实力5
         --print("insert hero", i, hn, curCol, hero[i+1])
+        --英雄配置在最前面
         if i < hn then
             table.insert(curCol, hero[i+1])
         else
-            table.insert(curCol, pow)
+            --剩余的兵力 分配给 最后的士兵
+            if i == totalNum-1 then
+                table.insert(curCol, pow+leftNum)
+            else
+                table.insert(curCol, pow)
+            end
         end
     end
     
-    --[[
-    for i =0, num-1, 1 do
-        local col = math.floor(i/5)
-        local row = math.floor(i%5)
-        if row == 0 then
-            curCol = {}
-            local leftRow = num-col*5
-            --最后剩余的数量 也占用 1行
-            if leftNum > 0 then
-                leftRow = leftRow+1
-            end
-            --剩余数量 居中显示
-            if leftRow < 4 then
-                for pad=0, math.floor((5-leftRow)/2)-1, 1 do
-                    table.insert(curCol, 0)
-                end
-            end
-            table.insert(temp, curCol)
-        end
-        --每个士兵实力5
-        table.insert(curCol, pow)
-    end
-    --]]
-    --保证所有士兵都有left 或者 right连接 至少有一个空列
-    --[[
-    if leftNum > 0 then
-        local col = math.floor(num/5)
-        local row = math.floor(num%5)
-        if row == 0 then
-            --居中显示
-            curCol = {0, 0}
-            table.insert(temp, curCol)
-        end
-        table.insert(curCol, leftNum)
-    end
-    --]]
     --补全当前列
     while #curCol < 5 do
         table.insert(curCol, 0)
@@ -679,6 +656,7 @@ function FightLayer2:initSoldier()
     hData = self.allHero[3]
     local footWidth = #self.myFootNum
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum-1
+    --优先级反向加入即可
     for k, v in ipairs(self.myMagicNum) do
         local temp = {}
         table.insert(self.myMagicSoldiers, temp)
@@ -727,6 +705,16 @@ function FightLayer2:initSoldier()
         end
         colId = colId-1
     end
+    
+    --反向加入magic的更新函数
+    --或者等待所有的children 重新加入一次enterScene 调用
+    for k, v in ipairs(reverse(self.myMagicSoldiers)) do
+        for ek, ev in ipairs(v) do
+            if not ev.dead then
+                registerUpdate(ev) 
+            end
+        end
+    end
 
     local footWidth = #self.eneFootNum
     --更新状态 检测 myArrow eneArrowSoldiers
@@ -761,6 +749,13 @@ function FightLayer2:initSoldier()
         colId = colId+1
     end
 
+    for k, v in ipairs(reverse(self.eneMagicSoldiers)) do
+        for ek, ev in ipairs(v) do
+            if not ev.dead then
+                registerUpdate(ev) 
+            end
+        end
+    end
 
 
     --士兵死亡动态调整 左右两侧

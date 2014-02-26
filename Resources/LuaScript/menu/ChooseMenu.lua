@@ -19,7 +19,7 @@ function ChooseMenu:ctor()
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "lvpng.png"), {332, fixY(sz.height, 216)}), {49, 43}), {0.50, 0.50}), 255)
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "chooseTitle.png"), {539, fixY(sz.height, 147)}), {270, 41}), {0.50, 0.50}), 255)
 
-    self.scrollPro = createScroll(self.temp, sz)
+    self.scrollPro = createScroll(self.temp, sz, self)
 
     local listSize = {width=546, height=319}
     self.listSize = listSize

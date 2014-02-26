@@ -162,6 +162,7 @@ function FightMenu:showArenaInfo(city)
 end
 
 --显示村落信息
+--村落兵力不会增加
 function FightMenu:showVillageInfo(city)
     if self.city == nil and self.finAni then
         self.city = city
@@ -174,13 +175,13 @@ function FightMenu:showVillageInfo(city)
 
         local ownNum = #Logic.ownVillage
         --每占领城堡对应兵力增加
-        local bn = math.floor(city.cityData[1]*math.pow(1.1, ownNum))
+        local bn = city.cityData[1]
         self.buw:setString(bn)
-        local gn = math.floor(city.cityData[2]*math.pow(1.1, ownNum))
+        local gn = city.cityData[2]
         self.gongw:setString(gn)
-        local mn = math.floor(city.cityData[3]*math.pow(1.1, ownNum))
+        local mn = city.cityData[3]
         self.maw:setString(mn)
-        local qn = math.floor(city.cityData[4]*math.pow(1.1, ownNum))
+        local qn = city.cityData[4]
         self.qiw:setString(qn)
 
         --奖励技术 奖励 装饰 奖励马匹
