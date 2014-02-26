@@ -202,7 +202,7 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
         }
 	}  
     //win32 测试uid
-    #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) 
+    #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) 
     if(c == "getUsername") {
         srand(time(0));
         int uid = rand();
@@ -213,6 +213,7 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
         CCLog("setUsername %s", str);
     }
     #endif
+    
 }
 
 void MyShareResult::onShareResult(ShareResultCode ret, const char* msg)
