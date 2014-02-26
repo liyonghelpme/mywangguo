@@ -39,7 +39,7 @@
 static AppDelegate s_sharedApplication;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
-    [MobClick startWithAppkey:@"52fb27b056240b6ef319af4f"];
+    [MobClick startWithAppkey:@"52fb27b056240b6ef319af4f" reportPolicy:BATCH channelId:@"official app store"];
     
     // Override point for customization after application launch.
 

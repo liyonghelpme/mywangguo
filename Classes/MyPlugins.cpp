@@ -54,7 +54,6 @@ void MyPlugins::loadPlugins(CCDictionary* dict)
 	m_pPluginNames->retain();
 	CCDictionary* pluginSetting;
 	pluginSetting = (CCDictionary*) dict->objectForKey("social");
-    /*
 	if(pluginSetting!=NULL){
 		m_pSharePlugin = dynamic_cast<ProtocolSocial*>(PluginManager::getInstance()->loadPlugin(pluginSetting->valueForKey("name")->getCString()));
 		if (NULL != m_pSharePlugin)
@@ -79,6 +78,7 @@ void MyPlugins::loadPlugins(CCDictionary* dict)
 			m_pSharePlugin->setResultListener(m_pRetListener);
 		}
 	}
+    /*
 	pluginSetting = (CCDictionary*) dict->objectForKey("iap");
 	if(pluginSetting!=NULL){
 		m_pIAPPlugin = dynamic_cast<ProtocolIAP*>(PluginManager::getInstance()->loadPlugin(pluginSetting->valueForKey("name")->getCString()));
@@ -155,8 +155,8 @@ void MyPlugins::pay(const char* productId)
 
 void MyPlugins::sendCmd(const char *cmd, const char *args) {
     CCLog("MyPlugins %s", cmd, args);
+	string c(cmd);   
 	if(m_pAds != NULL) {  
-		string c(cmd);   
 		if(c == "showAds") {  
 			m_pAds->showAds((ProtocolAds::AdsType)0, 0, (ProtocolAds::AdsPos)0);  
 		} else if(c == "hideAds") {  
@@ -194,8 +194,11 @@ void MyPlugins::sendCmd(const char *cmd, const char *args) {
         } else if(c == "logUrl") {
             CCLog("log Url");
             m_pAds->spendPoints(7);
-        }
+        } 
 	}  
+    if(c == "share") {
+        this->share(args, NULL);
+    }
 }
 
 void MyShareResult::onShareResult(ShareResultCode ret, const char* msg)
