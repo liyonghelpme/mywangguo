@@ -1188,6 +1188,7 @@ function toCol(c)
     return ccc3(c[1], c[2], c[3])
 end
 function addBanner(w)
+    print("add Banner ", w)
     global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}, nil, nil))
 end
 function Sign(v)
