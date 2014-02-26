@@ -3,6 +3,7 @@ BIRD_STATE = {
     FREE = 0,
     LIVE = 1,
     DEAD = 2,
+    CRACK = 3,
 }
 function Bird:ctor(s)
     self.scene = s
@@ -83,7 +84,12 @@ function Bird:update(diff)
             end
         end
         self.acc = downAcc
+        --无响应 降落4帧 最多
+        --self.leftTime = math.min(self.leftTime+diff, 0.06664)
         self.leftTime = self.leftTime+diff
+
+        --jumpTicks 有30 帧要执行 0.5s时间
+        --防止 帧率瞬间掉落 导致的 运行时间过长
         while self.leftTime >= 0.01666 do
             self.leftTime = self.leftTime-0.01666
             local p = getPos(self.bg)
@@ -99,6 +105,8 @@ function Bird:update(diff)
             --固定帧率 来做 物理计算根据时间 来确定 是否到特定的帧了
             self.upTime = math.max(self.upTime-1, 0)
         end
+        --速度降低成 0 
+        --self.leftTime = 0
 
         local p = getPos(self.bg)
         --end
@@ -151,6 +159,8 @@ function Bird:update(diff)
             self.shakeYet = true
             self.scene:shakeNow()
         end
+    elseif self.state == BIRD_STATE.CRACK then
+
     end
     if self.targetDir >= 90 then
         self.targetDir = 90
