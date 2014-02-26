@@ -29,6 +29,7 @@ local function main()
     ---------------
     require "Global.INCLUDE"
     require "BirdScene"
+    require "TestScene"
     
 
 

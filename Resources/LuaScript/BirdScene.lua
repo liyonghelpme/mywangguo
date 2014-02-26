@@ -219,12 +219,16 @@ function BirdScene:initMusic()
 end
 function BirdScene:makeNear()
     local near = CCNode:create()
-    local n1 = createSprite("near.png")
+    local n1 = createSprite("near2.png")
     setScale(setAnchor(setPos(n1, {0, 0}), {0, 0}), self.scale)
-    local n2 = createSprite("near.png")
+    setGLProgram(n1)
+    local n2 = createSprite("near2.png")
     setScale(setAnchor(setPos(n2, {768*self.scale, 0}), {0, 0}), self.scale)
-    local n3 = createSprite("near.png")
+    setGLProgram(n2)
+    local n3 = createSprite("near2.png")
     setScale(setAnchor(setPos(n3, {1536*self.scale, 0}), {0, 0}), self.scale)
+    setGLProgram(n3)
+
     addChild(near, n1)
     addChild(near, n2)
     addChild(near, n3)
@@ -345,7 +349,7 @@ function BirdScene:update(diff)
         self:adjustScene(diff)
     elseif self.state == SCENE_STATE.RUN then
         self:generatePipe()
-        if self.bird.state ~= BIRD_STATE.DEAD then
+        if self.bird.state ~= BIRD_STATE.DEAD and self.bird.state ~= BIRD_STATE.CRACK then
             self:adjustScene(diff)
         else
             --弹出 得分菜单 RunMenu

@@ -95,5 +95,6 @@ else
 fi
 
 cp "$DIR"/libbspatch.so "$DIR"/libs/armeabi/
-
-python miscFile.py
+if [ "$1" = "" ]; then
+    python miscFile.py
+fi

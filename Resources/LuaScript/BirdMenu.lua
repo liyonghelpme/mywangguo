@@ -69,7 +69,11 @@ function BirdMenu:onBut(p)
         global.director:popView()
         --self.scene.state = SCENE_STATE.FREE
         self.scene:startGame()
+    --share
     elseif p == 1 then
+        print("add Banner here")
+        addBanner("Thanks for share!")
+        MyPlugins:getInstance():sendCmd("share", RATE_URL)
     elseif p == 2 then
         CCNative:openURL(BIRD_URL)
     elseif p == 3 then

@@ -3,6 +3,7 @@ MapWidth=3136
 FIX_HEIGHT = 128
 MapHeight=1700+FIX_HEIGHT
 --]]
+RATE_URL = "I got a new high score in the Flying Tiny Birds! Come to play with me together! Download from http://www.dwz.cn/eE9KO"
 NOZOMI_URL = "https://itunes.apple.com/us/app/nozomi-clash-of-zombies/id608847384?mt=8"
 BIRD_URL = "https://itunes.apple.com/us/app/id821875082"
 FIGHT_HEAD_OFF = 220
@@ -14,7 +15,6 @@ FIGHT_OFFX = 110
 FIGHT_COL_OFFX = 31
 FIGHT_ROW_OFFY = 35
 FIGHT_NEAR_RANGE = 120
-DEBUG_FIGHT = false
 
 ANDROID = true
 
@@ -30,7 +30,7 @@ SIZEX=340/2
 SIZEY=170/2
 MapGX = 23
 MapGY = 26
-DEBUG=false
+DEBUG = false 
 MAX_BUILD_ZORD=10000
 
 BIG_MAPX = 50

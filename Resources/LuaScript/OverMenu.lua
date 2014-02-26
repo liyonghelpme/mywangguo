@@ -108,7 +108,10 @@ function OverMenu:onBut(p)
             self.scene:resetScene()
             self.scene:startGame()
         end
+    --share
     elseif p == 2 then
+        MyPlugins:getInstance():sendCmd("share", RATE_URL)
+        addBanner("Thanks for share!")
     elseif p == 3 then
         CCNative:openURL(NOZOMI_URL)
         MyPlugins:getInstance():sendCmd("logUrl", '')

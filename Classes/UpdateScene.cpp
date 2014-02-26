@@ -104,10 +104,16 @@ void UpdateScene::update(float diff) {
             }
 
 			CCDictionary *dict = CCDictionary::create();
+
             //使用adsadmob的 sendCmd 模块发送命令记录日志
             CCDictionary *ads = CCDictionary::create();
-			ads->setObject(CCString::create("CommonCmd"), "name");
-			dict->setObject(ads, "ads");
+			ads->setObject(CCString::create("SocialFacebook"), "name");
+			dict->setObject(ads, "social");
+
+            CCDictionary *config = CCDictionary::create();
+            config->setObject(CCString::create("272993536194029"), "FacebookAppKey");
+            ads->setObject(config, "config");
+
 			MyPlugins::getInstance()->loadPlugins(dict);
 		
 			CCLuaEngine* pEngine = CCLuaEngine::defaultEngine();
