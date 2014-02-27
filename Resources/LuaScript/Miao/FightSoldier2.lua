@@ -967,6 +967,10 @@ function FightSoldier2:doMoveTo(diff)
                         self.footFar = true  
                         setPos(self.bg, {p[1]+mx, p[2]})
                     else   
+                        --我的对手已经开打了 则 我不能再等对方靠近了 我要主动靠近对方
+                        if self.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
+                            self.footFar = true
+                        end
                         if self.color == 0 then
                             if p[1] < midScene-hr then
                                 setPos(self.bg, {p[1]+mx, p[2]})

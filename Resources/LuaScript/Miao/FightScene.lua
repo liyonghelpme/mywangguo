@@ -94,7 +94,7 @@ function FightScene:ctor()
     --self.soldiers = {{9, 90, 0, 0}, {0, 0, 90, 0}}
     if DEBUG_SOL then
         --self.soldiers = {{18, 15, 15, 15}, {18, 15, 15, 15}}
-        self.soldiers = {{0, 0, 0, 0}, {5, 0, 0, 0}}
+        self.soldiers = {{100, 0, 0, 0}, {50, 0, 0, 0}}
     end
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
@@ -113,6 +113,7 @@ function FightScene:ctor()
     if DEBUG_SOL then
         --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
         self.heros = {{}, {}, {}, {{attack=6*5, defense=0, health=66*5}}}
+        self.heros = {{}, {}, {}, {}}
     end
     
     if not DEBUG_SOL then

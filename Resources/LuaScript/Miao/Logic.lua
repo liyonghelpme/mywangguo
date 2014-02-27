@@ -451,13 +451,17 @@ SoldierAbility = {
     {attack=40, defense=30, health=30},
 }
 --]]
+
+--health/(defense*3+health)
+
 --基本上是 生命值数量 起作用
 SoldierAbility = {
-    {attack=10, defense=1, health=45},
-    {attack=17, defense=1, health=23},
-    {attack=25, defense=1, health=15},
-    {attack=20, defense=1, health=45},
+    {attack=40, defense=10, health=30},
+    {attack=35, defense=3, health=15},
+    {attack=50, defense=3, health=10},
+    {attack=40, defense=10, health=30},
 }
+
 
 IncEffect = {
     {attack=2, defense=1, health=1},
@@ -480,8 +484,8 @@ function getSolAbility(kind, num, total)
     temp.health = se.health+ae.health*addEffect
 
     temp.attack = temp.attack*num
-    --防御力不会乘
-    --temp.defense = temp.defense*num
+    --防御力不会乘 防御力乘 起来 因为 防御力和 生命值是加法关系
+    temp.defense = temp.defense*num
     temp.health = temp.health*num
     return temp
 end

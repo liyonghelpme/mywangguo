@@ -248,9 +248,6 @@ function FightArrow2:waitAttack(diff)
                     --足够靠近才反击
                     elseif dis < 400 then
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可
-                        --if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
-                        --    self.soldier:moveOneStep(diff)
-                        --end
                         --开始靠近敌人
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
                     end
