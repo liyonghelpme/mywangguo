@@ -468,8 +468,12 @@ function FightSoldier2:runAction(act)
     end
     self.changeDirNode:runAction(act)
 end
+
+--计算伤害实际效果
 function FightSoldier2:calHurt(harm)
-    return math.max(1, harm-self.defense)
+    --local rate = self.maxHealth/(3*self.defense+self.maxHealth)
+    return calRealHurt(harm, self.defense, self.maxHealth)
+    --return math.max(1, math.floor(harm*rate))
 end
 --谁攻击高 对方就受到 被动伤害
 function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
@@ -521,8 +525,10 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     realDefense = math.floor(realDefense*(100+addRate)/100)
     print("realDefense is", realDefense, self.defense, addRate)
 
-    local harm = harm-realDefense
-    harm = math.max(harm, 1)
+    --local harm = harm-realDefense
+    --实际伤害
+    local harm = calRealHurt(harm, realDefense, self.maxHealth)
+    --harm = math.max(harm, 1)
     --伤害小于 生命值上限
     harm = math.floor(math.min(self.health, harm))
     print("real hurt", harm)

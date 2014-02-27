@@ -56,3 +56,8 @@ function initSolLeftRight(self)
 end
 function createDeadSoldier()
 end
+
+function calRealHurt(harm, defense, health)
+    return math.max(1, math.floor(harm*health/(3*defense+health)))
+end
+
