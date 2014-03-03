@@ -40,6 +40,7 @@ function FightLayer2:convertNumToSoldier(n, h)
         hero = h
     end
     print("hero is", simple.encode(hero))
+    print("n is", simple.encode(n))
 
     local temp = {}
     local num
@@ -253,10 +254,10 @@ function FightLayer2:ctor(s, my, ene)
     --self.myFootNum = self:testNum12(1)
     --self.myArrowNum = self:testNum11()
 
-    self.eneFootNum = self:convertNumToSoldier(ene[1])
-    self.eneArrowNum = self:convertNumToSoldier(ene[2])
-    self.eneMagicNum = self:convertNumToSoldier(ene[3])
-    self.eneCavalryNum = self:convertNumToSoldier(ene[4])
+    self.eneFootNum = self:convertNumToSoldier(ene[1], self.scene.otherHeros[1])
+    self.eneArrowNum = self:convertNumToSoldier(ene[2], self.scene.otherHeros[2])
+    self.eneMagicNum = self:convertNumToSoldier(ene[3], self.scene.otherHeros[3])
+    self.eneCavalryNum = self:convertNumToSoldier(ene[4], self.scene.otherHeros[4])
     --self.eneFootNum = self:testNum13(0)
     --self.eneArrowNum = self:testNum14()
 
@@ -541,6 +542,7 @@ function FightLayer2:initSoldier()
     self.mySoldiers = {}
     self.allSoldiers = {}
     self.allHero = {{}, {}, {}, {}}
+    self.allOtherHero = {{}, {}, {}, {}}
     self.solOffY = 80
     self.scaleCoff = 0.05
 
@@ -614,14 +616,36 @@ function FightLayer2:initSoldier()
 
     --敌方步兵所在的列编号
     local colId = #self.myCavalryNum+#self.myArrowNum+#self.myMagicNum+#self.myFootNum
-
+    local hData = self.allOtherHero[1]
     self.eneSoldiers = {}
     for k, v in ipairs(self.eneFootNum) do
         local temp = {}
         table.insert(self.eneSoldiers, temp)
         local lastOne = nil
         for ck, cv in ipairs(v) do
-            if cv > 0 then
+            if type(cv) == 'table' then
+                --颜色
+                local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=0, color=1}, self:getSolId(), true, cv) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                --调整一下位置
+                setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                --setPos(sp.bg, {0, 0})
+                sp:setZord()
+                --方向
+                sp:setDir()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+
+                table.insert(hData, sp)
+            elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 0, colId, ck-1, {level=cv, color=1}, self:getSolId()) 
                 sp.low = lastOne
                 if lastOne ~= nil then
@@ -829,7 +853,24 @@ function FightLayer2:initSoldier()
         table.insert(self.eneArrowSoldiers, temp)
         local lastOne = nil
         for ck, cv in ipairs(v) do
-            if cv > 0 then
+            if type(cv) == 'table' then
+                local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=0, color=1}, self:getSolId(), true, cv) 
+                sp.low = lastOne
+                if lastOne ~= nil then
+                    lastOne.up = sp
+                end
+                lastOne = sp
+
+                self.battleScene:addChild(sp.bg)
+                setPos(sp.bg, {self.WIDTH-self.rightWidth+(k-1+footWidth)*FIGHT_OFFX-(ck-1)*FIGHT_COL_OFFX, self.solOffY+(ck-1)*FIGHT_ROW_OFFY})
+                sp:setZord()
+                sp:setDir()
+                table.insert(temp, sp)
+                table.insert(self.allSoldiers, sp)
+                local sca = 1-(ck-1)*self.scaleCoff
+                setScale(sp.bg, sca)
+                table.insert(hData, sp)
+            elseif cv > 0 then
                 local sp = FightSoldier2.new(self, 1, colId, ck-1, {level=cv, color=1}, self:getSolId()) 
                 sp.low = lastOne
                 if lastOne ~= nil then

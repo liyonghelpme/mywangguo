@@ -786,11 +786,20 @@ Logic.stageRange = {
 }
 
 --村落能量
+--[[
 Logic.villagePower = {
-    {2, 0, 0, 0},
+    {{2, 0, 0, 0}, },
     {10, 0, 0, 0},
     {7, 4, 0, 0},
 }
+--]]
+Logic.villagePower = {
+    {{{attack=50, health=80, defense=0}, {attack=3, health=22, defense=0}}, {}, {}, {}},
+    {{{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=50, health=50, defense=0}}, {}, {}, {}},
+    {{{attack=10, health=40, defense=0}, {attack=10, health=40, defense=0},  {attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=50, health=50, defense=0}}, 
+    {{attack=5, health=46, defense=0}, {attack=5, health=46, defense=0}, {attack=5, health=46, defense=0},{attack=5, health=46, defense=0}}, {}, {}},
+}
+
 Logic.newVillage = false
 
 Logic.villageCenter = {

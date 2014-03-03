@@ -246,7 +246,7 @@ function FightArrow2:waitAttack(diff)
                         self.soldier.changeDirNode:runAction(self.attackAni)
                     --]]
                     --足够靠近才反击
-                    elseif dis < 400 then
+                    elseif dis < 400 and not self.soldier.attackTarget.footFar then
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可
                         --开始靠近敌人
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
