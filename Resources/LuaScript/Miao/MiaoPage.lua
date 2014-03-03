@@ -453,7 +453,8 @@ function MiaoPage:initGameStage()
                     local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                     local m = createSprite("blackArrow.png")
                     addChild(self.buildLayer.buildingLayer, m)
-                    m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    setBlackZord(m, oldy)
                     setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                     table.insert(self.allMask, {m, hv})
                 end
@@ -704,7 +705,8 @@ function MiaoPage:initExtendLand()
                         local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                         local m = createSprite("blackArrow.png")
                         addChild(self.buildLayer.buildingLayer, m)
-                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setBlackZord(m, oldy)
                         setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                         table.insert(self.allMask, {m, hv})
                     end
@@ -971,7 +973,8 @@ function MiaoPage:stageOneToTwo()
                     local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                     local m = createSprite("blackArrow.png")
                     addChild(self.buildLayer.buildingLayer, m)
-                    m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    setBlackZord(m, oldy)
                     setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                     table.insert(self.allMask, {m, hv})
                 end
@@ -1071,6 +1074,9 @@ function MiaoPage:stageOneToTwo()
     end
 end
 
+function setBlackZord(b, z)
+    b:setZOrder(MAX_BUILD_ZORD-z)
+end
 
 --根据游戏 阶段 和 该阶段开启的地图数量 显示游戏地图大小
 function MiaoPage:maskMap()
@@ -1087,7 +1093,9 @@ function MiaoPage:maskMap()
                         local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                         local m = createSprite("blackArrow.png")
                         addChild(self.buildLayer.buildingLayer, m)
-                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        --显示在所有建筑物上面
+                        --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setBlackZord(m, oldy)
                         setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                         table.insert(self.allMask, {m, hv})
                     end

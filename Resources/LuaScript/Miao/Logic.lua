@@ -456,10 +456,10 @@ SoldierAbility = {
 
 --基本上是 生命值数量 起作用
 SoldierAbility = {
-    {attack=40, defense=10, health=30},
-    {attack=35, defense=3, health=15},
-    {attack=50, defense=3, health=10},
-    {attack=40, defense=10, health=30},
+    {attack=3, defense=4, health=12},
+    {attack=2, defense=2, health=6},
+    {attack=4, defense=2, health=6},
+    {attack=3, defense=4, health=12},
 }
 
 
@@ -802,6 +802,7 @@ Logic.villagePower = {
 
 Logic.newVillage = false
 
+--几个村落中心
 Logic.villageCenter = {
     {13, 24},
     {12, 19},

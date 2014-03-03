@@ -126,37 +126,6 @@ function MiaoBuildLayer:initCat()
     end
 end
 
---[[
-function MiaoBuildLayer:initCat()
-    if Logic.inNew then
-        self:addPeople(3)
-        self:addPeople(4)
-        return
-    end
-    local u = CCUserDefault:sharedUserDefault()
-    local cat = u:getStringForKey("people")
-    if cat ~= "" then
-        cat = simple.decode(cat)
-        for k, v in ipairs(cat) do
-            --{id=v.id or 3, needAppear = false, health=v.health}
-            v.needAppear = false
-            local p = MiaoPeople.new(self, v)
-            table.insert(Logic.farmPeople, p)
-            self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
-            local pos = normalizePos({v.px, v.py}, 1, 1)
-            p:setPos(pos)
-            p:setZord()
-            self.mapGridController:addSoldier(p)
-            if v.hid ~= nil then
-                p.myHouse = self.mapGridController.bidToBuilding[v.hid]
-                if p.myHouse ~= nil then
-                    p.myHouse:setOwner(p)
-                end
-            end
-        end
-    end
-end
---]]
 
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
@@ -462,6 +431,61 @@ function MiaoBuildLayer:initRoad()
     global.director.curScene:saveGame(true)
     u:setBoolForKey("initRoadYet", true)
 end
+
+--检测生成的新猫咪的位置所在 的 block 是否ok
+function MiaoBuildLayer:checkBlockOk(ax, ay)
+    local allBlock = self.scene.block
+    local mwid = self.scene.width
+
+    local hideBlock1 = Logic.villageBlock
+    local hideBlock2 = concateTable(concateTable(Logic.stage2Block, Logic.extendBlock), Logic.extendBlock2)
+
+    local v = {ax, ay}
+    if Logic.gameStage == 1 then
+        local sr = Logic.stageRange[Logic.gameStage]
+        if v[1] < sr[1] or v[2] < sr[2] then
+            addBanner("猫咪超出边界")
+            return false
+        end
+        local gk = v[2]*mwid+v[1]+1
+        for hk, hv in ipairs(hideBlock1) do
+            print("allBlock hv gk ", Logic.curVillage, hv, gk)
+            if hk >= Logic.curVillage then
+                print("value", allBlock[hv][gk])
+                if allBlock[hv][gk] ~= 0 then
+                    addBanner("不能在黑色区域建造"..hv)
+                    return false
+                end
+            end
+        end
+    else
+        local sr
+        if Logic.showLand[13] and Logic.showLand[11] then
+            sr = Logic.stageRange[4]
+        elseif Logic.showLand[11] and not Logic.showLand[13] then
+            sr = Logic.stageRange[3]
+        elseif Logic.showLand[13] and not Logic.showLand[11] then
+            sr = Logic.stageRange[5]
+        else
+            sr = Logic.stageRange[2]
+        end
+        if v[1] < sr[1] or v[2] < sr[2] then
+            addBanner("超出边界stage 2")
+            return false
+        end
+        local gk = v[2]*mwid+v[1]+1
+        for hk, hv in ipairs(hideBlock2) do
+            if not Logic.openMap[hv] then
+                if allBlock[hv][gk] ~= 0 then
+                    addBanner("不能在stage2黑色区域"..hv)
+                    return false
+                end
+            end
+        end
+    end
+    return true
+end
+
 function MiaoBuildLayer:addPeople(param)
     local p = MiaoPeople.new(self, {id=param, pid=#Logic.farmPeople+1})
     self.buildingLayer:addChild(p.bg, MAX_BUILD_ZORD)
@@ -479,12 +503,35 @@ function MiaoBuildLayer:addPeople(param)
         --附近最近的一个有效的网格
         --local ax, ay = cxyToAxyWithDepth(pos.x, pos.y, self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT, self.scene.mask, self.scene.cxyToAxyMap)
         --出现位置基本在地图中
-        pos = normalizePos({pos.x, pos.y}, 1, 1)
-        local p = pos
-
+        --pos = normalizePos({pos.x, pos.y}, 1, 1)
+        --local p = pos
+        --[[
         local ax, ay = newCartesianToAffine(p[1], p[2], self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT)
         ax = math.max(math.min(ax, self.scene.width-1-1-1-1), 1)
         ay = math.max(math.min(ay, self.scene.height-1-1-1-1), 1)
+        --]]
+        --检测ax ay 所在位置是否正确 
+        --在第一个gameStage 出现在第一块中心
+        --第二个gameStage 出现在第二块中心
+        --根据地图 块所在的中心位置决定
+        local ax, ay
+        if Logic.gameStage == 1 then
+            --local sr = Logic.stageRange[Logic.gameStage]
+            if Logic.curVillage == 1 then
+                ax, ay = 17, 24
+            elseif Logic.curVillage == 2 then
+                ax, ay = Logic.villageCenter[1][1], Logic.villageCenter[1][2]
+            elseif Logic.curVillage == 3 then
+                ax, ay = Logic.villageCenter[2][1], Logic.villageCenter[2][2]
+            else
+                ax, ay = Logic.villageCenter[3][1], Logic.villageCenter[3][2]
+            end
+        else
+            --新的块是否ok 如果ok 则 出现在这个ax ay 上面
+            --或者快速得到建筑物的 ax ay 属性
+            ax, ay = 15+math.random(3), 21+math.random(3)
+        end
+
         local cx, cy = newAffineToCartesian(ax, ay, self.scene.width, self.scene.height, MapWidth/2, FIX_HEIGHT)
         pos = {cx, cy}
         
