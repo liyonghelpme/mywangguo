@@ -433,6 +433,7 @@ function FightArrow2:doFightBack(diff)
             --对上步兵 才会近战攻击
             if self.soldier.map.day == 2 then
                 --步兵没有远程靠近中
+                --死掉了目标
                 if not self.inFightBack and not self.soldier.attackTarget.footFar then
                     --self.soldier.state = FIGHT_SOL_STATE.WAIT_ATTACK
                     self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE

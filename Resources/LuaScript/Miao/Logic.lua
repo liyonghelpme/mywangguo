@@ -61,6 +61,7 @@ Logic.ownGoods = {
     {0, 67}, 
     --{0, 68},
 }
+--[[
 Logic.allOwnBuild = {
 
 {2, 1}, {2, 2}, {2, 4}, {2, 5}, {2, 11}, {2, 15},
@@ -72,12 +73,13 @@ Logic.allOwnBuild = {
     {2, 24}, {2, 25}, {2, 26}, {2, 27}, {2, 30}, {2, 31},
 
 }
+--]]
 
 --初始化装饰物 到 商店中
 function getBuyableBuild()
     local temp = {}
-    for k, v in ipairs(Logic.allOwnBuild) do
-        if Logic.buildings[v[2]].buyable == 1 then
+    for k, v in ipairs(Logic.ownBuild) do
+        if Logic.buildings[v].buyable == 1 then
             table.insert(temp, v)
         end
     end
@@ -146,6 +148,10 @@ function initResearchEquip()
     end
 end
 
+function storeAddNewEquip(id)
+    table.insert(Logic.ownGoods, {0, id})
+    initResearchEquip()
+end
 
 --获得什么条件可以新增加的研究物品
 
@@ -753,8 +759,6 @@ Logic.fightNum = 4
 Logic.ownBuild = {
     1, 2, 15, 
     4, 
-    5, 
-    6, 7,
 }
 
 Logic.lastArenaTime = 0

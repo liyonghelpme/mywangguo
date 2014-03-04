@@ -416,6 +416,8 @@ function MiaoPage:restoreBuildAndMap()
     self.darkSlope = ns
 
     self:removeFence(landId)
+
+    Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 
 --移除该土地块的篱笆建筑物
@@ -600,6 +602,8 @@ function MiaoPage:onLand(p)
         --local landId = Logic.stage2Block[p]
         self:initWoodAndMine(landId, mg)
         self:removeOpenMapFence()
+
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
 function MiaoPage:initWoodAndMine(landId)
@@ -938,6 +942,8 @@ function MiaoPage:onExtendLand2(p)
 
         self:initWoodAndMine(landId)
         self:removeOpenMapFence()
+
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
 

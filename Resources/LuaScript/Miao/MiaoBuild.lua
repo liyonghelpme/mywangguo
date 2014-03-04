@@ -129,7 +129,6 @@ function MiaoBuild:ctor(m, data)
         --樱花树
         elseif self.data.kind == 4 then
             self.funcBuild = Tree.new(self)
-            --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
         --民居 农田
         elseif self.data.kind == 5 then
@@ -435,6 +434,15 @@ function MiaoBuild:getAxAyHeight()
     end
     return self.ax, self.ay, self.height
 end
+
+--得到建筑物的 blockId 所属的block 移动的时候 会修改掉 但是对于被屏蔽的地区的建筑物 是不会改变的
+--直接检测operate
+--[[
+function MiaoBuild:getBlockId()
+end
+--]]
+
+
 function MiaoBuild:setInStage()
     --之前不可见 现在可见了
     if not self.inStage then

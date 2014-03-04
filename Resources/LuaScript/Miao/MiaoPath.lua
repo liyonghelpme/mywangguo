@@ -83,45 +83,48 @@ function MiaoPath:checkNeibor(x, y)
             local bb
             if buildCell[key] ~= nil then
                 bb = buildCell[key][#buildCell[key]][1]
-                --道路或者 桥梁 建造好的建筑物
-                if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
-                    hasRoad = true
-                    --print("buildCell Kind Road")
-                --同一个建筑物不能多次插入
-                elseif not isStart and  bb.picName == 'build' and bb.data.kind == 0 then
-                    --是一个可以到达的 去工作的建筑物
-                    --建筑物不能贯通周围邻居
-                    --矿坑 检查道路是在斜坡上面 还是下面
-                    local mineOk = true
-                    if bb.id == 28 then
-                        local ax, ay, height = bb:getAxAyHeight() 
-                        print("curRoad is ", curRoad)
-                        if curRoad ~= nil then
-                            local rax, ray, rhei = curRoad:getAxAyHeight()
-                            print("my height road height", ax, ay, height, rax, ray, rhei)
-                            --矿点和道路不在同一高度 
-                            if height ~= rhei then
+                --不在黑色区域的建筑物
+                if bb.operate then
+                    --道路或者 桥梁 建造好的建筑物
+                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
+                        hasRoad = true
+                        --print("buildCell Kind Road")
+                    --同一个建筑物不能多次插入
+                    elseif not isStart and  bb.picName == 'build' and bb.data.kind == 0 then
+                        --是一个可以到达的 去工作的建筑物
+                        --建筑物不能贯通周围邻居
+                        --矿坑 检查道路是在斜坡上面 还是下面
+                        local mineOk = true
+                        if bb.id == 28 then
+                            local ax, ay, height = bb:getAxAyHeight() 
+                            print("curRoad is ", curRoad)
+                            if curRoad ~= nil then
+                                local rax, ray, rhei = curRoad:getAxAyHeight()
+                                print("my height road height", ax, ay, height, rax, ray, rhei)
+                                --矿点和道路不在同一高度 
+                                if height ~= rhei then
+                                    mineOk = false
+                                    print("mine not ok")
+                                end
+                            --矿点没有道路？
+                            else
                                 mineOk = false
-                                print("mine not ok")
                             end
-                        --矿点没有道路？
+                        end
+                        if mineOk then
+                            local oldDist = self.allBuilding[bb] or 999999
+                            self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
+                            table.insert(bb.belong, self.target.name)
+                            if #bb.belong > 3 then
+                                table.remove(bb.belong, 1)
+                            end
                         else
-                            mineOk = false
+                            print("mine not belong")
                         end
-                    end
-                    if mineOk then
-                        local oldDist = self.allBuilding[bb] or 999999
-                        self.allBuilding[bb] = math.min(oldDist, self.cells[curKey].gScore+10)
-                        table.insert(bb.belong, self.target.name)
-                        if #bb.belong > 3 then
-                            table.remove(bb.belong, 1)
-                        end
+                        --print("add Building ", bb.id, bb.picName)
                     else
-                        print("mine not belong")
+                        --print("no road")
                     end
-                    --print("add Building ", bb.id, bb.picName)
-                else
-                    --print("no road")
                 end
             else
                 --print("not Road")

@@ -63,158 +63,9 @@ end
 
 function TMXScene:initData(rep, param)
     print("initData", rep, param)
-
     local u = CCUserDefault:sharedUserDefault()
-    --[[
-    local r = u:getStringForKey("resource")
-    if r ~= "" then
-        Logic.resource = simple.decode(r)
-    end
-
-
-    local r = u:getStringForKey("holdNum")
-    if r ~= "" then
-        Logic.holdNum = tableToDict(simple.decode(r))
-        print("decode holdNum", simple.encode(Logic.holdNum))
-    end
-    local r = u:getStringForKey("researchData")
-    if r ~= "" then
-        local rd = simple.decode(r)
-        Logic.researchGoods = rd.researchGoods
-        --Logic.oldResearchGoods = simple.decode(simple.encode(rd.researchGoods))
-        Logic.inResearch = rd.inResearch
-        Logic.ownGoods = rd.ownGoods
-    end
-    --]]
-
     initResearchEquip() 
 
-    --[[
-    local r = u:getStringForKey("inSell")
-    if r ~= "" then
-        local rd = simple.decode(r)
-        Logic.inSell = rd
-    end
-
-    local r = u:getStringForKey("buildNum")
-    if r ~= "" then
-        local rd = tableToDict(simple.decode(r))
-        Logic.buildNum = rd
-    end
-    local r = u:getStringForKey("ownCity")
-    if r ~= "" then
-        print("ownCity", r)
-        local rd = tableToDict(simple.decode(r))
-        Logic.ownCity = rd
-    end
-
-    local r = u:getStringForKey("ownVillage")
-    if r ~= "" then
-        local rd = tableToDict(simple.decode(r))
-        Logic.ownVillage = rd
-    end
-
-    local r = u:getStringForKey("catData")
-    if r ~= "" and r ~= "null" then
-        print("catData", r)
-        local rd = simple.decode(r)
-        Logic.catData = rd
-        print("encode catData", simple.encode(Logic.catData))
-    else
-        Logic.catData = nil
-    end
-
-    local r = u:getStringForKey("ownPeople")
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.ownPeople = rd
-    end
-
-    local r = u:getStringForKey('ownBuild')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.ownBuild = rd
-    end
-
-    local r = u:getStringForKey('fightNum')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.fightNum = rd
-    end
-
-    local r = u:getStringForKey('arenaLevel')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.arenaLevel = rd
-    end
-
-    local r = u:getStringForKey('ownTech')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.ownTech = rd
-    end
-
-    local r = u:getStringForKey('lastArenaTime')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.lastArenaTime = rd
-    end
-    --]]
-
-    --[[
-    local r = u:getStringForKey('date')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.date = rd
-    end
-
-    local r = u:getStringForKey('landBook')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.landBook = rd
-    end
-
-    local r = u:getStringForKey('curVillage')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.curVillage = rd
-    end
-
-    local r = u:getStringForKey('gameStage')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.gameStage = rd
-    end
-
-    local r = u:getStringForKey('showMapYet')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.showMapYet = rd
-    end
-    local r = u:getStringForKey('attendHero')
-    if r ~= "" and r ~= "null" then
-        local rd = simple.decode(r)
-        Logic.attendHero = rd
-    end
-
-    local r = u:getStringForKey("openMap")
-    if r ~= "" then
-        Logic.openMap = tableToDict(simple.decode(r))
-        --print("decode holdNum", simple.encode(Logic.holdNum))
-    end
-
-    local r = u:getStringForKey("showLand")
-    if r ~= "" then
-        Logic.showLand = tableToDict(simple.decode(r))
-        --print("decode holdNum", simple.encode(Logic.holdNum))
-    end
-
-    local r = u:getStringForKey("soldiers")
-    if r ~= "" then
-        local rd = simple.decode(r)
-        Logic.soldiers = rd
-    end
-    --]]
 
     Logic.cityGoods = {}
     CityData = {}
@@ -599,7 +450,16 @@ function TMXScene:newVillageWin(w)
         Logic.curVillage = Logic.curVillage+1
         if Logic.curVillage < 4 then
             self.page:adjustFly()
+        --最后获得 工厂和商店
+            if Logic.curVillage == 2 then
+                addBanner("获得小甲")
+                --table.insert(Logic.ownGoods, {0, 47})
+                storeAddNewEquip(47)
+            end
         else
+            addBanner("获得工厂 和 茶屋")
+            table.insert(Logic.ownBuild, 5)
+            table.insert(Logic.ownBuild, 11)
             removeSelf(self.page.fly.bg)
         end
         self.page:restoreBuildAndMap()

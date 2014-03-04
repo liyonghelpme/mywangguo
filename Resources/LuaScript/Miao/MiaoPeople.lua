@@ -959,40 +959,42 @@ function MiaoPeople:checkNeibor(x, y)
             local bb
             if buildCell[key] ~= nil then
                 bb = buildCell[key][#buildCell[key]][1]
-                --道路或者 桥梁 建造好的建筑物
-                if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
-                    hasRoad = true
-                    --print("buildCell Kind Road")
-                else
-                    if bb == self.predictTarget then
-                        local mineOk = true
-                        --矿坑 当前道路没有在斜坡上
-                        --当前道路 和矿坑同高度
-                        if bb.id == 28 then
-                            print("curRoad is ", curRoad)
-                            if curRoad ~= nil then
-                                if curRoad.onSlope then 
-                                    mineOk = false
-                                else
-                                    local ax, ay, height = bb:getAxAyHeight() 
-                                    local rax, ray, rhei = curRoad:getAxAyHeight()
-                                    print("my height road height", ax, ay, height, rax, ray, rhei)
-                                    --矿点和道路不在同一高度 
-                                    if height ~= rhei then
+                if bb.operate then
+                    --道路或者 桥梁 建造好的建筑物
+                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
+                        hasRoad = true
+                        --print("buildCell Kind Road")
+                    else
+                        if bb == self.predictTarget then
+                            local mineOk = true
+                            --矿坑 当前道路没有在斜坡上
+                            --当前道路 和矿坑同高度
+                            if bb.id == 28 then
+                                print("curRoad is ", curRoad)
+                                if curRoad ~= nil then
+                                    if curRoad.onSlope then 
                                         mineOk = false
-                                        print("mine not ok")
+                                    else
+                                        local ax, ay, height = bb:getAxAyHeight() 
+                                        local rax, ray, rhei = curRoad:getAxAyHeight()
+                                        print("my height road height", ax, ay, height, rax, ray, rhei)
+                                        --矿点和道路不在同一高度 
+                                        if height ~= rhei then
+                                            mineOk = false
+                                            print("mine not ok")
+                                        end
                                     end
+                                --矿点没有道路？
+                                else
+                                    mineOk = false
                                 end
-                            --矿点没有道路？
-                            else
-                                mineOk = false
+                            end
+                            if mineOk then
+                                isTarget = true
                             end
                         end
-                        if mineOk then
-                            isTarget = true
-                        end
+                        --print("no road")
                     end
-                    --print("no road")
                 end
             else
                 --print("not Road")

@@ -596,7 +596,11 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
             self.shadow:runAction(sequence({moveby(2, vs.width/2, 0), fadeout(1)}))
         end
         self.bg:runAction(sequence({delaytime(3), disappear(self.bg)}))
+        self:clearState()
     end
+end
+function FightSoldier2:clearState()
+    self.footFar = false
 end
 
 
