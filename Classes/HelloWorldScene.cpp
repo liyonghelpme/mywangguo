@@ -3,6 +3,8 @@
 #include "CCSprite3D.h"
 //#include "Bone.h"
 #include "MD2.h"
+#include "Bone2.h"
+
 USING_NS_CC;
 
 
@@ -103,22 +105,85 @@ bool HelloWorld::init()
     this->addChild(m3, 2);
     m33 = m3;
 
-    //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
-    //m3->setScale(100);
-    //m3->setPosition(ccp(100, 100));
-    //m3->rotateX(100);
     m3->tranX(400); 
     m3->tranY(240); 
     m3->tranZ(0);
     
-    //m3->rotateX(90);
-
-    //m3->rotateZ(-90);
     m3->scaleX(0.5);
     m3->scaleY(0.5);
     m3->scaleZ(0.5);
     m3->rotateX(40); 
-    //m3->rotateX(135); 
+
+
+    sprintf(b1.name, "b1");
+    sprintf(b2.name, "b2");
+    
+    //骨骼的bind位置 和 朝向
+    kmQuaternionIdentity(&b1.rotate); 
+    b1.length = 100;
+    kmVec3Fill(&b1.offset, 0, 0, 0);
+    b1.child[0] = 1;
+    b1.child[1] = -1;
+    b1.parent = -1;
+    kmMat4Identity(&b1.mat);
+    b1.id = 0;
+
+
+    kmQuaternionIdentity(&b2.rotate); 
+    b2.length = 100;
+    kmVec3Fill(&b2.offset, 0, 0, 0);
+    b2.child[0] = -1;
+    b2.child[1] = -1;
+    b2.parent = 0;
+    kmMat4Identity(&b2.mat);
+    b2.id = 1;
+
+    allBone[0] = &b1;
+    allBone[1] = &b2;
+
+    kmMat4 *m1 = &invBoneMat[0];
+    kmMat4Identity(m1);
+    kmMat4 temp;
+    kmMat4Translation(&temp, 50, 100, 0);
+    kmMat4Multiply(m1, m1, &temp);
+    kmMat4Inverse(m1, m1);
+
+    kmMat4 *m2 = &invBoneMat[1];
+    kmMat4Translation(m2, 100, 100, 0);
+    kmMat4Inverse(m2, m2);
+
+
+    rb1 = CCSprite3D::create();
+    rb1->loadMd2("test2.md2");
+    rb1->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
+    this->addChild(rb1, 3);
+    rb1->tranX(100);
+    rb1->tranY(100);
+    rb1->tranZ(0);
+
+    rb1->scaleX(0.5);
+    rb1->scaleY(0.2);
+    rb1->scaleZ(0.1);
+
+
+    rb2 = CCSprite3D::create();
+    rb2->loadMd2("test2.md2");
+    rb2->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
+    this->addChild(rb2, 3);
+    rb2->tranX(200);
+    rb2->tranY(100);
+    rb2->tranZ(0);
+
+    rb2->scaleX(0.5);
+    rb2->scaleY(0.2);
+    rb2->scaleZ(0.1);
+
+
+    //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
+    //m3->setScale(100);
+    //m3->setPosition(ccp(100, 100));
+    //m3->rotateX(100);
+
 
     ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
     CCLog("Direction %d", p);
@@ -134,6 +199,10 @@ bool HelloWorld::init()
     readMD2(&pos, &tex, &ind, CCFileUtils::sharedFileUtils()->getFileData("test.md2", "rb", &size));
     */
 
+
+
+    passTime = 0;
+
     scheduleUpdate();
     return true;
 }
@@ -141,12 +210,35 @@ bool HelloWorld::init()
 void HelloWorld::update(float diff) {
     //render Success fully use CCReadPixel
     //save as 
+    /*
     if(frameNum == 1) {
     } else if(frameNum == 2) {
     }
     frameNum++; 
     m33->rotateY(frameNum);
+    */
     //m33->rotateZ(frameNum);
+    
+    passTime = passTime+diff;
+    //第一个个骨骼绕着z 方向旋转
+    
+    //每s 旋转45角度
+    kmVec3 axis;
+    kmVec3Fill(&axis, 0, 0, 1);
+    kmQuaternionRotationAxis(&b1.rotate, &axis, kmDegreesToRadians(45*passTime));
+
+    kmMat4 curMat;
+    kmMat4Identity(&curMat);
+    setBoneMatrix(&b1, allBone, &curMat);
+
+    kmMat4 boneMat[2];
+    for(int i=0; i < 2; i++) {
+        kmMat4Multiply(&boneMat[i], &invBoneMat[i], &allBone[i]->mat);
+    }
+
+    //对于所有顶点进行矩阵计算
+    kmMat4Assign(&rb1->boneMat, &boneMat[0]);
+    kmMat4Assign(&rb1->boneMat, &boneMat[1]);
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)

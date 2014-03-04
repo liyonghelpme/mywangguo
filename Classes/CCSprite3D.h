@@ -102,6 +102,9 @@ public:
     
     float sx, sy, sz;
 
+    //对于顶点对象调整位置
+    kmMat4 boneMat;
+
 protected:
     ccBlendFunc m_sBlendFunc;
     //CCTexture2D *m_pobTexture;//使用的纹理编号

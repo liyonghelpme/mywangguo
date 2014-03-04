@@ -178,6 +178,8 @@ bool CCSprite3D::init() {
     m_sBlendFunc.src = GL_ONE;
     m_sBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
 
+    //root Matrix 变换
+    kmMat4Identity(&boneMat);
     xRot = 0;
     yRot = 0;
     zRot = 0;
@@ -258,6 +260,10 @@ void CCSprite3D::stdTransform() {
     kmVec3 axis3 = {0, 0, 1};
     kmMat4RotationAxisAngle(&rotz, &axis3, zRot*kmPI/180);
     kmMat4Multiply(&matrixMV, &matrixMV, &rotz);
+
+
+    //顶点位置 再做变换最后做还是再之前做
+    kmMat4Multiply(&matrixMV, &matrixMV, &boneMat);
 
 
     kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);

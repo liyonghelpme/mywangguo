@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "CCSprite3D.h"
+#include "Bone2.h"
 using namespace cocos2d;
 
 class HelloWorld : public cocos2d::CCLayer
@@ -24,6 +25,15 @@ public:
     int frameNum;
     
     CCSprite3D *m33;
+
+    Bone b1, b2;
+    Bone *allBone[2];
+
+    kmMat4 invBoneMat[2];
+
+    float passTime;
+
+    CCSprite3D *rb1, *rb2;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
