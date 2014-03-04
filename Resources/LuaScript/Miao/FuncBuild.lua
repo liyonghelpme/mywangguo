@@ -36,11 +36,6 @@ end
 function FuncBuild:beginMove()
 end
 function FuncBuild:finishMove()
-    --[[
-    if self:checkBuildable() then
-        self.baseBuild:doMyEffect()
-    end
-    --]]
 end
 
 function FuncBuild:removeSelf()
@@ -138,6 +133,9 @@ function FuncBuild:clearMenu()
         --self.baseBuild.moved = true
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
         print("finish clear Menu send Msg!!!!!!!!!!!!!")
+
+        --移动建筑物之后调整道路
+        --self.baseBuild:checkRoadConnect()
     end
 end
 function FuncBuild:detailDialog()
@@ -209,6 +207,9 @@ function FuncBuild:adjustHeight()
     print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
     local hei = adjustNewHeight(self.baseBuild.map.scene.mask, self.baseBuild.map.scene.width, ax, ay)
     setPos(self.baseBuild.heightNode, {0, hei*103})
+    if self.baseBuild.roadNode ~= nil then
+        setPos(self.baseBuild.roadHeightNode, {0, hei*103})
+    end
 end
 
 function delayShow(sp, w)
