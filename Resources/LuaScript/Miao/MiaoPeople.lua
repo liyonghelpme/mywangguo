@@ -858,8 +858,8 @@ function MiaoPeople:calcG(x, y)
     --是建筑物 不能穿过
     if buildCell[key] ~= nil then
         local n = buildCell[key][#buildCell[key]][1]
-        --不是道路
-        if n.picName ~= 't' then
+        --不是道路 也不是 桥梁
+        if n.picName ~= 't' and n.id ~= 3 then
             dist = 100
         end
         --[[

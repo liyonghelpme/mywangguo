@@ -129,8 +129,14 @@ function TMXMenu2:beginBuild()
     self.mbut.shadowWord:setString("返回")
     self.leftBut.text:setString("旋转")
     self.leftBut.shadowWord:setString("旋转")
+    
+
     self.inBuild = true
     self:adjustLeftShow()
+    --没有旋转隐藏
+    if global.director.curScene.page.curBuild.data.switchable == 0 then
+        setVisible(self.leftBut.bg, false)
+    end
 end
 
 function TMXMenu2:finishBuild()
@@ -139,6 +145,8 @@ function TMXMenu2:finishBuild()
     self.leftBut.text:setString("地图")
     self.leftBut.shadowWord:setString("地图")
     self.inBuild = false
+    --switchable 可能隐藏菜单
+
     self:adjustLeftShow()
 end
 

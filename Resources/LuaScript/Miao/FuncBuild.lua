@@ -78,8 +78,7 @@ function FuncBuild:clearMenu()
     print("try to clear Menu", self.baseBuild.colNow, self.selGrid)
     if self.selGrid ~= nil then
         removeSelf(self.selGrid)
-        self.baseBuild.changeDirNode:stopAllActions()
-        setColor(self.baseBuild.changeDirNode, {255, 255, 255})
+        self:clearTouchAni()
         self.selGrid = nil
         
         --local curMap = getBuildMap(self.baseBuild)
@@ -146,6 +145,8 @@ function FuncBuild:detailDialog()
         global.director:pushView(DecorInfo.new(self.baseBuild), 1)
     elseif self.baseBuild.id == 28 or self.baseBuild.id == 29 then
         global.director:pushView(DecorInfo.new(self.baseBuild), 1)
+    elseif self.baseBuild.id == 3 then
+        global.director:pushView(DecorInfo.new(self.baseBuild), 1)
     end
 end
 function FuncBuild:showInfo()
@@ -155,7 +156,7 @@ function FuncBuild:showInfo()
     local bo = BuildOpMenu.new(self.baseBuild)
     global.director:pushView(bo)
 
-    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({itintto(0.5, 128, 128, 128), itintto(0.5, 255, 255, 255)})))
+    self:runTouchAni()
     self.baseBuild.oldPos = getPos(self.baseBuild.bg)
     self:initBottom()
 end
@@ -185,14 +186,6 @@ function FuncBuild:setBottomColor(c)
             setTexture(self.selGrid, "newBlueGrid.png")
         end
     end
-    --self:setColor()
-    --[[
-    if c == 0 then
-        setColor(self.baseBuild.bottom, {255, 0, 0})
-    else
-        setColor(self.baseBuild.bottom, {0, 255, 0})
-    end
-    --]]
 end
 function FuncBuild:doSwitch()
 end
@@ -206,7 +199,7 @@ function FuncBuild:updateState()
 end
 function FuncBuild:updateGoods()
 end
-function FuncBuild:setPos()
+function FuncBuild:setPos(p)
     self:adjustHeight()
 end
 
@@ -281,4 +274,15 @@ function FuncBuild:exitStore()
     self.inMerchant = nil
 end
 function FuncBuild:setOperatable()
+end
+function FuncBuild:runBeginBuild()
+    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
+end
+
+function FuncBuild:runTouchAni()
+    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({itintto(0.5, 128, 128, 128), itintto(0.5, 255, 255, 255)})))
+end
+function FuncBuild:clearTouchAni()
+    self.baseBuild.changeDirNode:stopAllActions()
+    setColor(self.baseBuild.changeDirNode, {255, 255, 255})
 end

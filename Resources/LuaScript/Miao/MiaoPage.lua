@@ -325,6 +325,7 @@ function MiaoPage:ctor(s)
     --河流图片
     --调整河流的zord 来进行遮挡
     --播放河流的动画
+    self.waterData = {}
     for dk, dv in ipairs(layerName.water.data) do
         if dv ~= 0 then
             print("water pid", dv)
@@ -335,11 +336,14 @@ function MiaoPage:ctor(s)
             print("water pname", pname)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.waterMap:addChild(pic)
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
             local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
             table.insert(self.allSlopeAndWater, {pic, w, h})
+            self.waterData[dk] = {0, hei*OFF_HEIGHT, pic=pic, pname=pname}
         end
     end
+
     setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
 
 
@@ -1143,14 +1147,6 @@ function MiaoPage:maskMap()
         --第一阶段 将超出范围的篱笆隐藏起来
         print("set newFence out of stage")
         self:showFence(sr)
-        --[[
-        for fk, fv in ipairs(self.newFence) do
-            local ax, ay = fv[2], fv[3]
-            if ax < sr[1] or ay < sr[2] then
-                setVisible(fv[1], false)
-            end
-        end
-        --]]
 
         self.darkSlope = {}
         for k, v in pairs(self.slopeData) do
@@ -1435,7 +1431,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
 
         --初始化道路状态 因为如果建筑物已经加入到building 里面了那么就不能再检测到冲突了
         self.curBuild:beginBuild()
-        self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
+        self.curBuild.funcBuild:runBeginBuild()
         
         --Logic.paused = true
         setLogicPause(true)
@@ -1499,6 +1495,7 @@ function MiaoPage:finishBuild()
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         --桥梁建河流上
+        --[[
         if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
             if self.curBuild.colNow == 0 then
@@ -1516,9 +1513,10 @@ function MiaoPage:finishBuild()
                 end
             end
         else
-            self.curBuild:finishBuild()
-            self.curBuild = nil
-        end
+        --]]
+        self.curBuild:finishBuild()
+        self.curBuild = nil
+        --end
 
         --根据当前的位置 调整一个新位置
         --oldBuild.picName == 't' and

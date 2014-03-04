@@ -85,7 +85,7 @@ function BuildPath:checkNeibor(x, y)
                 --必须是可operate的建筑物
                 if bb.operate then
                     --道路或者 桥梁 建造好的建筑物
-                    if bb.picName == 't' then
+                    if bb.picName == 't' or (bb.picName=='build' and bb.id==3) then
                         hasRoad = true
                         --print("buildCell Kind Road")
                     --同一个建筑物不能多次插入

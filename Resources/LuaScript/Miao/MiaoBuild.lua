@@ -123,7 +123,7 @@ function MiaoBuild:ctor(m, data)
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
-            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0.5})
+            --self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0.5})
             self.funcBuild = Bridge.new(self)
             self.funcBuild:initView()
         --樱花树
@@ -239,7 +239,11 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild:initView()
     end
 
-    self.heightNode:addChild(self.changeDirNode)
+    --桥梁的 node 自己添加
+    if self.id ~= 3 then
+        self.heightNode:addChild(self.changeDirNode)
+    end
+
     setContentSize(setAnchor(self.bg, {0.5, 0}), {SIZEX*2, SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
@@ -655,7 +659,9 @@ function MiaoBuild:checkRiverOrSlopeCol()
         local gid = layer.data[gk]
         if gid ~= 0 then
             self.colNow = 1
-            self.otherBuild = nil
+            --self.otherBuild = nil
+            local wd = self.map.scene.waterData[gk]
+            self.otherBuild = {picName='water', dir=wd[1], height=wd[2], ax=ax, ay=ay, pname=wd.pname}
             self:setColor(0)
             return true
         end
@@ -783,9 +789,9 @@ function MiaoBuild:setPos(p)
         self.zordLabel:setString(zord)
     end
 
-    self.bg:setZOrder(zord)
-    self.funcBuild:setPos()
     self.zord = zord
+    self.bg:setZOrder(zord)
+    self.funcBuild:setPos(p)
 
     self:setDirty()
 end
