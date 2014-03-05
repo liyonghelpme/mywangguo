@@ -49,7 +49,7 @@ function DialogController:addBanner(banner)
     local initY = dis[2]/2;
     for i = 1, #self.bannerStack, 1 do
         local ban = self.bannerStack[i][1]
-        ban:setMoveAni(initX, initY+100*maxOff)
+        ban:setMoveAni(initX, initY+70*maxOff)
         maxOff = maxOff-1
     end
     table.insert(self.bannerStack, {banner, Timer.now})

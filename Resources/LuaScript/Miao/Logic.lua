@@ -38,6 +38,9 @@ Logic.researchGoods = {
     --{0, 2}, {0, 3}, {0, 11},
 }
 
+--当前卖出的建筑物
+Logic.sellBuild = {}
+
 --正在研究的物品
 --researchGoodsNum time
 Logic.inResearch = nil

@@ -3,25 +3,7 @@ require "Miao.MiaoBuildLayer"
 require "Miao.RegionDialog"
 require "myMap.NewUtil"
 MiaoPage = class()
-function MiaoPage:ctor(s)
-    self.scene = s
-    self.bg = CCLayer:create()
-
-    local mj = simple.decode(getFileData("big512.json"))
-    self.mapInfo = mj
-    local width = mj.width
-    local height = mj.height
-    self.width = width
-    self.height = height
-    local maxWH = math.max(self.width, self.height)
-    --矩形地图MapPos 对照
-    MapWidth = SIZEX*(maxWH*2)
-    --3*103
-    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*4+50
-    --+180 
-
-    setContentSize(self.bg, {MapWidth, MapHeight})
-    setAnchor(self.bg, {0, 0})
+function MiaoPage:initView()
 
     --setPos(self.bg, {-MapWidth/2})
 
@@ -40,11 +22,13 @@ function MiaoPage:ctor(s)
 
     local sea2 = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
     local sea = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    setGLProgram(sea, "sea", "Vert.h", "SeaFrag.h")
     self.bg:addChild(sea)
     setAnchor(setPos(sea, {0, 0}), {0, 0})
     self.bg:addChild(sea2)
     setAnchor(setPos(sea2, {MapWidth, 0}), {0, 0})
     self.seas = {sea, sea2}
+
 
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
@@ -346,17 +330,38 @@ function MiaoPage:ctor(s)
 
     setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
 
+end
+
+function MiaoPage:ctor(s)
+    self.scene = s
+    self.bg = CCLayer:create()
+
+    local mj = simple.decode(getFileData("big512.json"))
+    self.mapInfo = mj
+    local width = mj.width
+    local height = mj.height
+    self.width = width
+    self.height = height
+    local maxWH = math.max(self.width, self.height)
+    --矩形地图MapPos 对照
+    MapWidth = SIZEX*(maxWH*2)
+    --3*103
+    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*4+50
+    --+180 
+    --
+    self:initView()
+
+    setContentSize(self.bg, {MapWidth, MapHeight})
+    setAnchor(self.bg, {0, 0})
 
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate:setBg(self.bg)
     self.blockMove = false
     
 
+    self.initYet = true
     registerEnterOrExit(self)
     registerMultiTouch(self)
-
-
-
     --缩放背景图到 0.5
     self.touchDelegate:scaleToMax(0.5)
     self:moveToPoint(MapWidth/2, FIX_HEIGHT+200)
@@ -1239,10 +1244,14 @@ function MiaoPage:enterScene()
     registerUpdate(self)
 end
 function MiaoPage:update(diff)
+
     self.touchDelegate:update(diff)
     self:updateSea(diff)
 end
 function MiaoPage:updateSea(diff)
+    if true then
+        return
+    end
     local s = diff*50
     local p1 = getPos(self.seas[1])
     local p2 = getPos(self.seas[2])

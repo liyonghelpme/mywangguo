@@ -3,6 +3,7 @@ require "Miao.MiaoPage"
 require "Miao.TMXMenu2"
 require "Miao.NewGame"
 require "menu.SessionMenu"
+require "Miao.LoadingView"
 TMXScene = class()
 
 function TMXScene:initDataNow()
@@ -18,14 +19,18 @@ function TMXScene:initDataNow()
     end
     --sendReq('login', dict(), self.initData, nil, self)
 end
-function TMXScene:ctor()
-    self.name = "TMXScene"
 
-    self.bg = CCScene:create()
+function TMXScene:initPage()
     self.page = MiaoPage.new(self)
     self.bg:addChild(self.page.bg)
+end
+
+function TMXScene:ctor()
+    self.name = "TMXScene"
+    self.bg = CCScene:create()
+
     
-    self.cameraLight = addNode(self.bg)
+    self.cameraLight = addNode(self.bg, 1)
     local vs = getVS()
     local sp1 = CCSprite:create("light.png")
     local bf = ccBlendFunc()
@@ -43,14 +48,11 @@ function TMXScene:ctor()
 
 
     self.menu = TMXMenu2.new(self)
-    self.bg:addChild(self.menu.bg)
+    self.bg:addChild(self.menu.bg, 2)
     self.dialogController = DialogController.new(self)
     self.bg:addChild(self.dialogController.bg)
 
-    --self.page:moveToPoint(1644, 384)
-    --setPos(self.bg, {})
 
-    delayCall(0.3, self.initDataNow, self)
     registerEnterOrExit(self)
     self.passTime = 0
     self.checkTime = 0
@@ -61,6 +63,7 @@ function TMXScene:ctor()
     initCityData()
 end
 
+--分步初始化 每帧率初始化一个 建筑物
 function TMXScene:initData(rep, param)
     print("initData", rep, param)
     local u = CCUserDefault:sharedUserDefault()
@@ -167,15 +170,23 @@ function TMXScene:initData(rep, param)
     self.page:initDataOver()
     print("start init buildLayer")
     self.page.buildLayer:initDataOver()
+
+end
+
+--建筑物初始化结束后调用
+function TMXScene:afterInitBuild()
+    --初始化斜坡
     self.page:initInvisibleSlope()
+    --遮挡斜坡
     self.page:maskMap()
 
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
-
     self.initDataing = false
+    global.director:popView()
 end
+
 
 function TMXScene:gotoFight()
     if Logic.catData ~= nil then
@@ -252,9 +263,31 @@ end
 
 
 function TMXScene:update(diff)
+    --初始化page
+    if self.showLoad then
+        --print("self.initPageYet", self.initPageYet)
+        if not self.initPageYet then
+            self.initPageYet = true
+            print("delayCall")
+            self:initPage()
+        end
+
+        if not self.synData then
+            self.synData = true
+            delayCall(0.3, self.initDataNow, self)
+        end
+    end
+
     if Logic.paused then
         return
     end
+
+    if not self.showLoad then
+        print("show Loading View")
+        self.showLoad = true
+        global.director:pushView(LoadingView.new(), 1, 0, 1)
+    end
+
     if Logic.gameStage == 1 and Logic.landBook > 0 then
         addBanner("获得土地产权证书 进入 第二阶段")
         Logic.gameStage = 2
@@ -307,23 +340,35 @@ function TMXScene:saveGame(hint)
         local p = getPos(k.bg)
         if k.bid ~= nil then
             print("save Building static !!!!", k.static, k.dirty)
-            --table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, lifeStage=k.lifeStage, dir=k.dir})
-            if k.dirty then
-                table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, k.lifeStage, k.dir, k.id})
-                k.dirty = false
+            if DEBUG_BUILD then
+                table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, lifeStage=k.lifeStage, dir=k.dir})
+            else
+                if k.dirty then
+                    table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, k.lifeStage, k.dir, k.id})
+                    k.dirty = false
+                end
             end
         end
     end
+
+    local allSellBuild = {}
+    for k, v in ipairs(Logic.sellBuild) do
+        table.insert(allSellBuild, v.bid)
+    end
+    Logic.sellBuild = {}
     
     local allRoad = {}
     for k, v in pairs(self.page.buildLayer.mapGridController.allRoad) do
         local p = getPos(k.bg)
         if k.bid ~= nil then
             print("save Road static !!!!", k.static)
-            --table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, static=k.static})
-            if k.dirty then
-                table.insert(allRoad, {k.bid, math.floor(p[1]), math.floor(p[2])})
-                k.dirty = false
+            if DEBUG_BUILD then
+                table.insert(allRoad, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, static=k.static})
+            else
+                if k.dirty then
+                    table.insert(allRoad, {k.bid, math.floor(p[1]), math.floor(p[2])})
+                    k.dirty = false
+                end
             end
         end
     end
@@ -339,8 +384,11 @@ function TMXScene:saveGame(hint)
             if k.myHouse ~= nil  then
                 hid = k.myHouse.bid
             end
-            --table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health, level=k.level, weapon=k.weapon, head=k.head, body=k.body, spe=k.spe})
-            table.insert(allPeople, {k.pid, k.id, p[1], p[2], hid, k.health, k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
+            if DEBUG_BUILD then
+                table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health, level=k.level, weapon=k.weapon, head=k.head, body=k.body, spe=k.spe})
+            else
+                table.insert(allPeople, {k.pid, k.id, p[1], p[2], hid, k.health, k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
+            end
         end
     end
     
@@ -363,18 +411,17 @@ function TMXScene:saveGame(hint)
         addBanner("保存人物成功 "..#allPeople)
     end
 
-    --local u = CCUserDefault:sharedUserDefault()
-    --[[
-    local b = simple.encode(allBuild)
-    u:setStringForKey("build", b)
+    if DEBUG_BUILD then
+        local u = CCUserDefault:sharedUserDefault()
+        local b = simple.encode(allBuild)
+        u:setStringForKey("build", b)
 
-    local r = simple.encode(allRoad)
-    u:setStringForKey("road", r)
-    --]]
+        local r = simple.encode(allRoad)
+        u:setStringForKey("road", r)
 
-
-    --local p = simple.encode(allPeople)
-    --u:setStringForKey('people', p)
+        local p = simple.encode(allPeople)
+        u:setStringForKey('people', p)
+    end
 
     local u = {}
     local os = {}
@@ -424,7 +471,7 @@ function TMXScene:saveGame(hint)
     u2:setStringForKey("ownVillage", dictToTable(Logic.ownVillage)) 
 
     print("inResearchData", simple.encode(os))
-    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt)})
+    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allSellBuild=simple.encode(allSellBuild), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt)})
 
 end
 

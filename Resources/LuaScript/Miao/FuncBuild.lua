@@ -274,7 +274,7 @@ end
 function FuncBuild:exitStore()
     self.inMerchant = nil
 end
-function FuncBuild:setOperatable()
+function FuncBuild:setOperatable(a)
 end
 function FuncBuild:runBeginBuild()
     self.baseBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
@@ -287,3 +287,4 @@ function FuncBuild:clearTouchAni()
     self.baseBuild.changeDirNode:stopAllActions()
     setColor(self.baseBuild.changeDirNode, {255, 255, 255})
 end
+

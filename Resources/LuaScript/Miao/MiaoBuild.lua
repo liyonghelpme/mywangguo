@@ -121,6 +121,7 @@ function MiaoBuild:ctor(m, data)
     self.bg = CCLayer:create()
     self.heightNode = addNode(self.bg)
 
+    self.addYet = false
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
@@ -241,7 +242,7 @@ function MiaoBuild:ctor(m, data)
     end
 
     --桥梁的 node 自己添加
-    if self.id ~= 3 then
+    if self.id ~= 3 and not self.addYet then
         self.heightNode:addChild(self.changeDirNode)
     end
 
@@ -686,8 +687,9 @@ function MiaoBuild:checkRiverOrSlopeCol()
     return false
 end
 
-
-
+--判定道路的碰撞 状态 用于 调整道路状态
+--判定矿坑的状态
+--判定河流的方向用于调整状态
 function MiaoBuild:setColPos()
     self.colNow = 1
     self.otherBuild = nil
@@ -1113,7 +1115,9 @@ function MiaoBuild:changeWorkNum(n)
     self.funcBuild:updateGoods()
     self:setDirty()
 end
+
 --如果没有确认建造则不要移除效果
+--卖出当前建筑物
 function MiaoBuild:removeSelf()
     if self.roadNode ~= nil then
         removeSelf(self.roadNode)
@@ -1124,7 +1128,12 @@ function MiaoBuild:removeSelf()
     self.deleted = true
     self.map:removeBuilding(self)
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+    
+    --每次的updateBuild 普通的是update状态有的是卖出状态
+    table.insert(Logic.sellBuild, self)
 end
+
+
 --用于Move 建筑
 --再次点击 确认
 function MiaoBuild:runMoveAction(px, py)

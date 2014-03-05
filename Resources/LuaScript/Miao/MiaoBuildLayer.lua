@@ -60,6 +60,28 @@ end
 
 --商人的状态也要保存么？
 function MiaoBuildLayer:update(diff)
+    if not self.initEnvYet and self.scene.initYet  then
+        self.initEnvYet = true
+        self:initEnv()
+    end
+
+    if self.needInit and self.initEnvYet then
+        if coroutine.status(self.coroutine) ~= 'dead' then
+            print("init build")
+            coroutine.resume(self.coroutine, self)
+        --dead then init other
+        else
+            print("init others")
+            self:initCat()
+            self:initRoad()
+            self:initBackPoint()
+            self.initYet = true
+            --self.scene.initDataing = false
+            self.needInit = false
+            global.director.curScene:afterInitBuild()
+        end
+    end
+
     self.passTime = self.passTime+diff
     if self.passTime >= 10 and self.initYet and not Logic.paused  then
         self.passTime = 0
@@ -105,6 +127,10 @@ function MiaoBuildLayer:testCat()
 end
 
 function MiaoBuildLayer:initCat()
+    if DEBUG_BUILD then
+        return
+    end
+
     for k, v in ipairs(Logic.pdata) do
         v.needAppear = false
         v.id = v.kind
@@ -152,6 +178,10 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 function MiaoBuildLayer:initBuild()
+    if DEBUG_BUILD then
+        self:initBuildOld()
+        return
+    end
     local mbid = 0
     print("bdata is what", #Logic.bdata)
     for k, v in ipairs(Logic.bdata) do
@@ -182,13 +212,14 @@ function MiaoBuildLayer:initBuild()
         b:doSwitch()
         mbid = math.max(v.bid, mbid)
         --end
+        coroutine.yield()
     end
     mbid = mbid+1
     Logic.maxBid = mbid
 end
 
---[[
-function MiaoBuildLayer:initBuild()
+
+function MiaoBuildLayer:initBuildOld()
     if Logic.inNew then
         local b = MiaoBuild.new(self, {picName='build', id=1, bid=1})
         local p = normalizePos({1344, 384}, 1, 1)
@@ -264,7 +295,6 @@ function MiaoBuildLayer:initBuild()
     end
 
 end
---]]
 
 function MiaoBuildLayer:initPic()
     --[[
@@ -287,16 +317,22 @@ function MiaoBuildLayer:initDataOver()
     self:initPic()
     print("init building info")
     --env 减少 地图
-    self:initEnv()
+    self.needInit = true
+    self.initEnvYet = false
+    self.coroutine = coroutine.create(self.initBuild)
+
+    --[[
     self:initBuild()
     self:initCat()
     self:initRoad()
     self:initBackPoint()
+    self.initYet = true
+    --]]
+
     --[[
     --最后保存道路
     --backPoint 在道路上面
     --]]
-    self.initYet = true
 end
 function MiaoBuildLayer:initEnv()
     local width = self.scene.width
@@ -326,9 +362,10 @@ end
 --road 外部的道路 第一次进入游戏需要从这里面初始化 firstGame = true ---->initRoad
 function MiaoBuildLayer:initRoad() 
     --新手建筑物 从服务器获得
-    if true then
+    if not DEBUG_BUILD then
         return
     end
+
     local u = CCUserDefault:sharedUserDefault()
     local initRoadYet = u:getBoolForKey("initRoadYet")
     if initRoadYet == true then
