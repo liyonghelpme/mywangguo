@@ -22,7 +22,7 @@ function MiaoPage:initView()
 
     local sea2 = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
     local sea = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
-    setGLProgram(sea, "sea", "Vert.h", "SeaFrag.h")
+    --setGLProgram(sea, "sea", "Vert.h", "SeaFrag.h")
     self.bg:addChild(sea)
     setAnchor(setPos(sea, {0, 0}), {0, 0})
     self.bg:addChild(sea2)
