@@ -1,5 +1,6 @@
 #include "CCSprite3D.h"
 #include "MD2.h"
+#include "Bone2.h"
 
 CCSprite3D *CCSprite3D::create() {
     CCSprite3D *pSprite = new CCSprite3D();
@@ -234,6 +235,12 @@ void CCSprite3D::stdTransform() {
     kmGLGetMatrix(KM_GL_PROJECTION, &matrixP);
     kmGLGetMatrix(KM_GL_MODELVIEW, &matrixMV);
 
+    //将对象 平移到屏幕中心位置
+    matrixMV.mat[12] = 0;
+    matrixMV.mat[13] = 0;
+    //z 方向会影响缩放比例
+    matrixMV.mat[14] = -300;
+
     //kmMat4 rotation;
     //kmMat4RotationPitchYawRoll(&rotation, xRot, yRot, zRot);
 
@@ -261,9 +268,16 @@ void CCSprite3D::stdTransform() {
     kmMat4RotationAxisAngle(&rotz, &axis3, zRot*kmPI/180);
     kmMat4Multiply(&matrixMV, &matrixMV, &rotz);
 
-
+    //矩阵缩放各个维度  0 0 0 默认的 0 0 0 坐标在 -200 x方向 -140 y 方向 -415 z 方向
+    printf("matrixMV\n");
+    printMat4(&matrixMV);
     //顶点位置 再做变换最后做还是再之前做
-    kmMat4Multiply(&matrixMV, &matrixMV, &boneMat);
+    //先做 局部骨骼旋转 接着做 MV 变换
+
+    //先做本地变动接着 做骨骼变动 这样 本地变动就在局部空间进行了
+    kmMat4Multiply(&matrixMV, &boneMat, &matrixMV);
+    printf("mmv bone\n");
+    printMat4(&matrixMV);
 
 
     kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);

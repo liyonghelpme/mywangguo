@@ -26,5 +26,6 @@ void setBoneMatrix(Bone *b, Bone **arr, kmMat4*);
 
 void setSpriteRotate(Bone *b, CCSprite3D *s);
 
+void printMat4(kmMat4 *mat);
 #endif
 

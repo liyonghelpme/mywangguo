@@ -4,6 +4,7 @@
 //#include "Bone.h"
 #include "MD2.h"
 #include "Bone2.h"
+#include "math.h"
 
 USING_NS_CC;
 
@@ -99,6 +100,7 @@ bool HelloWorld::init()
     CCTexture2D *tex = rt->getSprite()->getTexture();
     GLuint tid = tex->getName();
     */
+    /*
     CCSprite3D *m3 = CCSprite3D::create();
     m3->loadMd2("test2.md2");
     m3->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
@@ -113,7 +115,7 @@ bool HelloWorld::init()
     m3->scaleY(0.5);
     m3->scaleZ(0.5);
     m3->rotateX(40); 
-
+    */
 
     sprintf(b1.name, "b1");
     sprintf(b2.name, "b2");
@@ -143,40 +145,54 @@ bool HelloWorld::init()
 
     kmMat4 *m1 = &invBoneMat[0];
     kmMat4Identity(m1);
+    /*
     kmMat4 temp;
     kmMat4Translation(&temp, 50, 100, 0);
     kmMat4Multiply(m1, m1, &temp);
     kmMat4Inverse(m1, m1);
+    */
 
+    //mesh 绑定的 骨骼的时候 骨骼的逆向变换
+    //只有x 方向 平移100
+    kmMat4Identity(&invBoneMat[1]);
+    /*
     kmMat4 *m2 = &invBoneMat[1];
     kmMat4Translation(m2, 100, 100, 0);
     kmMat4Inverse(m2, m2);
-
+    */
 
     rb1 = CCSprite3D::create();
     rb1->loadMd2("test2.md2");
     rb1->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
     this->addChild(rb1, 3);
-    rb1->tranX(100);
-    rb1->tranY(100);
+    rb1->tranX(50);
+    rb1->tranY(0);
     rb1->tranZ(0);
 
+    //缩放有问题 首先需要在局部空间进行缩放
+    //缩放操作 在 旋转操作之后 作用在世界空间里面了
+    //先正则缩放 接着 再旋转 即可
+    //缩放发生在本地空间里面
+    //矩阵乘积的顺序 旋转 * 缩放 = 先缩放 再旋转 本地空间
     rb1->scaleX(0.5);
     rb1->scaleY(0.2);
     rb1->scaleZ(0.1);
-
 
     rb2 = CCSprite3D::create();
     rb2->loadMd2("test2.md2");
     rb2->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
     this->addChild(rb2, 3);
-    rb2->tranX(200);
-    rb2->tranY(100);
+    //骨骼表示 x 方向平移50 则和骨骼的左边对其了
+    rb2->tranX(50);
+    rb2->tranY(0);
     rb2->tranZ(0);
+    
 
+    //先缩放再 mv 导致平移问题 平移空间有问题
     rb2->scaleX(0.5);
     rb2->scaleY(0.2);
     rb2->scaleZ(0.1);
+
 
 
     //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
@@ -227,18 +243,38 @@ void HelloWorld::update(float diff) {
     kmVec3Fill(&axis, 0, 0, 1);
     kmQuaternionRotationAxis(&b1.rotate, &axis, kmDegreesToRadians(45*passTime));
 
+    //b2 骨骼绕着z轴 上下摆动旋转
+    //T = 2
+    //kmQuaternionRotationAxis(&b2.rotate, &axis, kmDegreesToRadians(45*passTime));
+    kmQuaternionRotationAxis(&b2.rotate, &axis, kmDegreesToRadians(45*sin(kmPI*passTime)));
+
     kmMat4 curMat;
     kmMat4Identity(&curMat);
     setBoneMatrix(&b1, allBone, &curMat);
 
+    printf("invBone\n");
+    printMat4(&invBoneMat[0]);
     kmMat4 boneMat[2];
     for(int i=0; i < 2; i++) {
         kmMat4Multiply(&boneMat[i], &invBoneMat[i], &allBone[i]->mat);
     }
+    printf("boneMat\n");
+    printMat4(&boneMat[0]);
 
+    //rb1->rotateZ(45*passTime);
     //对于所有顶点进行矩阵计算
+
+    //对于b2 对象 先平移100个x 方向 接着使用骨骼的矩阵
+    //平移100
+
+    //kmMat4 temp;
+    //kmMat4Translation(&temp, 100, 0, 0);
+
+    printMat4(&invBoneMat[1]);
+    printf("boneMat 111\n");
+    printMat4(&boneMat[1]);
     kmMat4Assign(&rb1->boneMat, &boneMat[0]);
-    kmMat4Assign(&rb1->boneMat, &boneMat[1]);
+    kmMat4Assign(&rb2->boneMat, &boneMat[1]);
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)
