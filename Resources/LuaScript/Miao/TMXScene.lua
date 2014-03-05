@@ -57,6 +57,8 @@ function TMXScene:ctor()
     self.passTime = 0
     self.checkTime = 0
 
+    self.debugTime = 0
+
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("equipOne.plist")
 
@@ -184,7 +186,14 @@ function TMXScene:afterInitBuild()
         global.director:pushView(NewGame.new(), 1, 0)
     end
     self.initDataing = false
+
+    --弹出加载页面
     global.director:popView()
+
+    --释放动画
+    --移除掉loadingAni中的SpriteFrame 而不是全部的SpriteFrame
+    removeAnimation("loadingAni")
+    --CCSpriteFrameCache:sharedSpriteFrameCache():removeSpriteFrameByName("")
 end
 
 
@@ -278,6 +287,11 @@ function TMXScene:update(diff)
         end
     end
 
+    self.debugTime = self.debugTime+diff
+    if self.debugTime > 5 then
+        self.debugTime = 0
+        print(CCTextureCache:sharedTextureCache():dumpCachedTextureInfo())
+    end
     if Logic.paused then
         return
     end

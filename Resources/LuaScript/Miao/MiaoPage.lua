@@ -11,7 +11,11 @@ function MiaoPage:initView()
 
     local col = math.ceil(MapWidth/64)
     local row = math.ceil(MapHeight/32)+1
-    local tex = CCTextureCache:sharedTextureCache():addImage("water.jpg")
+
+    --water 没有alpha通道图片
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGB5A1)
+    local tex = CCTextureCache:sharedTextureCache():addImage("water.png")
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
     
     local param = ccTexParams()
     param.minFilter = GL_LINEAR
@@ -32,10 +36,12 @@ function MiaoPage:initView()
 
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
     sf:addSpriteFramesWithFile("grassOne.plist")
     sf:addSpriteFramesWithFile("fenceOne.plist")
     sf:addSpriteFramesWithFile("t512.plist")
     sf:addSpriteFramesWithFile("daoyin.plist")
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 
 
     self.grassMap = CCSpriteBatchNode:create("grassOne.png")
