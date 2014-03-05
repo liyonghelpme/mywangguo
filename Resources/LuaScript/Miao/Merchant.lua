@@ -34,7 +34,10 @@ function Merchant:checkWork(k)
 end
 function Merchant:initView()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
     sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", self.people.id))
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
+
     self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, 1, true)
     self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, 1, true)
     self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 2, 1, true)

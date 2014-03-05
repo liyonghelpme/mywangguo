@@ -458,6 +458,7 @@ end
 
 function FightLayer2:initPic()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
     sf:addSpriteFramesWithFile("cat_foot.plist")
     sf:addSpriteFramesWithFile("cat_hero_foot.plist")
     sf:addSpriteFramesWithFile("cat_arrow.plist")
@@ -467,6 +468,7 @@ function FightLayer2:initPic()
     sf:addSpriteFramesWithFile("cat_cavalry.plist")
     sf:addSpriteFramesWithFile("cat_hero_cavalry.plist")
     sf:addSpriteFramesWithFile("attackAni.plist")
+
     createAnimation("attackSpe1", "attack%d.png", 5, 8, 1, 0.5, true)
     createAnimationWithNum("attackSpe2", "attack%d.png", 0.5, true, {1, 3, 4})
      
@@ -511,6 +513,7 @@ function FightLayer2:initPic()
     end
     createAnimation("skillHealth", "skillHealth%d", 0, 28, 1, 1.5, true)
 
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 end
 
 function FightLayer2:getSolId()

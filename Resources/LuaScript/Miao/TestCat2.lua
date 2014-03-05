@@ -34,20 +34,39 @@ CAT_ACTION = {
 Cat2 = class(FuncPeople)
 function Cat2:initView()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile(string.format("cat_%d_jump.plist", self.people.id))
-    local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 11, 2, 2, true)
-    self.jumpAni = ani
-    self.people.changeDirNode = CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
+
+    local aniTime = 1
+    if self.people.data.skill == 42 then
+        aniTime = 0.5
+    end
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", self.people.id))
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
+
+    self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, aniTime, true)
+    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, aniTime, true)
+    self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 2, aniTime, true)
+    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 2, aniTime, true)
+    self.people.changeDirNode = createSprite("cat_"..self.people.id.."_rb_0.png")
+
+    --CCSprite:createWithSpriteFrame(sf:spriteFrameByName(string.format("cat_%d_jump_0.png", self.people.id)))
     local sz = self.people.changeDirNode:getContentSize()
     --在当前基础上再缩小0.8 倍率 0.64 * 0.8 = 0.512 尺寸 然后是位置
     setPos(setScale(setAnchor(self.people.changeDirNode, {Logic.people[self.people.id].ax/sz.width, (sz.height-Logic.people[self.people.id].ay)/sz.height}), 0.8), {0, SIZEY})
     
     if self.people.needAppear == false then
     else
-        self.people.changeDirNode:runAction(CCAnimate:create(ani))
+        print("needAppear")
+        sf:addSpriteFramesWithFile(string.format("cat_%d_jump.plist", self.people.id))
+        local ani = createAnimation(string.format("cat_%d_jump", self.people.id), "cat_"..self.people.id.."_jump_%d.png", 0, 11, 2, 2, true)
+        self.jumpAni = ani
+        self.jumpAniName = string.format("cat_%d_jump", self.people.id) 
+        local function removeJump()
+            removeAnimation(self.jumpAniName)
+        end
+        self.people.changeDirNode:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeJump)}))
     end
 
-    sf:addSpriteFramesWithFile("cat_smoke.plist")
     local ani = createAnimation("cat_smoke", "cat_smoke_%d.png", 0, 12, 1, 2, true)
     self.people.smoke = CCSprite:createWithSpriteFrame(sf:spriteFrameByName("cat_smoke_0.png"))
     local sz = self.people.smoke:getContentSize()
@@ -56,16 +75,7 @@ function Cat2:initView()
     
     self.people.smoke:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeSelf, self.people.smoke)}))
 
-    sf:addSpriteFramesWithFile(string.format("cat_%d_walk.plist", self.people.id))
     --需要调整scaleX 的值 类似于小车
-    local aniTime = 1
-    if self.people.data.skill == 42 then
-        aniTime = 0.5
-    end
-    self.people.rbMove = createAnimation(string.format("people%d_rb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, aniTime, true)
-    self.people.lbMove = createAnimation(string.format("people%d_lb", self.people.id), "cat_"..self.people.id.."_rb_%d.png", 0, 9, 2, aniTime, true)
-    self.people.rtMove = createAnimation(string.format("people%d_rt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 2, aniTime, true)
-    self.people.ltMove = createAnimation(string.format("people%d_lt", self.people.id), "cat_"..self.people.id.."_rt_%d.png", 0, 9, 2, aniTime, true)
 
     if self.people.data.girl == 1 then 
         self.people.shadow = CCSprite:create("roleShadow1.png")
@@ -88,7 +98,6 @@ function Cat2:initView()
     end
 
 
-    sf:addSpriteFramesWithFile("car.plist")
     print("add car plist")
     self.carrbMove = createAnimation("car_rb", "car_rb_%d.png", 0, 9, 1, 1, true)
     self.carrtMove = createAnimation("car_rt", "car_rt_%d.png", 0, 9, 1, 1, true)

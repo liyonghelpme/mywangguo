@@ -1267,6 +1267,9 @@ function createAnimationWithNum(name, format, t, isFrame, num)
     end
     return animation
 end
+--动画名字 和所对应的 spriteFrame的名字
+AnimationCache = {
+}
 function createAnimation(name, format, a,b,c,t, isFrame)
     local animation = CCAnimationCache:sharedAnimationCache():animationByName(name)
     if not animation then
@@ -1274,9 +1277,14 @@ function createAnimation(name, format, a,b,c,t, isFrame)
         --从SpriteFrameCache 中获取动画Frame
         if isFrame then
             local cache = CCSpriteFrameCache:sharedSpriteFrameCache()
+            local at = {}
+            AnimationCache[name] = at
             for i=a, b, c do
-                animation:addSpriteFrame(cache:spriteFrameByName(string.format(format, i)))
+                local fname = string.format(format, i)
+                table.insert(at, fname)
+                animation:addSpriteFrame(cache:spriteFrameByName(fname))
             end
+
         else
             for i=a, b, c do
                 animation:addSpriteFrameWithFileName(string.format(format, i))
@@ -1872,8 +1880,10 @@ end
 function closeDialog()
     global.director:popView()
 end
+
 function initPlist()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
     sf:addSpriteFramesWithFile("buildOne.plist")
     sf:addSpriteFramesWithFile("buildTwo.plist")
     sf:addSpriteFramesWithFile("buildThree.plist")
@@ -1885,11 +1895,28 @@ function initPlist()
     sf:addSpriteFramesWithFile("catCut.plist")
     sf:addSpriteFramesWithFile("catHeadOne.plist")
     sf:addSpriteFramesWithFile("whiteGeo.plist")
+    sf:addSpriteFramesWithFile("car.plist")
+    sf:addSpriteFramesWithFile("cat_smoke.plist")
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 end
+
 function intToNil(i)
     if i == 0 then
         return nil
     else
         return i
     end
+end
+
+--删除loadAni 这个动画以及相应的纹理图片 以及SpriteFrame
+function removeAnimation(name)
+    print("removeAnimation", name)
+    CCAnimationCache:sharedAnimationCache():removeAnimationByName(name)
+    local at = AnimationCache[name]
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    for k, v in ipairs(at) do
+        sf:removeSpriteFrameByName(v)
+    end
+    AnimationCache[name] = nil
+    CCTextureCache:sharedTextureCache():removeUnusedTextures()
 end
