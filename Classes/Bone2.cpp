@@ -19,6 +19,11 @@ void setBoneMatrix(Bone *root, Bone **allBone, kmMat4 *curMat) {
     kmMat4 rot;
     printf("boneId %d\n", root->id);
     kmMat4RotationQuaternion(&rot, &root->rotate);
+    //局部空间先平移 接着旋转 
+    rot.mat[12] = root->offset.x;
+    rot.mat[13] = root->offset.y;
+    rot.mat[14] = root->offset.z;
+
     kmMat4Multiply(&root->mat, curMat, &rot);
     printMat4(&root->mat);
     

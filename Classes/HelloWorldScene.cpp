@@ -126,7 +126,8 @@ bool HelloWorld::init()
     kmVec3Fill(&b1.offset, 0, 0, 0);
     b1.child[0] = 1;
     b1.child[1] = 2;
-    b1.child[2] = -1;
+    b1.child[2] = 3;
+    b1.child[3] = -1;
     b1.parent = -1;
     kmMat4Identity(&b1.mat);
     b1.id = 0;
@@ -134,7 +135,7 @@ bool HelloWorld::init()
 
     kmQuaternionIdentity(&b2.rotate); 
     b2.length = 100;
-    kmVec3Fill(&b2.offset, 0, 0, 0);
+    kmVec3Fill(&b2.offset, 50, 0, 0);
     b2.child[0] = -1;
     b2.child[1] = -1;
     b2.parent = 0;
@@ -150,14 +151,22 @@ bool HelloWorld::init()
     kmMat4Identity(&b3.mat);
     b3.id = 2;
 
+    kmQuaternionIdentity(&b4.rotate); 
+    b4.length = 100;
+    kmVec3Fill(&b4.offset, -100, 0, 0);
+    b4.child[0] = -1;
+    b4.child[1] = -1;
+    b4.parent = 0;
+    kmMat4Identity(&b4.mat);
+    b4.id = 3;
+
 
     allBone[0] = &b1;
     allBone[1] = &b2;
     allBone[2] = &b3;
+    allBone[3] = &b4;
 
 
-    kmMat4 *m1 = &invBoneMat[0];
-    kmMat4Identity(m1);
     /*
     kmMat4 temp;
     kmMat4Translation(&temp, 50, 100, 0);
@@ -167,8 +176,11 @@ bool HelloWorld::init()
 
     //mesh 绑定的 骨骼的时候 骨骼的逆向变换
     //只有x 方向 平移100
+    kmMat4 *m1 = &invBoneMat[0];
+    kmMat4Identity(m1);
     kmMat4Identity(&invBoneMat[1]);
     kmMat4Identity(&invBoneMat[2]);
+    kmMat4Identity(&invBoneMat[3]);
     /*
     kmMat4 *m2 = &invBoneMat[1];
     kmMat4Translation(m2, 100, 100, 0);
@@ -220,6 +232,21 @@ bool HelloWorld::init()
     rb3->scaleX(0.5);
     rb3->scaleY(0.2);
     rb3->scaleZ(0.1);
+
+
+    rb4 = CCSprite3D::create();
+    rb4->loadMd2("test2.md2");
+    rb4->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
+    this->addChild(rb4, 3);
+    //骨骼表示 x 方向平移50 则和骨骼的左边对其了
+    rb4->tranX(50);
+    rb4->tranY(0);
+    rb4->tranZ(0);
+    
+    //先缩放再 mv 导致平移问题 平移空间有问题
+    rb4->scaleX(0.5);
+    rb4->scaleY(0.2);
+    rb4->scaleZ(0.1);
 
     //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
     //m3->setScale(100);
@@ -274,6 +301,7 @@ void HelloWorld::update(float diff) {
     //kmQuaternionRotationAxis(&b2.rotate, &axis, kmDegreesToRadians(45*passTime));
     kmQuaternionRotationAxis(&b2.rotate, &axis, kmDegreesToRadians(45+35*sin(kmPI*passTime)));
     kmQuaternionRotationAxis(&b3.rotate, &axis, kmDegreesToRadians(-45+35*sin(kmPI+kmPI*passTime)));
+    kmQuaternionRotationAxis(&b4.rotate, &axis, kmDegreesToRadians(135+35*sin(kmPI+kmPI*passTime)));
 
     kmMat4 curMat;
     kmMat4Identity(&curMat);
@@ -281,8 +309,8 @@ void HelloWorld::update(float diff) {
 
     printf("invBone\n");
     printMat4(&invBoneMat[0]);
-    kmMat4 boneMat[3];
-    for(int i=0; i < 3; i++) {
+    kmMat4 boneMat[4];
+    for(int i=0; i < 4; i++) {
         kmMat4Multiply(&boneMat[i], &invBoneMat[i], &allBone[i]->mat);
     }
     printf("boneMat\n");
@@ -303,6 +331,7 @@ void HelloWorld::update(float diff) {
     kmMat4Assign(&rb1->boneMat, &boneMat[0]);
     kmMat4Assign(&rb2->boneMat, &boneMat[1]);
     kmMat4Assign(&rb3->boneMat, &boneMat[2]);
+    kmMat4Assign(&rb4->boneMat, &boneMat[3]);
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)

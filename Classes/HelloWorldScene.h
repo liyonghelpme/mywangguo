@@ -26,14 +26,12 @@ public:
     
     CCSprite3D *m33;
 
-    Bone b1, b2, b3;
-    Bone *allBone[3];
-
-    kmMat4 invBoneMat[3];
-
+    Bone b1, b2, b3, b4, b5;
+    Bone *allBone[5];
+    kmMat4 invBoneMat[5];
+    
     float passTime;
-
-    CCSprite3D *rb1, *rb2, *rb3;
+    CCSprite3D *rb1, *rb2, *rb3, *rb4, *rb5;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
