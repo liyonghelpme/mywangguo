@@ -96,8 +96,8 @@ void UpdateScene::update(float diff) {
             /*
 			CCDictionary *dict = CCDictionary::create();
 			CCDictionary *ads = CCDictionary::create();
-			ads->setObject(CCString::create("AdsAdmob"), "name");
-			dict->setObject(ads, "ads");
+			ads->setObject(CCString::create("SocialFacebook"), "name");
+			dict->setObject(ads, "social");
 			MyPlugins::getInstance()->loadPlugins(dict);
             */
 		
