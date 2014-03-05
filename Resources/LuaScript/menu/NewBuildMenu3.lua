@@ -98,6 +98,9 @@ end
 --点击开始
 function NewBuildMenu3:setSel(s)
     --if self.selBuild ~= s then
+        if s > #self.data then
+            return
+        end
         print("self.", self.selBuild)
         if self.selBuild ~= nil then
             self.data[self.selBuild][1]:stopAllActions()

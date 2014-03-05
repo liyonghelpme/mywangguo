@@ -38,6 +38,9 @@ Logic.researchGoods = {
     --{0, 2}, {0, 3}, {0, 11},
 }
 
+--当前卖出的建筑物
+Logic.sellBuild = {}
+
 --正在研究的物品
 --researchGoodsNum time
 Logic.inResearch = nil
@@ -61,6 +64,7 @@ Logic.ownGoods = {
     {0, 67}, 
     --{0, 68},
 }
+--[[
 Logic.allOwnBuild = {
 
 {2, 1}, {2, 2}, {2, 4}, {2, 5}, {2, 11}, {2, 15},
@@ -72,12 +76,13 @@ Logic.allOwnBuild = {
     {2, 24}, {2, 25}, {2, 26}, {2, 27}, {2, 30}, {2, 31},
 
 }
+--]]
 
 --初始化装饰物 到 商店中
 function getBuyableBuild()
     local temp = {}
-    for k, v in ipairs(Logic.allOwnBuild) do
-        if Logic.buildings[v[2]].buyable == 1 then
+    for k, v in ipairs(Logic.ownBuild) do
+        if Logic.buildings[v].buyable == 1 then
             table.insert(temp, v)
         end
     end
@@ -146,6 +151,10 @@ function initResearchEquip()
     end
 end
 
+function storeAddNewEquip(id)
+    table.insert(Logic.ownGoods, {0, id})
+    initResearchEquip()
+end
 
 --获得什么条件可以新增加的研究物品
 
@@ -451,13 +460,17 @@ SoldierAbility = {
     {attack=40, defense=30, health=30},
 }
 --]]
+
+--health/(defense*3+health)
+
 --基本上是 生命值数量 起作用
 SoldierAbility = {
-    {attack=10, defense=1, health=45},
-    {attack=17, defense=1, health=23},
-    {attack=25, defense=1, health=15},
-    {attack=20, defense=1, health=45},
+    {attack=3, defense=4, health=12},
+    {attack=2, defense=2, health=6},
+    {attack=4, defense=2, health=6},
+    {attack=3, defense=4, health=12},
 }
+
 
 IncEffect = {
     {attack=2, defense=1, health=1},
@@ -480,8 +493,8 @@ function getSolAbility(kind, num, total)
     temp.health = se.health+ae.health*addEffect
 
     temp.attack = temp.attack*num
-    --防御力不会乘
-    --temp.defense = temp.defense*num
+    --防御力不会乘 防御力乘 起来 因为 防御力和 生命值是加法关系
+    temp.defense = temp.defense*num
     temp.health = temp.health*num
     return temp
 end
@@ -749,8 +762,6 @@ Logic.fightNum = 4
 Logic.ownBuild = {
     1, 2, 15, 
     4, 
-    5, 
-    6, 7,
 }
 
 Logic.lastArenaTime = 0
@@ -782,13 +793,23 @@ Logic.stageRange = {
 }
 
 --村落能量
+--[[
 Logic.villagePower = {
-    {2, 0, 0, 0},
+    {{2, 0, 0, 0}, },
     {10, 0, 0, 0},
     {7, 4, 0, 0},
 }
+--]]
+Logic.villagePower = {
+    {{{attack=50, health=80, defense=0}, {attack=3, health=22, defense=0}}, {}, {}, {}},
+    {{{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=5, health=30, defense=0},{attack=50, health=50, defense=0}}, {}, {}, {}},
+    {{{attack=10, health=40, defense=0}, {attack=10, health=40, defense=0},  {attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=10, health=40, defense=0},{attack=50, health=50, defense=0}}, 
+    {{attack=5, health=46, defense=0}, {attack=5, health=46, defense=0}, {attack=5, health=46, defense=0},{attack=5, health=46, defense=0}}, {}, {}},
+}
+
 Logic.newVillage = false
 
+--几个村落中心
 Logic.villageCenter = {
     {13, 24},
     {12, 19},

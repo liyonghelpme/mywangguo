@@ -9,14 +9,22 @@ function Tree:initView()
     local bd = Logic.buildings[self.baseBuild.id]
     self.baseBuild.changeDirNode = createSprite("build"..self.baseBuild.id..".png")
 
-    local sz = self.baseBuild.changeDirNode:getContentSize()
-    setPos(setAnchor(self.baseBuild.changeDirNode, {444/1024, (768-559)/768}), {0, SIZEY})
+    local rx = math.random(10)
+    local ry = math.random(10)
 
-    --[[
-    self.shadow = createSprite("build4_shadow_0.png")
-    setPos(setAnchor(self.shadow, {249/sz.width, (sz.height-253)/sz.height}), {0, SIZEY})
-    self.baseBuild.heightNode:addChild(self.shadow)
-    --]]
+    local sz = self.baseBuild.changeDirNode:getContentSize()
+    setPos(setAnchor(self.baseBuild.changeDirNode, {444/1024, (768-559)/768}), {0+rx, SIZEY+ry})
+
+    self.baseBuild.heightNode:addChild(self.baseBuild.changeDirNode)
+    self.baseBuild.addYet = true
+
+    local rd = math.random(2)
+    if rd == 1 then
+        self.leaf2 = createSprite("build4_leaf2.png")
+        self.baseBuild.heightNode:addChild(self.leaf2)
+        setPos(setAnchor(self.leaf2, {444/1024, (768-559)/768}), {0+rx, SIZEY+ry})
+    end
+
     
     local temp = CCSpriteBatchNode:create("white2.png")
     self.baseBuild.heightNode:addChild(temp)
@@ -142,4 +150,13 @@ end
 
 function Tree:detailDialog()
     global.director:pushView(DecorInfo.new(self.baseBuild), 1)
+end
+function Tree:setOperatable()
+    if self.leaf2 ~= nil then
+        if not self.baseBuild.operate then
+            setColor(self.leaf2, {128, 128, 128})
+        else
+            setColor(self.leaf2, {255, 255, 255})
+        end
+    end
 end

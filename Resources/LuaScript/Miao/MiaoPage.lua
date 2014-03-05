@@ -3,25 +3,7 @@ require "Miao.MiaoBuildLayer"
 require "Miao.RegionDialog"
 require "myMap.NewUtil"
 MiaoPage = class()
-function MiaoPage:ctor(s)
-    self.scene = s
-    self.bg = CCLayer:create()
-
-    local mj = simple.decode(getFileData("big512.json"))
-    self.mapInfo = mj
-    local width = mj.width
-    local height = mj.height
-    self.width = width
-    self.height = height
-    local maxWH = math.max(self.width, self.height)
-    --矩形地图MapPos 对照
-    MapWidth = SIZEX*(maxWH*2)
-    --3*103
-    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*4+50
-    --+180 
-
-    setContentSize(self.bg, {MapWidth, MapHeight})
-    setAnchor(self.bg, {0, 0})
+function MiaoPage:initView()
 
     --setPos(self.bg, {-MapWidth/2})
 
@@ -40,11 +22,13 @@ function MiaoPage:ctor(s)
 
     local sea2 = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
     local sea = CCSprite:createWithTexture(tex, CCRectMake(0, 0, MapWidth+2, MapHeight))
+    setGLProgram(sea, "sea", "Vert.h", "SeaFrag.h")
     self.bg:addChild(sea)
     setAnchor(setPos(sea, {0, 0}), {0, 0})
     self.bg:addChild(sea2)
     setAnchor(setPos(sea2, {MapWidth, 0}), {0, 0})
     self.seas = {sea, sea2}
+
 
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
@@ -328,6 +312,7 @@ function MiaoPage:ctor(s)
     --河流图片
     --调整河流的zord 来进行遮挡
     --播放河流的动画
+    self.waterData = {}
     for dk, dv in ipairs(layerName.water.data) do
         if dv ~= 0 then
             print("water pid", dv)
@@ -338,24 +323,47 @@ function MiaoPage:ctor(s)
             print("water pname", pname)
             local pic = CCSprite:createWithSpriteFrameName(pname)
             self.waterMap:addChild(pic)
+            local hei = adjustNewHeight(self.mask, self.width, w, h)
             local cx, cy, oldy = axyToCxyWithDepth(w, h, width, height, 0, 0, self.mask)
             setAnchor(setPos(pic, {cx, cy}), {170/512, 0})
             table.insert(self.allSlopeAndWater, {pic, w, h})
+            self.waterData[dk] = {0, hei*OFF_HEIGHT, pic=pic, pname=pname}
         end
     end
     --setGLProgram(self.waterMap, "wave", "waveVert.h", "waveFrag.h")
 
+end
+
+function MiaoPage:ctor(s)
+    self.scene = s
+    self.bg = CCLayer:create()
+
+    local mj = simple.decode(getFileData("big512.json"))
+    self.mapInfo = mj
+    local width = mj.width
+    local height = mj.height
+    self.width = width
+    self.height = height
+    local maxWH = math.max(self.width, self.height)
+    --矩形地图MapPos 对照
+    MapWidth = SIZEX*(maxWH*2)
+    --3*103
+    MapHeight = SIZEY*(self.width+self.height)+FIX_HEIGHT+OFF_HEIGHT*4+50
+    --+180 
+    --
+    self:initView()
+
+    setContentSize(self.bg, {MapWidth, MapHeight})
+    setAnchor(self.bg, {0, 0})
 
     self.touchDelegate = StandardTouchHandler.new()
     self.touchDelegate:setBg(self.bg)
     self.blockMove = false
     
 
+    self.initYet = true
     registerEnterOrExit(self)
     registerMultiTouch(self)
-
-
-
     --缩放背景图到 0.5
     self.touchDelegate:scaleToMax(0.5)
     self:moveToPoint(MapWidth/2, FIX_HEIGHT+200)
@@ -419,6 +427,8 @@ function MiaoPage:restoreBuildAndMap()
     self.darkSlope = ns
 
     self:removeFence(landId)
+
+    Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
 end
 
 --移除该土地块的篱笆建筑物
@@ -456,7 +466,8 @@ function MiaoPage:initGameStage()
                     local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                     local m = createSprite("blackArrow.png")
                     addChild(self.buildLayer.buildingLayer, m)
-                    m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    setBlackZord(m, oldy)
                     setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                     table.insert(self.allMask, {m, hv})
                 end
@@ -602,6 +613,8 @@ function MiaoPage:onLand(p)
         --local landId = Logic.stage2Block[p]
         self:initWoodAndMine(landId, mg)
         self:removeOpenMapFence()
+
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
 function MiaoPage:initWoodAndMine(landId)
@@ -707,7 +720,8 @@ function MiaoPage:initExtendLand()
                         local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                         local m = createSprite("blackArrow.png")
                         addChild(self.buildLayer.buildingLayer, m)
-                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setBlackZord(m, oldy)
                         setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                         table.insert(self.allMask, {m, hv})
                     end
@@ -939,6 +953,8 @@ function MiaoPage:onExtendLand2(p)
 
         self:initWoodAndMine(landId)
         self:removeOpenMapFence()
+
+        Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
     end
 end
 
@@ -974,7 +990,8 @@ function MiaoPage:stageOneToTwo()
                     local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                     local m = createSprite("blackArrow.png")
                     addChild(self.buildLayer.buildingLayer, m)
-                    m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                    setBlackZord(m, oldy)
                     setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                     table.insert(self.allMask, {m, hv})
                 end
@@ -1074,6 +1091,9 @@ function MiaoPage:stageOneToTwo()
     end
 end
 
+function setBlackZord(b, z)
+    b:setZOrder(MAX_BUILD_ZORD-z)
+end
 
 --根据游戏 阶段 和 该阶段开启的地图数量 显示游戏地图大小
 function MiaoPage:maskMap()
@@ -1090,7 +1110,9 @@ function MiaoPage:maskMap()
                         local cx, cy, oldy = axyToCxyWithDepth(ax, ay, self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
                         local m = createSprite("blackArrow.png")
                         addChild(self.buildLayer.buildingLayer, m)
-                        m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        --显示在所有建筑物上面
+                        --m:setZOrder(MAX_BUILD_ZORD-oldy)
+                        setBlackZord(m, oldy)
                         setColor(setSize(setAnchor(setPos(m, {cx, cy}), {0.5, 0}), {SIZEX*2, SIZEY*2}), {0, 0, 0})
                         table.insert(self.allMask, {m, hv})
                     end
@@ -1132,14 +1154,6 @@ function MiaoPage:maskMap()
         --第一阶段 将超出范围的篱笆隐藏起来
         print("set newFence out of stage")
         self:showFence(sr)
-        --[[
-        for fk, fv in ipairs(self.newFence) do
-            local ax, ay = fv[2], fv[3]
-            if ax < sr[1] or ay < sr[2] then
-                setVisible(fv[1], false)
-            end
-        end
-        --]]
 
         self.darkSlope = {}
         for k, v in pairs(self.slopeData) do
@@ -1232,10 +1246,14 @@ function MiaoPage:enterScene()
     registerUpdate(self)
 end
 function MiaoPage:update(diff)
+
     self.touchDelegate:update(diff)
     self:updateSea(diff)
 end
 function MiaoPage:updateSea(diff)
+    if true then
+        return
+    end
     local s = diff*50
     local p1 = getPos(self.seas[1])
     local p2 = getPos(self.seas[2])
@@ -1424,7 +1442,7 @@ function MiaoPage:beginBuild(kind, id, px, py)
 
         --初始化道路状态 因为如果建筑物已经加入到building 里面了那么就不能再检测到冲突了
         self.curBuild:beginBuild()
-        self.curBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
+        self.curBuild.funcBuild:runBeginBuild()
         
         --Logic.paused = true
         setLogicPause(true)
@@ -1488,6 +1506,7 @@ function MiaoPage:finishBuild()
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         --桥梁建河流上
+        --[[
         if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
             --桥梁没有冲突
             if self.curBuild.colNow == 0 then
@@ -1505,9 +1524,10 @@ function MiaoPage:finishBuild()
                 end
             end
         else
-            self.curBuild:finishBuild()
-            self.curBuild = nil
-        end
+        --]]
+        self.curBuild:finishBuild()
+        self.curBuild = nil
+        --end
 
         --根据当前的位置 调整一个新位置
         --oldBuild.picName == 't' and

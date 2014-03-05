@@ -451,6 +451,22 @@ function FightSoldier2:doHarm()
         end
         local realAttack = self:getAttack()
         self.attackTarget:doHurt(realAttack, false, self)
+        
+        --背景屏幕是不会缩放的
+        local sceneLeft = self.map.mainCamera.startPoint[1]
+        local vs = getVS()
+        --士兵超过屏幕中心 则不要再向前移动了
+        local midScene = -sceneLeft+vs.width/2
+        local bp = getPos(self.bg)
+        if self.color == 0 then
+            if bp[1] >= midScene-30 then
+                return
+            end
+        else
+            if bp[1] <= midScene+30 then
+                return
+            end
+        end
 
         local dir = 1
         if self.color == 1 then
@@ -468,8 +484,12 @@ function FightSoldier2:runAction(act)
     end
     self.changeDirNode:runAction(act)
 end
+
+--计算伤害实际效果
 function FightSoldier2:calHurt(harm)
-    return math.max(1, harm-self.defense)
+    --local rate = self.maxHealth/(3*self.defense+self.maxHealth)
+    return calRealHurt(harm, self.defense, self.maxHealth)
+    --return math.max(1, math.floor(harm*rate))
 end
 --谁攻击高 对方就受到 被动伤害
 function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
@@ -521,8 +541,10 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     realDefense = math.floor(realDefense*(100+addRate)/100)
     print("realDefense is", realDefense, self.defense, addRate)
 
-    local harm = harm-realDefense
-    harm = math.max(harm, 1)
+    --local harm = harm-realDefense
+    --实际伤害
+    local harm = calRealHurt(harm, realDefense, self.maxHealth)
+    --harm = math.max(harm, 1)
     --伤害小于 生命值上限
     harm = math.floor(math.min(self.health, harm))
     print("real hurt", harm)
@@ -566,15 +588,19 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
             print("jump0")
             self.changeDirNode:runAction(jumpBy(2, -vs.width/2, 100, 200, 1))
             self.changeDirNode:runAction(sequence({delaytime(1), fadeout(1)}))
-            self.shadow:runAction(sequence({delaytime(1), fadeout(1)}))
+            self.shadow:runAction(sequence({moveby(2, -vs.width/2, 0), fadeout(1)}))
         else
             print("jump1")
             self.changeDirNode:runAction(jumpBy(2, vs.width/2, 100, 200, 1))
             self.changeDirNode:runAction(sequence({delaytime(1), fadeout(1)}))
-            self.shadow:runAction(sequence({delaytime(1), fadeout(1)}))
+            self.shadow:runAction(sequence({moveby(2, vs.width/2, 0), fadeout(1)}))
         end
         self.bg:runAction(sequence({delaytime(3), disappear(self.bg)}))
+        self:clearState()
     end
+end
+function FightSoldier2:clearState()
+    self.footFar = false
 end
 
 
@@ -961,6 +987,10 @@ function FightSoldier2:doMoveTo(diff)
                         self.footFar = true  
                         setPos(self.bg, {p[1]+mx, p[2]})
                     else   
+                        --我的对手已经开打了 则 我不能再等对方靠近了 我要主动靠近对方
+                        if self.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK or self.attackTarget.state == FIGHT_SOL_STATE.NEAR_ATTACK then
+                            self.footFar = true
+                        end
                         if self.color == 0 then
                             if p[1] < midScene-hr then
                                 setPos(self.bg, {p[1]+mx, p[2]})

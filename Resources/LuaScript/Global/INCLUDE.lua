@@ -1,7 +1,6 @@
 require "util"
 require "Class"
 require "Event"
-require "data.Static"
 require "data.constant"
 require "Global.Timer"
 

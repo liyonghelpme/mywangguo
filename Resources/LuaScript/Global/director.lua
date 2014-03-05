@@ -38,11 +38,11 @@ function Director:pushView(view, dark, autoPop, showDark)
         local d = Dark.new(autoPop, showDark)
         temp.bg:addChild(d.bg)
         temp.bg:addChild(view.bg)
-        self.curScene.bg:addChild(temp.bg)
+        self.curScene.bg:addChild(temp.bg, MENU_ZORD)
         temp.realView = view
         table.insert(self.stack, temp)
     else
-        self.curScene.bg:addChild(view.bg)
+        self.curScene.bg:addChild(view.bg, MENU_ZORD)
         table.insert(self.stack, view)
         print('push View', #self.stack)
     end

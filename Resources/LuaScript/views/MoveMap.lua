@@ -163,9 +163,8 @@ function MoveMap:addBuilding(chd, z)
     if chd.picName == 'build' or chd.picName == 'fence' then
         if chd.id == 2 then
             self.farmLayer:addChild(chd.bg, z)
-        --没有斜坡了 只有普通建筑物
         --[[
-        elseif chd.data.kind == 1 then
+        elseif chd.id == 3 then
             self.roadLayer:addChild(chd.bg, z)
         --]]
         --普通建筑物

@@ -12,14 +12,31 @@ function PressMenu3:ctor()
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "mainBoard.png"), {896, fixY(sz.height, 376)}), {212, 551}), {0.50, 0.50})
     local temp = {
-        "建筑",
-        "村民",
-        "研究",
-        "商人",
-        "兵力",
-        "排行榜",
-        "系统",
+        {"建筑", 1},
+        {"村民", 2},
+        {"研究", 3},
+        {"商人", 4},
+        {"兵力", 5},
+        {"排行榜", 6},
+        {"系统", 7},
     }
+
+    if Logic.curVillage == 1 then
+        temp = {
+            {"建筑", 1},
+            {"村民", 2},
+            {"系统", 7},
+        }
+    elseif Logic.curVillage == 2 or Logic.curVillage == 3 then
+        temp = {
+            {"建筑", 1},
+            {"村民", 2},
+            {"商人", 4},
+            {"系统", 7},
+        }
+    end
+    
+    --self.temp = temp
 
     local initX = 896
     local initY = fixY(sz.height, 154)
@@ -28,16 +45,16 @@ function PressMenu3:ctor()
     
     self.data = {}
     for i=1, #temp, 1 do
-        local but = ui.newButton({image="mainA.png", text="", font="f1", size=18, color={255, 255, 255}, touchColor=hexToDec('ce4e00'), delegate=self, callback=self.onBut, touchBegan=self.onTab, param=i, shadowColor={0, 0, 0}, color={255, 255, 255}})
+        local but = ui.newButton({image="mainA.png", text="", font="f1", size=18, color={255, 255, 255}, touchColor=hexToDec('ce4e00'), delegate=self, callback=self.onBut, touchBegan=self.onTab, param=temp[i], shadowColor={0, 0, 0}, color={255, 255, 255}})
         but:setContentSize(190, 77)
         setPos(addChild(self.temp, but.bg), {initX, initY+(i-1)*offY})
 
-        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i], size=24, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {129-190/2, fixY(77, 30)-77/2})
+        local w = setPos(setAnchor(addChild(but.bg, ui.newTTFLabel({text=temp[i][1], size=24, color={255, 255, 255}, font="f2", shadowColor={0, 0, 0}})), {0.50, 0.50}), {129-190/2, fixY(77, 30)-77/2})
         but.text = w
         local sp = setAnchor(setSize(setPos(addSprite(but.bg, "icon"..(i-1)..".png"), {35-190/2, fixY(77, 32)-77/2}), {45, 47}), {0.50, 0.50})
 
         --调整info的位置
-        if temp[i] == "研究" then
+        if temp[i][1] == "研究" then
             if Logic.inResearch ~= nil then
                 local sd = Logic.inResearch
                 local diff = math.floor(math.max(math.min((sd[2])/10, 1), 0)*100)
@@ -53,7 +70,8 @@ function PressMenu3:ctor()
                 but.bg:addChild(info.bg)
             end
         end
-        table.insert(self.data, but)
+        self.data[temp[i][2]] = but
+        --table.insert(self.data, but)
     end
 
     rightTopUI(self.bg)
@@ -74,36 +92,36 @@ function PressMenu3:clearMenu()
 end
 function PressMenu3:onTab(p)
     self.first = false
-    if self.curSel ~= p then
+    if self.curSel ~= p[2] then
         self.first = true
         self:clearMenu()
-        self:setSelect(p)
+        self:setSelect(p[2])
     end
 end
 function PressMenu3:onBut(p)
-    if p == 1  then
+    if p[2] == 1  then
         global.director:popView()
         local m = NewBuildMenu3.new()
         global.director:pushView(m, 1 )
-    elseif p == 2 and  self.first then
+    elseif p[2] == 2 and  self.first then
         local m = PeopleMenu3.new(self)
         self.bg:addChild(m.bg)
         self.subMenu = m
-    elseif p == 3 then
+    elseif p[2] == 3 then
         if Logic.inResearch == nil then
             global.director:popView()
             global.director:pushView(ResearchMenu3.new(), 1 )
         end
-    elseif p == 4 then
+    elseif p[2] == 4 then
         global.director:popView()
         global.director:pushView(StoreMenu3.new(), 1)
-    elseif p == 5 then
+    elseif p[2] == 5 then
         global.director:popView()
         global.director:pushView(IncSoldierMenu.new(), 1)
-    elseif p == 6 then
+    elseif p[2] == 6 then
         global.director:popView()
         global.director:pushView(UseGoldMenu.new(), 1)
-    elseif p == 7 then
+    elseif p[2] == 7 then
         global.director:popView()
         global.director.curScene:saveGame()
     end

@@ -36,11 +36,6 @@ end
 function FuncBuild:beginMove()
 end
 function FuncBuild:finishMove()
-    --[[
-    if self:checkBuildable() then
-        self.baseBuild:doMyEffect()
-    end
-    --]]
 end
 
 function FuncBuild:removeSelf()
@@ -78,8 +73,7 @@ function FuncBuild:clearMenu()
     print("try to clear Menu", self.baseBuild.colNow, self.selGrid)
     if self.selGrid ~= nil then
         removeSelf(self.selGrid)
-        self.baseBuild.changeDirNode:stopAllActions()
-        setColor(self.baseBuild.changeDirNode, {255, 255, 255})
+        self:clearTouchAni()
         self.selGrid = nil
         
         --local curMap = getBuildMap(self.baseBuild)
@@ -139,12 +133,17 @@ function FuncBuild:clearMenu()
         --self.baseBuild.moved = true
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
         print("finish clear Menu send Msg!!!!!!!!!!!!!")
+
+        --移动建筑物之后调整道路
+        --self.baseBuild:checkRoadConnect()
     end
 end
 function FuncBuild:detailDialog()
     if self.baseBuild.data.effect > 0 then
         global.director:pushView(DecorInfo.new(self.baseBuild), 1)
     elseif self.baseBuild.id == 28 or self.baseBuild.id == 29 then
+        global.director:pushView(DecorInfo.new(self.baseBuild), 1)
+    elseif self.baseBuild.id == 3 then
         global.director:pushView(DecorInfo.new(self.baseBuild), 1)
     end
 end
@@ -155,7 +154,7 @@ function FuncBuild:showInfo()
     local bo = BuildOpMenu.new(self.baseBuild)
     global.director:pushView(bo)
 
-    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({itintto(0.5, 128, 128, 128), itintto(0.5, 255, 255, 255)})))
+    self:runTouchAni()
     self.baseBuild.oldPos = getPos(self.baseBuild.bg)
     self:initBottom()
 end
@@ -185,14 +184,6 @@ function FuncBuild:setBottomColor(c)
             setTexture(self.selGrid, "newBlueGrid.png")
         end
     end
-    --self:setColor()
-    --[[
-    if c == 0 then
-        setColor(self.baseBuild.bottom, {255, 0, 0})
-    else
-        setColor(self.baseBuild.bottom, {0, 255, 0})
-    end
-    --]]
 end
 function FuncBuild:doSwitch()
 end
@@ -206,7 +197,7 @@ function FuncBuild:updateState()
 end
 function FuncBuild:updateGoods()
 end
-function FuncBuild:setPos()
+function FuncBuild:setPos(p)
     self:adjustHeight()
 end
 
@@ -216,6 +207,9 @@ function FuncBuild:adjustHeight()
     print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
     local hei = adjustNewHeight(self.baseBuild.map.scene.mask, self.baseBuild.map.scene.width, ax, ay)
     setPos(self.baseBuild.heightNode, {0, hei*103})
+    if self.baseBuild.roadNode ~= nil then
+        setPos(self.baseBuild.roadHeightNode, {0, hei*103})
+    end
 end
 
 function delayShow(sp, w)
@@ -280,5 +274,17 @@ end
 function FuncBuild:exitStore()
     self.inMerchant = nil
 end
-function FuncBuild:setOperatable()
+function FuncBuild:setOperatable(a)
 end
+function FuncBuild:runBeginBuild()
+    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({fadeout(0.5), fadein(0.5)})))
+end
+
+function FuncBuild:runTouchAni()
+    self.baseBuild.changeDirNode:runAction(repeatForever(sequence({itintto(0.5, 128, 128, 128), itintto(0.5, 255, 255, 255)})))
+end
+function FuncBuild:clearTouchAni()
+    self.baseBuild.changeDirNode:stopAllActions()
+    setColor(self.baseBuild.changeDirNode, {255, 255, 255})
+end
+

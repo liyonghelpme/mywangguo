@@ -39,11 +39,12 @@ function FightScene:ctor()
     --根据挑战胜利的村落数量调整士兵数值
     --挑战新手村 只有 英雄
 
+    --村落的hero 使用自定义的
     local isVillage = false
     if not DEBUG_SOL then
         --新手村
         if Logic.newVillage then
-            self.soldiers = {{0, 0, 0, 0}, copyTable(Logic.villagePower[Logic.curVillage])}
+            self.soldiers = {{0, 0, 0, 0}, {0, 0, 0, 0}}
         --竞技场
         elseif type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
             local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
@@ -63,8 +64,10 @@ function FightScene:ctor()
             --挑战村落 我方只有英雄
             --村落兵力不会增长
             elseif cityInfo[4] == 4 then
-                on = #Logic.ownVillage
+                --self.soldiers = {{0, 0, 0, 0}, {0, 0, 0, 0}}
                 isVillage = true
+
+                on = #Logic.ownVillage
                 local cn = copyTable(Logic.challengeNum)
                 self.soldiers = {{0, 0, 0, 0}, cn}
                 print("village challenge num is ", simple.encode(Logic.challengeNum))
@@ -94,7 +97,7 @@ function FightScene:ctor()
     --self.soldiers = {{9, 90, 0, 0}, {0, 0, 90, 0}}
     if DEBUG_SOL then
         --self.soldiers = {{18, 15, 15, 15}, {18, 15, 15, 15}}
-        self.soldiers = {{0, 0, 0, 0}, {5, 0, 0, 0}}
+        self.soldiers = {{100, 0, 0, 0}, {50, 0, 0, 0}}
     end
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 
@@ -110,13 +113,21 @@ function FightScene:ctor()
     --self.heros = {{}, {}, {}, {{attack=6*5, defense=0, health=66*5}}}
     --self.heros = {{}, {}, {{attack=6*5, defense=0, health=66*5}}, {}}
     --self.heros = {{}, {}, {}, {}}
+    self.otherHeros = {{}, {}, {}, {}}
     if DEBUG_SOL then
         --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
         self.heros = {{}, {}, {}, {{attack=6*5, defense=0, health=66*5}}}
+        self.heros = {{}, {}, {}, {}}
     end
     
     if not DEBUG_SOL then
         self.heros = {{}, {}, {}, {}}
+        --对方英雄 otherHeros
+        if Logic.newVillage then
+            self.otherHeros = simple.decode(simple.encode(Logic.villagePower[Logic.curVillage]))
+            print("other heri is", simple.encode(self.otherHeros))
+        end
+
         --设置参战士兵属性
         for k, v in ipairs(Logic.attendHero) do
             local pdata = Logic.farmPeople[v.id]
@@ -182,6 +193,12 @@ function FightScene:ctor()
     self.mySoldier[3] = self.mySoldier[3]+#self.heros[3]
     self.mySoldier[4] = self.mySoldier[4]+#self.heros[4]
     print("maxSoldierNum is", simple.encode(self.mySoldier))
+
+    self.eneSoldier = self.maxSoldier[2]
+    self.eneSoldier[1] = self.eneSoldier[1]+#self.otherHeros[1]
+    self.eneSoldier[2] = self.eneSoldier[2]+#self.otherHeros[2]
+    self.eneSoldier[3] = self.eneSoldier[3]+#self.otherHeros[3]
+    self.eneSoldier[4] = self.eneSoldier[4]+#self.otherHeros[4]
 
     self.menuSoldier = simple.decode(simple.encode(self.maxSoldier))
     

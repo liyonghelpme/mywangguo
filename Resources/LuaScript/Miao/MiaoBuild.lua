@@ -60,6 +60,7 @@ function MiaoBuild:ctor(m, data)
     --道路的状态
     self.value = 0
     self.name = 'b'..math.random(10000)
+    self.roadNode = nil
     --self.setYet = data.setYet
     self.setYet = false
     if data.static == 0 then
@@ -120,16 +121,16 @@ function MiaoBuild:ctor(m, data)
     self.bg = CCLayer:create()
     self.heightNode = addNode(self.bg)
 
+    self.addYet = false
     if self.picName == 'build' then
         --建造桥梁 4个方向旋转 还是两个方向旋转
         if self.id == 3 then
-            self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0.5})
+            --self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0.5})
             self.funcBuild = Bridge.new(self)
             self.funcBuild:initView()
         --樱花树
         elseif self.data.kind == 4 then
             self.funcBuild = Tree.new(self)
-            --self.changeDirNode = setAnchor(CCSprite:create(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild:initView()
         --民居 农田
         elseif self.data.kind == 5 then
@@ -240,7 +241,11 @@ function MiaoBuild:ctor(m, data)
         self.funcBuild:initView()
     end
 
-    self.heightNode:addChild(self.changeDirNode)
+    --桥梁的 node 自己添加
+    if self.id ~= 3 and not self.addYet then
+        self.heightNode:addChild(self.changeDirNode)
+    end
+
     setContentSize(setAnchor(self.bg, {0.5, 0}), {SIZEX*2, SIZEY*2})
 
     local allLabel = addNode(self.heightNode)
@@ -297,6 +302,7 @@ function MiaoBuild:receiveMsg(msg, param)
     elseif msg == EVENT_TYPE.ROAD_CHANGED then
         --self.dirty = true
         --self.dirty = false
+        self.needRoadConnect = true 
         if self.data and self.data.needFindBuild == 1 then
             --self.dirty = true
             self:findNearby()
@@ -435,6 +441,15 @@ function MiaoBuild:getAxAyHeight()
     end
     return self.ax, self.ay, self.height
 end
+
+--得到建筑物的 blockId 所属的block 移动的时候 会修改掉 但是对于被屏蔽的地区的建筑物 是不会改变的
+--直接检测operate
+--[[
+function MiaoBuild:getBlockId()
+end
+--]]
+
+
 function MiaoBuild:setInStage()
     --之前不可见 现在可见了
     if not self.inStage then
@@ -647,7 +662,9 @@ function MiaoBuild:checkRiverOrSlopeCol()
         local gid = layer.data[gk]
         if gid ~= 0 then
             self.colNow = 1
-            self.otherBuild = nil
+            --self.otherBuild = nil
+            local wd = self.map.scene.waterData[gk]
+            self.otherBuild = {picName='water', dir=wd[1], height=wd[2], ax=ax, ay=ay, pname=wd.pname}
             self:setColor(0)
             return true
         end
@@ -670,8 +687,9 @@ function MiaoBuild:checkRiverOrSlopeCol()
     return false
 end
 
-
-
+--判定道路的碰撞 状态 用于 调整道路状态
+--判定矿坑的状态
+--判定河流的方向用于调整状态
 function MiaoBuild:setColPos()
     self.colNow = 1
     self.otherBuild = nil
@@ -754,6 +772,11 @@ function MiaoBuild:update(diff)
         end
         self:updateState(diff)
         self.funcBuild:updateStage(diff)
+
+        if self.needRoadConnect then
+            self.needRoadConnect = false
+            self:checkRoadConnect()
+        end
     end
 end
 function MiaoBuild:enterScene()
@@ -775,10 +798,12 @@ function MiaoBuild:setPos(p)
         self.zordLabel:setString(zord)
     end
 
-    self.bg:setZOrder(zord)
-    self.funcBuild:setPos()
     self.zord = zord
-
+    self.bg:setZOrder(zord)
+    self.funcBuild:setPos(p)
+    if self.roadNode ~= nil then
+        setPos(self.roadNode, p)
+    end
     self:setDirty()
 end
 --建造花坛 拆除花坛影响周围建筑属性 
@@ -949,6 +974,8 @@ function MiaoBuild:finishBuild()
     self:finishBottom()
     --self:findNearby()
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+    
+    --self:checkRoadConnect()
 end
 
 --自己移动了 
@@ -961,9 +988,10 @@ end
 --
 --inSearch 中如果又dirty了 那么就要重新再searth一下 dirty = false  
 --dirty = true
+--商店 民居 矿坑
 function MiaoBuild:findNearby()
     --if self.dirty then
-        self.dirty = false
+        --self.dirty = false
         self.state = BUILD_STATE.CHECK_NEARBY
         local p = getPos(self.bg)
         local mxy = getPosMapFloat(1, 1, p[1], p[2])
@@ -971,6 +999,58 @@ function MiaoBuild:findNearby()
         self.buildPath:init(mx, my)
     --end
 end
+
+
+--对于每种建筑物 都只考虑 ax ay 2*1 的建筑物不考虑
+--不是自身建筑物
+--移动结束的时候更新
+function MiaoBuild:checkRoadConnect()
+    --人要进入的场所都要加道路
+    --道路修建好附近的建筑物要调整
+    --民居 工厂 商店 采矿场 伐木场 矿洞 和 树木
+    if self.data ~= nil and (self.data.kind == 5 or self.data.id == 5 or self.data.IsStore == 1 or self.data.IsStore == 3 or self.data.IsStore == 5 or self.data.IsStore == 4 or self.data.IsStore == 6) then
+        if self.roadNode ~= nil then
+            removeSelf(self.roadNode)
+        end
+        self.roadNode = CCNode:create()
+        self.map.roadLayer:addChild(self.roadNode)
+
+        self.roadHeightNode = CCNode:create()
+        self.roadNode:addChild(self.roadHeightNode)
+
+        local map = getBuildMap(self)
+        local mx, my = map[3], map[4] 
+        local buildCell = self.map.mapGridController.mapDict
+        local neibor = {
+            {-1, 1},
+            {1, 1},
+            {1, -1},
+            {-1, -1},
+        }
+        local coord = {
+            {-70, 110},
+            {70, 110},
+            {70, 57},
+            {-70, 57},
+        }
+        for k, v in ipairs(neibor) do
+            local key = getMapKey(mx+v[1], my+v[2])
+            --是建筑物 不能穿过
+            if buildCell[key] ~= nil then
+                local n = buildCell[key][#buildCell[key]][1]
+                if n.picName == 't' then
+                    local sp = setAnchor(createSprite("tile6.png"), {155/512, (512-422)/512})
+                    self.roadHeightNode:addChild(sp)
+                    setPos(sp, {coord[k][1], coord[k][2]})
+                    print("checkRoadConnect", v[1], v[2], simple.encode(coord[k]))
+                end
+            end
+        end
+        local p = getPos(self.bg)
+        self:setPos(p)
+    end
+end
+
 
 function MiaoBuild:updateState(diff)
     if self.state == BUILD_STATE.CHECK_NEARBY then
@@ -1035,14 +1115,25 @@ function MiaoBuild:changeWorkNum(n)
     self.funcBuild:updateGoods()
     self:setDirty()
 end
+
 --如果没有确认建造则不要移除效果
+--卖出当前建筑物
 function MiaoBuild:removeSelf()
+    if self.roadNode ~= nil then
+        removeSelf(self.roadNode)
+        self.roadNode = nil
+    end
     print("removeSelf Building", self.picName, self.id)
     self.funcBuild:removeSelf()
     self.deleted = true
     self.map:removeBuilding(self)
     Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+    
+    --每次的updateBuild 普通的是update状态有的是卖出状态
+    table.insert(Logic.sellBuild, self)
 end
+
+
 --用于Move 建筑
 --再次点击 确认
 function MiaoBuild:runMoveAction(px, py)

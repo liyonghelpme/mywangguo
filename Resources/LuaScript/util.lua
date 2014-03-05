@@ -7,7 +7,7 @@ function dict(arr)
     end
     return temp
 end
-require "data.String"
+--require "data.String"
 local sim = require "SimpleJson"
 function registerMultiTouch(obj)
     --x y id x y id  x y id
@@ -537,11 +537,17 @@ function addLabel(s, w, f, sz)
     s:addChild(l)
     return l
 end
-function addNode(s)
+
+function addNode(s, z)
     local n = CCNode:create()
-    s:addChild(n)
+    if z ~= nil then
+        s:addChild(n, z)
+    else
+        s:addChild(n)
+    end
     return n
 end
+
 function setVisible(s, v)
     s:setVisible(v)
     return s

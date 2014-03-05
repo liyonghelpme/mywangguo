@@ -5,17 +5,25 @@ function Wood:ctor(b)
     self.lastTime = 0
 end
 
-function Wood:setOperatable(a)
-    if a then
-        setColor(self.fence, {255, 255, 255})
-    else
-        setColor(self.fence, {128, 128, 128})
-    end
-end
 function Wood:initView()
     print("Wood Tree")
+
+    local rx = math.random(10)
+    local ry = math.random(10)
     local sz = self.baseBuild.changeDirNode:getContentSize()
-    setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0, SIZEY})
+    setPos(setAnchor(self.baseBuild.changeDirNode, {306/1024, (768-288)/768}), {0+rx, SIZEY+ry})
+    self.baseBuild.heightNode:addChild(self.baseBuild.changeDirNode)
+    self.baseBuild.addYet = true
+
+    local rd = math.random(2)
+    if rd == 1 then
+        self.leaf2 = createSprite("tree4_leaf.png")
+        self.baseBuild.heightNode:addChild(self.leaf2)
+        setPos(setAnchor(self.leaf2, {306/1024, (768-288)/768}), {0+rx, SIZEY+ry})
+        setVisible(self.leaf2, false)
+    end
+
+
     local fence = setPos(createSprite("treeFence.png"), {512, 384})
     self.baseBuild.changeDirNode:addChild(fence, -1) 
     self.fence = fence
@@ -34,6 +42,13 @@ function Wood:updateStage(diff)
             if s ~= self.showState then
                 self.showState = s
                 setDisplayFrame(self.baseBuild.changeDirNode, "tree"..(self.showState+1)..'.png')
+                if self.leaf2 ~= nil then
+                    if self.showState == 3 then
+                        setVisible(self.leaf2, true)
+                    else
+                        setVisible(self.leaf2, false)
+                    end
+                end
             end
         end
     end
@@ -81,4 +96,19 @@ function Wood:updateGoods()
     setPos(self.goodsObj, {512, 384})
     print("setPos", 512)
 
+end
+function Wood:setOperatable(a)
+    if self.leaf2 ~= nil then
+        if not self.baseBuild.operate then
+            setColor(self.leaf2, {128, 128, 128})
+        else
+            setColor(self.leaf2, {255, 255, 255})
+        end
+    end
+
+    if a then
+        setColor(self.fence, {255, 255, 255})
+    else
+        setColor(self.fence, {128, 128, 128})
+    end
 end

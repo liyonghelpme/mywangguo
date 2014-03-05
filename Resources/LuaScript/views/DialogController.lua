@@ -15,7 +15,7 @@ function DialogController:update(diff)
     local now = Timer.now
     if #self.bannerStack > 0 then
         local first = self.bannerStack[1]
-        if now - first[2] > getParam("bannerFinishTime")/1000 then
+        if now - first[2] > 3 then
             table.remove(self.bannerStack, 1)
         end
     end
@@ -36,7 +36,7 @@ function DialogController:update(diff)
 end
 --可能t[1] 已经删除自己了 只是DialogController 还不知道
 function DialogController:addBanner(banner)
-    while #self.bannerStack > getParam("maxBannerNum") do
+    while #self.bannerStack > 5 do
         local t = table.remove(self.bannerStack, 1)
         if t[1].bg ~= nil then
             removeSelf(t[1].bg)
@@ -49,7 +49,7 @@ function DialogController:addBanner(banner)
     local initY = dis[2]/2;
     for i = 1, #self.bannerStack, 1 do
         local ban = self.bannerStack[i][1]
-        ban:setMoveAni(initX, initY+getParam("bannerOffY")*maxOff)
+        ban:setMoveAni(initX, initY+70*maxOff)
         maxOff = maxOff-1
     end
     table.insert(self.bannerStack, {banner, Timer.now})

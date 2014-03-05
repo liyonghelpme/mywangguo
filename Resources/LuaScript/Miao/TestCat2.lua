@@ -234,15 +234,17 @@ function Cat2:findTarget()
     if allBuild ~= nil then
         print("allBuildNum", getLen(allBuild))
     end
-    print("allPossible", #allPossible)
-    print("allFreeFactory num", #allFreeFactory)
-    print("allFreeStore num", #allFreeStore)
-    print("allFreeSmith num", #allFreeSmith)
-    print("allFreeMine num", #allFreeMine)
-    print("allFoodFarm num", #allFoodFarm)
-    print("allStoneQuarry num", #allStoneQuarry)
-    print("allFreeQuarry num", #allFreeQuarry)
-    global.director.curScene.menu.stateLabel:setString(string.format("allPossible %d\nallFoodFarm %d\nallStoneQuarry %d\n", #allPossible, #allFoodFarm, #allStoneQuarry))
+    if DEBUG then
+        print("allPossible", #allPossible)
+        print("allFreeFactory num", #allFreeFactory)
+        print("allFreeStore num", #allFreeStore)
+        print("allFreeSmith num", #allFreeSmith)
+        print("allFreeMine num", #allFreeMine)
+        print("allFoodFarm num", #allFoodFarm)
+        print("allStoneQuarry num", #allStoneQuarry)
+        print("allFreeQuarry num", #allFreeQuarry)
+        global.director.curScene.menu.stateLabel:setString(string.format("allPossible %d\nallFoodFarm %d\nallStoneQuarry %d\n", #allPossible, #allFoodFarm, #allStoneQuarry))
+    end
 
     if #allPossible > 0 then
         --按照建筑物的距离排序

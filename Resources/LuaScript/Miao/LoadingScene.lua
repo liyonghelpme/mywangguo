@@ -7,7 +7,7 @@ function LoadingScene:ctor()
 
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     sf:addSpriteFramesWithFile("loadAni.plist")
-    local ani = createAnimation("loadingAni", "load%d.png", 0, 8, 1, 2, true)
+    local ani = createAnimation("loadingAni", "load%d.png", 0, 8, 1, 1, true)
     local sp = createSprite("load0.png")
     addChild(self.bg, sp)
     local vs = getVS()
