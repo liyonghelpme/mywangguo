@@ -34,8 +34,8 @@ void setBoneMatrix(Bone *root, Bone **allBone, kmMat4 *curMat) {
     kmMat4Multiply(&nextCur, &root->mat, &temp);
     //kmMat4Assign(&nextCur, &temp);
     
-    printf("nextCur\n");
-    printMat4(&nextCur);
+    //printf("nextCur\n");
+    //printMat4(&nextCur);
 
     for(int i=0; i<MAX_BONE_CHILDREN; i++) {
         if(root->child[i] == -1) {
