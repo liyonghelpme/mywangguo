@@ -1912,6 +1912,7 @@ function initPlist()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     sf:addSpriteFramesWithFile("car.plist")
     sf:addSpriteFramesWithFile("cat_smoke.plist")
+    sf:addSpriteFramesWithFile("cat_labor.plist")
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 end
 

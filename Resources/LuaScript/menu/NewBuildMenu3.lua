@@ -19,6 +19,23 @@ function NewBuildMenu3:onBut()
     global.director:popView()
 end
 
+function createSmallDialogb()
+    local n = CCNode:create()
+    local left = createSprite("dialogCLeft.png")
+    local right = createSprite("dialogCLeft.png")
+    local mid = createSprite("dialogCMid.png")
+    n:addChild(mid)
+    n:addChild(left)
+    n:addChild(right)
+    --横向宽度参数
+    --纵向高度参数
+    --中间宽度参数
+    setScaleY(setAnchor(setPos(left, {-294, 0}), {0, 0.5}), 255/397)
+    setScaleY(setScaleX(setAnchor(setPos(right, {294, 0}), {0, 0.5}), -1), 255/397)
+    setScaleY(setScaleX(setPos(mid, {0, 0}), 488/21), 255/397)
+    return n
+end
+
 function createDialogB()
     local n = CCNode:create()
     local left = createSprite("dialogCLeft.png")
