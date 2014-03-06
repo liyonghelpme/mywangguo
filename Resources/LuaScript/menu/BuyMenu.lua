@@ -3,29 +3,13 @@ BuyMenu = class()
 function BuyMenu:ctor(p, e)
     self.people = p
     self.equip = e
-    --[[
-    local vs = getVS()
-    self.bg = CCNode:create()
-    local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {36.5, 4.5})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {485, fixY(sz.height, 379)}), {619, 381}), {0.50, 0.50})
-    local but = ui.newButton({image="butb.png", text="取消", font="f1", size=25, delegate=self, callback=self.onCancel})
-    but:setContentSize(117, 43)
-    setPos(addChild(self.temp, but.bg), {574, fixY(sz.height, 528)})
-    local but = ui.newButton({image="butd.png", text="确定", font="f1", size=25, delegate=self, callback=self.onOK})
-    but:setContentSize(117, 43)
-    setPos(addChild(self.temp, but.bg), {411, fixY(sz.height, 528)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="信息", size=34, color={102, 66, 42}, font="f1"})), {0.50, 0.50}), {475, fixY(sz.height, 245)})
-    local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="并进行装备", size=28, color={255, 255, 255}, font="f1"})), {0.50, 0.50}), {478, fixY(sz.height, 410)})
-    local w = setPos(setAnchor(addChild(self.temp, colorWords({text=string.format("将<2070dc%s>购入", self.equip.name), size=28, color={255, 255, 255}, font="f1"})), {0.50, 0.50}), {483, fixY(sz.height, 366)})
-    --]]
 
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "smallDialogb.png"), {512, fixY(sz.height, 403)}), {588, 246}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addChild(self.temp, createSmallDialogb()), {512, fixY(sz.height, 403)}), {0.50, 0.50})
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {813, fixY(sz.height, 196)})

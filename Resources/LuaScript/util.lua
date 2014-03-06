@@ -1061,6 +1061,8 @@ function client2Server(t)
 end
 --DisplayFrame 有trimedSize 导致 位置不对 改变这个trimmedSize
 function setTexture(sp, tex)
+    setTexOrDis(sp, tex)
+    --[[
     local t = CCTextureCache:sharedTextureCache():addImage(tex)
     --print('setTexture', sp, t)
     sp:setTexture(t)
@@ -1068,6 +1070,7 @@ function setTexture(sp, tex)
     local r = CCRectMake(0, 0, sz.width, sz.height)
     sp:setContentSize(sz)
     sp:setTextureRect(r, false, sz)
+    --]]
     return sp
 end
 function linearInter(va, vb, ta, tb, cut)
@@ -1525,6 +1528,17 @@ function newProNum(banner, n, max)
     end
 end
 
+function setRealTexture(sp, tex)
+    local t = CCTextureCache:sharedTextureCache():addImage(tex)
+    --print('setTexture', sp, t)
+    sp:setTexture(t)
+    local sz = t:getContentSize()
+    local r = CCRectMake(0, 0, sz.width, sz.height)
+    sp:setContentSize(sz)
+    sp:setTextureRect(r, false, sz)
+    return sp
+end
+
 function setTexOrDis(sp, n)
     if string.sub(n, 1, 1) == '#' then
         setTexture(sp, string.sub(n, 2))
@@ -1535,7 +1549,7 @@ function setTexOrDis(sp, n)
     if tex then
         sp:setDisplayFrame(tex)
     else
-        setTexture(sp, n)
+        setRealTexture(sp, n)
     end
     return sp
 end
@@ -1884,6 +1898,7 @@ end
 function initPlist()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("buildOne.plist")
     sf:addSpriteFramesWithFile("buildTwo.plist")
     sf:addSpriteFramesWithFile("buildThree.plist")
@@ -1897,6 +1912,7 @@ function initPlist()
     sf:addSpriteFramesWithFile("whiteGeo.plist")
     sf:addSpriteFramesWithFile("car.plist")
     sf:addSpriteFramesWithFile("cat_smoke.plist")
+    sf:addSpriteFramesWithFile("cat_labor.plist")
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 end
 

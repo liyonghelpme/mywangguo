@@ -76,3 +76,88 @@ int setGLProgram(CCNode *sp, const char *name, const char *vert, const char *fra
     //return (int)glGetUniformLocation(prog->getProgram(), "offset");
     return 0;
 }
+
+//只支持加载 png 图片 不带 透明通道的 加载到 RGB565 格式的 数据中
+void initTextureData(char *name) {
+    CCImage *pImage = NULL;
+    std::string pathKey = name;
+    pathKey = CCFileUtils::sharedFileUtils()->fullPathForFilename(pathKey.c_str());
+    CCTextureCache *tc = CCTextureCache::sharedTextureCache();
+    CCTexture2D *texture = CCTextureCache::sharedTextureCache()->textureForKey(pathKey.c_str());
+    std::string fullPath = pathKey;
+    //纹理不存在
+    if(texture == NULL) {
+        //初始图片
+        CCImage::EImageFormat eImageFormat = CCImage::kFmtPng;
+        pImage = new CCImage();
+        bool bRet = pImage->initWithImageFile(fullPath.c_str(), eImageFormat);
+        
+        //初始化纹理
+        texture = new CCTexture2D();
+        unsigned char *tempData = pImage->getData();
+        unsigned char *inPixel8 = NULL;
+        unsigned short *outPixel16 = NULL;
+		unsigned int *inPixel32 = NULL;
+
+        unsigned int width = pImage->getWidth();
+        unsigned int height = pImage->getHeight();
+
+        bool hasAlpha = pImage->hasAlpha();
+        CCSize imageSize = CCSizeMake((float)(pImage->getWidth()), (float)(pImage->getHeight()));
+        CCTexture2DPixelFormat pixelFormat;
+        pixelFormat = kCCTexture2DPixelFormat_RGB565;
+        unsigned int length = width*height;
+        
+		CCLog("image has Alpha %d", hasAlpha);
+
+        tempData = new unsigned char[width*height*2];
+        outPixel16 = (unsigned short*)tempData;
+        inPixel8 = (unsigned char*)pImage->getData();
+		inPixel32 = (unsigned int*)inPixel8;
+        //无alpha
+        //RRRRRRRR to RRRRR  888 565 调整png 数据到565 格式
+		/*
+				((((*inPixel32 >>  0) & 0xFF) >> 3) << 11) |  // R
+                ((((*inPixel32 >>  8) & 0xFF) >> 2) << 5)  |  // G
+                ((((*inPixel32 >> 16) & 0xFF) >> 3) << 0);    // B
+			*/
+		/*|  // R
+                (((*inPixel8++ & 0xFF) >> 2) << 5)  |  // G
+                (((*inPixel8++ & 0xFF) >> 3) << 0);    // B
+		`*/
+			/*
+                (((*inPixel8++ & 0xFF) >> 3) << 11) |
+                (((*inPixel8++ & 0xFF) >> 2) << 5) |
+                (((*inPixel8++ & 0xFF) >> 3) << 0);
+			*/
+		
+        for(unsigned int i=0; i < length; i++) {
+			unsigned int r = *inPixel8++;
+			unsigned int g = *inPixel8++;
+			unsigned int b = *inPixel8++;
+            
+			*outPixel16++ = ((r>>3) << 11) | ((g>>2) << 5) | (b>>3);
+			
+			if(i < 1000) {
+				CCLog("%x %x %x %x", r, g, b, *(outPixel16-1));
+			}
+			//inPixel8++;
+			//inPixel8++;
+			
+			
+        }
+		
+        //使用数据初始化 纹理
+        texture->initWithData(tempData, pixelFormat, width, height, imageSize);
+		if(tempData != pImage->getData()) {
+			delete [] tempData;
+		}
+        //设定纹理Cache
+        tc->m_pTextures->setObject(texture, pathKey.c_str());
+        texture->release();
+        
+        //释放图片
+        CC_SAFE_RELEASE(pImage);
+    }
+}
+

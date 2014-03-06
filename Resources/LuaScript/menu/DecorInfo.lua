@@ -7,7 +7,7 @@ function DecorInfo:ctor(b)
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {525, fixY(sz.height, 418)}), {626, 358}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addSprite(self.temp, createDialogB()), {525, fixY(sz.height, 418)}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text=self.build.data.name, size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {529, fixY(sz.height, 219)})
 
     local but = ui.newButton({image="butc.png", text="确定", font="f1", size=27, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})

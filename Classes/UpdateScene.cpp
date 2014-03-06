@@ -30,7 +30,11 @@ bool UpdateScene::init() {
     addChild(lab);
     
     CCSpriteFrameCache *sf = CCSpriteFrameCache::sharedSpriteFrameCache();
+	//loadAni 效果很差
+	//CCTexture2D::setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444);
     sf->addSpriteFramesWithFile("loadAni.plist");
+	//CCTexture2D::setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888);
+
     CCAnimation *ani = CCAnimation::create();
     char name[100];
     for(int i = 0; i <= 8; i++) {

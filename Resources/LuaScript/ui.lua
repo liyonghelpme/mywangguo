@@ -196,8 +196,9 @@ function ui.newButton(params)
     local sprOr9 = params.spr or true
     local sp
     if sprOr9 then
-        sp = CCSprite:create(params.image)
+        sp = createSprite(params.image)
     else
+        --scale 9 sprite
         sp = display.newScale9Sprite(params.image)
     end
     lay:addChild(sp)

@@ -7,7 +7,7 @@ function AttributeMenu2:ctor()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4.0})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 423)}), {626, 358}), {0.50, 0.50})
+    local sp = setAnchor(setPos(addChild(self.temp, createDialogB()), {523, fixY(sz.height, 423)}), {0.50, 0.50})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "basicAtt.png"), {531, fixY(sz.height, 148)}), {212, 42}), {0.50, 0.50})
 
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onClose, param=self.onClose, shadowColor={0, 0, 0}, color={255, 255, 255}})

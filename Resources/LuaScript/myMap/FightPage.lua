@@ -11,19 +11,34 @@ require "myMap.PagePath"
 FightPage = class()
 function FightPage:ctor()
     self.bg = CCLayer:create()
-    --local sp = CCSprite:create("bigMap.png")
-    local sp1 = CCSprite:create("bigMap1.png")
+    
+    initTextureData("bigMap1.png")
+    initTextureData("bigMap2.png")
+
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    local sp1 = createSprite("bigMap1.png")
+    local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE
+    sp1:setBlendFunc(bf)
+
     setPos(setAnchor(sp1, {0, 0}), {0, 256})
     addChild(self.bg, sp1)
-    local sp2 = CCSprite:create("bigMap2.png")
+    local sp2 = createSprite("bigMap2.png")
+    sp2:setBlendFunc(bf)
     setPos(setAnchor(sp2, {0, 0}), {2048, 256})
     addChild(self.bg, sp2)
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
+
+
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
     local sp3 = CCSprite:create("bigMap3.png")
     setPos(setAnchor(sp3, {0, 0}), {0, 0})
     addChild(self.bg, sp3)
     local sp4 = CCSprite:create("bigMap4.png")
     setPos(setAnchor(sp4, {0, 0}), {2048, 0})
     addChild(self.bg, sp4)
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 
     --setAnchor(sp, {0, 0})
     --addChild(self.bg, sp)

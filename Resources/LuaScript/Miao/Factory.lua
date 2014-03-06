@@ -49,6 +49,7 @@ function createFacBanner()
     local banner = setSize(createSprite("buildProgressBar.png"), {189, 30})
     local pro = {lw=8, rw=8, cw=6}
     local tex = CCTextureCache:sharedTextureCache():addImage("buildProgress.png")
+
     local ca = CCSpriteFrameCache:sharedSpriteFrameCache()
     local r = CCRectMake(0, 0, pro.lw, 23)
     local left = createSpriteFrame(tex, r, 'proLeft')
