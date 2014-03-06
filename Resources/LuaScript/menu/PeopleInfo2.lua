@@ -8,7 +8,7 @@ function PeopleInfo2:ctor(p, attribute)
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 418)}), {626, 358}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addChild(self.temp, createDialogB()), {523, fixY(sz.height, 418)}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="Lv.", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {682, fixY(sz.height, 216)})
     self.level = w
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="name", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {259, fixY(sz.height, 215)})

@@ -6,7 +6,7 @@ self.bg = CCNode:create()
 local sz = {width=1024, height=768}
 self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
 local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
-local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {523, fixY(sz.height, 423)}), {626, 358}), {0.50, 0.50}), 255)
+local sp = setAnchor(setPos(addChild(self.temp, createDialogB()), {523, fixY(sz.height, 423)}), {0.50, 0.50})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="点击更改商品", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {523, fixY(sz.height, 625)})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="价格", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {705, fixY(sz.height, 215)})
 local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="材料", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {511, fixY(sz.height, 215)})

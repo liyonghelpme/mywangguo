@@ -180,7 +180,7 @@ function Merchant:handleAction()
             getNum = self.people.predictTarget.workNum
             print("getNum is", getNum)
             if getNum > 0 then
-                local sp = CCSprite:create("silverIcon.png")
+                local sp = createSprite("silverIcon.png")
                 local p = getPos(self.people.predictTarget.heightNode)
                 local bgPos = getPos(self.people.predictTarget.bg)
                 self.people.map.bg:addChild(sp)

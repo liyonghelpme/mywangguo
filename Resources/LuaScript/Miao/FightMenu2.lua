@@ -19,23 +19,28 @@ function FightMenu2:ctor(s)
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
     local bc = addNode(self.bg)
-    local sp = CCSprite:create("battleUI.png")
+
+    --需要缩放一定比例
+    local spmid = createSprite("battleMid.png")
+    bc:addChild(spmid)
+    local vs = getVS()
+    setAnchor(setPos(spmid, {vs.width/2, 0}), {0.5, 0})
+    local tsz = spmid:getContentSize()
+    self.tsz =tsz
+    local nh = vs.height-FIGHT_HEIGHT+10
+    self.realHeight = nh
+    setScale(spmid, nh/tsz.height)
+
+    local backNode = createSprite("battleBar.png")
+    bc:addChild(backNode, -1)
+    setAnchor(setPos(backNode, {vs.width/2, 0}), {0.5, 0})
+    local bs = backNode:getContentSize()
+    local scaX = vs.width/bs.width
+    setScaleY(setScaleX(backNode, scaX), nh/tsz.height)
 
     --[[
-    local tex = CCTextureCache:sharedTextureCache():addImage("battleUI.png")
-    local r = CCRectMake(0, 0, 405, 291)
-    local left = createSpriteFrame(tex, r, 'leftBattle')
-    local r = CCRectMake(619, 0, 405, 291)
-    local right = createSpriteFrame(tex, r, 'rightBattle')
-
-    local sp = CCSpriteBatchNode:create("buildUI.png")
-    --]]
-
-
-
-    self.bui = sp
+    local sp = CCSprite:create("battleUI.png")
     bc:addChild(sp)
-    local vs = getVS()
     setAnchor(setPos(sp, {vs.width/2, 0}), {0.5, 0})
 
     local tsz = sp:getContentSize()
@@ -46,13 +51,7 @@ function FightMenu2:ctor(s)
     print("ui height", nh)
     setScaleY(sp, nh/tsz.height)
     setScaleX(sp, vs.width/tsz.width)
-    --[[
-    setPos(sp, {512, fixY(sz.height, 592)})
-    centerYRate(bc)  
-    local vs = getVS()
-    setScaleY(bc, (vs.height-FIGHT_HEIGHT+80)/tsz.height)
     --]]
-
 
 
     --高度缩放但是X 位置 基本根据宽度重新布局

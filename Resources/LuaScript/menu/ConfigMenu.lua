@@ -9,7 +9,7 @@ function ConfigMenu:ctor(ct)
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogB.png"), {524, fixY(sz.height, 409)}), {626, 340}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addChild(self.temp, createDialogB()), {524, fixY(sz.height, 409)}), {0.50, 0.50})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="参战费用", size=26, color={32, 112, 220}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {258, fixY(sz.height, 215)})
     local w = setPos(setAnchor(addChild(self.temp, ui.newTTFLabel({text="(野外村落仅限英雄出战)", size=26, color={247, 5, 39}, font="f2", shadowColor={255, 255, 255}})), {0.00, 0.50}), {514, fixY(sz.height, 215)})
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})

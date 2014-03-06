@@ -29,6 +29,10 @@ function TMXScene:ctor()
     self.name = "TMXScene"
     self.bg = CCScene:create()
 
+    --init UI PIC
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    sf:addSpriteFramesWithFile("uiOne.plist")
+
     
     self.cameraLight = addNode(self.bg, 1)
     local vs = getVS()
@@ -58,9 +62,6 @@ function TMXScene:ctor()
     self.checkTime = 0
 
     self.debugTime = 0
-
-    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
-    sf:addSpriteFramesWithFile("equipOne.plist")
 
     initCityData()
 end

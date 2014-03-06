@@ -19,13 +19,41 @@ function NewBuildMenu3:onBut()
     global.director:popView()
 end
 
+function createDialogB()
+    local n = CCNode:create()
+    local left = createSprite("dialogCLeft.png")
+    local right = createSprite("dialogCLeft.png")
+    local mid = createSprite("dialogCMid.png")
+    n:addChild(mid)
+    n:addChild(left)
+    n:addChild(right)
+    setScaleY(setAnchor(setPos(left, {-313, 0}), {0, 0.5}), 358/397)
+    setScaleY(setScaleX(setAnchor(setPos(right, {313, 0}), {0, 0.5}), -1), 358/397)
+    setScaleY(setScaleX(setPos(mid, {0, 0}), 526/21), 358/397)
+    return n
+end
+
+function createDialogC()
+    local n = CCNode:create()
+    local left = createSprite("dialogCLeft.png")
+    local right = createSprite("dialogCLeft.png")
+    local mid = createSprite("dialogCMid.png")
+    n:addChild(mid)
+    n:addChild(left)
+    n:addChild(right)
+    setAnchor(setPos(left, {-312, 0}), {0, 0.5})
+    setScaleX(setAnchor(setPos(right, {312, 0}), {0, 0.5}), -1)
+    setScaleX(setPos(mid, {0, 0}), 525/21)
+    return n
+end
+
 function NewBuildMenu3:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+0})
     local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50})
-    local sp = setAnchor(setSize(setPos(addSprite(self.temp, "dialogC.png"), {525, fixY(sz.height, 403)}), {625, 397}), {0.50, 0.50})
+    local sp = setAnchor(setPos(addChild(self.temp, createDialogC()), {525, fixY(sz.height, 403)}), {0.50, 0.50})
 
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=self.onBut, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
