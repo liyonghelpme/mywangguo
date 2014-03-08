@@ -2,6 +2,9 @@
 #include "string.h"
 #include <map>
 
+//MD2 模型有scale 比例缩放尺寸了
+
+
 //vi * 10000 + ti 
 static map<int, int> vItI;
 static int maxIndex;

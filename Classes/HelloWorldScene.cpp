@@ -188,10 +188,15 @@ bool HelloWorld::init()
     */
 
     rb1 = CCSprite3D::create();
-    rb1->loadMd2("test2.md2");
-    rb1->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
+    //rb1->loadMd2("test2.md2");
+    rb1->loadData("vert.dat", "face.dat", "bone.dat");
+    rb1->generateLine();
+    //rb1->generatePoint();
+    
+    //使用纯光shader
+    //rb1->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
     this->addChild(rb1, 3);
-    rb1->tranX(50);
+    rb1->tranX(0);
     rb1->tranY(0);
     rb1->tranZ(0);
 
@@ -200,10 +205,12 @@ bool HelloWorld::init()
     //先正则缩放 接着 再旋转 即可
     //缩放发生在本地空间里面
     //矩阵乘积的顺序 旋转 * 缩放 = 先缩放 再旋转 本地空间
-    rb1->scaleX(0.5);
-    rb1->scaleY(0.2);
-    rb1->scaleZ(0.1);
+    rb1->scaleX(50);
+    rb1->scaleY(50);
+    rb1->scaleZ(50);
 
+    //rb1->rotateY(45);
+    /*
     rb2 = CCSprite3D::create();
     rb2->loadMd2("test2.md2");
     rb2->setTexture(CCTextureCache::sharedTextureCache()->addImage("test.png"));
@@ -247,12 +254,11 @@ bool HelloWorld::init()
     rb4->scaleX(0.5);
     rb4->scaleY(0.2);
     rb4->scaleZ(0.1);
-
     //scale 导致 transform 的位置也已经被scale掉了 先平移 再scale 不过平移没有用了 貌似
     //m3->setScale(100);
     //m3->setPosition(ccp(100, 100));
     //m3->rotateX(100);
-
+    */
 
     ccDirectorProjection p = CCDirector::sharedDirector()->getProjection(); 
     CCLog("Direction %d", p);
@@ -272,7 +278,7 @@ bool HelloWorld::init()
 
     passTime = 0;
 
-    scheduleUpdate();
+    //scheduleUpdate();
     return true;
 }
 
@@ -305,7 +311,7 @@ void HelloWorld::update(float diff) {
 
     kmMat4 curMat;
     kmMat4Identity(&curMat);
-    setBoneMatrix(&b1, allBone, &curMat);
+    //setBoneMatrix(&b1, allBone, &curMat);
 
     printf("invBone\n");
     printMat4(&invBoneMat[0]);
@@ -328,10 +334,12 @@ void HelloWorld::update(float diff) {
     printMat4(&invBoneMat[1]);
     printf("boneMat 111\n");
     printMat4(&boneMat[1]);
+    /*
     kmMat4Assign(&rb1->boneMat, &boneMat[0]);
     kmMat4Assign(&rb2->boneMat, &boneMat[1]);
     kmMat4Assign(&rb3->boneMat, &boneMat[2]);
     kmMat4Assign(&rb4->boneMat, &boneMat[3]);
+    */
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)

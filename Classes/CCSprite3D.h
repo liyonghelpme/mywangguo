@@ -2,11 +2,18 @@
 #define __CCSPRITE3D_H__
 #include "cocos2d.h"
 #include <vector>
+#include "Bone2.h"
+
 //分配的 buffer 大小 由 加载的文件决定 先加载一个8个定点的矩形实验一下
 //使用client side array
 //第一步 绘制一个矩形
 using namespace cocos2d;
 using namespace std;
+#define MAX_WEI_NUM 4
+struct VertexWeight {
+    float wei[MAX_WEI_NUM];
+};
+
 class CCSprite3D : public CCNode { // public CCNodeRGBA, public CCTextureProtocol {
 public:
     static CCSprite3D *create();
@@ -84,6 +91,8 @@ public:
     void scaleZ(float z);
 
     virtual void loadMd2(const char *fileName);
+    void loadData(const char *vert, const char *face, const char *bone);
+    virtual void update(float);
     
     /** 
      * Makes the Sprite to be updated in the Atlas.
@@ -103,18 +112,36 @@ public:
     float sx, sy, sz;
 
     //对于顶点对象调整位置
-    kmMat4 boneMat;
+    void initRenderPos();
 
+    void generateLine();
+
+    void generatePoint();
+    kmMat4 boneMat;
 protected:
     ccBlendFunc m_sBlendFunc;
     //CCTexture2D *m_pobTexture;//使用的纹理编号
+    
+    
+    vector<kmMat4> invBoneMat;
+    float passTime;
 
+    bool inLine;
+    bool inPoint;
 
     vector<float> pos;
     vector<float> tex;
     vector<unsigned char> col;
     vector<unsigned int> index;
+    vector<unsigned int> lineInd;
+    vector<unsigned int> pointInd;
+
     vector<float> normal;
+    vector<float> renderPos;
+
+    vector<Bone> bone;
+    vector<VertexWeight> wv;
+    vector<kmMat4> allBoneMat;
     
     //所有的动画frame数据
     vector< vector<float> > animations;

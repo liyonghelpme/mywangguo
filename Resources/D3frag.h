@@ -24,7 +24,8 @@ void main() {
     float diff = clamp(dot(v_normal, L), 0.4, 1);
 
     //gl_FragColor = v_fragmentColor;
-    gl_FragColor = texture2D(CC_Texture0, v_texCoord)*diff;
+    //gl_FragColor = texture2D(CC_Texture0, v_texCoord)*diff;
+    gl_FragColor = vec4(diff);
     //gl_FragColor = vec4(v_normal, 1);
     //gl_FragColor = vec4(v_texCoord, 0, 1);
 }

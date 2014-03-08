@@ -25,6 +25,7 @@ void main()
 {														
     gl_Position = CC_MVPMatrix * a_position;			
 
+    gl_PointSize = 10;
     //v_normal = normalize(u_normalMatrix*a_normal);
     //uniform scale then use model view
     v_normal = normalize(mat3(CC_MVMatrix)*a_normal);

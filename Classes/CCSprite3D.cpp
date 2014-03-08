@@ -1,6 +1,7 @@
 #include "CCSprite3D.h"
 #include "MD2.h"
 #include "Bone2.h"
+#include "MyData.h"
 
 CCSprite3D *CCSprite3D::create() {
     CCSprite3D *pSprite = new CCSprite3D();
@@ -174,11 +175,33 @@ void CCSprite3D::initModel() {
     setTexture(NULL);
     setTextureRect();
 }
+void CCSprite3D::generatePoint() {
+    inPoint = true;
+    for(int i=0; i < pos.size(); i++) {
+        pointInd.push_back(i);
+    }
+}
+void CCSprite3D::generateLine() {
+    inLine = true;
+    for(int i = 0; i < index.size(); i += 3) {
+        int p1 = index[i];
+        int p2 = index[i+1];
+        int p3 = index[i+2];
+        lineInd.push_back(p1);
+        lineInd.push_back(p2);
+        lineInd.push_back(p2);
+        lineInd.push_back(p3);
+        lineInd.push_back(p3);
+        lineInd.push_back(p1);
+    }
+}
 //调用父亲类的 init  方法
 bool CCSprite3D::init() {
     m_sBlendFunc.src = GL_ONE;
     m_sBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
 
+    inLine = false;
+    inPoint = false;
     //root Matrix 变换
     kmMat4Identity(&boneMat);
     xRot = 0;
@@ -188,9 +211,51 @@ bool CCSprite3D::init() {
     sx = sy = sz = 1;
     pTex = NULL;
     pNor = NULL;
+    passTime = 0;
 
     initModel();
+    scheduleUpdate();
     return true;
+}
+void CCSprite3D::update(float diff) {
+    passTime = passTime+diff;
+
+    //y 旋转骨骼
+    kmVec3 axis;
+    kmVec3Fill(&axis, 1, 0, 0);
+    //kmQuaternionRotationAxis(&bone[0].rotate, &axis, kmDegreesToRadians(45*passTime));
+    //kmQuaternionRotationAxis(&bone[0].rotate, &axis, kmDegreesToRadians(35*sin(kmPI*passTime)));
+    //kmQuaternionRotationAxis(&bone[1].rotate, &axis, kmDegreesToRadians(45*passTime));
+    
+    //变换 root 骨骼 parent = -1
+    kmMat4 curMat;
+    kmMat4Identity(&curMat);
+    setBoneMatrix(&bone[0], &bone, &curMat);
+    setBoneMatrix(&bone[1], &bone, &curMat);
+    //根据骨骼修正顶点数值
+
+    for(int i =0; i<allBoneMat.size(); i++) {
+        kmMat4Multiply(&allBoneMat[i], &invBoneMat[i], &(bone[i].mat));
+    }
+
+    for(int i=0; i <wv.size(); i++) {
+        kmVec3 v;
+        kmVec3Fill(&v, pos[i*3], pos[i*3+1], pos[i*3+2]);
+        kmVec3 out;
+        kmVec3Zero(&out);
+        for(int j=0; j < bone.size(); j++) {
+            //骨骼权重 > 0 骨骼编号 和 相应的权重 只生成相关的骨骼 相关的不用关心
+            if(wv[i].wei[j] > 0) {
+                kmVec3 temp;
+                kmVec3Transform(&temp, &v, &allBoneMat[j]);
+                kmVec3Scale(&temp, &temp, wv[i].wei[j]);
+                kmVec3Add(&out, &out, &temp);
+            }
+        }
+        renderPos[i*3] = out.x;
+        renderPos[i*3+1] = out.y;
+        renderPos[i*3+2] = out.z;
+    }
 }
 
 void CCSprite3D::rotateX(float deg) {
@@ -269,15 +334,18 @@ void CCSprite3D::stdTransform() {
     kmMat4Multiply(&matrixMV, &matrixMV, &rotz);
 
     //矩阵缩放各个维度  0 0 0 默认的 0 0 0 坐标在 -200 x方向 -140 y 方向 -415 z 方向
-    printf("matrixMV\n");
-    printMat4(&matrixMV);
+    
+    //printf("matrixMV\n");
+    //printMat4(&matrixMV);
+    
     //顶点位置 再做变换最后做还是再之前做
     //先做 局部骨骼旋转 接着做 MV 变换
 
     //先做本地变动接着 做骨骼变动 这样 本地变动就在局部空间进行了
     kmMat4Multiply(&matrixMV, &boneMat, &matrixMV);
-    printf("mmv bone\n");
-    printMat4(&matrixMV);
+    
+    //printf("mmv bone\n");
+    //printMat4(&matrixMV);
 
 
     kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);
@@ -341,12 +409,12 @@ void CCSprite3D::draw() {
     //1号槽位置 对应 shader 中的normalmap
     if(pNor != NULL) {
         ccGLBindTexture2DN(1, pNor->getName());
+        //enable normal array
+        glEnableVertexAttribArray(3);
     }
 
-    //enable normal array
-    glEnableVertexAttribArray(3);
 
-    glVertexAttribPointer(kCCVertexAttrib_Position, 3, GL_FLOAT, GL_FALSE, 0, &pos[0]);
+    glVertexAttribPointer(kCCVertexAttrib_Position, 3, GL_FLOAT, GL_FALSE, 0, &renderPos[0]);
     if (pTex != NULL)
     {
         // texCoods
@@ -354,13 +422,59 @@ void CCSprite3D::draw() {
     }
     //暂时不要颜色
     //glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, &col[0]);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, &normal[0]);
+    if(pNor != NULL) {
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, &normal[0]);
+    }
 
-    glDrawElements(GL_TRIANGLES, index.size(), GL_UNSIGNED_INT, &index[0]);
+    if(inPoint) {
+        glDrawElements(GL_POINTS, pointInd.size(), GL_UNSIGNED_INT, &pointInd[0]);
+        //glPointSize(10);
+        //glDrawArrays(GL_POINTS, 0, 4);
+    }else if(inLine) {
+        glDrawElements(GL_LINES, lineInd.size(), GL_UNSIGNED_INT, &lineInd[0]);
+    } else {
+        glDrawElements(GL_TRIANGLES, index.size(), GL_UNSIGNED_INT, &index[0]);
+    }
     
     CCDirector::sharedDirector()->setDepthTest(false);
     glEnable(GL_BLEND);
 }
+
+void CCSprite3D::loadData(const char *vert, const char *face, const char *boned) {
+    unsigned long size;
+    unsigned char *fcon = CCFileUtils::sharedFileUtils()->getFileData(vert, "rb", &size);
+    readVert(fcon, &pos, &wv);
+    delete fcon;
+
+    fcon = CCFileUtils::sharedFileUtils()->getFileData(face, "rb", &size);
+    readFace(fcon, &index);
+    delete fcon;
+
+    fcon = CCFileUtils::sharedFileUtils()->getFileData(boned, "rb", &size);
+    readBone(fcon, &bone);
+    delete fcon;
+
+    allBoneMat.resize(bone.size());
+    initRenderPos();
+    
+    //当前骨骼状态 的逆 用于标注骨骼的默认姿态
+    for(int i=0; i < bone.size(); i++) {
+        kmMat4 mat;
+        //offset set 接着 rotate
+        kmMat4RotationQuaternion(&mat, &bone[i].rotate);
+        mat.mat[12] = bone[i].offset.x;
+        mat.mat[13] = bone[i].offset.y;
+        mat.mat[14] = bone[i].offset.z;
+        kmMat4Inverse(&mat, &mat);
+        invBoneMat.push_back(mat);
+    }
+}
+
+void CCSprite3D::initRenderPos() {
+    renderPos = pos;
+}
+
+
 void CCSprite3D::loadMd2(const char *fileName) {
     unsigned long size;
     unsigned char *fcon = CCFileUtils::sharedFileUtils()->getFileData(fileName, "rb", &size);
