@@ -227,6 +227,12 @@ void CCSprite3D::update(float diff) {
     //kmQuaternionRotationAxis(&bone[0].rotate, &axis, kmDegreesToRadians(35*sin(kmPI*passTime)));
     //kmQuaternionRotationAxis(&bone[1].rotate, &axis, kmDegreesToRadians(45*passTime));
     
+    float rate = (sin(kmPI*passTime)+1.0)/2;
+    //旋转圆插值
+    kmQuaternion inter;
+    kmQuaternionSlerp(&inter, &(keyFrames[0].bones[0].rotate), &(keyFrames[1].bones[0].rotate), rate);
+    kmQuaternionAssign(&bone[0].rotate, &inter);
+    
     //变换 root 骨骼 parent = -1
     kmMat4 curMat;
     kmMat4Identity(&curMat);
@@ -440,7 +446,7 @@ void CCSprite3D::draw() {
     glEnable(GL_BLEND);
 }
 
-void CCSprite3D::loadData(const char *vert, const char *face, const char *boned) {
+void CCSprite3D::loadData(const char *vert, const char *face, const char *boned, const char *ani) {
     unsigned long size;
     unsigned char *fcon = CCFileUtils::sharedFileUtils()->getFileData(vert, "rb", &size);
     readVert(fcon, &pos, &wv);
@@ -452,6 +458,10 @@ void CCSprite3D::loadData(const char *vert, const char *face, const char *boned)
 
     fcon = CCFileUtils::sharedFileUtils()->getFileData(boned, "rb", &size);
     readBone(fcon, &bone);
+    delete fcon;
+
+    fcon = CCFileUtils::sharedFileUtils()->getFileData(ani, "rb", &size);
+    readAni(fcon, &keyFrames);
     delete fcon;
 
     allBoneMat.resize(bone.size());

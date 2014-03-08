@@ -8,5 +8,6 @@ struct VertexWeight;
 using namespace std;
 void readVert(unsigned char *con, vector<float> *pos, vector<VertexWeight> *wv);
 void readFace(unsigned char *con, vector<unsigned int> *ind);
-void readBone(unsigned char *con, vector<Bone> *bone);
+unsigned char* readBone(unsigned char *con, vector<Bone> *bone);
+void readAni(unsigned char *con, vector<KeyframeData > *key);
 #endif

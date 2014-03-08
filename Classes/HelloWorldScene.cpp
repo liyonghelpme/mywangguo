@@ -189,7 +189,7 @@ bool HelloWorld::init()
 
     rb1 = CCSprite3D::create();
     //rb1->loadMd2("test2.md2");
-    rb1->loadData("vert.dat", "face.dat", "bone.dat");
+    rb1->loadData("vert.dat", "face.dat", "bone.dat", "ani.dat");
     rb1->generateLine();
     //rb1->generatePoint();
     
@@ -209,7 +209,8 @@ bool HelloWorld::init()
     rb1->scaleY(50);
     rb1->scaleZ(50);
 
-    //rb1->rotateY(45);
+    rb1->rotateY(90);
+    
     /*
     rb2 = CCSprite3D::create();
     rb2->loadMd2("test2.md2");

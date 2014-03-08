@@ -84,7 +84,66 @@ void dumpBoneData(vector<Bone> *bone) {
         CCLog("rotate", (*bone)[i].rotate.x);
     }
 }
-void readBone(unsigned char *con, vector<Bone> *bone) {
+void scanLine(unsigned char **con, char *fmt, ...) {
+    va_list argptr;
+    va_start(argptr, fmt);
+    vsscanf((char*)*con, fmt, argptr);
+    va_end(argptr);
+    *con = readLine(*con);
+}
+
+void dumpAniData(vector<KeyframeData> *key) {
+    CCLog("ani");
+    for(int i = 0; i < key->size(); i++) {
+        CCLog("%d", (*key)[i].fnum);
+        for(int j = 0; j < (*key)[i].bones.size(); j++) {
+            CCLog("%f", (*key)[i].bones[j].rotate.x);
+        }
+    }
+}
+//读取动画数据
+void readAni(unsigned char *con, vector<KeyframeData > *key) {
+    int anum;
+    scanLine(&con, "%d", &anum);    
+    //动画数量
+    for(int i = 0; i < anum; i++) {
+        KeyframeData kd;
+        key->push_back(kd);
+    
+        KeyframeData *pk = &(key->back());
+        scanLine(&con, "%d", &pk->fnum);
+        int bnum;
+        scanLine(&con, "%d", &bnum);
+        //每阵的骨骼数量
+        for(int j=0; j < bnum; j++) {
+            float x, y, z, w;
+            scanLine(&con, "%f %f %f %f", &x, &y, &z, &w);
+            float len;
+            scanLine(&con, "%f", &len);
+            float ox, oy, oz;
+            scanLine(&con, "%f %f %f", &ox, &oy, &oz);
+            int parent;
+            scanLine(&con, "%d", &parent);
+            
+            Bone b;
+            b.rotate.x = x;
+            b.rotate.y = y;
+            b.rotate.z = z;
+            b.rotate.w = w;
+            b.length = len;
+            kmVec3Fill(&b.offset, ox, oy, oz);
+            b.parent = parent;
+            b.setChild();
+            kmMat4Identity(&b.mat);
+            b.id = i;
+            //写入骨骼中
+            pk->bones.push_back(b);
+        }
+    }
+    dumpAniData(key);
+}
+
+unsigned char* readBone(unsigned char *con, vector<Bone> *bone) {
     int bnum;
     sscanf((char*)con, "%d", &bnum);
     con = readLine(con);
@@ -131,6 +190,7 @@ void readBone(unsigned char *con, vector<Bone> *bone) {
             pb->child[i] = it->second[i];
         }
     }
+    return con;
 }
 
 

@@ -25,10 +25,12 @@ public:
 
 };
 
-class Keyframe {
+//骨骼的keyFrameData
+//多少keyFrame
+class KeyframeData {
 public:
     int fnum;
-    kmQuaternion rotate;
+    vector<Bone> bones;
 };
 
 

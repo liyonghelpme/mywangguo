@@ -17,7 +17,7 @@ void printMat4(kmMat4 *mat) {
 //当前骨骼的矩阵
 void setBoneMatrix(Bone *root, vector<Bone> *allBone, kmMat4 *curMat) {
     kmMat4 rot;
-    printf("boneId %d\n", root->id);
+    //printf("boneId %d\n", root->id);
     kmMat4RotationQuaternion(&rot, &root->rotate);
     //局部空间先平移 接着旋转 
     rot.mat[12] = root->offset.x;
@@ -25,7 +25,7 @@ void setBoneMatrix(Bone *root, vector<Bone> *allBone, kmMat4 *curMat) {
     rot.mat[14] = root->offset.z;
 
     kmMat4Multiply(&root->mat, curMat, &rot);
-    printMat4(&root->mat);
+    //printMat4(&root->mat);
     
     kmMat4 nextCur;
     kmMat4 temp;

@@ -91,7 +91,7 @@ public:
     void scaleZ(float z);
 
     virtual void loadMd2(const char *fileName);
-    void loadData(const char *vert, const char *face, const char *bone);
+    void loadData(const char *vert, const char *face, const char *bone, const char*ani);
     virtual void update(float);
     
     /** 
@@ -138,6 +138,8 @@ protected:
 
     vector<float> normal;
     vector<float> renderPos;
+
+    vector<KeyframeData> keyFrames;
 
     vector<Bone> bone;
     vector<VertexWeight> wv;
