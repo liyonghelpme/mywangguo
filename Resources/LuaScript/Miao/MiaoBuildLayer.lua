@@ -67,6 +67,7 @@ function MiaoBuildLayer:update(diff)
 
     if self.needInit and self.initEnvYet then
         if coroutine.status(self.coroutine) ~= 'dead' then
+            print("beginInitBuild")
             print("init build")
             coroutine.resume(self.coroutine, self)
         --dead then init other

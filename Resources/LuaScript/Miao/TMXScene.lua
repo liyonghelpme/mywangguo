@@ -27,6 +27,7 @@ end
 
 function TMXScene:ctor()
     self.name = "TMXScene"
+    self.initDataing = true
     self.bg = CCScene:create()
 
     --init UI PIC
@@ -164,7 +165,6 @@ function TMXScene:initData(rep, param)
         Logic.skill[v.id] = v
     end
 
-    self.initDataing = true
 
     print("start init Menu")
     self.menu:initDataOver()
@@ -178,6 +178,7 @@ end
 
 --建筑物初始化结束后调用
 function TMXScene:afterInitBuild()
+    print("afterInitBuild")
     --初始化斜坡
     self.page:initInvisibleSlope()
     --遮挡斜坡
@@ -336,7 +337,9 @@ function TMXScene:update(diff)
             end
             addBanner("研究"..edata.name.."成功")
             table.remove(Logic.researchGoods, Logic.inResearch[1])
+            Logic.researchGoodsDirty = true
             table.insert(Logic.ownGoods, resG)
+            Logic.ownGoodsDirty = true
             Logic.inResearch = nil
             initResearchEquip()
         end
@@ -359,9 +362,10 @@ function TMXScene:saveGame(hint)
             if DEBUG_BUILD then
                 table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, lifeStage=k.lifeStage, dir=k.dir})
             else
-                if k.dirty then
-                    table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, k.lifeStage, k.dir, k.id})
-                    k.dirty = false
+                --保存建筑物信息
+                if k.builddirty then
+                    table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, math.floor(k.lifeStage), k.dir, k.id})
+                    k.builddirty = false
                 end
             end
         end
@@ -403,7 +407,7 @@ function TMXScene:saveGame(hint)
             if DEBUG_BUILD then
                 table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health, level=k.level, weapon=k.weapon, head=k.head, body=k.body, spe=k.spe})
             else
-                table.insert(allPeople, {k.pid, k.id, p[1], p[2], hid, k.health, k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
+                table.insert(allPeople, {k.pid, k.id, math.floor(p[1]), math.floor(p[2]), hid, math.floor(k.health), k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
             end
         end
     end
@@ -448,7 +452,16 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("resource", Logic.resource)
     --数字作为key的 dict 不能转化成json格式 所以先转化成一个 table
     --压缩了的数据直接采用二进制存储
-    u:setStringForKey("researchData", {researchGoods=Logic.researchGoods, inResearch=(Logic.inResearch or simple.null), ownGoods=Logic.ownGoods})
+    local rd = {inResearch=(Logic.inResearch or simple.null)}
+    if Logic.researchGoodsDirty then
+        Logic.researchGoodsDirty = false
+        rd['researchGoods'] = Logic.researchGoods
+    end
+    if Logic.ownGoodsDirty then
+        Logic.ownGoodsDirty = false
+        rd['ownGoods'] = Logic.ownGoods
+    end
+    u:setStringForKey("researchData", rd)
     --只有训练了士兵才同步士兵
     if Logic.soldierDirty then
         u:setStringForKey("soldiers", Logic.soldiers)
@@ -473,7 +486,7 @@ function TMXScene:saveGame(hint)
         u:setStringForKey("catData", cd) 
     end
 
-    u:setStringForKey("date", Logic.date) 
+    u:setStringForKey("date", math.floor(Logic.date)) 
     if Logic.curVillageDirty then
         Logic.curVillageDirty = false
         u:setStringForKey("curVillage", Logic.curVillage) 
@@ -484,11 +497,17 @@ function TMXScene:saveGame(hint)
         Logic.ownPeopleDirty = false
         u:setStringForKey("ownPeople", Logic.ownPeople) 
     end
-    u:setStringForKey("ownBuild", Logic.ownBuild) 
+    if Logic.ownBuildDirty then
+        Logic.ownBuildDirty = false
+        u:setStringForKey("ownBuild", Logic.ownBuild) 
+    end
+
     --转化成research 的操作而不是单纯的同步数据
     u:setStringForKey("fightNum", Logic.fightNum) 
     u:setStringForKey("arenaLevel", Logic.arenaLevel) 
-    u:setStringForKey("ownTech", Logic.ownTech) 
+    if Logic.ownTechDirty then
+        u:setStringForKey("ownTech", Logic.ownTech) 
+    end
     u:setStringForKey("lastArenaTime", Logic.lastArenaTime) 
     u:setStringForKey("landBook", Logic.landBook) 
     u:setStringForKey("showMapYet", Logic.showMapYet) 
@@ -509,15 +528,33 @@ function TMXScene:saveGame(hint)
     function u2:setStringForKey(k, v)
         dt[k] = v
     end
-    u2:setStringForKey("holdNum", dictToTable(Logic.holdNum))
-    u2:setStringForKey("buildNum", dictToTable(Logic.buildNum))
-    u2:setStringForKey("ownCity", dictToTable(Logic.ownCity)) 
-    u2:setStringForKey("openMap", dictToTable(Logic.openMap))
+    local hold = {}
+    for k, v in pairs(Logic.changedHold) do
+        table.insert(hold, {k, Logic.holdNum[k]})
+    end
+    --u2:setStringForKey("holdNum", dictToTable(Logic.holdNum))
+
+    if Logic.buildNumDirty then
+        Logic.buildNumDirty = false
+        u2:setStringForKey("buildNum", dictToTable(Logic.buildNum))
+    end
+    if Logic.ownCityDirty then
+        Logic.ownCityDirty = false
+        u2:setStringForKey("ownCity", dictArray(Logic.ownCity)) 
+    end
+
+    if Logic.openMapDirty then
+        u2:setStringForKey("openMap", dictArray(Logic.openMap))
+        Logic.openMapDirty = false
+    end
     u2:setStringForKey("showLand", dictToTable(Logic.showLand))
-    u2:setStringForKey("ownVillage", dictToTable(Logic.ownVillage)) 
+    if Logic.ownVillageDirty then
+        Logic.ownVillageDirty = false
+        u2:setStringForKey("ownVillage", dictArray(Logic.ownVillage)) 
+    end
 
     print("inResearchData", simple.encode(os))
-    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allSellBuild=simple.encode(allSellBuild), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt)})
+    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allSellBuild=simple.encode(allSellBuild), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt), holdNum=simple.encode(hold)})
 
 end
 

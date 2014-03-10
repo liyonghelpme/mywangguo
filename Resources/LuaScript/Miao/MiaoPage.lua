@@ -396,6 +396,7 @@ function MiaoPage:restoreBuildAndMap()
     local lastV = Logic.curVillage-1
     --8 10 9
     Logic.openMap[Logic.villageBlock[lastV]] = true
+    Logic.openMapDirty = true
     local landId = Logic.villageBlock[lastV]
 
     local nm = {}
@@ -580,6 +581,7 @@ function MiaoPage:onLand(p)
 
         Logic.landBook = Logic.landBook-1
         Logic.openMap[landId] = true
+        Logic.openMapDirty = true
         --去掉地面的 遮罩
         local nm = {}
         for k, v in ipairs(self.allMask) do
@@ -923,6 +925,7 @@ function MiaoPage:onExtendLand2(p)
 
         Logic.landBook = Logic.landBook-1
         Logic.openMap[landId] = true
+        Logic.openMapDirty = true
         --去掉地面的 遮罩
         local nm = {}
         for k, v in ipairs(self.allMask) do
@@ -1493,6 +1496,8 @@ function MiaoPage:cancelBuild()
         global.director.curScene.menu:finishBuild()
     end
 end
+
+--完成建筑物建造
 function MiaoPage:finishBuild()
     if self.curBuild ~= nil then
         self.buildLayer:adjustLayer(self.curBuild)
@@ -1510,26 +1515,8 @@ function MiaoPage:finishBuild()
         local oldBuild = self.curBuild
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         --桥梁建河流上
-        --[[
-        if self.curBuild.picName == 'build' and self.curBuild.id == 3 then
-            --桥梁没有冲突
-            if self.curBuild.colNow == 0 then
-                self.curBuild:finishBuild()
-                self.curBuild = nil
-            else
-                if type(self.curBuild.otherBuild) == 'table' then
-                    --地形河流
-                    if self.curBuild.otherBuild.picName == 's' then
-                        self.curBuild:finishBuild()
-                        self.curBuild = nil
-                    else
-                        addBanner("和其它建筑物冲突啦！")
-                    end
-                end
-            end
-        else
-        --]]
         self.curBuild:finishBuild()
+        --table.insert(Logic.newBuild, self.curBuild)
         self.curBuild = nil
         --end
 

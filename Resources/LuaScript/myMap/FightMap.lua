@@ -50,6 +50,7 @@ function FightMap:checkWin()
                 --出现在商店里面
                 if reward[4] then
                     table.insert(Logic.ownGoods, {0, reward[2]})
+                    Logic.ownGoodsDirty = true
                 end
                 --持有数量增加
                 changeEquip(reward[2], reward[3])
@@ -109,12 +110,14 @@ function FightMap:checkWin()
                     for tk, tv in pairs(Logic.techId) do
                         if tv == v then
                             Logic.ownTech[tk] = Logic.ownTech[tk]+1
+                            Logic.ownTechDirty = true
                             addBanner("技能书获得"..edata.name.."lv"..Logic.ownTech[tk])
                             local eq = checkTechNewEquip(tk, Logic.ownTech[tk])
                             for ek, ev in ipairs(eq) do
                                 local equipData = Logic.equip[ev]
                                 addBanner("可以研究新的物品了"..equipData.name)
                                 table.insert(Logic.researchGoods, {0, ev})
+                                Logic.researchGoodsDirty = true
                             end
                             findTech = true
                             break
@@ -156,6 +159,7 @@ function FightMap:checkWin()
         elseif city.kind == 4 then
             Logic.ownCity[Logic.challengeCity] = nil
             Logic.ownVillage[Logic.challengeCity] = true
+            Logic.ownVillageDirty = true
             local cp = Logic.villagePeople[city.realId]
             if cp ~= nil then
                 addNewPeople(cp)
@@ -184,12 +188,14 @@ function FightMap:checkWin()
                     for tk, tv in pairs(Logic.techId) do
                         if tv == v then
                             Logic.ownTech[tk] = Logic.ownTech[tk]+1
+                            Logic.ownTechDirty = true
                             addBanner("技能书获得"..edata.name.."lv"..Logic.ownTech[tk])
                             local eq = checkTechNewEquip(tk, Logic.ownTech[tk])
                             for ek, ev in ipairs(eq) do
                                 local equipData = Logic.equip[ev]
                                 addBanner("可以研究新的物品了"..equipData.name)
                                 table.insert(Logic.researchGoods, {0, ev})
+                                Logic.researchGoodsDirty = true
                             end
                             findTech = true
                             break

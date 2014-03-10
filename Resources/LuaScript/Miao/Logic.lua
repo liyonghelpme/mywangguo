@@ -25,8 +25,13 @@ Logic.allSpe = {}
 Logic.skill = {}
 Logic.allSkill = {}
 
+
+
 --持有武器的数量
 Logic.holdNum = {}
+--保存变更了数量的装备的列表
+Logic.changedHold = {}
+
 --购买的装备数量 = 装备的 和 持有的
 Logic.buyNum = {}
 
@@ -34,12 +39,17 @@ Logic.buyNum = {}
 
 --待研究的物品 类型 id
 --0 装备 物品id
+--31 装备 
 Logic.researchGoods = {
     --{0, 2}, {0, 3}, {0, 11},
 }
+Logic.researchGoodsDirty = false
 
+--新插入的建造的建筑物
+Logic.newBuild = {}
 --当前卖出的建筑物
 Logic.sellBuild = {}
+
 
 --正在研究的物品
 --researchGoodsNum time
@@ -64,6 +74,8 @@ Logic.ownGoods = {
     {0, 67}, 
     --{0, 68},
 }
+Logic.ownGoodsDirty = false
+
 --[[
 Logic.allOwnBuild = {
 
@@ -95,15 +107,17 @@ end
 --保存游戏
 --树木的 数量 和 坑道的数量
 --树木根据 land数量来增加
+--7 个装饰的数量 和 树木 矿洞的数量
 Logic.buildNum = {
     [24]=0,
     [28]=0,
     [29]=0,
 }
-
+Logic.buildNumDirty = false
 
 function changeBuildNum(id, n)
     Logic.buildNum[id] = (Logic.buildNum[id] or 0)+n
+    Logic.buildNumDirty = true
 end
 
 function getBuyPrice(id)
@@ -322,6 +336,7 @@ end
 
 function changeEquip(id, num)
     Logic.holdNum[id] = (Logic.holdNum[id] or 0)+num
+    Logic.changedHold[id] = true
 end
 
 
@@ -412,6 +427,7 @@ function updateSellNum(k, n)
         --研究对话框 里面显示这个物品
         if not find then
             table.insert(Logic.researchGoods, {1, k+1})
+            Logic.researchGoodsDirty = true
             addBanner(ng.name.."可以研究了")
         end
     end
@@ -568,11 +584,14 @@ Logic.cityNum = {}
 
 --占领的城市
 Logic.ownCity = {}
+Logic.ownCityDirty = false
+
 --挑战竞技场胜利
 Logic.winArena = false
 
 --占领的村落
 Logic.ownVillage = {}
+Logic.ownVillageDirty = false
 
 --退出Fight 场景之后 Map 上面提示奖励
 function winCity()
@@ -582,8 +601,14 @@ function winCity()
         --挑战 竞技场 kind = 0
         if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
             Logic.winArena = true
+        --城堡或者 村落
         else
-            Logic.ownCity[Logic.challengeCity] = true
+            local cdata = MapNode[Logic.challengeCity]
+            --城堡记录数据
+            if cdata[4] == 1 then 
+                Logic.ownCity[Logic.challengeCity] = true
+                Logic.ownCityDirty = true
+            end
         end
     end
     --table.insert(Logic.ownCity, Logic.challengeCity)
@@ -693,6 +718,8 @@ bow=0,
 armour=0,
 ninja=0,
 }
+Logic.ownTechDirty = false
+
 Logic.techId = {
 sword=40,
 spear=41,
@@ -798,6 +825,8 @@ Logic.curVillageDirty = false
 
 --开放的地图
 Logic.openMap = {}
+Logic.openMapDirty = false
+
 Logic.gameStage = 1
 Logic.showMapYet = false
 
@@ -873,6 +902,7 @@ Logic.showLand = {
 
 
 Logic.initYet = false
+--only for Test
 local function initData(rep, param)
     initCityData()
     print("initData", rep, param)

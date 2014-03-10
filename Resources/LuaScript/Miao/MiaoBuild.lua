@@ -41,7 +41,8 @@ end
 
 function MiaoBuild:setDirty()
     if not global.director.curScene.initDataing then
-        self.dirty = true
+        print("setDirty", self.bid, self.id, global.director.curScene.initDataing)
+        self.builddirty = true
     end
 end
 
@@ -430,6 +431,7 @@ function MiaoBuild:beginBuild()
 end
 
 --缓存affine 坐标
+--获得建筑物的 ax ay 缓存信息
 function MiaoBuild:getAxAyHeight()
     if self.ax == nil then
         local pos = getPos(self.bg)
@@ -593,6 +595,8 @@ function MiaoBuild:checkRiverOrSlopeCol()
     --河流 和 斜坡之前首先 判定 是否在可建造的范围内
     --超出可建造边界
     --初始化建筑物的 时候 不检测
+    print("curScene init?", global.director.curScene.initDataing)
+    print('curScene name', global.director.curScene.name)
     if not global.director.curScene.initDataing then
         --addBanner("check game stage 1 collision", Logic.gameStage)
         local allBlock = self.map.scene.block
@@ -784,8 +788,10 @@ function MiaoBuild:enterScene()
 end
 function MiaoBuild:exitScene()
 end
+
 --道路显示的图层Layer 在 建筑物 和 人物的下面
-function MiaoBuild:setPos(p)
+--变换位置 dirty的可能性更大
+function MiaoBuild:setPos(p, noDirty)
     local curPos = p
     local zord = MAX_BUILD_ZORD-curPos[2]
 
@@ -804,7 +810,11 @@ function MiaoBuild:setPos(p)
     if self.roadNode ~= nil then
         setPos(self.roadNode, p)
     end
-    self:setDirty()
+
+    if not noDirty then
+        print("setPos set")
+        self:setDirty()
+    end
 end
 --建造花坛 拆除花坛影响周围建筑属性 
 --增加的量 根据 对象 以及距离 决定
@@ -1046,8 +1056,11 @@ function MiaoBuild:checkRoadConnect()
                 end
             end
         end
+        --检测建筑物是否和 道路相联通 如果相联通 为什么要重设定建筑物的位置呢？
+        --重设建筑物的 坐标 但是不更新
         local p = getPos(self.bg)
-        self:setPos(p)
+        --self:resetPos(p)
+        self:setPos(p, true)
     end
 end
 

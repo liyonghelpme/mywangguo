@@ -201,6 +201,7 @@ function FuncBuild:setPos(p)
     self:adjustHeight()
 end
 
+--调整建筑物的高度在哪里调整
 function FuncBuild:adjustHeight()
     local p = getPos(self.baseBuild.bg)
     local ax, ay = newCartesianToAffine(p[1], p[2], self.baseBuild.map.scene.width, self.baseBuild.map.scene.height, MapWidth/2, FIX_HEIGHT)
