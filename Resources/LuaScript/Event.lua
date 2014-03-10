@@ -38,3 +38,12 @@ function Event:sendMsg(name, msg)
         end
     end
 end
+
+function Event.cppMsg(event, eventParam)
+    if Event.callbacks[event] ~= nil then
+        for k, v in pairs(Event.callbacks[event]) do
+            k:receiveMsg(event)
+        end
+    end
+end
+

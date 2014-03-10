@@ -59,7 +59,10 @@ local function main()
     --global.director:runWithScene(TestMenu.new())
     
     --global.director:runWithScene(MapScene.new())
-
+    local allMsg = {"EVENT_COCOS_PAUSE", "EVENT_COCOS_RESUME"}
+    for k, v in ipairs(allMsg) do
+        CCNotificationCenter:sharedNotificationCenter():registerScriptObserver(CCNotificationCenter:sharedNotificationCenter(), Event.cppMsg, v)
+    end
 end
 
 xpcall(main, __G__TRACKBACK__)

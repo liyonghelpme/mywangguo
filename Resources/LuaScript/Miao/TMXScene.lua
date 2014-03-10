@@ -58,6 +58,7 @@ function TMXScene:ctor()
     self.bg:addChild(self.dialogController.bg)
 
 
+    self.events = {"EVENT_COCOS_PAUSE"}
     registerEnterOrExit(self)
     self.passTime = 0
     self.checkTime = 0
@@ -65,6 +66,11 @@ function TMXScene:ctor()
     self.debugTime = 0
 
     initCityData()
+end
+function TMXScene:receiveMsg(name, msg)
+    if name == 'EVENT_COCOS_PAUSE' then
+        self:saveGame(true)
+    end
 end
 
 --分步初始化 每帧率初始化一个 建筑物
@@ -353,6 +359,8 @@ end
 --普通建筑物 和 环境
 --保存道路
 function TMXScene:saveGame(hint)
+    --更新保存时间
+    self.passTime = 0
     local allBuild = {}
     --bug： allRoad 似乎没有生效
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do

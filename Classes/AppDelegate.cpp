@@ -142,6 +142,7 @@ void AppDelegate::applicationDidEnterBackground()
 {
     CCDirector::sharedDirector()->stopAnimation();
     SimpleAudioEngine::sharedEngine()->pauseBackgroundMusic();
+	CCNotificationCenter::sharedNotificationCenter()->postNotification("EVENT_COCOS_PAUSE");
 }
 
 // this function will be called when the app is active again
@@ -149,4 +150,5 @@ void AppDelegate::applicationWillEnterForeground()
 {
     CCDirector::sharedDirector()->startAnimation();
     SimpleAudioEngine::sharedEngine()->resumeBackgroundMusic();
+	CCNotificationCenter::sharedNotificationCenter()->postNotification("EVENT_COCOS_RESUME");
 }
