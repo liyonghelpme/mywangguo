@@ -89,7 +89,7 @@ function MiaoBuild:ctor(m, data)
     self.dirty = false
     self.data = Logic.buildings[self.id]
     --记录开始生长的时间
-    self.lifeStage = data.lifeStage or 0
+    self.lifeStage = data.lifeStage or Logic.date
     --篱笆数据
     print("buildkind", self.id, self.data)
     if self.data ~= nil then

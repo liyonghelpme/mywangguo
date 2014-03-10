@@ -30,14 +30,17 @@ function Wood:initView()
 end
 --砍伐结束 阶段 = 0
 --降低建筑物更新频率
+--lifeStage  用于下次进入游戏的时候显示当前的状态是多少
+--当前的建筑物时间即可
 function Wood:updateStage(diff)
     self.lastTime = self.lastTime+diff
     if self.lastTime > 1 then
         if self.baseBuild.state == BUILD_STATE.FREE then
-            self.baseBuild.lifeStage = self.baseBuild.lifeStage+diff
-            self.baseBuild:setDirty()
+            local passTime = Logic.date - self.baseBuild.lifeStage
+            --self.baseBuild.lifeStage = self.baseBuild.lifeStage+diff
+            --self.baseBuild:setDirty()
             --4 个阶段 每8s 一个阶段
-            local s = math.floor(self.baseBuild.lifeStage/8)
+            local s = math.floor(passTime/8)
             s = math.min(s, 3)
             if s ~= self.showState then
                 self.showState = s
@@ -61,7 +64,7 @@ end
 function Wood:updateGoods()
     if self.baseBuild.workNum == 0 then
         self.showState = -1
-        self.baseBuild.lifeStage = 0
+        self.baseBuild.lifeStage = Logic.date
         self.baseBuild:setDirty()
     end
 

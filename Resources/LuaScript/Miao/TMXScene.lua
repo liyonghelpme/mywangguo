@@ -498,7 +498,10 @@ function TMXScene:saveGame(hint)
         table.insert(at, {v['id'], v['pos']})
     end
     --]]
-    u:setStringForKey("attendHero", Logic.attendHero)
+    if Logic.attendHeroDirty then
+        Logic.attendHeroDirty = false
+        u:setStringForKey("attendHero", Logic.attendHero)
+    end
 
 
     local u2 = {}

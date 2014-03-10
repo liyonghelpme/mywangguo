@@ -788,6 +788,10 @@ Logic.landBook = 0
 --{id=xx, pos=xx}
 Logic.attendHero = {
 }
+Logic.attendHeroDirty = false
+function updateAttend()
+    Logic.attendHeroDirty = true
+end
 
 Logic.curVillage = 1
 Logic.curVillageDirty = false
