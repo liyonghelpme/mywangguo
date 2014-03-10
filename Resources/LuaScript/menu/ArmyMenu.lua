@@ -90,6 +90,7 @@ function ArmyMenu:onLeft(p)
     word.pos = word.pos%3
     Logic.attendHero[p].pos = word.pos 
     word[4]:setString(n[word.pos+1])
+    updateAttend()
 end
 function ArmyMenu:onRight(p)
     local word = self.data[p]
@@ -98,6 +99,7 @@ function ArmyMenu:onRight(p)
     word.pos = word.pos%3
     Logic.attendHero[p].pos = word.pos 
     word[4]:setString(n[word.pos+1])
+    updateAttend()
 end
 
 function ArmyMenu:touchBegan(x, y)

@@ -151,11 +151,13 @@ function ChooseMenu:adjustAttend(t)
         for ak, av in ipairs(Logic.attendHero) do
             if av.id == t then
                 table.remove(Logic.attendHero, ak)
+                updateAttend()
                 break
             end
         end
     else
         table.insert(Logic.attendHero, {id=t, pos=0})
+        updateAttend()
     end
     setVisible(word.attend, not v)
 end

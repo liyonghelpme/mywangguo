@@ -1,6 +1,7 @@
 MapCity = class()
 function MapCity:ctor(s, data, cid, isV)
     self.scene = s
+    --x y isCity kind
     --0 竞技场
     self.kind = data[4] 
     --inkscape 中的id位置

@@ -1,5 +1,6 @@
 LoadingScene = class()
 function LoadingScene:ctor()
+    self.name = 'Loading'
     self.bg = CCScene:create()
     local u = CCUserDefault:sharedUserDefault()
     local username = u:getStringForKey("username")
@@ -16,9 +17,6 @@ function LoadingScene:ctor()
 
     local lab = ui.newTTFLabel({text="Loading...", size=25})
     setAnchor(setPos(addChild(self.bg, lab), {16, 768-743}), {0, 0.5})
-
-
-
 
     self.needUpdate = true
     registerEnterOrExit(self)
@@ -45,7 +43,12 @@ function LoadingScene:signin(rep, param)
         Logic.ownBuild = simple.decode(rep.user.ownBuild)
         --]]
         for k, v in pairs(rep.tableData) do
-            if type(v) ~= 'number' then
+            print("handle", k, v)
+            if k == 'holdNum' then
+                Logic[k] = tableToDict(v)
+            elseif k == 'openMap' or k == 'ownVillage' or k == 'ownCity' then
+                Logic[k] = arrayDict(simple.decode(v))
+            elseif type(v) ~= 'number' then
                 Logic[k] = tableToDict(simple.decode(v))
             end
         end
@@ -57,6 +60,7 @@ function LoadingScene:signin(rep, param)
                 Logic[k] = v
             end
         end
+
 
         if Logic.showMapYet == 0 then
             Logic.showMapYet = false

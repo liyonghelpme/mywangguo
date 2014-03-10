@@ -27,6 +27,7 @@ end
 
 function TMXScene:ctor()
     self.name = "TMXScene"
+    self.initDataing = true
     self.bg = CCScene:create()
 
     --init UI PIC
@@ -57,6 +58,7 @@ function TMXScene:ctor()
     self.bg:addChild(self.dialogController.bg)
 
 
+    self.events = {"EVENT_COCOS_PAUSE"}
     registerEnterOrExit(self)
     self.passTime = 0
     self.checkTime = 0
@@ -64,6 +66,11 @@ function TMXScene:ctor()
     self.debugTime = 0
 
     initCityData()
+end
+function TMXScene:receiveMsg(name, msg)
+    if name == 'EVENT_COCOS_PAUSE' then
+        self:saveGame(true)
+    end
 end
 
 --分步初始化 每帧率初始化一个 建筑物
@@ -164,7 +171,6 @@ function TMXScene:initData(rep, param)
         Logic.skill[v.id] = v
     end
 
-    self.initDataing = true
 
     print("start init Menu")
     self.menu:initDataOver()
@@ -178,6 +184,7 @@ end
 
 --建筑物初始化结束后调用
 function TMXScene:afterInitBuild()
+    print("afterInitBuild")
     --初始化斜坡
     self.page:initInvisibleSlope()
     --遮挡斜坡
@@ -218,6 +225,7 @@ function TMXScene:checkBattleTime(diff)
         local curPoint = lc.curPoint
         lc.moveTime = lc.moveTime - self.checkTime
         self.checkTime = 0
+        Logic.catDirty = true
 
         --cid 信息
         --cid inkScape 边关系中的id信息
@@ -335,7 +343,9 @@ function TMXScene:update(diff)
             end
             addBanner("研究"..edata.name.."成功")
             table.remove(Logic.researchGoods, Logic.inResearch[1])
+            Logic.researchGoodsDirty = true
             table.insert(Logic.ownGoods, resG)
+            Logic.ownGoodsDirty = true
             Logic.inResearch = nil
             initResearchEquip()
         end
@@ -349,6 +359,8 @@ end
 --普通建筑物 和 环境
 --保存道路
 function TMXScene:saveGame(hint)
+    --更新保存时间
+    self.passTime = 0
     local allBuild = {}
     --bug： allRoad 似乎没有生效
     for k, v in pairs(self.page.buildLayer.mapGridController.allBuildings) do
@@ -358,9 +370,10 @@ function TMXScene:saveGame(hint)
             if DEBUG_BUILD then
                 table.insert(allBuild, {picName=k.picName, id=k.id, px=p[1], py=p[2], bid=k.bid, goodsKind=k.goodsKind, workNum=k.workNum, static=k.static, lifeStage=k.lifeStage, dir=k.dir})
             else
-                if k.dirty then
-                    table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, k.lifeStage, k.dir, k.id})
-                    k.dirty = false
+                --保存建筑物信息
+                if k.builddirty then
+                    table.insert(allBuild, {k.bid, math.floor(p[1]), math.floor(p[2]), k.goodsKind or 0, k.workNum, math.floor(k.lifeStage), k.dir, k.id})
+                    k.builddirty = false
                 end
             end
         end
@@ -402,7 +415,7 @@ function TMXScene:saveGame(hint)
             if DEBUG_BUILD then
                 table.insert(allPeople, {px=p[1], py=p[2], hid=hid, id=k.id, health=k.health, level=k.level, weapon=k.weapon, head=k.head, body=k.body, spe=k.spe})
             else
-                table.insert(allPeople, {k.pid, k.id, p[1], p[2], hid, k.health, k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
+                table.insert(allPeople, {k.pid, k.id, math.floor(p[1]), math.floor(p[2]), hid, math.floor(k.health), k.level, (k.weapon or 0), (k.head or 0), (k.body or 0), (k.spe or 0)})
             end
         end
     end
@@ -447,9 +460,26 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("resource", Logic.resource)
     --数字作为key的 dict 不能转化成json格式 所以先转化成一个 table
     --压缩了的数据直接采用二进制存储
-    u:setStringForKey("researchData", {researchGoods=Logic.researchGoods, inResearch=(Logic.inResearch or simple.null), ownGoods=Logic.ownGoods})
-    u:setStringForKey("soldiers", Logic.soldiers)
-    u:setStringForKey("inSell", Logic.inSell)
+    local rd = {inResearch=(Logic.inResearch or simple.null)}
+    if Logic.researchGoodsDirty then
+        Logic.researchGoodsDirty = false
+        rd['researchGoods'] = Logic.researchGoods
+    end
+    if Logic.ownGoodsDirty then
+        Logic.ownGoodsDirty = false
+        rd['ownGoods'] = Logic.ownGoods
+    end
+    u:setStringForKey("researchData", rd)
+    --只有训练了士兵才同步士兵
+    if Logic.soldierDirty then
+        u:setStringForKey("soldiers", Logic.soldiers)
+        Logic.soldierDirty = false
+    end
+
+    if Logic.sellDirty then
+        u:setStringForKey("inSell", Logic.inSell)
+        Logic.sellDirty = false
+    end
 
     local cd
     if Logic.catData ~= nil then
@@ -458,35 +488,81 @@ function TMXScene:saveGame(hint)
     else
         cd = simple.null
     end
-    u:setStringForKey("catData", cd) 
-    u:setStringForKey("date", Logic.date) 
-    u:setStringForKey("curVillage", Logic.curVillage) 
+
+    if Logic.catDirty then
+        Logic.catDirty = false
+        u:setStringForKey("catData", cd) 
+    end
+
+    u:setStringForKey("date", math.floor(Logic.date)) 
+    if Logic.curVillageDirty then
+        Logic.curVillageDirty = false
+        u:setStringForKey("curVillage", Logic.curVillage) 
+    end
+
     u:setStringForKey("gameStage", Logic.gameStage) 
-    u:setStringForKey("ownPeople", Logic.ownPeople) 
-    u:setStringForKey("ownBuild", Logic.ownBuild) 
+    if Logic.ownPeopleDirty then
+        Logic.ownPeopleDirty = false
+        u:setStringForKey("ownPeople", Logic.ownPeople) 
+    end
+    if Logic.ownBuildDirty then
+        Logic.ownBuildDirty = false
+        u:setStringForKey("ownBuild", Logic.ownBuild) 
+    end
+
     --转化成research 的操作而不是单纯的同步数据
     u:setStringForKey("fightNum", Logic.fightNum) 
     u:setStringForKey("arenaLevel", Logic.arenaLevel) 
-    u:setStringForKey("ownTech", Logic.ownTech) 
+    if Logic.ownTechDirty then
+        u:setStringForKey("ownTech", Logic.ownTech) 
+    end
     u:setStringForKey("lastArenaTime", Logic.lastArenaTime) 
     u:setStringForKey("landBook", Logic.landBook) 
     u:setStringForKey("showMapYet", Logic.showMapYet) 
-    u:setStringForKey("attendHero", Logic.attendHero) 
+    --[[
+    local at = {}
+    for k, v in ipairs(Logic.attendHero) do
+        table.insert(at, {v['id'], v['pos']})
+    end
+    --]]
+    if Logic.attendHeroDirty then
+        Logic.attendHeroDirty = false
+        u:setStringForKey("attendHero", Logic.attendHero)
+    end
+
 
     local u2 = {}
     local dt = {}
     function u2:setStringForKey(k, v)
         dt[k] = v
     end
-    u2:setStringForKey("holdNum", dictToTable(Logic.holdNum))
-    u2:setStringForKey("buildNum", dictToTable(Logic.buildNum))
-    u2:setStringForKey("ownCity", dictToTable(Logic.ownCity)) 
-    u2:setStringForKey("openMap", dictToTable(Logic.openMap))
+    local hold = {}
+    for k, v in pairs(Logic.changedHold) do
+        table.insert(hold, {k, Logic.holdNum[k]})
+    end
+    --u2:setStringForKey("holdNum", dictToTable(Logic.holdNum))
+
+    if Logic.buildNumDirty then
+        Logic.buildNumDirty = false
+        u2:setStringForKey("buildNum", dictToTable(Logic.buildNum))
+    end
+    if Logic.ownCityDirty then
+        Logic.ownCityDirty = false
+        u2:setStringForKey("ownCity", dictArray(Logic.ownCity)) 
+    end
+
+    if Logic.openMapDirty then
+        u2:setStringForKey("openMap", dictArray(Logic.openMap))
+        Logic.openMapDirty = false
+    end
     u2:setStringForKey("showLand", dictToTable(Logic.showLand))
-    u2:setStringForKey("ownVillage", dictToTable(Logic.ownVillage)) 
+    if Logic.ownVillageDirty then
+        Logic.ownVillageDirty = false
+        u2:setStringForKey("ownVillage", dictArray(Logic.ownVillage)) 
+    end
 
     print("inResearchData", simple.encode(os))
-    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allSellBuild=simple.encode(allSellBuild), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt)})
+    sendReq("saveGame", {uid=Logic.uid, allBuild=simple.encode(allBuild), allRoad=simple.encode(allRoad), allSellBuild=simple.encode(allSellBuild), allPeople=simple.encode(allPeople), dirParams=simple.encode(os), indirParams=simple.encode(dt), holdNum=simple.encode(hold)})
 
 end
 
@@ -500,7 +576,7 @@ function TMXScene:newVillageWin(w)
         local cp = Logic.newPeople[Logic.curVillage+1]
         if cp ~= nil then
             print("newPeople is who", simple.encode(Logic.newPeople), cp)
-            Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+            addNewPeople(cp)
             --showPeopleInfo(cp)
             for k, v in ipairs(cp) do
                 local pd = Logic.people[v]
@@ -510,6 +586,7 @@ function TMXScene:newVillageWin(w)
 
 
         Logic.curVillage = Logic.curVillage+1
+        Logic.curVillageDirty = true
         if Logic.curVillage < 4 then
             self.page:adjustFly()
         --最后获得 工厂和商店
@@ -520,8 +597,8 @@ function TMXScene:newVillageWin(w)
             end
         else
             addBanner("获得工厂 和 茶屋")
-            table.insert(Logic.ownBuild, 5)
-            table.insert(Logic.ownBuild, 11)
+            addNewBuild(5)
+            addNewBuild(11)
             removeSelf(self.page.fly.bg)
         end
         self.page:restoreBuildAndMap()

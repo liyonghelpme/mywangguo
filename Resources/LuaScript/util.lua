@@ -1854,6 +1854,24 @@ function dictToTable(t)
     end
     return temp
 end
+
+function dictArray(t)
+    local temp = {}
+    for k, v in pairs(t) do
+        table.insert(temp, k)
+    end
+    return temp
+end
+
+function arrayDict(t)
+    local temp = {}
+    for k, v in ipairs(t) do
+        temp[v] = true
+    end
+    return temp
+end
+
+
 function tableToDict(t)
     local temp = {}
     for k, v in ipairs(t) do
