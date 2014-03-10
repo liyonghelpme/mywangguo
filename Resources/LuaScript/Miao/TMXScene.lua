@@ -218,6 +218,7 @@ function TMXScene:checkBattleTime(diff)
         local curPoint = lc.curPoint
         lc.moveTime = lc.moveTime - self.checkTime
         self.checkTime = 0
+        Logic.catDirty = true
 
         --cid 信息
         --cid inkScape 边关系中的id信息
@@ -448,8 +449,16 @@ function TMXScene:saveGame(hint)
     --数字作为key的 dict 不能转化成json格式 所以先转化成一个 table
     --压缩了的数据直接采用二进制存储
     u:setStringForKey("researchData", {researchGoods=Logic.researchGoods, inResearch=(Logic.inResearch or simple.null), ownGoods=Logic.ownGoods})
-    u:setStringForKey("soldiers", Logic.soldiers)
-    u:setStringForKey("inSell", Logic.inSell)
+    --只有训练了士兵才同步士兵
+    if Logic.soldierDirty then
+        u:setStringForKey("soldiers", Logic.soldiers)
+        Logic.soldierDirty = false
+    end
+
+    if Logic.sellDirty then
+        u:setStringForKey("inSell", Logic.inSell)
+        Logic.sellDirty = false
+    end
 
     local cd
     if Logic.catData ~= nil then
@@ -458,11 +467,23 @@ function TMXScene:saveGame(hint)
     else
         cd = simple.null
     end
-    u:setStringForKey("catData", cd) 
+
+    if Logic.catDirty then
+        Logic.catDirty = false
+        u:setStringForKey("catData", cd) 
+    end
+
     u:setStringForKey("date", Logic.date) 
-    u:setStringForKey("curVillage", Logic.curVillage) 
+    if Logic.curVillageDirty then
+        Logic.curVillageDirty = false
+        u:setStringForKey("curVillage", Logic.curVillage) 
+    end
+
     u:setStringForKey("gameStage", Logic.gameStage) 
-    u:setStringForKey("ownPeople", Logic.ownPeople) 
+    if Logic.ownPeopleDirty then
+        Logic.ownPeopleDirty = false
+        u:setStringForKey("ownPeople", Logic.ownPeople) 
+    end
     u:setStringForKey("ownBuild", Logic.ownBuild) 
     --转化成research 的操作而不是单纯的同步数据
     u:setStringForKey("fightNum", Logic.fightNum) 
@@ -471,7 +492,14 @@ function TMXScene:saveGame(hint)
     u:setStringForKey("lastArenaTime", Logic.lastArenaTime) 
     u:setStringForKey("landBook", Logic.landBook) 
     u:setStringForKey("showMapYet", Logic.showMapYet) 
-    u:setStringForKey("attendHero", Logic.attendHero) 
+    --[[
+    local at = {}
+    for k, v in ipairs(Logic.attendHero) do
+        table.insert(at, {v['id'], v['pos']})
+    end
+    --]]
+    u:setStringForKey("attendHero", Logic.attendHero)
+
 
     local u2 = {}
     local dt = {}
@@ -500,7 +528,7 @@ function TMXScene:newVillageWin(w)
         local cp = Logic.newPeople[Logic.curVillage+1]
         if cp ~= nil then
             print("newPeople is who", simple.encode(Logic.newPeople), cp)
-            Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+            addNewPeople(cp)
             --showPeopleInfo(cp)
             for k, v in ipairs(cp) do
                 local pd = Logic.people[v]
@@ -510,6 +538,7 @@ function TMXScene:newVillageWin(w)
 
 
         Logic.curVillage = Logic.curVillage+1
+        Logic.curVillageDirty = true
         if Logic.curVillage < 4 then
             self.page:adjustFly()
         --最后获得 工厂和商店
@@ -520,8 +549,8 @@ function TMXScene:newVillageWin(w)
             end
         else
             addBanner("获得工厂 和 茶屋")
-            table.insert(Logic.ownBuild, 5)
-            table.insert(Logic.ownBuild, 11)
+            addNewBuild(5)
+            addNewBuild(11)
             removeSelf(self.page.fly.bg)
         end
         self.page:restoreBuildAndMap()

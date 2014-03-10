@@ -373,6 +373,8 @@ Logic.soldiers = {
     [3] = {0, 0},
     [4] = {0, 0},
 }
+Logic.soldierDirty = false
+
 
 --每种商品卖出的数量
 --如果条件满足了 就显示可以卖出的物品了
@@ -451,6 +453,7 @@ Logic.inSell = {
     wood=true,
     stone=true,
 }
+Logic.sellDirty = false
 
 --[[
 SoldierAbility = {
@@ -502,8 +505,9 @@ end
 --根据 path 和 curPoint 计算方向
 --test CatData
 --Logic.catData = {pos={1186, 1227}, path={1, 2, 9}, curPoint=1, moveTime=2, cid=9}
---
+
 Logic.catData = nil
+Logic.catDirty = false
 
 
 --计算合战剩余时间
@@ -586,6 +590,7 @@ function winCity()
 end
 function clearFight()
     Logic.catData = nil
+    Logic.catDirty = true
 end
 
 function initCityData()
@@ -674,6 +679,11 @@ end
 --Logic.ownPeople = {11, 20, 21, 22, 23}
 --Logic.ownPeople = {14, 18, 20, 23}
 Logic.ownPeople = {}
+Logic.ownPeopleDirty = false
+function addNewPeople(cp)
+    Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+    Logic.ownPeopleDirty = true
+end
 
 Logic.ownTech = {
 sword=0,
@@ -763,6 +773,13 @@ Logic.ownBuild = {
     1, 2, 15, 
     4, 
 }
+Logic.ownBuildDirty = false
+
+function addNewBuild(b)
+    table.insert(Logic.ownBuild, b)
+    Logic.ownBuildDirty = true
+end
+
 
 Logic.lastArenaTime = 0
 
@@ -773,6 +790,8 @@ Logic.attendHero = {
 }
 
 Logic.curVillage = 1
+Logic.curVillageDirty = false
+
 --开放的地图
 Logic.openMap = {}
 Logic.gameStage = 1

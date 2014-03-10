@@ -63,7 +63,7 @@ function FightMap:checkWin()
                 else
                 end
             elseif reward[1] == 'build' then
-                table.insert(Logic.ownBuild, reward[2])
+                addNewBuild(reward[2])
                 local bd = Logic.buildings[reward[2]]
                 addBanner("获得建筑物"..bd.name)
             elseif reward[1] == 'gold' then
@@ -84,7 +84,7 @@ function FightMap:checkWin()
             --城堡数据
             local cp = Logic.castlePeople[city.realId]
             if cp ~= nil then
-                Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+                addNewPeople(cp)
                 showPeopleInfo(cp)
             end
 
@@ -144,7 +144,7 @@ function FightMap:checkWin()
                 for k, v in ipairs(cg.build) do
                     local edata = Logic.buildings[v]
                     addBanner("获得新建筑物"..edata.name)
-                    table.insert(Logic.ownBuild, edata.id)
+                    addNewBuild(edata.id)
                 end
                 local silver = cg.silver
                 doGain(silver)
@@ -158,7 +158,7 @@ function FightMap:checkWin()
             Logic.ownVillage[Logic.challengeCity] = true
             local cp = Logic.villagePeople[city.realId]
             if cp ~= nil then
-                Logic.ownPeople = concateTable(Logic.ownPeople, cp)
+                addNewPeople(cp)
                 showPeopleInfo(cp)
             end
             print("village people", cp)
@@ -219,7 +219,7 @@ function FightMap:checkWin()
                 for k, v in ipairs(cg.build) do
                     local edata = Logic.buildings[v]
                     addBanner("获得新建筑物"..edata.name)
-                    table.insert(Logic.ownBuild, edata.id)
+                    addNewBuild(edata.id)
                 end
                 local silver = cg.silver
                 doGain(silver)

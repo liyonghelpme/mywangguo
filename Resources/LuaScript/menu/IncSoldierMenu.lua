@@ -129,6 +129,7 @@ function IncSoldierMenu:onBut(param)
                 addBanner("增加"..cnName[self.selNum].."成功")
                 solData[1] = solData[1]+1
                 solData[2] = solData[2]+Logic.IncCost[self.selNum][2]
+                Logic.soldierDirty = true
 
                 self:updateBut(self.selNum)
                 self:selTab(self.selNum)

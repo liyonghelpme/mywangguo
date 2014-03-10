@@ -136,6 +136,7 @@ function FindPeople3:onPeople()
             global.director.curScene.page:addPeople(pid)
             --移除掉这个村民
             table.remove(Logic.ownPeople, self.num)
+            Logic.ownPeopleDirty = true
         end
         if pdata.gold > 0 then
             global.director:pushView(SureGold.new(callPeople, self), nil)

@@ -72,6 +72,7 @@ end
 function MatInfo3:onLeft(p)
     local key = {'food', 'wood', 'stone'}
     Logic.inSell[key[p]] = not Logic.inSell[key[p]]
+    Logic.sellDirty = true
     if Logic.inSell[key[p]] then
         self.allW[p]:setString('进行')
         setColor(self.allW[p], {206, 78, 0})

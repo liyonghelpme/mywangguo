@@ -96,9 +96,12 @@ function MapCat:exitScene()
     --    self:storeData()
     --end
 end
+
 function MapCat:storeData()
     Logic.catData = {path=self.path, curPoint=self.curPoint, moveTime=self.moveTime}
+    Logic.catDirty = true
 end
+
 
 function MapCat:restoreData()
     local lc = Logic.catData

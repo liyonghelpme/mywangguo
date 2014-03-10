@@ -58,6 +58,7 @@ function LoadingScene:signin(rep, param)
             end
         end
 
+
         if Logic.showMapYet == 0 then
             Logic.showMapYet = false
         else

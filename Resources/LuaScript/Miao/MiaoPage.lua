@@ -655,8 +655,8 @@ function MiaoPage:initWoodAndMine(landId)
         --增加若干个木材建筑物
         addBanner("发现了木材")
         addBanner("新增加伐木场建筑物")
-        table.insert(Logic.ownBuild, 29)
-        table.insert(Logic.ownBuild, 19)
+        addNewBuild(29)
+        addNewBuild(19)
     end
 
     local hasMine = false
@@ -669,8 +669,8 @@ function MiaoPage:initWoodAndMine(landId)
     if landHasMine and not hasMine then
         addBanner("发现了坑道")
         addBanner("新增加采矿场建筑物")
-        table.insert(Logic.ownBuild, 28)
-        table.insert(Logic.ownBuild, 12)
+        addNewBuild(28)
+        addNewBuild(12)
     end
 end
 
