@@ -10,6 +10,22 @@ function Arrow:ctor(s)
     registerEnterOrExit(self)
 end
 function Arrow:update(diff)
+    --print("Arrow battle", Logic.battlePause)
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.changeDirNode)
+            pauseNode(self.bg)
+        end
+        return
+    end
+
+    if self.paused then
+        self.paused = false
+        resumeNode(self.changeDirNode)
+        resumeNode(self.bg)
+    end
+
     local p = getPos(self.changeDirNode)
     if self.lastPos ~= nil then
         local oldPos = self.lastPos
@@ -45,6 +61,20 @@ function Arrow2:ctor(s, t)
     registerEnterOrExit(self)
 end
 function Arrow2:update(diff)
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.changeDirNode)
+            pauseNode(self.bg)
+            return
+        end
+    end
+    if self.paused then
+        self.paused = false
+        resumeNode(self.changeDirNode)
+        resumeNode(self.bg)
+    end
+
     local p = getPos(self.bg)
     local tp = getPos(self.target.bg)
     if self.soldier.color == 0 then

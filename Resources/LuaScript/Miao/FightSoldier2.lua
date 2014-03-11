@@ -364,7 +364,22 @@ function FightSoldier2:startAttack(diff)
 end
 
 --跟随我前面的 我方士兵
+--连update 都会给pause掉么？
 function FightSoldier2:update(diff)
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.bg)
+            pauseNode(self.changeDirNode)
+        end
+        return
+    end
+    if self.paused then
+        self.paused = false
+        resumeNode(self.bg)
+        resumeNode(self.changeDirNode)
+    end
+
     self:updateLabel()
     --弓箭手 步兵 
     --骑士 步兵 之间的 防御 步兵 靠近骑兵的攻击

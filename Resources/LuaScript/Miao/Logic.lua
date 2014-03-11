@@ -168,6 +168,7 @@ end
 function storeAddNewEquip(id)
     table.insert(Logic.ownGoods, {0, id})
     initResearchEquip()
+    Logic.ownGoodsDirty = true
 end
 
 --获得什么条件可以新增加的研究物品
@@ -186,6 +187,17 @@ function setLogicPause(p)
         Event:sendMsg(EVENT_TYPE.CONTINUE_GAME)
     end
 end
+
+Logic.battlePause = false
+function pauseBattle(p)
+    Logic.battlePause = p
+    if Logic.battlePause then
+        Event:sendMsg(EVENT_TYPE.PAUSE_BATTLE)
+    else
+        Event:sendMsg(EVENT_TYPE.RESUME_BATTLE)
+    end
+end
+
 
 Logic.maxBid = 0
 function getBid()

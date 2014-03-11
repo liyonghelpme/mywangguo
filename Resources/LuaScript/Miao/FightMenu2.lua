@@ -172,8 +172,20 @@ function fightNumPro(banner, n, max)
     end
 end
 
+--战斗结束
+function FightMenu2:overGame(p)
+    if p == 0 then
+        global.director:popScene()
+    elseif p == 1 then
+
+    end
+    Logic.battlePause = false
+end
+
 function FightMenu2:onBut()
-    CAMERA_SMOOTH = 1
+    --CAMERA_SMOOTH = 1
+    Logic.battlePause = true
+    global.director:pushView(SessionMenu.new("确定退出战斗?", self.overGame, self, {butOk=true, butCancel=true} ), 1, 0)
 end
 
 --初始化的时候 根据 

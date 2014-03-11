@@ -91,9 +91,29 @@ function FightLayer2:convertNumToSoldier(n, h)
     --剩余的兵力 补偿给最后一个普通士兵
     leftNum = n-pow*num
 
+    --判定hero的pos位置 front pos = 0
+    local frontHero = {}
+    local midHero = {}
+    local backHero = {}
+    for k, v in ipairs(hero) do
+        if v.pos == 0 then
+            table.insert(frontHero, v)
+        elseif v.pos == 1 then
+            table.insert(midHero, v)
+        elseif v.pos == 2 then
+            table.insert(backHero, v)
+        else
+            table.insert(frontHero, v)
+        end
+    end
+
+    --例如10个士兵就是 3 3 4
+    local cutSolNum = math.floor(num/2)
+
     local curCol
     local totalNum = num+hn
     --前 hn 个是 英雄特殊值
+    local solNum = 0
     for i =0, totalNum-1, 1 do
         local col = math.floor(i/5)
         local row = math.floor(i%5)
@@ -114,7 +134,25 @@ function FightLayer2:convertNumToSoldier(n, h)
         end
         --每个士兵实力5
         --print("insert hero", i, hn, curCol, hero[i+1])
-        --英雄配置在最前面
+        --英雄配置在 前 中 后
+        if i < #frontHero then
+            table.insert(curCol, frontHero[i+1])
+        --0    1 2 3   4    5 6 7   8   
+        elseif i >= #frontHero+cutSolNum then
+            table.insert(curCol, midHero[i-#frontHero-cutSolNum+1])
+        elseif i >= #frontHero+cutSolNum+#midHero+cutSolNum then
+            table.insert(curCol, backHero[i-#frontHero-cutSolNum-#midHero-cutSolNum+1])
+        --最后一个士兵 配置能力
+        else
+            if solNum == num-1 then
+                table.insert(curCol, pow+leftNum)
+            else
+                table.insert(curCol, pow)
+            end
+            solNum = solNum+1
+        end
+
+        --[[
         if i < hn then
             table.insert(curCol, hero[i+1])
         else
@@ -125,6 +163,7 @@ function FightLayer2:convertNumToSoldier(n, h)
                 table.insert(curCol, pow)
             end
         end
+        --]]
     end
     
     --补全当前列
@@ -382,7 +421,8 @@ function FightLayer2:doFree(diff)
         print("endPoint is", endPoint)
         self.endPoint = endPoint
         self.totalTime = (endPoint-p[1])/self.moveSpeed
-        self.battleScene:runAction(sinein(moveto(self.totalTime, -endPoint, 0)))
+        self.freeMove = sinein(moveto(self.totalTime, -endPoint, 0))
+        self.battleScene:runAction(self.freeMove)
     end
 end
 --测试不同数量的士兵的战斗效果
@@ -448,6 +488,19 @@ function FightLayer2:update(diff)
     if DEBUG_FIGHT then
         self.stateLabel:setString(str(self.finishAttack).." "..str(math.floor(self.passTime)))
     end
+    
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.battleScene)
+        end
+        return
+    end
+    if self.paused then
+        self.paused = false
+        resumeNode(self.battleScene)
+    end
+
     self.poseRowTime = self.poseRowTime+diff
 
     self:doFree(diff)

@@ -9,10 +9,21 @@ function FightBall:ctor(s, t)
     end
     self.bg:runAction(sequence({moveto(2, t[1], t[2]), callfunc(nil, removeSelf, self.bg)}))
     --registerUpdate(self)
-    --registerEnterOrExit(self)
+    self.needUpdate = true
+    registerEnterOrExit(self)
 end
 function FightBall:update(diff)
-
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.bg)
+        end
+        return
+    end
+    if self.paused then
+        self.paused = false
+        resumeNode(self.bg)
+    end
 end
 
 FightGun = class(FightFunc)
