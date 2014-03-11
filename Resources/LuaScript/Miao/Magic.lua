@@ -26,6 +26,21 @@ end
 
 --magic 目标如果中途死亡了 自动做 doHarm
 function Magic:update(diff)
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.changeDirNode)
+            pauseNode(self.bg)
+        end
+        return
+    end
+
+    if self.paused then
+        self.paused = false
+        resumeNode(self.changeDirNode)
+        resumeNode(self.bg)
+    end
+
     local p = getPos(self.bg)
     local tp = getPos(self.target.bg)
     self.lastPos = p

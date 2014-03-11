@@ -121,8 +121,8 @@ function FightScene:ctor()
     self.otherHeros = {{}, {}, {}, {}}
     if DEBUG_SOL then
         --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
-        self.heros = {{}, {}, {}, {{attack=6*5, defense=0, health=66*5}}}
-        self.heros = {{}, {}, {}, {}}
+        self.heros = {{{attack=6*5, defense=0, health=66*5, pos=0}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=2}}}
+        --self.heros = {{}, {}, {}, {}}
     end
     
     if not DEBUG_SOL then
