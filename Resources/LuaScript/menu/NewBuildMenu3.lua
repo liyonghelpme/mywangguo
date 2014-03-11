@@ -33,6 +33,7 @@ function createSmallDialogb()
     setScaleY(setAnchor(setPos(left, {-294, 0}), {0, 0.5}), 255/397)
     setScaleY(setScaleX(setAnchor(setPos(right, {294, 0}), {0, 0.5}), -1), 255/397)
     setScaleY(setScaleX(setPos(mid, {0, 0}), 488/21), 255/397)
+
     return n
 end
 

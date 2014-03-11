@@ -138,9 +138,9 @@ function FightLayer2:convertNumToSoldier(n, h)
         if i < #frontHero then
             table.insert(curCol, frontHero[i+1])
         --0    1 2 3   4    5 6 7   8   
-        elseif i >= #frontHero+cutSolNum then
+        elseif i >= #frontHero+cutSolNum and i < #frontHero+cutSolNum+#midHero then
             table.insert(curCol, midHero[i-#frontHero-cutSolNum+1])
-        elseif i >= #frontHero+cutSolNum+#midHero+cutSolNum then
+        elseif i >= #frontHero+cutSolNum+#midHero+cutSolNum and i < #frontHero+cutSolNum+#midHero+cutSolNum+#backHero then
             table.insert(curCol, backHero[i-#frontHero-cutSolNum-#midHero-cutSolNum+1])
         --最后一个士兵 配置能力
         else
@@ -170,6 +170,7 @@ function FightLayer2:convertNumToSoldier(n, h)
     while #curCol < 5 do
         table.insert(curCol, 0)
     end
+    print("convert result", simple.encode(temp))
 
     return temp
 end

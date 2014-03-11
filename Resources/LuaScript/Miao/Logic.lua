@@ -152,6 +152,7 @@ end
 Logic.buildBuyNum = {}
 
 
+
 --初始化已经研究的物品
 --研究结束更新
 --商店显示 hold的装备 不仅仅是 research的装备 只hold的装备不能购买
@@ -1113,3 +1114,4 @@ Logic.blockNeibor = {
 [15] = {14, 2},
 [11] = {3, 12},
 }
+Logic.selTarget = 0

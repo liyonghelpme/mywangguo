@@ -17,7 +17,7 @@ DEBUG_FIGHT = false
 DEBUG_BUILD = false
 MENU_ZORD = 128
 
-DEBUG_SOL = false
+DEBUG_SOL = true 
 
 ANDROID = true
 

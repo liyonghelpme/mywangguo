@@ -3,6 +3,10 @@ require "Miao.FightMenu2"
 FightScene = class()
 function FightScene:ctor()
     self.name = "FightScene"
+    if DEBUG_SOL then
+        local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+        sf:addSpriteFramesWithFile("uiOne.plist")
+    end
 
     initCityData()
     --local testData = CityData[17]
@@ -95,9 +99,10 @@ function FightScene:ctor()
     --self.soldiers = {{0, 0, 0, 90}, {90, 0, 0, 0}}
     --self.soldiers = {{0, 0, 90, 0}, {9, 90, 0, 0}}
     --self.soldiers = {{9, 90, 0, 0}, {0, 0, 90, 0}}
+    --调试弓箭手 攻击 目标
     if DEBUG_SOL then
-        --self.soldiers = {{18, 15, 15, 15}, {18, 15, 15, 15}}
-        self.soldiers = {{100, 0, 0, 0}, {50, 0, 0, 0}}
+        self.soldiers = {{18, 15, 15, 15}, {18, 15, 15, 15}}
+        --self.soldiers = {{10, 0, 0, 0}, {50, 0, 0, 0}}
     end
     --attack defense health 前 中 后 默认都在前方布局  技能属性
     --一个 装备上 铜甲 头巾 防御力 22 远高于一些攻击力 

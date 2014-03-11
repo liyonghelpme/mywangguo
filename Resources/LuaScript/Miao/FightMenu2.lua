@@ -1,3 +1,4 @@
+require "menu.ConfigArrow"
 FightMenu2 = class()
 function FightMenu2:adjustPos()
     local vs = getVS()
@@ -140,9 +141,14 @@ function FightMenu2:ctor(s)
     local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text="0", size=35, color={128, 0, 0}, font="bound.fnt"})), {0.50, 0.50}), {56, 40})
     self.myNum = w
 
+    self.rightBottom = addNode(self.bg)
+    local but = ui.newButton({image="buta.png", text="返回", font="f2", size=30, delegate=self, callback=self.onBut, param=1, shadowColor={255, 255, 255}, color={206, 78, 0}})
+    but:setContentSize(107, 113)
+    setPos(addChild(self.rightBottom, but.bg), {1024-76, fixY(sz.height, 706)})
+    rightBottomUI(self.rightBottom)
 
     self.leftBottom = addNode(self.bg)
-    local but = ui.newButton({image="buta.png", text="返回", font="f2", size=30, delegate=self, callback=self.onBut, shadowColor={255, 255, 255}, color={206, 78, 0}})
+    local but = ui.newButton({image="buta.png", text="菜单", font="f2", size=30, delegate=self, callback=self.onBut,  param=0, shadowColor={255, 255, 255}, color={206, 78, 0}})
     but:setContentSize(107, 113)
     setPos(addChild(self.leftBottom, but.bg), {76, fixY(sz.height, 706)})
     leftBottomUI(self.leftBottom)
@@ -182,10 +188,15 @@ function FightMenu2:overGame(p)
     Logic.battlePause = false
 end
 
-function FightMenu2:onBut()
+function FightMenu2:onBut(p)
     --CAMERA_SMOOTH = 1
-    Logic.battlePause = true
-    global.director:pushView(SessionMenu.new("确定退出战斗?", self.overGame, self, {butOk=true, butCancel=true} ), 1, 0)
+    if p == 1 then
+        Logic.battlePause = true
+        global.director:pushView(SessionMenu.new("确定退出战斗?", self.overGame, self, {butOk=true, butCancel=true} ), 1, 0)
+    else
+        Logic.battlePause = true
+        global.director:pushView(ConfigArrow.new(), 1, 0)
+    end
 end
 
 --初始化的时候 根据 
