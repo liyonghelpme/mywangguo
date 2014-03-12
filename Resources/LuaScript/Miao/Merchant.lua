@@ -9,27 +9,6 @@ function Merchant:checkWork(k)
             ret = true
         end
     end
-    --[[
-    ret = (k.picName == 'build' and k.id == 2 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    --去商店
-    if not ret then
-        ret = (k.picName == 'build' and k.id == 6 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    --采矿场
-    if not ret then
-        print("stone ", k.stone)
-        ret = (k.picName == 'build' and k.id == 12 and k.state == BUILD_STATE.FREE and k.stone > 0 and k.owner == nil)
-    end
-    --铁匠铺
-    if not ret then
-        ret = (k.picName == 'build' and k.id == 13 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    --塔
-    if not ret then
-        print("try tower goods")
-        ret = (k.picName == 'build' and k.id == 14 and k.state == BUILD_STATE.FREE and k.workNum > 0 and k.owner == nil)
-    end
-    --]]
     return ret
 end
 function Merchant:initView()
@@ -135,13 +114,25 @@ function Merchant:findTarget()
     end
 end
 
+--checkPossible 结束之后的状态
 function Merchant:checkAllPossible()
     for _, k in ipairs(self.allPossible) do
-        table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
-        --商人不会限制农民去工作的 使用排队处理进入商店
-        --k:setOwner(self)
-        self.people.predictTarget = k
-        self.people.actionContext = CAT_ACTION.BUY_GOODS
+        if Logic.newStage == 6 then
+            print("goto village Entry")
+            table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
+            table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.BUY_GOODS})
+            --table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.villageEntry, CAT_ACTION.MOVE_VILLAGE_ENTRY})
+            self.people.predictTarget = self.people.map.villageEntry
+            self.people.actionContext = CAT_ACTION.MOVE_VILLAGE_ENTRY
+            --self.people.actionContext = CAT_ACTION
+        else
+            table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
+            --商人不会限制农民去工作的 使用排队处理进入商店
+            --k:setOwner(self)
+            self.people.predictTarget = k
+            self.people.actionContext = CAT_ACTION.BUY_GOODS
+        end
+
         if Logic.inNew and not Logic.checkFarm then
             Logic.checkFarm = true
             self.people.merch = 0
@@ -152,6 +143,7 @@ function Merchant:checkAllPossible()
         break
     end
 end
+
 --商人寻找回家的道路失败之后 怎么调整状态 接着寻路 但是条件放宽
 function Merchant:findPathError()
     print("Merchant findPathError", self.people.actionContext)
@@ -164,11 +156,24 @@ function Merchant:findPathError()
         self.people:clearStateStack()
         self.people.state = PEOPLE_STATE.FREE
         self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK}
+    else
+        self.people:clearStateStack()
+        self.people.state = PEOPLE_STATE.FREE
+        self.people.stateContext = {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK}
     end
 end
 
+
 function Merchant:handleAction()
-    if self.people.actionContext == CAT_ACTION.MER_BACK then
+    local act = self.people.actionContext
+    if act == CAT_ACTION.MOVE_VILLAGE_ENTRY then
+        self.people:popState()
+        self:resetNotOwner()
+        --self.people.state = PEOPLE_STATE.
+        if Logic.newStage == 6 then
+            global.director:pushView(SessionMenu.new("你好啊！！\n没想到这里还会有村落...我正在行商的途中，正好过来走一遭！", onNew, nil, {butOk=true}), 1, 0)
+        end
+    elseif self.people.actionContext == CAT_ACTION.MER_BACK then
         self.people.state = PEOPLE_STATE.GO_AWAY
         self.people.changeDirNode:runAction(sequence({fadeout(1), callfunc(nil, removeSelf, self.people.bg)}))
         self.people.map.mapGridController:removeSoldier(self.people)
@@ -204,6 +209,9 @@ function Merchant:handleAction()
                 --+商店的贩卖能力
                 doGain(val)
                 updateSellNum(self.people.predictTarget.goodsKind, bn)
+                if Logic.newStage == 9 then
+                    global.director:pushView(SessionMenu.new("好了，那么我就收购食材"..getNum.."个，付给你"..val.."贯", onNew, nil, {butOk=true}), 1, 0)
+                end
             else
                 self.people.predictTarget:showNoGoods()
             end

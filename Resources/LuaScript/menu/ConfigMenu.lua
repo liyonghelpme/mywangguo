@@ -178,23 +178,23 @@ function ConfigMenu:onBut(p)
         if self.city == nil then
             Logic.newVillage = true
             global.director:popView()
-            global.director:pushView(SessionMenu.new("开始攻略村落", self.onVillage, self), 1, 0)
+            global.director:pushView(SessionMenu.new("开始攻略村落", self.onVillage, self, {butOk=true}), 1, 0)
         --挑战竞技场
         elseif self.city.kind == 0 then
             global.director:popView()
             Logic.challengeCity = self.city
-            global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self), 1, 0)
+            global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self, {butOk=true}), 1, 0)
         --挑战 城堡 realId 或者 kind = 4 challengeCity challengeKind
         elseif self.city.kind == 1 then
             print("fight menu city")
             global.director.curScene.page:sendCat(self.city)
             global.director:popView()
-            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!", nil, nil, {butOk=true}), 1, 0)
         elseif self.city.kind == 4 then
             print("fight menu city")
             global.director.curScene.page:sendCatToVillage(self.city)
             global.director:popView()
-            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!", nil, nil, {butOk=true}), 1, 0)
         end
     end
 end

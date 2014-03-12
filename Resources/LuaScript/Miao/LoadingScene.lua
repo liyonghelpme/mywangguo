@@ -33,6 +33,9 @@ function LoadingScene:signin(rep, param)
         Logic.researchGoods = simple.decode(rep.researchData.researchGoods)
         Logic.ownGoods = simple.decode(rep.researchData.ownGoods)
         
+        Logic.newUser = rep.newUser
+        Logic.newStage = rep.newStage
+
         --[[
         Logic.soldiers = simple.decode(rep.user.soldiers)
         Logic.inSell = simple.decode(rep.user.inSell)

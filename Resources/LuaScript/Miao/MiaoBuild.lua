@@ -215,6 +215,9 @@ function MiaoBuild:ctor(m, data)
     elseif self.picName == 'backPoint' then
         self.changeDirNode = setColor(setSize(setAnchor(createSprite("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
         self.funcBuild = FuncBuild.new(self) 
+    elseif self.picName == 'villageEntry' then
+        self.changeDirNode = setColor(setSize(setAnchor(createSprite("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
+        self.funcBuild = FuncBuild.new(self) 
     elseif self.picName == 'remove' then
         self.changeDirNode = setPos(CCSprite:create("build20.png"), {0, SIZEY})
         self.funcBuild = RemoveBuild.new(self) 
@@ -988,6 +991,30 @@ function MiaoBuild:finishBuild()
     --self:checkRoadConnect()
 end
 
+
+function MiaoBuild:showFinishLabel()
+    local ani = createAnimation("cat_smoke", "cat_smoke_%d.png", 0, 12, 1, 2, true)
+    local sp = createSprite("cat_smoke_0.png")
+    
+    local sz = sp:getContentSize()
+    setPos(setScale(setAnchor(sp, {147/sz.width, (sz.height-208)/sz.height}), 1.4), {0, SIZEY})
+    self.heightNode:addChild(sp, 1)
+    sp:runAction(sequence({CCAnimate:create(ani), callfunc(nil, removeSelf, sp)}))
+
+    
+    local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="完成啦!", color={48, 52, 109}, size=25})
+    self.heightNode:addChild(homeLabel.bg)
+    setPos(homeLabel.bg, {0, 200})
+    homeLabel.bg:runAction(sequence({jumpBy(4, 0, 0, 10, 4), callfunc(nil, removeSelf, homeLabel.bg)}))
+
+    if Logic.newStage == 4 then
+        global.director:pushView(SessionMenu.new("太好啦！！新房子！\n一直在这里傻站着我的脚都肿啦！", onNew, nil, {butOk=true}), 1, 0)
+        Logic.lastCloseTime = Logic.date
+    end
+end
+
+
+
 --自己移动了 
 --别人移动了
 --初始化建筑物 dirty = true 之后就要新的寻路 
@@ -1213,7 +1240,7 @@ function MiaoBuild:showNoGoods()
             removeSelf(sp)
             self.infoBack = nil
         end
-        self.infoBack:runAction(sequence({delaytime(1), callfunc(nil, rinfo), delaytime(0.2), callfunc(nil, clearR)}))
+        self.infoBack:runAction(sequence({jumpBy(4, 0, 0, 10, 4), callfunc(nil, rinfo), delaytime(0.2), callfunc(nil, clearR)}))
         --self.heightNode:addChild(sp)
         local p = getPos(self.bg)
         local hp = getPos(self.heightNode)

@@ -71,7 +71,8 @@ function MiaoPath:checkNeibor(x, y)
         local cx, cy = normalToCartesian(nv[1], nv[2])
         --小于左边界 则 只能+x
         --有效范围 受到建造范围的控制
-        if cx <= 0 and nv[1] < x then
+        if self.closedList[key] ~= nil then
+        elseif cx <= 0 and nv[1] < x then
         elseif cx > MapWidth and nv[1] > x then
         elseif cy < 0 and nv[2] < y then
         elseif cy > MapHeight and nv[2] > y then
@@ -86,7 +87,10 @@ function MiaoPath:checkNeibor(x, y)
                 --不在黑色区域的建筑物
                 if bb.operate then
                     --道路或者 桥梁 建造好的建筑物
-                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
+                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or bb.id == 3 or bb.id == 32) then
+                        if bb.id == 32 then
+                            print("is villageEntry")
+                        end
                         hasRoad = true
                         --print("buildCell Kind Road")
                     --同一个建筑物不能多次插入
@@ -172,8 +176,8 @@ end
 function MiaoPath:update()
     local n = 1
     --所有建筑物  水面 道路
-    local buildCell = self.target.map.mapGridController.mapDict
-    local staticObstacle = self.target.map.staticObstacle 
+    --local buildCell = self.target.map.mapGridController.mapDict
+    --local staticObstacle = self.target.map.staticObstacle 
     --print("MiaoPath update")
     while n < 2 do
         if #self.openList == 0 then
@@ -185,6 +189,7 @@ function MiaoPath:update()
             local n = math.random(#possible)
             local point = table.remove(possible, n)
             local x, y = getXY(point)
+            self.closedList[point] = true
             self:checkNeibor(x, y)
         end
         n = n+1

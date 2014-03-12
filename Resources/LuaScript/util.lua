@@ -1176,6 +1176,14 @@ function disappear(obj)
     end
     return callfunc(nil, cb, nil)
 end
+
+function appear(obj)
+    local function cb()
+        obj:setVisible(true)
+    end
+    return callfunc(nil, cb, nil)
+end
+
 function sendReq(url, postData, handler, param, delegate)
     global.httpController:addRequest(url, postData, handler, param, delegate)
 end
@@ -1916,6 +1924,7 @@ end
 function initPlist()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    sf:addSpriteFramesWithFile("fnew.plist")
     sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("buildOne.plist")
     sf:addSpriteFramesWithFile("buildTwo.plist")

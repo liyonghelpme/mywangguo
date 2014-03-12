@@ -1115,3 +1115,12 @@ Logic.blockNeibor = {
 [11] = {3, 12},
 }
 Logic.selTarget = 0
+
+Logic.newUser = false
+Logic.newStage = 0
+
+function onNew()
+    Logic.newStage = Logic.newStage+1
+    Logic.lastCloseTime = Logic.date
+end
+

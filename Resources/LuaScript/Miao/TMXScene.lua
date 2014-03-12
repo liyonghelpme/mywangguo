@@ -28,6 +28,7 @@ end
 function TMXScene:ctor()
     self.name = "TMXScene"
     self.initDataing = true
+    Logic.lastCloseTime = 0
     self.bg = CCScene:create()
 
     --init UI PIC
@@ -193,7 +194,6 @@ function TMXScene:afterInitBuild()
     if Logic.inNew then
         global.director:pushView(NewGame.new(), 1, 0)
     end
-    self.initDataing = false
 
     --弹出加载页面
     global.director:popView()
@@ -202,6 +202,7 @@ function TMXScene:afterInitBuild()
     --移除掉loadingAni中的SpriteFrame 而不是全部的SpriteFrame
     removeAnimation("loadingAni")
     --CCSpriteFrameCache:sharedSpriteFrameCache():removeSpriteFrameByName("")
+    self.initDataing = false
 end
 
 
@@ -279,6 +280,87 @@ function TMXScene:enterScene()
     --]]
 end
 
+function TMXScene:onNew(p) 
+    Logic.newStage = Logic.newStage+1
+    Logic.lastCloseTime = Logic.date
+end
+
+local newWord = {
+    "此地是 喵喵忍者村 被数个郡县分裂，互相争夺领土",
+    "我们虽然刚刚成立，领地微小，但是让我们以统一村落为目标努力吧！！",
+    "让我们先为追随你而来的村民建造住所吧。\n请选择菜单中的 建筑！",
+}
+
+local merWord = {
+    "如果这里有食材的话，\n希望能够让我收购一些...",
+    "真是求之不得的建议啊。\n那么就让商人收购一些田地里生产的 食材 吧。",
+}
+local news = {
+    "喵喵村日报最新刊\n已经送到了",
+    "那么进入正题，在无数小领主相互较劲的喵喵村上，新的喵喵部落终于独立出来了。\n他们将以统一全村落为目标，和所有势力进行角逐，到底那个实例才能达成统一，还真是叫人期待呢。",
+    "没想到！！喵喵村的情报竟然逐一被泄露出来了。",
+    "今后也许还能够得到有用的情报，让我们多加留心吧。",
+}
+
+local battle = {
+    "喵喵大人...\n我曾暗中派遣某人前往临近地区进行谍报活动...",
+    "此人刚刚完成任务，\n顺利归来了。\n让我们听听他是怎么说的吧。",
+    "初次见面，我叫娜米！！\n我收集到攻下临近村庄的必要的情报。\n请灵活运用。",
+}
+
+local bat2 = {
+    "临近领地可以进行攻略啦！！",
+    "选择领地就可以对其发起战争。",
+    "那么今后我打算在大人下面任事，还请您多多关照！！",
+}
+function TMXScene:checkNewUser()
+    if not self.initDataing and Logic.newStage < 1000 then
+        if Logic.date-Logic.lastCloseTime > 3 then 
+            if Logic.newStage < #newWord then
+                global.director:pushView(SessionMenu.new(newWord[Logic.newStage+1], self.onNew, self, {butOk=true}), 1, 0)
+            elseif Logic.newStage == 5 then
+                global.director:pushView(SessionMenu.new("等我休息好了，就在附近的田地里进行耕作好了。", onNew, nil, {butOk=true}), 1, 0)
+            elseif Logic.newStage >= 7 and Logic.newStage <= 6+#merWord then
+                global.director:pushView(SessionMenu.new(merWord[Logic.newStage-6], onNew, nil, {butOk=true}), 1, 0)
+            --9 商人收购食材
+            elseif Logic.newStage == 10 then
+                global.director:pushView(SessionMenu.new("今后我打算定期前来采购，希望你能够增加田地。", onNew, nil, {butOk=true}), 1, 0)
+            end
+        end
+
+        --日报系统
+        if Logic.newStage >= 11 and Logic.newStage < #news+11 then
+            global.director:pushView(SessionMenu.new(news[Logic.newStage-10], onNew, nil, {butOk=true}), 1, 0)
+        end
+
+        --1 4 3
+        if Logic.newStage >= 15 and Logic.newStage < 15+#battle and Logic.date >= 780 then
+            global.director:pushView(SessionMenu.new(battle[Logic.newStage-14], self.onNew, self, {butOk=true}), 1, 0)
+        end
+
+        --移动插旗
+        --村落中心
+        if Logic.newStage == 18 then
+            self.page:showFly()
+            onNew()
+        end
+
+        --显示对话
+        if Logic.newStage == 19 and Logic.date-Logic.lastCloseTime > 3  then
+            global.director:pushView(SessionMenu.new(bat2[Logic.newStage-18], onNew, nil, {butOk=true}), 1, 0)
+        elseif Logic.newStage > 19 and Logic.newStage<19+#bat2 then
+            global.director:pushView(SessionMenu.new(bat2[Logic.newStage-18], onNew, nil, {butOk=true}), 1, 0)
+        end
+
+        --放出新的人物
+        if Logic.newStage == 22 then
+            self.page:addPeople(14)
+            Logic.newStage = Logic.newStage+1
+        end
+
+
+    end
+end
 
 function TMXScene:update(diff)
     --初始化page
@@ -304,7 +386,8 @@ function TMXScene:update(diff)
     if Logic.paused then
         return
     end
-
+    self:checkNewUser()
+    
     if not self.showLoad then
         print("show Loading View")
         self.showLoad = true
@@ -458,6 +541,7 @@ function TMXScene:saveGame(hint)
     end
 
     u:setStringForKey("resource", Logic.resource)
+    u:setStringForKey('newStage', Logic.newStage)
     --数字作为key的 dict 不能转化成json格式 所以先转化成一个 table
     --压缩了的数据直接采用二进制存储
     local rd = {inResearch=(Logic.inResearch or simple.null)}

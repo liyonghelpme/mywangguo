@@ -17,7 +17,7 @@ DEBUG_FIGHT = false
 DEBUG_BUILD = false
 MENU_ZORD = 128
 
-DEBUG_SOL = true 
+DEBUG_SOL = false 
 
 ANDROID = true
 
@@ -28,6 +28,9 @@ FIX_WIDTH = 340
 OFF_HEIGHT = 103
 --两个斜坡的高度
 MapHeight = 2040+FIX_HEIGHT+103*2+200 
+
+MapAX = 23
+MapAY = 27
 
 SIZEX=340/2
 SIZEY=170/2
