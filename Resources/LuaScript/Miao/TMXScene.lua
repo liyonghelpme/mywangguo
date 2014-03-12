@@ -394,16 +394,19 @@ function TMXScene:update(diff)
         global.director:pushView(LoadingView.new(), 1, 0, 1)
     end
 
-    if Logic.gameStage == 1 and Logic.landBook > 0 then
-        addBanner("获得土地产权证书 进入 第二阶段")
-        Logic.gameStage = 2
-        --显示几个黑色的块
-        self.page:stageOneToTwo()
-    end
-    if Logic.curVillage >= 4 and not Logic.showMapYet then
-        addBanner("大地图功能开启了")
-        Logic.showMapYet = true
-        self.menu:adjustLeftShow()
+
+    if self.initPageYet then
+        if Logic.gameStage == 1 and Logic.landBook > 0 then
+            addBanner("获得土地产权证书 进入 第二阶段")
+            Logic.gameStage = 2
+            --显示几个黑色的块
+            self.page:stageOneToTwo()
+        end
+        if Logic.curVillage >= 4 and not Logic.showMapYet then
+            addBanner("大地图功能开启了")
+            Logic.showMapYet = true
+            self.menu:adjustLeftShow()
+        end
     end
 
     self:checkBattleTime(diff)

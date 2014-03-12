@@ -70,7 +70,10 @@ function MiaoBuildLayer:update(diff)
         if coroutine.status(self.coroutine) ~= 'dead' then
             print("beginInitBuild")
             print("init build")
+            local st = getTimeOfDay()
             coroutine.resume(self.coroutine, self)
+            local et = getTimeOfDay()
+            print("diffTime", et-st, st, et)
         --dead then init other
         else
             print("init others")
@@ -223,23 +226,37 @@ function MiaoBuildLayer:initBuild()
         v.ax = nil
         v.ay = nil
 
+        local st = getTimeOfDay()
+        print("initBuild Kind", v.bid, v.id, st)
+
         --work data
         local b = MiaoBuild.new(self, v)
         b:setWork(v)
 
         local p = {v.px, v.py}
         b:setPos(p)
+
         b:setColPos()
+
         self:addBuilding(b, MAX_BUILD_ZORD)
         b:setPos(p)
+        --local et = getTimeOfDay()
+        --print("check col Time", et-st, st, et)
+
         --道路需要调用这个调整斜坡
+        --local st = getTimeOfDay()
         b.funcBuild:whenColNow()
         b.funcBuild:adjustRoad()
+        --local et = getTimeOfDay()
+        --print("road Time", et-st)
         b:finishBuild()
         --调整建筑物方向
         b:doSwitch()
         mbid = math.max(v.bid, mbid)
         --end
+        local et = getTimeOfDay()
+        print("handle Time", st, et, et-st)
+
         coroutine.yield()
     end
     mbid = mbid+1

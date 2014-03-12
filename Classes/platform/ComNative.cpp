@@ -161,3 +161,10 @@ void initTextureData(char *name) {
     }
 }
 
+float getTimeOfDay() {
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    float t = now.tv_sec+now.tv_usec/1000000.0f;
+    CCLog("getTimeOfDay %f", t);
+    return t; 
+}

@@ -38,4 +38,5 @@ void setFontFillColor(CCLabelTTF *, ccColor3B, bool);
 int setGLProgram(CCNode *, const char *, const char *, const char *);
 
 void initTextureData(char *fileName);
+float getTimeOfDay();
 #endif // __CC_EXTENSION_CCNATIVE_H_

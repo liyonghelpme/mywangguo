@@ -230,14 +230,6 @@ function MiaoBuild:ctor(m, data)
     --slope 使用slopedata实现
     --包括斜坡方向属性
     --dir == 0 1 可以建造道路 其它的不能建造道路 dir = 2
-    --[[
-    elseif self.picName == 'slope' then
-        self.dir = data.dir
-        self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.slopeName), {0.5, 0})
-        local sz = self.changeDirNode:getContentSize()
-        setAnchor(self.changeDirNode, {170/512, 0})
-        self.funcBuild = Slope.new(self)
-    --]]
     --篱笆建筑物的数据是本地的数据加载的
     elseif self.picName == 'fence' then
         self.changeDirNode = setAnchor(CCSprite:createWithSpriteFrameName(data.tileName), {170/512, 0})
