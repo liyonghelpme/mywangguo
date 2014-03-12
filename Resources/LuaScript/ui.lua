@@ -245,7 +245,7 @@ function ui.newButton(params)
             else
                 if needScale then
                 else
-                    local tempSp = CCSprite:create(params.image)
+                    local tempSp = createSprite(params.image)
                     lay:addChild(tempSp)
                     local function removeTemp()
                         removeSelf(tempSp)
