@@ -557,9 +557,10 @@ function MiaoPage:initGameStage()
             --local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onLand, param=hideBlock[k]})
             --setPos(addChild(self.bg, sp.bg), {cx, cy})
             local sp = self:makeFly(self.onLand, hideBlock[k])
-            addChild(self.bg, setPos(sp, {cx, cy}))
+            addChild(self.bg, setPos(sp.bg, {cx, cy}))
 
             self.allFly[hideBlock[k]] = sp
+
         end
     end
     --点击使用 土地使用证来交换
@@ -626,6 +627,7 @@ function MiaoPage:onLand(p)
         self:removeOpenMapFence()
 
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        self:showAllFly()
     end
 end
 function MiaoPage:initWoodAndMine(landId)
@@ -900,6 +902,13 @@ function MiaoPage:openNearLand(p)
     end    
 end
 
+function MiaoPage:showAllFly()
+    for k, v in pairs(self.allFly) do
+        if checkShowFly(k) then
+            setVisible(v.bg, true)
+        end
+    end
+end
 
 function MiaoPage:onExtendLand2(p)
     local landId = p
@@ -912,6 +921,13 @@ function MiaoPage:onExtendLand2(p)
                 return
             end
         end
+        local sf = checkShowFly(landId)
+        if not sf then
+            addBanner("请先开发临近的块")
+            return
+        end
+        
+        --[[
         if Logic.blockNeibor[landId] ~= nil then
             local oy = false
             for k, v in ipairs(Logic.blockNeibor[landId]) do
@@ -925,7 +941,8 @@ function MiaoPage:onExtendLand2(p)
                 return
             end
         end
-         
+        --]]
+
 
         addBanner("开放土地块"..landId)
 
@@ -968,6 +985,7 @@ function MiaoPage:onExtendLand2(p)
         self:removeOpenMapFence()
 
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        self:showAllFly()
     end
 end
 
@@ -1225,22 +1243,30 @@ function MiaoPage:maskMap()
     end
 end
 function MiaoPage:makeFly(f, p)
-    local temp = CCNode:create()
+    --local temp = CCNode:create()
 
     local sp = ui.newButton({image="fnew0.png", conSize={128, 128}, delegate=self, callback=f, param=p})
     --setPos(addChild(temp, sp.bg), {cx, cy})
-    addChild(temp, sp.bg)
+    --addChild(temp, sp.bg)
+
     local ani = createAnimation("flyNew", "fnew%d.png", 0, 3, 1, 0.3, true)
     sp.sp:runAction(repeatForever(CCAnimate:create(ani)))
     --sp.sp:runAction(sequence({fadeout(0), delaytime(0.8), fadein(0.25), jumpBy(0.5, 0, 0, 20, 1)}))
     --self:moveToPoint(cx, cy)
 
-    local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="可以开发", color={0, 0, 0}, size=25, callback=f, param=p})
+    local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="可以开发", color={0, 0, 0}, size=25, delegate=self, callback=f, param=p})
     sp.bg:addChild(homeLabel.bg)
     setPos(homeLabel.bg, {0, -60})
     homeLabel.bg:runAction(repeatForever(jumpBy(1, 0, 0, 10, 1)))
     --homeLabel.bg:runAction(sequence({disappear(homeLabel.bg), delaytime(0.8), appear(homeLabel.bg), jumpBy(0.5, 0, 20, 25, 1)}))
-    return temp
+    --return temp
+
+    --对于
+    local sf = checkShowFly(p)
+    if not sf then
+        setVisible(sp.bg, false)
+    end
+    return sp
 end
 
 
@@ -1467,8 +1493,14 @@ function MiaoPage:moveToPoint(x, y)
         self.bg:stopAction(self.moveAct)
         self.moveAct = nil
     end
+
+    self.touchDelegate.targetMove = {mx, my}
+    self.bg:runAction(sequence({delaytime(0.2), callfunc(nil, finishMov)}))
+    
+    --[[
     self.moveAct = sequence({moveto(0.2, mx, my), callfunc(nil, finishMov)})
     self.bg:runAction(self.moveAct)
+    --]]
 end
 function MiaoPage:touchesEnded(touches)
     --不处理 但是有可能存在bug

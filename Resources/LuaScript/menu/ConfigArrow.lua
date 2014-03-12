@@ -28,6 +28,8 @@ self.selTarget = Logic.selTarget
 self:setSel()
 
 registerEnterOrExit(self)
+
+centerUI(self)
 end
 function ConfigArrow:setSel()
     local t = {'委任', '步兵', '弓箭', '魔法', '骑兵'}

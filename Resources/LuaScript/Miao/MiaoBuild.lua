@@ -41,13 +41,13 @@ end
 
 function MiaoBuild:setDirty()
     if not global.director.curScene.initDataing then
-        print("setDirty", self.bid, self.id, global.director.curScene.initDataing)
+        --print("setDirty", self.bid, self.id, global.director.curScene.initDataing)
         self.builddirty = true
     end
 end
 
 function MiaoBuild:ctor(m, data)
-    print("init building", simple.encode(data))
+    --print("init building", simple.encode(data))
     self.map = m
     --self.privData = data
     self.sx = 1
@@ -92,7 +92,7 @@ function MiaoBuild:ctor(m, data)
     --记录开始生长的时间
     self.lifeStage = data.lifeStage or Logic.date
     --篱笆数据
-    print("buildkind", self.id, self.data)
+    --print("buildkind", self.id, self.data)
     if self.data ~= nil then
         self.sx = self.data.sx
         self.sy = self.data.sy
@@ -167,7 +167,7 @@ function MiaoBuild:ctor(m, data)
             self.funcBuild:initView()
         --采矿场
         elseif self.id == 12 then
-            print("init MineStore")
+            --print("init MineStore")
             self.changeDirNode = setAnchor(createSprite(self.picName..self.id..".png"), {0.5, 0})
             self.funcBuild = MineStore.new(self)
             self.funcBuild:initView()
@@ -215,9 +215,11 @@ function MiaoBuild:ctor(m, data)
     elseif self.picName == 'backPoint' then
         self.changeDirNode = setColor(setSize(setAnchor(createSprite("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
         self.funcBuild = FuncBuild.new(self) 
+        setVisible(self.changeDirNode, false)
     elseif self.picName == 'villageEntry' then
         self.changeDirNode = setColor(setSize(setAnchor(createSprite("white2.png"), {0.5, 0}), {SIZEX*2, SIZEY*2}), {255, 255, 0})
         self.funcBuild = FuncBuild.new(self) 
+        setVisible(self.changeDirNode, false)
     elseif self.picName == 'remove' then
         self.changeDirNode = setPos(CCSprite:create("build20.png"), {0, SIZEY})
         self.funcBuild = RemoveBuild.new(self) 
@@ -295,6 +297,7 @@ function MiaoBuild:ctor(m, data)
         setVisible(self.bg, false)
     end
 end
+
 function MiaoBuild:receiveMsg(msg, param)
     if msg == EVENT_TYPE.SELECT_ME then
         if param ~= self then
@@ -309,7 +312,10 @@ function MiaoBuild:receiveMsg(msg, param)
             self:findNearby()
         end
     elseif msg == EVENT_TYPE.INIT_OVER then
-        setVisible(self.bg, true)
+        --初始化operate 成功则显示出来
+        if self.inStage then
+            setVisible(self.bg, true)
+        end
     end
 end
 
@@ -388,7 +394,7 @@ function MiaoBuild:touchesBegan(touches)
     self.moveYet = false
 
     --self.startPos = getBuildMap(self)
-    print("build touch began")
+    --print("build touch began")
     --if self.lastPos.count == 1 then
         --建筑物 getBuildMap 0.5 0 位置
         --手指是 0.5 0 位置 转化成0.5 0.5 位置
@@ -397,16 +403,16 @@ function MiaoBuild:touchesBegan(touches)
         --local tp = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]-SIZEY))
         --local ret = checkPointIn(tp.x, tp.y,  px, py, self.sx, self.sy)
         local ret = true
-        --print("checkPointIn", ret)
+        ----print("checkPointIn", ret)
         if ret then
-            print("check build in self")
+            --print("check build in self")
             self.inSelf = true
             local setSuc = 0
             if self.state == BUILD_STATE.MOVE or self.Planing == 1 then
                 setSuc = self.map.scene:setBuilding(self)
             end
 
-            --print("touchesBegan", setSuc, self.state, self.Planing)
+            ----print("touchesBegan", setSuc, self.state, self.Planing)
             --if setSuc == 1 then
             --选中建筑物成功了 正在建造的时候 就不能选中建筑物
             if self.funcBuild.selGrid ~= nil then
@@ -438,7 +444,7 @@ function MiaoBuild:getAxAyHeight()
     if self.ax == nil then
         local pos = getPos(self.bg)
         local ax, ay = newCartesianToAffine(pos[1], pos[2], self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT)
-        --print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
+        ----print("adjust Road Height !!!!!!!!!!!!!!!!!!!!!!!!!", ax, ay)
         local hei = adjustNewHeight(self.map.scene.mask, self.map.scene.width, ax, ay)
         self.ax, self.ay, self.height = ax, ay, hei
         --return ax, ay, height
@@ -518,7 +524,7 @@ function MiaoBuild:touchesMoved(touches)
         local parPos = self.bg:getParent():convertToNodeSpace(ccp(self.lastPos[0][1], self.lastPos[0][2]))
         
         local ax, ay, height = cxyToAxyWithDepth(parPos.x, parPos.y, self.map.scene.width, self.map.scene.height, MapWidth/2, FIX_HEIGHT, self.map.scene.mask, self.map.scene.cxyToAxyMap)
-        print("build touchMoved  !!", ax, ay, height)
+        --print("build touchMoved  !!", ax, ay, height)
         --移动不在裂缝里面
         if ax ~= nil and ay ~= nil then
             if ax < self.map.scene.width-1 and ay < self.map.scene.height-1 and ax >= 0 and ay >= 0 then 
@@ -549,7 +555,7 @@ end
 
 function MiaoBuild:setColor(c)
     if self.funcBuild.selGrid ~= nil then
-        --print("set normal color")
+        ----print("set normal color")
         self.funcBuild:setBottomColor(c)
         self.funcBuild:setColor()
     end
@@ -582,12 +588,12 @@ function MiaoBuild:checkRiverOrSlopeCol()
             table.insert(allCoord, {ax-j, ay-i})
         end
     end
-    print("checkRiverOrSlopeCol", simple.encode(allCoord))
+    --print("checkRiverOrSlopeCol", simple.encode(allCoord))
 
     --超出边界 左下右下边界
     for k, v in ipairs(allCoord) do
         if not self.static and (v[1] < 0 or v[2] < 0 or v[1] >= self.map.scene.width or v[2] >= self.map.scene.height or v[1] >= self.map.scene.width-4) then
-            --print("out of range")
+            ----print("out of range")
             self.colNow = 1
             self:setColor(0)
             return true
@@ -597,8 +603,8 @@ function MiaoBuild:checkRiverOrSlopeCol()
     --河流 和 斜坡之前首先 判定 是否在可建造的范围内
     --超出可建造边界
     --初始化建筑物的 时候 不检测
-    print("curScene init?", global.director.curScene.initDataing)
-    print('curScene name', global.director.curScene.name)
+    --print("curScene init?", global.director.curScene.initDataing)
+    --print('curScene name', global.director.curScene.name)
     if not global.director.curScene.initDataing then
         --addBanner("check game stage 1 collision", Logic.gameStage)
         local allBlock = self.map.scene.block
@@ -617,9 +623,9 @@ function MiaoBuild:checkRiverOrSlopeCol()
                 end
                 local gk = v[2]*mwid+v[1]+1
                 for hk, hv in ipairs(hideBlock1) do
-                    print("allBlock hv gk ", Logic.curVillage, hv, gk)
+                    --print("allBlock hv gk ", Logic.curVillage, hv, gk)
                     if hk >= Logic.curVillage then
-                        print("value", allBlock[hv][gk])
+                        --print("value", allBlock[hv][gk])
                         if allBlock[hv][gk] ~= 0 then
                             addBanner("不能在黑色区域建造"..hv)
                             self.colNow = 1
@@ -681,7 +687,7 @@ function MiaoBuild:checkRiverOrSlopeCol()
         local gk = v[2]*self.map.scene.width+v[1]+1
         local sd = self.map.scene.slopeData[gk]
         if sd ~= nil then
-            print("collision with slope")
+            --print("collision with slope")
             self.colNow = 1
             self.otherBuild = {picName='slope', dir=sd[1], height=sd[2], ax=ax, ay=ay}
             --不能建造
@@ -702,7 +708,7 @@ function MiaoBuild:setColPos()
     self:setColor(0)
 
     local other = self.map:checkCollision(self)
-    print("checkCollision result", other)
+    --print("checkCollision result", other)
     if other ~= nil then
         self.colNow = 1
         self.otherBuild = other
@@ -713,7 +719,7 @@ function MiaoBuild:setColPos()
     end
 
     if self.colNow == 0 then
-        print("no building col check river")
+        --print("no building col check river")
         local col = self:checkRiverOrSlopeCol()
     end
 end
@@ -725,7 +731,7 @@ function MiaoBuild:touchesEnded(touches)
             if self.accMove < 20 then
                 self.funcBuild:showInfo()
                 --开始移动
-                print("show Info clearEffect")
+                --print("show Info clearEffect")
                 self.funcBuild:clearEffect()
                 --self:clearMyEffect()
             end
@@ -817,7 +823,7 @@ function MiaoBuild:setPos(p, noDirty)
     end
 
     if not noDirty then
-        print("setPos set")
+        --print("setPos set")
         self:setDirty()
     end
 end
@@ -832,7 +838,7 @@ end
 
 --调用公有代码
 function MiaoBuild:doMyEffect()
-    print("doHouse Effect ", self.data.kind)
+    --print("doHouse Effect ", self.data.kind)
     if self.data == nil or (self.data.kind ~= 0 and self.data.kind ~= 5) then
         return
     end
@@ -1081,7 +1087,7 @@ function MiaoBuild:checkRoadConnect()
                     local sp = setAnchor(createSprite("tile6.png"), {155/512, (512-422)/512})
                     self.roadHeightNode:addChild(sp)
                     setPos(sp, {coord[k][1], coord[k][2]})
-                    print("checkRoadConnect", v[1], v[2], simple.encode(coord[k]))
+                    --print("checkRoadConnect", v[1], v[2], simple.encode(coord[k]))
                 end
             end
         end
@@ -1106,7 +1112,7 @@ end
 
 function MiaoBuild:setState(s)
     self.state = s
-    print("MiaoBuild setState", s, self.state)
+    --print("MiaoBuild setState", s, self.state)
     if self.state == BUILD_STATE.MOVE and self.bottom == nil then
         self.funcBuild:initBottom()
     end
@@ -1153,7 +1159,7 @@ end
 function MiaoBuild:changeWorkNum(n)
     self.workNum = self.workNum+n
     self.workNum = math.min(self.workNum, self.maxNum)
-    print("changeWorkNum", n, self.workNum)
+    --print("changeWorkNum", n, self.workNum)
     self.funcBuild:updateGoods()
     self:setDirty()
 end
@@ -1165,7 +1171,7 @@ function MiaoBuild:removeSelf()
         removeSelf(self.roadNode)
         self.roadNode = nil
     end
-    print("removeSelf Building", self.picName, self.id)
+    --print("removeSelf Building", self.picName, self.id)
     self.funcBuild:removeSelf()
     self.deleted = true
     self.map:removeBuilding(self)
@@ -1195,7 +1201,7 @@ function MiaoBuild:runMoveAction(px, py)
     self.bg:runAction(self.moveAct)
 end
 function MiaoBuild:moveToPos(p)
-    print("moveToPos", simple.encode(p))
+    --print("moveToPos", simple.encode(p))
     self.map.mapGridController:clearMap(self)
     setPos(self.bg, p)
     self.map.mapGridController:updateMap(self)
@@ -1217,7 +1223,7 @@ function MiaoBuild:doProduct()
 end
 
 function MiaoBuild:setGoodsKind(k)
-    print("setGoodsKind", k)
+    --print("setGoodsKind", k)
     if k ~= self.goodsKind then
         self.goodsKind = k
         self.workNum = 0
@@ -1226,7 +1232,7 @@ function MiaoBuild:setGoodsKind(k)
     end
 end
 function MiaoBuild:showNoGoods()
-    print("showNoGoods")
+    --print("showNoGoods")
     if self.infoBack == nil then
         local sp = createSprite("newInfoBack.png")
         local lab = ui.newTTFLabel({text='断货', size=25, color={251, 6, 41}})

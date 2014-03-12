@@ -14,6 +14,26 @@ function FightMap:ctor()
     
     self.page = FightPage.new()
     self.bg:addChild(self.page.bg)
+    
+    self.tempNode = addNode(self.bg)
+    setVisible(self.tempNode, false)
+
+
+    self.mist = createSprite("mist.png")
+    local vs = getVS()
+    setScaleX(self.mist, vs.width/128)
+    setScaleY(self.mist, vs.height/128)
+    setPos(addChild(self.tempNode, self.mist), {vs.width/2, vs.height/2})
+
+
+    self.mistRender = CCRenderTexture:create(vs.width, vs.height)
+    self.bg:addChild(self.mistRender)
+    setPos(self.mistRender, {vs.width/2, vs.height/2})
+    --setVisible(self.mistRender)
+    local sp = self.mistRender:getSprite()
+    local bf = ccBlendFunc()
+    
+
     self.menu = FightMenu.new(self)
     self.bg:addChild(self.menu.bg)
     --initDataFromServer()
@@ -23,11 +43,15 @@ function FightMap:ctor()
 end
 
 function FightMap:update(diff)
-    --[[
-    if Logic.initYet then
-        Logic.initYet = false
-    end
-    --]]
+    self.mistRender:beginWithClear(0, 0, 0, 0)
+    self.mist:visit()
+    local p = getPos(self.page.bg)
+    local sca = getScale(self.page.bg)
+    setScale(setPos(self.page.lightNode, p), sca)
+
+    self.page.lightNode:visit()
+    self.mistRender:endToLua()
+
 end
 
 

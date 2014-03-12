@@ -721,8 +721,10 @@ end
 Logic.ownPeople = {}
 Logic.ownPeopleDirty = false
 function addNewPeople(cp)
+    print("addNewPeople", cp)
     Logic.ownPeople = concateTable(Logic.ownPeople, cp)
     Logic.ownPeopleDirty = true
+    global.director:pushView(NewPeople.new(cp[1]), 1, 0)
 end
 
 Logic.ownTech = {
@@ -1116,6 +1118,21 @@ Logic.blockNeibor = {
 [15] = {14, 2},
 [11] = {3, 12},
 }
+
+function checkShowFly(landId) 
+    if Logic.blockNeibor[landId] ~= nil then
+        local oy = false
+        for k, v in ipairs(Logic.blockNeibor[landId]) do
+            if Logic.openMap[v] then
+                oy = true
+                break
+            end
+        end
+        return oy
+    end
+    return true
+end
+
 Logic.selTarget = 0
 
 Logic.newUser = false

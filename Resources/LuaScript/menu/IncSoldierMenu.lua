@@ -5,7 +5,7 @@ function IncSoldierMenu:ctor()
     local sz = {width=1024, height=768}
     self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+12})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addChild(self.temp, createSmallDialogb()), {512, fixY(sz.height, 407)}), {588, 255}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addChild(self.temp, createSmallDialogb()), {512, fixY(sz.height, 407)}), {0.50, 0.50})
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {813, fixY(sz.height, 196)})

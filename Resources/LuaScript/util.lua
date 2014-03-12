@@ -1549,7 +1549,8 @@ end
 
 function setTexOrDis(sp, n)
     if string.sub(n, 1, 1) == '#' then
-        setTexture(sp, string.sub(n, 2))
+        --setTexture(sp, string.sub(n, 2))
+        setRealTexture(sp, string.sub(n, 2))
         return sp
     end
 

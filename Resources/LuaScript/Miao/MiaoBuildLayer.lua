@@ -73,7 +73,7 @@ function MiaoBuildLayer:update(diff)
             local st = getTimeOfDay()
             coroutine.resume(self.coroutine, self)
             local et = getTimeOfDay()
-            print("diffTime", et-st, st, et)
+            --OldPrint("diffTime", et-st, st, et)
         --dead then init other
         else
             print("init others")
@@ -236,7 +236,7 @@ function MiaoBuildLayer:initBuild()
         --100 ms 的处理
         --lua 进入coroutine 消耗3-4ms
         local sst = getTimeOfDay()
-        print("initBuild Kind", v.bid, v.id, sst)
+        --OldPrint("initBuild Kind", v.bid, v.id, sst)
         
         --50ms
         --work data
@@ -250,7 +250,7 @@ function MiaoBuildLayer:initBuild()
         local st = getTimeOfDay()
         b:setColPos()
         local et = getTimeOfDay()
-        print("col Time", st, et, et-st)
+        --OldPrint("col Time", st, et, et-st)
 
         --10ms
         self:addBuilding(b, MAX_BUILD_ZORD)
@@ -264,7 +264,7 @@ function MiaoBuildLayer:initBuild()
         b.funcBuild:whenColNow()
         b.funcBuild:adjustRoad()
         local et = getTimeOfDay()
-        print("road Time", st, et, et-st)
+        --OldPrint("road Time", st, et, et-st)
 
         --9ms
         b:finishBuild()
@@ -273,7 +273,7 @@ function MiaoBuildLayer:initBuild()
         mbid = math.max(v.bid, mbid)
         --end
         local eet = getTimeOfDay()
-        print("handle Time", sst, eet, eet-sst)
+        --OldPrint("handle Time", sst, eet, eet-sst)
 
         --5ms
         coroutine.yield()

@@ -58,11 +58,11 @@ function MapCity:ctor(s, data, cid, isV)
         
     addChild(self.bg, self.changeDirNode)
     --修正坐标 为正常的坐标
-    local sz = getContentSize(self.scene.bg) 
+    --local sz = getContentSize(self.scene.bg) 
     setPos(self.bg, {data[1], data[2]})
 
     print('myCity', simple.encode(data))
-    local sz = getContentSize(self.changeDirNode)
+    --local sz = getContentSize(self.changeDirNode)
     --self.touch = ui.newTouchLayer({size=sz, delegate=self, touchBegan=self.touchBegan, touchMoved=self.touchMoved, touchEnded=self.touchEnded})
     --self.changeDirNode:addChild(self.touch.bg)
 
@@ -106,12 +106,14 @@ function MapCity:checkAccess()
     if self.scene.accessCity[self.cid] then
         self.acc = true
         setVisible(self.bg, true)
+        setVisible(self.lightNode, true)
         --显示自己的村落
         --村落没有独立的node 适合城堡相连的
         --if self.village == nil then
         --    self.village = MapCity.new(self.scene, )
         --end
         self.village = self.scene.allVillage[self.realId]
+        --普通城堡16 有两个 village 相连接
         if self.realId == 16 then
             print("self realId", self.realId)
             self.village = {16, 25}
@@ -119,37 +121,47 @@ function MapCity:checkAccess()
             for k, v in ipairs(self.village) do
                 if self.color == 0 then
                     setVisible(self.scene.allVillage[v].bg, true)
+                    setVisible(self.scene.allVillage[v].lightNode, true)
                     self.village.acc = true
                 else
                     setVisible(self.scene.allVillage[v].bg, false)
                     self.village.acc = false
+                    setVisible(self.scene.allVillage[v].lightNode, false)
                 end
             end
         elseif self.village ~= nil then
             if self.color == 0 then
                 setVisible(self.village.bg, true)
                 self.village.acc = true
+                setVisible(self.village.lightNode, true)
             else
                 setVisible(self.village.bg, false)
                 self.village.acc = false
+                setVisible(self.village.lightNode, false)
             end
         end
+
     else
         setVisible(self.bg, false)
         self.acc = false
+        --是否驱散周围雾气
+        setVisible(self.lightNode, false)
         
         self.village = self.scene.allVillage[self.realId]
+        --16 有两个village
         if self.realId == 16 then
             print("self realId", 16)
             self.village = {16, 25}
-            print("allVillage", self.scene.allVillage[25])
+            --print("allVillage", self.scene.allVillage[25])
             for k, v in ipairs(self.village) do
                 setVisible(self.scene.allVillage[v].bg, false)
+                setVisible(self.scene.allVillage[v].lightNode, false)
                 self.village.acc = false
             end
         elseif self.village ~= nil then
             setVisible(self.village.bg, false)
             self.village.acc = false
+            setVisible(self.village.lightNode, false)
         end
     end
 end

@@ -294,6 +294,6 @@ double getTimeOfDay() {
     struct cc_timeval now;
     CCTime::gettimeofdayCocos2d(&now, NULL);
     double t = now.tv_sec+now.tv_usec/1000000.0;
-    CCLog("getTimeOfDay %f", t);
+    //CCLog("getTimeOfDay %f", t);
     return t;
 }

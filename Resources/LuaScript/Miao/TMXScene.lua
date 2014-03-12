@@ -4,6 +4,7 @@ require "Miao.TMXMenu2"
 require "Miao.NewGame"
 require "menu.SessionMenu"
 require "Miao.LoadingView"
+require "menu.NewPeople"
 TMXScene = class()
 
 function TMXScene:initDataNow()
@@ -298,7 +299,7 @@ local merWord = {
 }
 local news = {
     "喵喵村日报最新刊\n已经送到了",
-    "那么进入正题，在无数小领主相互较劲的喵喵村上，新的喵喵部落终于独立出来了。\n他们将以统一全村落为目标，和所有势力进行角逐，到底那个实例才能达成统一，还真是叫人期待呢。",
+    "那么进入正题，在无数小领主相互较劲的喵喵村上，新的喵喵部落终于独立出来了。\n他们将以统一全村落为目标，和所有势力进行角逐，到底那个势力才能达成统一，还真是叫人期待呢。",
     "没想到！！喵喵村的情报竟然逐一被泄露出来了。",
     "今后也许还能够得到有用的情报，让我们多加留心吧。",
 }

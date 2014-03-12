@@ -106,6 +106,7 @@ end
 
 
 function PressMenu3:onBut(p)
+    --global.director:pushView(NewPeople.new(), 1, 0)
     if p[2] == 1  then
         global.director:popView()
         local m = NewBuildMenu3.new()
