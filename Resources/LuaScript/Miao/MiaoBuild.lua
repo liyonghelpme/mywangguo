@@ -286,9 +286,14 @@ function MiaoBuild:ctor(m, data)
     --local temp = setSize(addSprite(self.bg, "green2.png"), {10, 10})
     self:setState(BUILD_STATE.FREE)
 
-    self.events = {EVENT_TYPE.SELECT_ME, EVENT_TYPE.ROAD_CHANGED}
+    self.events = {EVENT_TYPE.SELECT_ME, EVENT_TYPE.ROAD_CHANGED, EVENT_TYPE.INIT_OVER}
     registerEnterOrExit(self)
     --page 首先处理 建筑物的touch 再处理自身的touch事件
+
+
+    if global.director.curScene.initDataing then
+        setVisible(self.bg, false)
+    end
 end
 function MiaoBuild:receiveMsg(msg, param)
     if msg == EVENT_TYPE.SELECT_ME then
@@ -303,6 +308,8 @@ function MiaoBuild:receiveMsg(msg, param)
             --self.dirty = true
             self:findNearby()
         end
+    elseif msg == EVENT_TYPE.INIT_OVER then
+        setVisible(self.bg, true)
     end
 end
 
@@ -753,6 +760,9 @@ function MiaoBuild:touchesEnded(touches)
     end
 end
 function MiaoBuild:update(diff)
+    if global.director.curScene.initDataing then
+        return
+    end
     if not Logic.paused then 
         if self.id ~= -1 and self.id ~= nil then
             if DEBUG then

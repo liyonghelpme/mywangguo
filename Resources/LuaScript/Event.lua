@@ -19,6 +19,8 @@ EVENT_TYPE = {
 
     PAUSE_BATTLE=26,
     RESUME_BATTLE=27,
+
+    INIT_OVER=28,
 }
 Event = {}
 Event.callbacks = {}

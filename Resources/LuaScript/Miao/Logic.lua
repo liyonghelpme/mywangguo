@@ -446,6 +446,8 @@ function updateSellNum(k, n)
     end
     
 end
+
+--检测是否拥有这种商品 商店:
 function checkResearchYet(k, v)
     for tk, tv in ipairs(Logic.ownGoods) do
         if tv[1] == k and tv[2] == v then

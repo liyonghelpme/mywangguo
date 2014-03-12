@@ -203,6 +203,7 @@ function TMXScene:afterInitBuild()
     removeAnimation("loadingAni")
     --CCSpriteFrameCache:sharedSpriteFrameCache():removeSpriteFrameByName("")
     self.initDataing = false
+    Event:sendMsg(EVENT_TYPE.INIT_OVER)
 end
 
 

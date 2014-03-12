@@ -22,7 +22,7 @@ static int tolua_Cocos2d_getTimeOfDay00(lua_State* tolua_S)
  else
 #endif
  {
-    float d = getTimeOfDay();
+    double d = getTimeOfDay();
 	tolua_pushnumber(tolua_S, (lua_Number)d);
  }
  return 1;

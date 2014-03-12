@@ -161,10 +161,139 @@ void initTextureData(char *name) {
     }
 }
 
+/*
+#include <time.h>
+#include <windows.h>
+
+#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#else
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+#endif
+
+struct mytimezone 
+{
+  int  tz_minuteswest;
+  int  tz_dsttime;    
+};
+struct mytimeval {
+    long tv_sec;
+    long tv_usec;
+};
+
+int gettimeofday(struct mytimeval *tv, struct mytimezone *tz)
+{
+  FILETIME ft;
+  unsigned __int64 tmpres = 0;
+  static int tzflag;
+ 
+  if (NULL != tv)
+  {
+    GetSystemTimeAsFileTime(&ft);
+ 
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+ 
+    tmpres -= DELTA_EPOCH_IN_MICROSECS; 
+    tmpres /= 10;  
+    tv->tv_sec = (long)(tmpres / 1000000UL);
+    tv->tv_usec = (long)(tmpres % 1000000UL);
+  }
+ 
+  if (NULL != tz)
+  {
+    if (!tzflag)
+    {
+      _tzset();
+      tzflag++;
+    }
+    tz->tz_minuteswest = _timezone / 60;
+    tz->tz_dsttime = _daylight;
+  }
+ 
+  return 0;
+}
+*/
+ 
+
+//#include "stdafx.h"
+#include <time.h>
+#include <windows.h> 
+
+const __int64 DELTA_EPOCH_IN_MICROSECS= 11644473600000000;
+
+struct timezone2 
+{
+  __int32  tz_minuteswest; /* minutes W of Greenwich */
+  bool  tz_dsttime;     /* type of dst correction */
+};
+
+struct timeval2 {
+__int32    tv_sec;         /* seconds */
+__int32    tv_usec;        /* microseconds */
+};
+
+int gettimeofday(struct timeval2 *tv/*in*/, struct timezone2 *tz/*in*/)
+{
+  FILETIME ft;
+  __int64 tmpres = 0;
+  TIME_ZONE_INFORMATION tz_winapi;
+  int rez=0;
+
+   ZeroMemory(&ft,sizeof(ft));
+   ZeroMemory(&tz_winapi,sizeof(tz_winapi));
+
+    GetSystemTimeAsFileTime(&ft);
+
+    tmpres = ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+
+    /*converting file time to unix epoch*/
+    tmpres /= 10;  /*convert into microseconds*/
+    tmpres -= DELTA_EPOCH_IN_MICROSECS; 
+    tv->tv_sec = (__int32)(tmpres*0.000001);
+    tv->tv_usec =(tmpres%1000000);
+
+
+    //_tzset(),don't work properly, so we use GetTimeZoneInformation
+    rez=GetTimeZoneInformation(&tz_winapi);
+    tz->tz_dsttime=(rez==2)?true:false;
+    tz->tz_minuteswest = tz_winapi.Bias + ((rez==2)?tz_winapi.DaylightBias:0);
+
+  return 0;
+}
+
+/*
 float getTimeOfDay() {
-    struct cc_timeval now;
-    CCTime::gettimeofdayCocos2d(&now, NULL);
+    float t = GetTickCount();
+    CCLog("getTimeOfDay %f", t);
+    return t/1000.0f;
+}
+*/
+/*
+float getTimeOfDay() {
+    struct timeval2 now;
+    struct timezone2 tz;
+    ZeroMemory(&now, sizeof(now));
+    ZeroMemory(&tz, sizeof(tz));
+
+    gettimeofday(&now, &tz);
+    //CCTime::gettimeofdayCocos2d(&now, NULL);
     float t = now.tv_sec+now.tv_usec/1000000.0f;
     CCLog("getTimeOfDay %f", t);
     return t; 
+}
+*/
+
+struct cc_timeval startTime;
+bool start = false;
+
+double getTimeOfDay() {
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    double t = now.tv_sec+now.tv_usec/1000000.0;
+    CCLog("getTimeOfDay %f", t);
+    return t;
 }

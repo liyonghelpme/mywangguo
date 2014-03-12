@@ -208,6 +208,13 @@ function MiaoBuildLayer:initBackPoint()
     self.backPoint = b
 end
 
+--空旋转一会
+function MiaoBuildLayer:initBuildDebug()
+    for i=0, 200, 1 do
+        coroutine.yield()
+    end
+end
+
 function MiaoBuildLayer:initBuild()
     if DEBUG_BUILD then
         self:initBuildOld()
@@ -226,9 +233,12 @@ function MiaoBuildLayer:initBuild()
         v.ax = nil
         v.ay = nil
 
-        local st = getTimeOfDay()
-        print("initBuild Kind", v.bid, v.id, st)
-
+        --100 ms 的处理
+        --lua 进入coroutine 消耗3-4ms
+        local sst = getTimeOfDay()
+        print("initBuild Kind", v.bid, v.id, sst)
+        
+        --50ms
         --work data
         local b = MiaoBuild.new(self, v)
         b:setWork(v)
@@ -236,27 +246,36 @@ function MiaoBuildLayer:initBuild()
         local p = {v.px, v.py}
         b:setPos(p)
 
+        --12ms
+        local st = getTimeOfDay()
         b:setColPos()
+        local et = getTimeOfDay()
+        print("col Time", st, et, et-st)
 
+        --10ms
         self:addBuilding(b, MAX_BUILD_ZORD)
         b:setPos(p)
         --local et = getTimeOfDay()
         --print("check col Time", et-st, st, et)
 
+        --23ms
         --道路需要调用这个调整斜坡
-        --local st = getTimeOfDay()
+        local st = getTimeOfDay()
         b.funcBuild:whenColNow()
         b.funcBuild:adjustRoad()
-        --local et = getTimeOfDay()
-        --print("road Time", et-st)
+        local et = getTimeOfDay()
+        print("road Time", st, et, et-st)
+
+        --9ms
         b:finishBuild()
         --调整建筑物方向
         b:doSwitch()
         mbid = math.max(v.bid, mbid)
         --end
-        local et = getTimeOfDay()
-        print("handle Time", st, et, et-st)
+        local eet = getTimeOfDay()
+        print("handle Time", sst, eet, eet-sst)
 
+        --5ms
         coroutine.yield()
     end
     mbid = mbid+1
@@ -365,6 +384,7 @@ function MiaoBuildLayer:initDataOver()
     self.needInit = true
     self.initEnvYet = false
     self.coroutine = coroutine.create(self.initBuild)
+    --self.coroutine = coroutine.create(self.initBuildDebug)
 
     --[[
     self:initBuild()
