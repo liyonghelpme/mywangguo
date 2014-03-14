@@ -268,6 +268,9 @@ end
 function repeatN(act, n)
     return CCRepeat:create(act, n)
 end
+function rotateto(t, ang)
+    return CCRotateTo:create(t, ang)
+end
 function rotateby(t, ang)
     return CCRotateBy:create(t, ang)
 end
@@ -338,6 +341,10 @@ function sequence(seq)
         arr:addObject(v)
     end
     return CCSequence:create(arr)
+end
+
+function bounceout(act)
+    return CCEaseBounceOut:create(act)
 end
 
 function sinein(act)
@@ -1193,6 +1200,9 @@ end
 function toCol(c)
     return ccc3(c[1], c[2], c[3])
 end
+function addDialog(d)
+    global.director.curScene.dialogController:addDialog(d)
+end
 function addBanner(w)
     global.director.curScene.dialogController:addBanner(UpgradeBanner.new(w, {255, 255, 255}, nil, nil))
 end
@@ -1645,6 +1655,12 @@ function resumeNode(n)
 end
 
 function createSprite(n)
+    if string.sub(n, 1, 1) == '#' then
+        --setTexture(sp, string.sub(n, 2))
+        sp = CCSprite:create(string.sub(n, 2))
+        return sp
+    end
+
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     local f = sf:spriteFrameByName(n)
     if f ~= nil then
@@ -1925,6 +1941,7 @@ end
 function initPlist()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    sf:addSpriteFramesWithFile("castleOne.plist")
     sf:addSpriteFramesWithFile("fnew.plist")
     sf:addSpriteFramesWithFile("equipOne.plist")
     sf:addSpriteFramesWithFile("buildOne.plist")

@@ -257,7 +257,7 @@ function FightLayer2:initSkill()
         end
     end
     --确保 英雄 是 活着的 才能施展技能的呀
-    print("positive skill")
+    print("positive skill", #positive)
     if #positive > 0 then
         for k, v in ipairs(ss) do
             for tk, tv in ipairs(v) do
@@ -273,32 +273,6 @@ function FightLayer2:initSkill()
     else
         self.skillOver = true
     end
-    --[[
-    local hasSkill = false
-    for k, v in ipairs(ss) do
-        for tk, tv in ipairs(v) do
-            if not tv.dead and tv.isHero and tv.heroData.skill ~= nil then
-                local skId = tv.heroData.skill
-                local sdata = Logic.skill[skId]
-                self.skillEffect = sdata 
-                hasSkill = true
-            end
-        end
-    end
-    if hasSkill then
-        for k, v in ipairs(self.allSoldiers) do
-            if not v.dead then
-                v:showSkillEffect()
-            end
-        end
-        local function setOver()
-            self.skillOver = true
-        end
-        self.bg:runAction(sequence({delaytime(1), callfunc(nil, setOver)}))
-    else
-        self.skillOver = true
-    end
-    --]]
 end
 
 

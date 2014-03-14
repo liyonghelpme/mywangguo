@@ -5,10 +5,10 @@ using namespace cocos2d;
 using namespace std;
 
 void setScriptTouchPriority(CCLayer *lay, int pri){
-    CCLog("setScriptTouchPriority %d", pri);
+    //CCLog("setScriptTouchPriority %d", pri);
     CCTouchScriptHandlerEntry *st = lay->getScriptTouchHandlerEntry();
     st->setPriority(pri);
-    CCLog("priority %d %d", st->getPriority(), st->getSwallowsTouches());
+    //CCLog("priority %d %d", st->getPriority(), st->getSwallowsTouches());
     /*
     lay->retain();
     CCNode *par = lay->getParent();
@@ -35,7 +35,7 @@ void setTextureRect(CCSprite *sp, CCRect rect, bool rotated, CCSize size) {
     sp->setTextureRect(rect, rotated, size);
 }
 void enableShadow(CCLabelTTF *lab, CCSize sz, float so, float sb, bool up, int r, int g, int b) {
-    CCLog("enableShadow %d %d %d", r, g, b);
+    //CCLog("enableShadow %d %d %d", r, g, b);
     lab->enableShadow(sz, so, sb, up);//, r, g, b
 }
 void setFontFillColor(CCLabelTTF *lab, ccColor3B c, bool u) {
@@ -43,16 +43,16 @@ void setFontFillColor(CCLabelTTF *lab, ccColor3B c, bool u) {
 }
 
 int setGLProgram(CCNode *sp, const char *name, const char *vert, const char *frag) {
-    CCLog("setGLProgram %s %s %s", name, vert, frag);
+    //CCLog("setGLProgram %s %s %s", name, vert, frag);
     CCShaderCache *sc = CCShaderCache::sharedShaderCache();
     CCGLProgram *prog = (CCGLProgram*)sc->programForKey(name);
     if(prog == NULL) {
         GLchar *fragSource = (GLchar*)CCString::createWithContentsOfFile(CCFileUtils::sharedFileUtils()->fullPathForFilename(frag).c_str())->getCString();
         GLchar *vertSource = (GLchar*)CCString::createWithContentsOfFile(CCFileUtils::sharedFileUtils()->fullPathForFilename(vert).c_str())->getCString();
-        CCLog("Frag File");
-        //CCLog("%s", fragSource);
-        CCLog("Vert File");
-        //CCLog("%s", vertSource);
+        //CCLog("Frag File");
+        ////CCLog("%s", fragSource);
+        //CCLog("Vert File");
+        ////CCLog("%s", vertSource);
 
         prog = new CCGLProgram();
         prog->initWithVertexShaderByteArray(vertSource, fragSource);
@@ -108,7 +108,7 @@ void initTextureData(char *name) {
         pixelFormat = kCCTexture2DPixelFormat_RGB565;
         unsigned int length = width*height;
         
-		CCLog("image has Alpha %d", hasAlpha);
+		//CCLog("image has Alpha %d", hasAlpha);
 
         tempData = new unsigned char[width*height*2];
         outPixel16 = (unsigned short*)tempData;
@@ -139,7 +139,7 @@ void initTextureData(char *name) {
 			*outPixel16++ = ((r>>3) << 11) | ((g>>2) << 5) | (b>>3);
 			
 			if(i < 1000) {
-				CCLog("%x %x %x %x", r, g, b, *(outPixel16-1));
+				//CCLog("%x %x %x %x", r, g, b, *(outPixel16-1));
 			}
 			//inPixel8++;
 			//inPixel8++;
@@ -268,7 +268,7 @@ int gettimeofday(struct timeval2 *tv/*in*/, struct timezone2 *tz/*in*/)
 /*
 float getTimeOfDay() {
     float t = GetTickCount();
-    CCLog("getTimeOfDay %f", t);
+    //CCLog("getTimeOfDay %f", t);
     return t/1000.0f;
 }
 */
@@ -282,7 +282,7 @@ float getTimeOfDay() {
     gettimeofday(&now, &tz);
     //CCTime::gettimeofdayCocos2d(&now, NULL);
     float t = now.tv_sec+now.tv_usec/1000000.0f;
-    CCLog("getTimeOfDay %f", t);
+    //CCLog("getTimeOfDay %f", t);
     return t; 
 }
 */
@@ -294,6 +294,6 @@ double getTimeOfDay() {
     struct cc_timeval now;
     CCTime::gettimeofdayCocos2d(&now, NULL);
     double t = now.tv_sec+now.tv_usec/1000000.0;
-    //CCLog("getTimeOfDay %f", t);
+    ////CCLog("getTimeOfDay %f", t);
     return t;
 }

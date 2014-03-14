@@ -4,6 +4,7 @@ function DialogController:ctor(sc)
     self.bg = CCLayer:create()
     self.cmds = {}
     self.bannerStack = {}
+    self.dialogStack = {}
 
     registerEnterOrExit(self)
 end
@@ -33,7 +34,20 @@ function DialogController:update(diff)
             end
         end
     end
+    if #global.director.stack == 0 then
+        if #self.dialogStack > 0 then
+            local d = table.remove(self.dialogStack, 1)
+            global.director:pushView(d, 1, 0)
+            d.bg:release()
+        end
+    end
 end
+
+function DialogController:addDialog(d)
+    d.bg:retain()
+    table.insert(self.dialogStack, d)
+end
+
 --可能t[1] 已经删除自己了 只是DialogController 还不知道
 function DialogController:addBanner(banner)
     while #self.bannerStack > 5 do

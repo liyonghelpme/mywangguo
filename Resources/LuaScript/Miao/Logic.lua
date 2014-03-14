@@ -724,7 +724,8 @@ function addNewPeople(cp)
     print("addNewPeople", cp)
     Logic.ownPeople = concateTable(Logic.ownPeople, cp)
     Logic.ownPeopleDirty = true
-    global.director:pushView(NewPeople.new(cp[1]), 1, 0)
+    --global.director:pushView(NewPeople.new(cp[1]), 1, 0)
+    global.director.curScene.dialogController:addDialog(NewPeople.new(cp[1]))
 end
 
 Logic.ownTech = {
@@ -822,6 +823,7 @@ Logic.ownBuildDirty = false
 function addNewBuild(b)
     table.insert(Logic.ownBuild, b)
     Logic.ownBuildDirty = true
+    global.director.curScene.dialogController:addDialog(NewBuild.new(b))
 end
 
 

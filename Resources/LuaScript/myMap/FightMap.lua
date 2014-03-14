@@ -62,7 +62,8 @@ function FightMap:checkWin()
     if type(Logic.challengeCity) == 'table' and Logic.challengeCity.kind == 0 then
         if Logic.winArena then
             Logic.winArena = false
-            global.director:pushView(SessionMenu.new("挑战竞技场胜利了"), 1, 0)
+            --global.director:pushView(, 1, 0)
+            addDialog(SessionMenu.new("挑战竞技场胜利了", nil, nil, {butOk=true}))
             Logic.lastArenaTime = Logic.date
             --士兵数量
             local cityData = Logic.arena[math.min(#Logic.arena, Logic.arenaLevel)]
@@ -101,7 +102,8 @@ function FightMap:checkWin()
     --挑战普通城堡胜利
     elseif Logic.ownCity[Logic.challengeCity] ~= nil then
         --addBanner("获取 胜利奖励！")
-        global.director:pushView(SessionMenu.new("合战胜利了!"), 1, 0)
+        --global.director:pushView(, 1, 0)
+        addDialog(SessionMenu.new("合战胜利了!", nil, nil, {butOk=true}))
         local city = self.page.cidToCity[Logic.challengeCity]
         city:setColor(0)
         --城堡
@@ -258,7 +260,8 @@ function FightMap:checkWin()
         --新手村不在这里处理
         end
     else
-        global.director:pushView(SessionMenu.new("合战失败了!"), 1, 0)
+        --global.director:pushView(, 1, 0)
+        addDialog(SessionMenu.new("合战失败了!", nil, nil, {butOk=true}))
     end
 end
 --显示可以启用的人才

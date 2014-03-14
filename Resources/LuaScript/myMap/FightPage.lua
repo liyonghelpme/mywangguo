@@ -171,15 +171,20 @@ function FightPage:updateDebugNode(p)
 end
 --从主城到其它城市
 function FightPage:sendCat(city)
+    print("sendCat")
     local cat = MapCat.new(self, self.mainCity, city, false)
     self.cat = cat
     self.bg:addChild(cat.bg)
+    city:showSword()
 end
 
+--去村落
 function FightPage:sendCatToVillage(city)
+    print("sendCatToVillage")
     local cat = MapCat.new(self, self.mainCity, city, false, true)
     self.cat = cat
     self.bg:addChild(cat.bg)
+    city:showSword()
 end
 
 function FightPage:touchesCanceled(touches)

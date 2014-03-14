@@ -5,6 +5,8 @@ require "Miao.NewGame"
 require "menu.SessionMenu"
 require "Miao.LoadingView"
 require "menu.NewPeople"
+require "menu.NewBuild"
+
 TMXScene = class()
 
 function TMXScene:initDataNow()

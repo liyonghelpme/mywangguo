@@ -1058,6 +1058,7 @@ function FightLayer2:initSoldier()
     end
     self:printLeftRight()
     
+    --初始化所有士兵的被动技能
     self:initPassivitySkill()
 
     for k, v in ipairs(self.allHero) do
@@ -1065,14 +1066,17 @@ function FightLayer2:initSoldier()
             print("heroData", tv.sid)
         end
     end
+    --英雄角色的被动技能有哪些呢?
     self:showPassivitySkill() 
 end
 
+--发动被动技能 英雄么
 function FightLayer2:showPassivitySkill()
     for k, v in ipairs(self.allHero) do
         for hk, hv in ipairs(v) do
             if not hv.dead and hv.heroData.skill ~= nil then
                 local skData = Logic.skill[hv.heroData.skill]
+                --兵种对步兵的防御加5% 这种被动技能 显示在兵种身上 同时  一遍遍提醒用户 潜意识影响用户的行为
                 if skData.passivity == 1 then
                     addBanner("发动被动技能"..skData.name)
                 end
