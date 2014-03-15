@@ -1,9 +1,12 @@
+require "menu.IncProcess"
+
 IncSoldierMenu  = class()
 function IncSoldierMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+12})
+    self.sz = sz
+    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
     local sp = setAnchor(setPos(addChild(self.temp, createSmallDialogb()), {512, fixY(sz.height, 407)}), {0.50, 0.50})
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
@@ -128,15 +131,34 @@ function IncSoldierMenu:onBut(param)
             else
                 doCost(cost)
                 local cnName = {'步卒', '弓队', '魔法', '铁骑'}
-                addBanner("增加"..cnName[self.selNum].."成功")
+                --addBanner("增加"..cnName[self.selNum].."成功")
                 solData[1] = solData[1]+1
                 solData[2] = solData[2]+Logic.IncCost[self.selNum][2]
                 Logic.soldierDirty = true
 
                 self:updateBut(self.selNum)
-                self:selTab(self.selNum)
+                --self:selTab(self.selNum)
+
+                --self.inProcess = true
+
+                --显示数字
+                global.director:pushView(IncProcess.new(self.selNum), 1, 0)
             end
         end
     end
+end
+
+function IncSoldierMenu:refreshData()
+    local inu = Logic.IncCost[self.selNum][2]
+    local height = {
+        342, 
+        389,
+        436, 
+        483,
+    }
+    local w = setPos(setAnchor(ui.newBMFontLabel({text="+"..inu, size=26, color={32, 112, 220}, font="bound.fnt"}), {0.00, 0.50}), {570, fixY(self.sz.height, height[self.selNum])})
+    print("refresh Menu")
+    self.temp:addChild(w, 2)
+    w:runAction(sequence({fadein(0.5), delaytime(1), fadeout(0.3), callfunc(nil, removeSelf, w)}))
 end
 

@@ -1,3 +1,4 @@
+require "menu.PeopleInTrain"
 PeopleInfo2 = class()
 function PeopleInfo2:ctor(p, attribute)
     self.selPeople = p
@@ -6,6 +7,7 @@ function PeopleInfo2:ctor(p, attribute)
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
+    self.sz = sz
     self.temp = setPos(addNode(self.bg), {-13.5, fixY(sz.height, 0+sz.height)+4})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "dialogA.png"), {525, fixY(sz.height, 388)}), {693, 588}), {0.50, 0.50}), 255)
     local sp = setAnchor(setPos(addChild(self.temp, createDialogB()), {523, fixY(sz.height, 418)}), {0.50, 0.50})
@@ -83,6 +85,7 @@ function PeopleInfo2:ctor(p, attribute)
     self.catHead = sp
 
 
+    --从攻击 防御  
     local b, p = createInfoPro()
     addChild(self.temp, setPos(b, {661, fixY(sz.height, 280)}))
     self.attackBar = p
@@ -267,6 +270,7 @@ function PeopleInfo2:setPeople()
 
 end
 
+--升级按钮
 function PeopleInfo2:onLevel()
     local people = Logic.farmPeople[self.selPeople] 
     local silver = Logic.LevelCost[people.level+1+1]
@@ -276,10 +280,51 @@ function PeopleInfo2:onLevel()
     else
         doCost(silver)
         people:updateLevel()
-        global.director:popView()
+        --global.director:popView()
+        global.director:pushView(PeopleInTrain.new(people.id), 1, 0)
+        self.inTrain = true
     end
 end
 
+--old att 增加了多少数值?
 function PeopleInfo2:refreshData()
+    if self.inTrain then
+        self.inTrain = false
+        local p = Logic.farmPeople[self.selPeople]
+        local diff = calAddAttr(p.id, p.level)
+        local att = {
+            'health',
+            'brawn',
+            'shoot',
+            'labor'
+        }
+        local hei = {
+            374,
+            425,
+            472,
+            521,
+        }
+        for k, v in ipairs(att) do
+            if diff[v] > 0 then
+                --各个属性增加的数值的显示
+                local w = setPos(setAnchor(ui.newBMFontLabel({text="+"..diff[v], size=26, color={32, 112, 220}, font="bound.fnt"}), {0.50, 0.50}), {661, fixY(self.sz.height, hei[k])})
+                print("refresh  Train")
+                self.temp:addChild(w, 2)
+                w:runAction(sequence({fadein(0.5), delaytime(1), fadeout(0.3), callfunc(nil, removeSelf, w)}))
+            end
+        end
+        local skold = getPeopleSkill(p.id, p.level-1)
+        local skNew = getPeopleSkill(p.id, p.level)
+
+        if skNew ~= skold then
+            local skData = Logic.skill[skNew]
+            local w = setPos(setAnchor(ui.newTTFLabel({text="习得新技能"..skData.name, size=35, color={32, 112, 220}, font="f2"}), {0.50, 0.50}), {543, fixY(self.sz.height, 626)})
+            print("refresh  Train")
+            self.temp:addChild(w, 2)
+            w:runAction(sequence({fadein(0.5), jumpBy(0.5, 0, 40, 50, 1), delaytime(1), fadeout(0.3), callfunc(nil, removeSelf, w)}))
+        end
+
+    end
+
     self:setPeople()
 end

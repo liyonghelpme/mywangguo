@@ -1167,3 +1167,14 @@ function onNew()
     Logic.lastCloseTime = Logic.date
 end
 
+--计算村民增加的属性 上一级 到现在这个级别之间增加的属性
+function calAddAttr(id, level)
+    local old = calAttr(id, level-1)
+    local new = calAttr(id, level)
+    local diff = {}
+    diff.health = new.health-old.health
+    diff.brawn = new.brawn-old.brawn
+    diff.shoot = new.shoot-old.shoot
+    diff.labor = new.labor-old.labor
+    return diff
+end

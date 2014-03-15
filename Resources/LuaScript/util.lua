@@ -1938,6 +1938,16 @@ function closeDialog()
     global.director:popView()
 end
 
+function initSoldier()
+    local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
+    sf:addSpriteFramesWithFile("cat_foot.plist")
+    sf:addSpriteFramesWithFile("cat_arrow.plist")
+    sf:addSpriteFramesWithFile("cat_magic.plist")
+    sf:addSpriteFramesWithFile("cat_cavalry.plist")
+    CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888)
+end
+
 function initPlist()
     local sf = CCSpriteFrameCache:sharedSpriteFrameCache()
     CCTexture2D:setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA4444)
