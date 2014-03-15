@@ -117,6 +117,19 @@ function FightArrow2:findNearEnemy()
         table.insert(eneList, self.soldier.map.myArrowSoldiers)
         table.insert(eneList, self.soldier.map.myCavalrySoldiers)
     end
+    --0 委任 
+    --1 步兵
+    --2 弓箭
+    --3 铁铳
+    --4 骑兵
+    if Logic.selTarget == 2 then
+        eneList[1], eneList[3] = eneList[3], eneList[1]
+    elseif Logic.selTarget == 3 then
+        eneList[1], eneList[2] = eneList[2], eneList[1]
+    elseif Logic.selTarget == 4 then
+        eneList[1], eneList[4] = eneList[4], eneList[1] 
+    end
+
     --这两个状态 不累计arrowHurt数值
     --local inNext = (self.state == FIGHT_SOL_STATE.NEXT_TARGET or self.state == FIGHT_SOL_STATE.WAIT_ATTACK)
     local isStart = (self.soldier.state == FIGHT_SOL_STATE.START_ATTACK)

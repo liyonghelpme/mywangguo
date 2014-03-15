@@ -152,6 +152,7 @@ end
 Logic.buildBuyNum = {}
 
 
+
 --初始化已经研究的物品
 --研究结束更新
 --商店显示 hold的装备 不仅仅是 research的装备 只hold的装备不能购买
@@ -168,6 +169,7 @@ end
 function storeAddNewEquip(id)
     table.insert(Logic.ownGoods, {0, id})
     initResearchEquip()
+    Logic.ownGoodsDirty = true
 end
 
 --获得什么条件可以新增加的研究物品
@@ -186,6 +188,17 @@ function setLogicPause(p)
         Event:sendMsg(EVENT_TYPE.CONTINUE_GAME)
     end
 end
+
+Logic.battlePause = false
+function pauseBattle(p)
+    Logic.battlePause = p
+    if Logic.battlePause then
+        Event:sendMsg(EVENT_TYPE.PAUSE_BATTLE)
+    else
+        Event:sendMsg(EVENT_TYPE.RESUME_BATTLE)
+    end
+end
+
 
 Logic.maxBid = 0
 function getBid()
@@ -381,6 +394,24 @@ Logic.IncCost = {
     {20, 20, 400},
     {10, 20, 500},
 }
+--升级价格遵循 等差 等差数列关系 200 + 200+n*k  n 等级 k 差值
+--200
+--200+200 = 400
+--400+200+k = 600+k
+--600+k+200+2*k = 800+3*k
+--
+-- k1* x*x + k2*x + k3 = 
+-- k3 = 200
+-- k1+k2 = 216
+-- 4k1+k2 = 448 
+-- k1 = 77
+-- k2 = 149
+-- k3 = 200
+function getIncCost(kind, level)
+    local initV = Logic.IncCost[kind][3]
+    return 77*(level-1)*(level-1)+149*(level-1)+initV
+end
+
 --等级 数量 当前训练士兵的阶梯
 Logic.soldiers = {
     [1] = {1, 50},
@@ -433,6 +464,8 @@ function updateSellNum(k, n)
     end
     
 end
+
+--检测是否拥有这种商品 商店:
 function checkResearchYet(k, v)
     for tk, tv in ipairs(Logic.ownGoods) do
         if tv[1] == k and tv[2] == v then
@@ -608,6 +641,10 @@ function winCity()
             if cdata[4] == 1 then 
                 Logic.ownCity[Logic.challengeCity] = true
                 Logic.ownCityDirty = true
+            --村落记录数据
+            elseif cdata[4] == 4 then
+                Logic.ownVillage[Logic.challengeCity] = true
+                Logic.ownVillageDirty = true
             end
         end
     end
@@ -706,8 +743,11 @@ end
 Logic.ownPeople = {}
 Logic.ownPeopleDirty = false
 function addNewPeople(cp)
+    print("addNewPeople", cp)
     Logic.ownPeople = concateTable(Logic.ownPeople, cp)
     Logic.ownPeopleDirty = true
+    --global.director:pushView(NewPeople.new(cp[1]), 1, 0)
+    global.director.curScene.dialogController:addDialog(NewPeople.new(cp[1]))
 end
 
 Logic.ownTech = {
@@ -805,6 +845,7 @@ Logic.ownBuildDirty = false
 function addNewBuild(b)
     table.insert(Logic.ownBuild, b)
     Logic.ownBuildDirty = true
+    global.director.curScene.dialogController:addDialog(NewBuild.new(b))
 end
 
 
@@ -1101,3 +1142,39 @@ Logic.blockNeibor = {
 [15] = {14, 2},
 [11] = {3, 12},
 }
+
+function checkShowFly(landId) 
+    if Logic.blockNeibor[landId] ~= nil then
+        local oy = false
+        for k, v in ipairs(Logic.blockNeibor[landId]) do
+            if Logic.openMap[v] then
+                oy = true
+                break
+            end
+        end
+        return oy
+    end
+    return true
+end
+
+Logic.selTarget = 0
+
+Logic.newUser = false
+Logic.newStage = 0
+
+function onNew()
+    Logic.newStage = Logic.newStage+1
+    Logic.lastCloseTime = Logic.date
+end
+
+--计算村民增加的属性 上一级 到现在这个级别之间增加的属性
+function calAddAttr(id, level)
+    local old = calAttr(id, level-1)
+    local new = calAttr(id, level)
+    local diff = {}
+    diff.health = new.health-old.health
+    diff.brawn = new.brawn-old.brawn
+    diff.shoot = new.shoot-old.shoot
+    diff.labor = new.labor-old.labor
+    return diff
+end

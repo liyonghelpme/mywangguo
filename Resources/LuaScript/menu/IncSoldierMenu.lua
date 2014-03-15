@@ -1,11 +1,14 @@
+require "menu.IncProcess"
+
 IncSoldierMenu  = class()
 function IncSoldierMenu:ctor()
     local vs = getVS()
     self.bg = CCNode:create()
     local sz = {width=1024, height=768}
-    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)+12})
+    self.sz = sz
+    self.temp = setPos(addNode(self.bg), {0, fixY(sz.height, 0+sz.height)})
     local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "sdialoga.png"), {512, fixY(sz.height, 396)}), {633, 427}), {0.50, 0.50}), 255)
-    local sp = setOpacity(setAnchor(setSize(setPos(addSprite(self.temp, "smallDialogb.png"), {512, fixY(sz.height, 407)}), {588, 255}), {0.50, 0.50}), 255)
+    local sp = setAnchor(setPos(addChild(self.temp, createSmallDialogb()), {512, fixY(sz.height, 407)}), {0.50, 0.50})
     local but = ui.newButton({image="newClose.png", text="", font="f1", size=18, delegate=self, callback=closeDialog, shadowColor={0, 0, 0}, color={255, 255, 255}})
     but:setContentSize(80, 82)
     setPos(addChild(self.temp, but.bg), {813, fixY(sz.height, 196)})
@@ -84,7 +87,8 @@ function IncSoldierMenu:updateBut(n)
     else
         setColor(nword[1], {255, 255, 255})
         nword[2]:setString(s[2])
-        local cost = math.floor(math.pow(1.5, s[1]-1)*Logic.IncCost[n][3])
+        --local cost = math.floor(math.pow(1.5, s[1]-1)*Logic.IncCost[n][3])
+        local cost = getIncCost(n, s[1])
         nword[3]:setString(cost..'银币')
         if not checkCost(cost) then
             setColor(nword[3], {254, 7, 1})
@@ -120,21 +124,41 @@ function IncSoldierMenu:onBut(param)
         if solData[1] == 0 then
         elseif solData[2] >= 999 then
         else
-            local cost = math.floor(math.pow(1.5, solData[1]-1)*Logic.IncCost[self.selNum][3])
+            --local cost = math.floor(math.pow(1.5, solData[1]-1)*Logic.IncCost[self.selNum][3])
+            local cost = getIncCost(self.selNum, solData[1])
             if not checkCost(cost) then
                 addBanner("银币不足")
             else
                 doCost(cost)
                 local cnName = {'步卒', '弓队', '魔法', '铁骑'}
-                addBanner("增加"..cnName[self.selNum].."成功")
+                --addBanner("增加"..cnName[self.selNum].."成功")
                 solData[1] = solData[1]+1
                 solData[2] = solData[2]+Logic.IncCost[self.selNum][2]
                 Logic.soldierDirty = true
 
                 self:updateBut(self.selNum)
-                self:selTab(self.selNum)
+                --self:selTab(self.selNum)
+
+                --self.inProcess = true
+
+                --显示数字
+                global.director:pushView(IncProcess.new(self.selNum), 1, 0)
             end
         end
     end
+end
+
+function IncSoldierMenu:refreshData()
+    local inu = Logic.IncCost[self.selNum][2]
+    local height = {
+        342, 
+        389,
+        436, 
+        483,
+    }
+    local w = setPos(setAnchor(ui.newBMFontLabel({text="+"..inu, size=26, color={32, 112, 220}, font="bound.fnt"}), {0.00, 0.50}), {570, fixY(self.sz.height, height[self.selNum])})
+    print("refresh Menu")
+    self.temp:addChild(w, 2)
+    w:runAction(sequence({fadein(0.5), delaytime(1), fadeout(0.3), callfunc(nil, removeSelf, w)}))
 end
 

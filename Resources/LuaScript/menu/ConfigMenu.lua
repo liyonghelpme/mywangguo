@@ -52,8 +52,9 @@ function ConfigMenu:initHero()
     --补全 英雄
     if #en < n then
         local inAtt = {}
+        --pid framePeople 的Id
         for k, v in ipairs(en) do
-            inAtt[v] = true 
+            inAtt[v.id] = true 
         end
         local left = n-#en
         --没有在farmPeople 中
@@ -66,6 +67,7 @@ function ConfigMenu:initHero()
                 break
             end
         end
+        Logic.attendHeroDirty = true
     end
     self:adjustAttend() 
 end
@@ -157,11 +159,11 @@ function ConfigMenu:refreshData()
 end
 
 function ConfigMenu:onArena()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
 end
 
 function ConfigMenu:onVillage()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
 end
 
 function ConfigMenu:onBut(p)
@@ -178,23 +180,23 @@ function ConfigMenu:onBut(p)
         if self.city == nil then
             Logic.newVillage = true
             global.director:popView()
-            global.director:pushView(SessionMenu.new("开始攻略村落", self.onVillage, self), 1, 0)
+            global.director:pushView(SessionMenu.new("开始攻略村落", self.onVillage, self, {butOk=true}), 1, 0)
         --挑战竞技场
         elseif self.city.kind == 0 then
             global.director:popView()
             Logic.challengeCity = self.city
-            global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self), 1, 0)
+            global.director:pushView(SessionMenu.new("虽然是模拟战但也不可以粗心大意哦！", self.onArena, self, {butOk=true}), 1, 0)
         --挑战 城堡 realId 或者 kind = 4 challengeCity challengeKind
         elseif self.city.kind == 1 then
             print("fight menu city")
             global.director.curScene.page:sendCat(self.city)
             global.director:popView()
-            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!", nil, nil, {butOk=true}), 1, 0)
         elseif self.city.kind == 4 then
             print("fight menu city")
             global.director.curScene.page:sendCatToVillage(self.city)
             global.director:popView()
-            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!"), 1, 0)
+            global.director:pushView(SessionMenu.new("那么现在开始向\n战场出发!!", nil, nil, {butOk=true}), 1, 0)
         end
     end
 end

@@ -46,7 +46,7 @@ function MiaoPeople:ctor(m, data)
     self.maxHealth = Logic.people[self.id].health+self.data.healthAdd*self.level
     self.labor = self.data.labor+self.data.laborAdd*self.level
     self.tired = false
-    self.goBack = nil
+    --self.goBack = nil
     self.myHouse = nil
     self.lastState = nil
     self.name = str(math.random(99999))
@@ -145,6 +145,7 @@ function MiaoPeople:showNoHome()
         self.homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="无家可归", color={0, 0, 0}, size=25})
         self.heightNode:addChild(self.homeLabel.bg)
         setPos(self.homeLabel.bg, {0, 200})
+        self.homeLabel.bg:runAction(repeatForever(jumpBy(1, 0, 0, 10, 1)))
     end
 end
 function MiaoPeople:clearNoHome()
@@ -390,7 +391,7 @@ function MiaoPeople:initFind(diff)
                 --商人往回走 miaoPath 初始化结束 
                 elseif self.data.kind == 2 and self.state == PEOPLE_STATE.START_FIND then
                     --self.funcPeople:findPathError()
-                    self.goBack = true
+                    --self.goBack = true
                 --农民没有地方去工作 则休息一下 miaoPath 已经初始化ok了
                 elseif (self.data.kind == 1 or self.data.kind == 2) and self.state == PEOPLE_STATE.START_FIND then
                     self.state = PEOPLE_STATE.PAUSED
@@ -479,6 +480,7 @@ function MiaoPeople:doFind(diff)
                 --道路 和 建筑物 都在cell 里面
                 --从当前位置附近的道路开始寻路 calcG gScore ~= 100 不是100的值
                 --local findTarget = false
+                --不一定是最上面的
                 if buildCell[key] ~= nil and buildCell[key][#buildCell[key]][1] == self.predictTarget then
                     --矿坑相邻的道路没在斜坡上面
                     --if mineOk then
@@ -564,62 +566,12 @@ function MiaoPeople:doMove(diff)
                 --首先检测目标是否移动 
                 local moved = self:checkMoved()
                 if moved or self.realTarget.deleted then
-                    --self:clearStateStack()
-                    --self:resetState()
                     self.funcPeople:buildMove()
                 elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction(diff)
-                    --收获农作物 商店资源
-                    elseif self.goBack == nil then
-                        self.state = PEOPLE_STATE.FREE
-                        self.goBack = true
-                        self.realTarget:setOwner(nil)
-                        --开始交易 回家啦
-                        --去采矿场
-                        local getNum = 0
-                        if self.predictTarget.stone > 0 then
-                            local sp = CCSprite:create("silver.png")
-                            local p = getPos(self.predictTarget.bg)
-                            self.map.bg:addChild(sp)
-                            setPos(sp, p)
-                            local rx = math.random(20)-10
-                            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                            local pay = self.predictTarget.stone*math.floor(self.predictTarget.rate+1)
-                            local num = ui.newBMFontLabel({text=str(pay), font="bound.fnt", size=30})
-                            sp:addChild(num)
-                            setPos(num, {50, 0})
-                            doGain({silver=pay})
-                            self.predictTarget.workNum = 0
-                        --去农田
-                        --去商店
-                        --去铁匠铺
-                        elseif self.predictTarget.workNum > 0 then
-                            getNum = self.predictTarget.workNum
-                            local sp = CCSprite:create("silver.png")
-                            local p = getPos(self.predictTarget.bg)
-                            self.map.bg:addChild(sp)
-                            setPos(sp, p)
-                            local rx = math.random(20)-10
-                            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                            local num = ui.newBMFontLabel({text=str(self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)), font="bound.fnt", size=30})
-                            sp:addChild(num)
-                            setPos(num, {50, 0})
-                            doGain({silver=self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)})
-                            self.predictTarget.workNum = 0
-                        end
-                        if Logic.inNew and not Logic.buyIt then
-                            Logic.buyIt = true
-                            local w = Welcome2.new(self.onBuy, self)
-                            w:updateWord("好了，那么我就收购食材<0000ff"..getNum..">个，并付给你<0000ff"..getNum.."贯>")
-                            global.director:pushView(w, 1, 0)
-                        end
-                    else
-                        print("GO AWAY Now!")
-                        self.state = PEOPLE_STATE.GO_AWAY
-                        self.changeDirNode:runAction(sequence({fadeout(1), callfunc(nil, removeSelf, self.bg)}))
-                        self.map.mapGridController:removeSoldier(self)
                     end
+
                 else
                     self:beforeHandle()
                     if self.realTarget.data.kind == 5 then
@@ -858,8 +810,8 @@ function MiaoPeople:calcG(x, y)
     --是建筑物 不能穿过
     if buildCell[key] ~= nil then
         local n = buildCell[key][#buildCell[key]][1]
-        --不是道路 也不是 桥梁
-        if n.picName ~= 't' and n.id ~= 3 then
+        --不是道路 也不是 桥梁 也不是村落入口点
+        if n.picName ~= 't' and n.id ~= 3 and n.id ~= 32 then
             dist = 100
         end
         --[[
@@ -961,7 +913,7 @@ function MiaoPeople:checkNeibor(x, y)
                 bb = buildCell[key][#buildCell[key]][1]
                 if bb.operate then
                     --道路或者 桥梁 建造好的建筑物
-                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or (bb.picName == 'build' and bb.id == 3)) then
+                    if bb.state == BUILD_STATE.FREE and (bb.picName == 't' or bb.id == 3 or bb.id == 32) then
                         hasRoad = true
                         --print("buildCell Kind Road")
                     else

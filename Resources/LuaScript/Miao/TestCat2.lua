@@ -29,6 +29,8 @@ CAT_ACTION = {
 
     --运送矿石到采矿场
     --BACK_STONE = 14,
+    --走到村落的入口点位置
+    MOVE_VILLAGE_ENTRY = 19,
 }
 
 Cat2 = class(FuncPeople)

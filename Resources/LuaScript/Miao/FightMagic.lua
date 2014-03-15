@@ -276,22 +276,10 @@ function FightMagic:waitAttack(diff)
                         if dy < 5 then
                             self.soldier.state = FIGHT_SOL_STATE.FIGHT_BACK
                         end
-                    --[[
-                    elseif dis <= FIGHT_NEAR_RANGE then
-                        self.soldier.changeDirNode:stopAllActions()
-                        self.soldier.state = FIGHT_SOL_STATE.NEAR_ATTACK
-                        print("WAIT_MOVE  NEAR_ATTACK")
-                        self.oneAttack = false
-                        self.attackAni = sequence({CCAnimate:create(self.soldier.attackA), callfunc(self, self.doHarm)})
-                        self.soldier.changeDirNode:runAction(self.attackAni)
-                    --]]
                     --足够靠近才反击
-                    elseif dis < 400 then
+                    elseif dis < 400 and not self.soldier.attackTarget.footFar then
                         --攻击目标已经开始 攻击别人了 则 我主动靠近即可
-                        --if self.soldier.attackTarget.state == FIGHT_SOL_STATE.IN_ATTACK then
                         self.soldier.state = FIGHT_SOL_STATE.NEAR_MOVE
-                        --self.soldier:moveOneStep(diff)
-                        --end
                     end
 
                 --移动靠近我的 弓箭手 

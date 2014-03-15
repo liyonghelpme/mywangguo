@@ -130,13 +130,13 @@ function FightMenu:showArenaInfo(city)
                     local edata = Logic.buildings[v]
                     self['goods'..gid]:setString(edata.name)
                     setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
-                    local sca = getSca(self['g'..gid], {21, 18})
+                    local sca = getSca(self['g'..gid], {40, 40})
                     setScale(self['g'..gid], sca)
                     gid = gid+1
                 elseif rew[1] == 'gold' then
                     self['goods'..gid]:setString(rew[3])
-                    setTexOrDis(self['g'..gid], '#silverIcon.png')
-                    local sca = getSca(self['g'..gid], {21, 18})
+                    setTexOrDis(self['g'..gid], 'silverIcon.png')
+                    local sca = getSca(self['g'..gid], {40, 40})
                     setScale(self['g'..gid], sca)
                     gid = gid+1
                 end
@@ -220,9 +220,10 @@ function FightMenu:showVillageInfo(city)
                 local edata = Logic.buildings[v]
                 self['goods'..gid]:setString(edata.name)
                 setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
-                local sca = getSca(self['g'..gid], {21, 18})
+                local sca = getSca(self['g'..gid], {40, 40})
                 setScale(self['g'..gid], sca)
                 gid = gid+1
+                print("build set Scale is", sca)
             end
             for i=1, gid-1, 1 do
                 setVisible(self['goods'..i], true)
@@ -302,9 +303,10 @@ function FightMenu:showCityInfo(city)
                 local edata = Logic.buildings[v]
                 self['goods'..gid]:setString(edata.name)
                 setTexOrDis(self['g'..gid], '#build'..edata.id..'.png')
-                local sca = getSca(self['g'..gid], {21, 18})
+                local sca = getSca(self['g'..gid], {40, 40})
                 setScale(self['g'..gid], sca)
                 gid = gid+1
+                print("build set Scale is", sca)
             end
             for i=1, gid-1, 1 do
                 setVisible(self['goods'..i], true)

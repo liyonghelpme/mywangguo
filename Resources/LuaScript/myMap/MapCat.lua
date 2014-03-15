@@ -156,8 +156,9 @@ function MapCat:doDir(oldPos, newPos)
 end
 
 function MapCat:gotoFight()
+    self.endCity:removeSword()
     clearFight()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
     removeSelf(self.bg)
 end
 
@@ -188,7 +189,7 @@ function MapCat:update(diff)
                 if nextPoint > #self.path then
                     if not self.showYet then
                         self.showYet = true
-                        global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self), 1, 0)
+                        global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self, {butOk=true}), 1, 0)
                         --[[
                         addBanner("部队到达目标 开战了")
                         global.director:pushScene(FightScene.new())

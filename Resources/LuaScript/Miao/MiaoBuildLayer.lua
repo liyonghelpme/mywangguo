@@ -63,19 +63,28 @@ function MiaoBuildLayer:update(diff)
     if not self.initEnvYet and self.scene.initYet  then
         self.initEnvYet = true
         self:initEnv()
+
     end
 
     if self.needInit and self.initEnvYet then
         if coroutine.status(self.coroutine) ~= 'dead' then
             print("beginInitBuild")
             print("init build")
+            local st = getTimeOfDay()
             coroutine.resume(self.coroutine, self)
+            local et = getTimeOfDay()
+            --OldPrint("diffTime", et-st, st, et)
         --dead then init other
         else
             print("init others")
             self:initCat()
             self:initRoad()
             self:initBackPoint()
+            --防止这个entry 和 其它建筑物 重叠在一起了
+            --忽略掉这个entry即可建筑物冲突的时候
+            --逻辑Layer图层检测
+            self:initVillageEntry()
+            --寻路villageEntry 也可以
             self.initYet = true
             --self.scene.initDataing = false
             self.needInit = false
@@ -89,7 +98,10 @@ function MiaoBuildLayer:update(diff)
         --正在搜索路径则 不要添加新的商人
         if publicMiaoPath ~= nil and publicMiaoPath.inSearch then
         else
-            self:addPeople(8)
+            --建造房子的阶段结束了 开始进入商人阶段
+            if Logic.newStage >= 6 then
+                self:addPeople(8)
+            end
         end
     end
 end
@@ -153,6 +165,23 @@ function MiaoBuildLayer:initCat()
     end
 end
 
+--会导致和道路重叠在一起了road 对象怎么办呢?
+function MiaoBuildLayer:initVillageEntry()
+    local ax, ay = 20, 24
+    local width = self.scene.width
+    local height = self.scene.height
+    local cx, cy = newAffineToCartesian(ax, ay, width, height, MapWidth/2, FIX_HEIGHT)
+
+    local b = MiaoBuild.new(self, {picName='villageEntry', id=32})
+    local p = normalizePos({cx, cy}, 1, 1)
+    b:setPos(p)
+    b:setColPos()
+    self:addBuilding(b, MAX_BUILD_ZORD)
+    b:setPos(p)
+    b:finishBuild()
+
+    self.villageEntry = b
+end
 
 function MiaoBuildLayer:initBackPoint()
     local b = MiaoBuild.new(self, {picName='backPoint', id=23})
@@ -178,6 +207,14 @@ function MiaoBuildLayer:initBackPoint()
     b:finishBuild()
     self.backPoint = b
 end
+
+--空旋转一会
+function MiaoBuildLayer:initBuildDebug()
+    for i=0, 200, 1 do
+        coroutine.yield()
+    end
+end
+
 function MiaoBuildLayer:initBuild()
     if DEBUG_BUILD then
         self:initBuildOld()
@@ -196,23 +233,49 @@ function MiaoBuildLayer:initBuild()
         v.ax = nil
         v.ay = nil
 
+        --100 ms 的处理
+        --lua 进入coroutine 消耗3-4ms
+        local sst = getTimeOfDay()
+        --OldPrint("initBuild Kind", v.bid, v.id, sst)
+        
+        --50ms
         --work data
         local b = MiaoBuild.new(self, v)
         b:setWork(v)
 
         local p = {v.px, v.py}
         b:setPos(p)
+
+        --12ms
+        local st = getTimeOfDay()
         b:setColPos()
+        local et = getTimeOfDay()
+        --OldPrint("col Time", st, et, et-st)
+
+        --10ms
         self:addBuilding(b, MAX_BUILD_ZORD)
         b:setPos(p)
+        --local et = getTimeOfDay()
+        --print("check col Time", et-st, st, et)
+
+        --23ms
         --道路需要调用这个调整斜坡
+        local st = getTimeOfDay()
         b.funcBuild:whenColNow()
         b.funcBuild:adjustRoad()
+        local et = getTimeOfDay()
+        --OldPrint("road Time", st, et, et-st)
+
+        --9ms
         b:finishBuild()
         --调整建筑物方向
         b:doSwitch()
         mbid = math.max(v.bid, mbid)
         --end
+        local eet = getTimeOfDay()
+        --OldPrint("handle Time", sst, eet, eet-sst)
+
+        --5ms
         coroutine.yield()
     end
     mbid = mbid+1
@@ -321,6 +384,7 @@ function MiaoBuildLayer:initDataOver()
     self.needInit = true
     self.initEnvYet = false
     self.coroutine = coroutine.create(self.initBuild)
+    --self.coroutine = coroutine.create(self.initBuildDebug)
 
     --[[
     self:initBuild()

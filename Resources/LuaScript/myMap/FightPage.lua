@@ -11,6 +11,8 @@ require "myMap.PagePath"
 FightPage = class()
 function FightPage:ctor()
     self.bg = CCLayer:create()
+    self.cityLight = setVisible(addNode(self.bg), false)
+    self.lightNode = addNode(self.cityLight)
     
     initTextureData("bigMap1.png")
     initTextureData("bigMap2.png")
@@ -78,6 +80,21 @@ function FightPage:initData()
                 self.mainCity = ci
             end
             self.cidToCity[ci.cid] = ci
+
+            --初始化城堡
+            --if ci.realId == 1 then
+                print("show clear", v[1], v[2])
+                local sp = createSprite("clear.png")
+                setAnchor(setScale(setPos(addChild(self.lightNode, sp), {v[1], v[2]}), 2), {0.5, 0.5})
+                local bf = ccBlendFunc()
+                bf.src = GL_DST_COLOR
+                bf.dst = GL_ZERO
+                sp:setBlendFunc(bf)
+
+                ci.lightNode = sp
+
+                --local sp2 = setPos(addChild(self.lightNode, createSprite("whitebox.png")), {v[1], v[2]})
+            --end
         end
     end
 
@@ -93,6 +110,15 @@ function FightPage:initData()
             --realId
             self.allVillage[vil.realId] = vil
             self.cidToCity[vil.cid] = vil
+
+            local sp = createSprite("clear.png")
+            setAnchor(setScale(setPos(addChild(self.lightNode, sp), {v[1], v[2]}), 2), {0.5, 0.5})
+            local bf = ccBlendFunc()
+            bf.src = GL_DST_COLOR
+            bf.dst = GL_ZERO
+            sp:setBlendFunc(bf)
+
+            vil.lightNode = sp
         end
     end
 
@@ -145,15 +171,20 @@ function FightPage:updateDebugNode(p)
 end
 --从主城到其它城市
 function FightPage:sendCat(city)
+    print("sendCat")
     local cat = MapCat.new(self, self.mainCity, city, false)
     self.cat = cat
     self.bg:addChild(cat.bg)
+    city:showSword()
 end
 
+--去村落
 function FightPage:sendCatToVillage(city)
+    print("sendCatToVillage")
     local cat = MapCat.new(self, self.mainCity, city, false, true)
     self.cat = cat
     self.bg:addChild(cat.bg)
+    city:showSword()
 end
 
 function FightPage:touchesCanceled(touches)

@@ -123,13 +123,7 @@ end
 
 --农田被拆除或者移动了
 --但是应该由人自己检测 来
---[[
-function MiaoPeople:clearWork()
-    if self.state == PEOPLE_STATE.IN_WORK then
-        self.state = PEOPLE_STATE.FREE
-    end
-end
---]]
+
 function MiaoPeople:hideSelf()
     if self.lastVisible then
         self.changeDirNode:runAction(fadeout(0.5))
@@ -679,7 +673,6 @@ function MiaoPeople:workInFactory()
                 self:sendGoods()
                 self:setDir(1, -1)
                 self:resetState()
-                --self:showSelf()
             end
         end
         --生产结束 直到运送到工厂
@@ -821,7 +814,6 @@ function MiaoPeople:workInHome(diff)
         self.lastState = PEOPLE_STATE.IN_HOME
         self.lastEndPoint = self.tempEndPoint
         self.state = PEOPLE_STATE.FREE
-        --self:showSelf()
     end
 end
 function MiaoPeople:checkMeInHouse()

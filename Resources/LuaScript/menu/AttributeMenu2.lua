@@ -60,7 +60,13 @@ function createScroll(temp, sz, content)
     local myscroll = {}
     local ssz = {width=35, height=327, maxY = 304, minY=28, totalHeight=304-28}
     local banner = setAnchor(setSize(setPos(addSprite(temp, "scrollBack.png"), {806, fixY(sz.height, 423)}), {35, 327}), {0.50, 0.50})
-    setGLProgram(banner, "blur", "Vert.h", "Frag.h")
+    --setGLProgram(banner, "blur", "Vert.h", "Frag.h")
+    local tsp = setAnchor(addChild(banner, createSprite("scrollBack.png")), {0, 0})
+    local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE
+    tsp:setBlendFunc(bf)
+    tsp:runAction(repeatForever(sequence({fadein(1), fadeout(1)})))
 
     local sp = setAnchor(setSize(setPos(addSprite(banner, "scrollPro.png"), {ssz.width/2, fixY(ssz.height, 28)}), {49, 45}), {0.50, 0.50})
     myscroll.ssz = ssz

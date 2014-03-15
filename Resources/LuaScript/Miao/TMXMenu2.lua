@@ -95,7 +95,7 @@ function TMXMenu2:onLeft()
     else
         if Logic.showMapYet then
             if global.director.curScene.name == "TMXScene" then
-                global.director:pushScene(FightMap.new())
+                global.director:pushScene(FightMap.new(), true)
             end
         end
     end

@@ -364,7 +364,22 @@ function FightSoldier2:startAttack(diff)
 end
 
 --跟随我前面的 我方士兵
+--连update 都会给pause掉么？
 function FightSoldier2:update(diff)
+    if Logic.battlePause then
+        if not self.paused then
+            self.paused = true
+            pauseNode(self.bg)
+            pauseNode(self.changeDirNode)
+        end
+        return
+    end
+    if self.paused then
+        self.paused = false
+        resumeNode(self.bg)
+        resumeNode(self.changeDirNode)
+    end
+
     self:updateLabel()
     --弓箭手 步兵 
     --骑士 步兵 之间的 防御 步兵 靠近骑兵的攻击
@@ -462,8 +477,17 @@ function FightSoldier2:doHarm()
             if bp[1] >= midScene-30 then
                 return
             end
+
         else
             if bp[1] <= midScene+30 then
+                return
+            end
+        end
+        
+        --距离太远不要 远离了
+        if self.attackTarget ~= nil and not self.attackTarget.dead then
+            local ap = getPos(self.attackTarget.bg)
+            if math.abs(ap[1]-bp[1]) > 150 then
                 return
             end
         end
@@ -497,6 +521,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     if self.dead then
         return
     end
+
     --远程攻击无效
     if self.isHero and self.heroData.skill ~= nil then
         if self.heroData.skill == 39 then
@@ -525,6 +550,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
     
     local realDefense = self.defense
     local addRate = 0
+    
     --根据是谁 发动的 攻击 步兵 弓箭手 魔法师 骑兵 来决定  是否有伤害免疫
     for k, v in ipairs(self.extraEffect) do
         --步兵减免伤害 可以叠加效果
@@ -538,6 +564,7 @@ function FightSoldier2:doHurt(harm, showBomb, whoAttack, isArrow)
             addRate = addRate+v.effect
         end
     end
+
     realDefense = math.floor(realDefense*(100+addRate)/100)
     print("realDefense is", realDefense, self.defense, addRate)
 
@@ -1120,9 +1147,13 @@ function FightSoldier2:doWinMove(left, right)
         end
     end
 end
+
+--显示主动技能的效果 例如 战术4
+--单体 技能的效果不显示 到英雄身上
 function FightSoldier2:showSkillEffect(positive)
     if self.color == 0 then
         local day = self.map.day
+        print("showKillEffect")
         if (day == 0 and self.id == 2) or (day == 1 and self.id == 1) or (day == 2 and self.id == 0) or (day == 3 and self.id == 3) then
             local bf = ccBlendFunc()
             bf.src = GL_ONE
@@ -1140,12 +1171,42 @@ function FightSoldier2:showSkillEffect(positive)
             --elseif self.map.skillEffect.kind == 2 then
             --    self.extraEffect = {kind=2, effect=self.map.skillEffect.effect}
             end
+            
+            local skData = positive[1]
+            local sname = "skill"..getSkillIcon(skData.id)..'.png'
+            local sp = setAnchor(setPos(createSprite(sname), {0, 70}), {76/128, 54/128})
+            self.bg:addChild(sp)
+            local p = getPos(self.bg)
+            --加亮一下图标可以么?
+            --local wt = (math.sin(p[1]+p[2])+1.0)/2*0.5
+            local en = #self.extraEffect*30
+            --相对于被动技能偏移位置
+            sp:runAction(sequence({fadein(1), jumpBy(0.5, 0+en, 20, 20, 1), delaytime(1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+            local rd = (math.sin(p[1]+p[2])+1.0)/2*0.2+0.7
+            setScale(sp, rd)
+            --local rot = (math.sin(p[1]+p[2])+1.0)/2*60-30
+            --setRotation(sp, rot)
+           
+            --sp:runAction(repeatForever(sequence({rotateto(0.5, 30), rotateto(0.5, -30)})))
+
+            if skData.hasLevel > 0 then
+                local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.00}), {76-22+1, 54-25+8})
+            end
         end
     end
 end
 
+--初始化被动技能
+--战斗开始的时候 
+--回合结束的时候也会重新初始化一下
 function FightSoldier2:initPassivitySkill()
+    --敌方士兵不初始化 被动技能
+    --显示的技能的数量
+    self.skillNum = 0
     self.extraEffect = {}
+    if self.color == 1 then
+        return
+    end
     local heros = self.map.allHero
     local he
     if self.id == 0 then
@@ -1165,6 +1226,7 @@ function FightSoldier2:initPassivitySkill()
             local skData = Logic.skill[v.heroData.skill]
             print("initPassivitySkill", self.sid, simple.encode(skData))
             --耐步兵 弓箭 魔法 骑兵
+            local showIt = true
             if skData.kind == 2 then
                 table.insert(self.extraEffect, {kind=2, effect=skData.effect})
             elseif skData.kind == 3 then
@@ -1173,6 +1235,29 @@ function FightSoldier2:initPassivitySkill()
                 table.insert(self.extraEffect, {kind=4, effect=skData.effect})
             elseif skData.kind == 5 then
                 table.insert(self.extraEffect, {kind=5, effect=skData.effect})
+            else
+                showIt = false
+            end
+
+            if showIt then
+                local sname = "skill"..getSkillIcon(skData.id)..'.png'
+                local sp = setAnchor(setPos(createSprite(sname), {0, 70}), {76/128, 54/128})
+                self.bg:addChild(sp)
+                --加亮一下图标可以么?
+                sp:runAction(sequence({fadein(1), jumpBy(0.5, 0, 20, 20, 1), delaytime(1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+                local p = getPos(self.bg)
+                local rd = (math.sin(p[1]+p[2])+1.0)/2*0.2+0.7
+                setScale(sp, rd)
+                --local rot = (math.sin(p[1]+p[2])+1.0)/2*60-30
+                --setRotation(sp, rot)
+               
+                --sp:runAction(repeatForever(sequence({rotateto(0.5, 30), rotateto(0.5, -30)})))
+
+                if skData.hasLevel > 0 then
+                    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.00}), {76-22+1, 54-25+8})
+                end
+                --发光效果?
+                self.skillNum = self.skillNum+1
             end
         end
     end

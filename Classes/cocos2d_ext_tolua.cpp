@@ -8,6 +8,33 @@
 using namespace cocos2d;
 using namespace cocos2d::extension;
 
+
+/* method: convert a CCNode to CCSprite */
+#ifndef TOLUA_DISABLE_tolua_Cocos2d_getTimeOfDay00
+static int tolua_Cocos2d_getTimeOfDay00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if(
+	 !tolua_isnoobj(tolua_S,1,&tolua_err)
+	 )
+  goto tolua_lerror;
+ else
+#endif
+ {
+    double d = getTimeOfDay();
+	tolua_pushnumber(tolua_S, (lua_Number)d);
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function getTimeOfDay.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+
 /* method: convert a CCNode to CCSprite */
 #ifndef TOLUA_DISABLE_tolua_Cocos2d_convertToSprite00
 static int tolua_Cocos2d_convertToSprite00(lua_State* tolua_S)
@@ -1713,6 +1740,7 @@ TOLUA_API int tolua_ext_reg_types(lua_State* tolua_S)
 
 TOLUA_API int tolua_ext_reg_modules(lua_State* tolua_S)
 {
+  tolua_function(tolua_S,"getTimeOfDay", tolua_Cocos2d_getTimeOfDay00);
   tolua_function(tolua_S,"convertToSprite", tolua_Cocos2d_convertToSprite00);
   tolua_function(tolua_S,"initTextureData", tolua_Cocos2d_initTextureData00);
   tolua_function(tolua_S,"setGLProgram", tolua_Cocos2d_setGLProgram00);

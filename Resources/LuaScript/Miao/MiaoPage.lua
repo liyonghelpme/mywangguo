@@ -75,7 +75,9 @@ function MiaoPage:initView()
     local width = mj.width
     local height = mj.height
     self.width = width
+    MapAX = width
     self.height = height
+    MapAY = height
 
     local tilesets = mj.tilesets
     self.tilesets = tilesets
@@ -554,9 +556,13 @@ function MiaoPage:initGameStage()
     for k, v in ipairs(Logic.stage2Center) do
         if not Logic.openMap[hideBlock[k]] then
             local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-            local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onLand, param=hideBlock[k]})
-            setPos(addChild(self.bg, sp.bg), {cx, cy})
+            --local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onLand, param=hideBlock[k]})
+            --setPos(addChild(self.bg, sp.bg), {cx, cy})
+            local sp = self:makeFly(self.onLand, hideBlock[k])
+            addChild(self.bg, setPos(sp.bg, {cx, cy}))
+
             self.allFly[hideBlock[k]] = sp
+
         end
     end
     --点击使用 土地使用证来交换
@@ -623,6 +629,7 @@ function MiaoPage:onLand(p)
         self:removeOpenMapFence()
 
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        self:showAllFly()
     end
 end
 function MiaoPage:initWoodAndMine(landId)
@@ -657,8 +664,8 @@ function MiaoPage:initWoodAndMine(landId)
     end
     if landHasWood and not hasWood then
         --增加若干个木材建筑物
-        addBanner("发现了木材")
-        addBanner("新增加伐木场建筑物")
+        --addBanner("发现了木材")
+        --addBanner("新增加伐木场建筑物")
         addNewBuild(29)
         addNewBuild(19)
     end
@@ -671,8 +678,8 @@ function MiaoPage:initWoodAndMine(landId)
         end
     end
     if landHasMine and not hasMine then
-        addBanner("发现了坑道")
-        addBanner("新增加采矿场建筑物")
+        --addBanner("发现了坑道")
+        --addBanner("新增加采矿场建筑物")
         addNewBuild(28)
         addNewBuild(12)
     end
@@ -829,7 +836,8 @@ function MiaoPage:initExtendLand()
         for k, v in ipairs(newCenter) do
             if not Logic.openMap[hideBlock[k]] then
                 local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-                local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onExtendLand2, param=hideBlock[k]})
+                --local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onExtendLand2, param=hideBlock[k]})
+                local sp = self:makeFly(self.onExtendLand2, hideBlock[k])
                 setPos(addChild(self.bg, sp.bg), {cx, cy})
                 --对应地图块编号的 fly
                 self.allFly[hideBlock[k]] = sp
@@ -896,6 +904,13 @@ function MiaoPage:openNearLand(p)
     end    
 end
 
+function MiaoPage:showAllFly()
+    for k, v in pairs(self.allFly) do
+        if checkShowFly(k) then
+            setVisible(v.bg, true)
+        end
+    end
+end
 
 function MiaoPage:onExtendLand2(p)
     local landId = p
@@ -908,20 +923,12 @@ function MiaoPage:onExtendLand2(p)
                 return
             end
         end
-        if Logic.blockNeibor[landId] ~= nil then
-            local oy = false
-            for k, v in ipairs(Logic.blockNeibor[landId]) do
-                if Logic.openMap[v] then
-                    oy = true
-                    break
-                end
-            end
-            if not oy then
-                addBanner("请先开发临近的块")
-                return
-            end
+        local sf = checkShowFly(landId)
+        if not sf then
+            addBanner("请先开发临近的块")
+            return
         end
-         
+        
 
         addBanner("开放土地块"..landId)
 
@@ -964,6 +971,7 @@ function MiaoPage:onExtendLand2(p)
         self:removeOpenMapFence()
 
         Event:sendMsg(EVENT_TYPE.ROAD_CHANGED)
+        self:showAllFly()
     end
 end
 
@@ -1093,7 +1101,8 @@ function MiaoPage:stageOneToTwo()
     for k, v in ipairs(Logic.stage2Center) do
         if not Logic.openMap[hideBlock[k]] then
             local cx, cy = axyToCxyWithDepth(v[1], v[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-            local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onLand, param=hideBlock[k]})
+            --local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onLand, param=hideBlock[k]})
+            local sp = self:makeFly(self.onLand, hideBlock[k])
             setPos(addChild(self.bg, sp.bg), {cx, cy})
             self.allFly[hideBlock[k]] = sp
         end
@@ -1191,14 +1200,25 @@ function MiaoPage:maskMap()
         print("bound range", simple.encode(br))
         self.touchDelegate.boundRange = br
 
-        if Logic.curVillage < 4 then
-            local cc = Logic.villageCenter[Logic.curVillage]
-            local cx, cy = axyToCxyWithDepth(cc[1], cc[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
-            local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onBut, param=1})
-            setPos(addChild(self.bg, sp.bg), {cx, cy})
-            self.fly = sp
+        --新手阶段 完成直接显示 旗帜
+        if Logic.newStage >= 18 then
+            if Logic.curVillage < 4 then
+                local cc = Logic.villageCenter[Logic.curVillage]
+                local cx, cy = axyToCxyWithDepth(cc[1], cc[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+                local sp = ui.newButton({image="fly.png", conSize={74, 97}, delegate=self, callback=self.onBut, param=1})
+                setPos(addChild(self.bg, sp.bg), {cx, cy})
+                local ani = createAnimation("flyNew", "fnew%d.png", 0, 3, 1, 1, true)
+                self.fly = sp
+                self.fly.sp:runAction(repeatForever(CCAnimate:create(ani)))
+
+                local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="可以攻略", color={0, 0, 0}, size=25, callback=self.onBut, param=1})
+                self.fly.bg:addChild(homeLabel.bg)
+                setPos(homeLabel.bg, {0, -60})
+                homeLabel.bg:runAction(repeatForever(jumpBy(1, 0, 0, 10, 1)))
+
+            end
         end
-        
+
         --删除对应的新手村的 fence 对象
         self:removeOpenMapFence()
 
@@ -1208,6 +1228,60 @@ function MiaoPage:maskMap()
         --self:removeOpenMapFence()
     end
 end
+function MiaoPage:makeFly(f, p)
+    --local temp = CCNode:create()
+
+    local sp = ui.newButton({image="fnew0.png", conSize={128, 128}, delegate=self, callback=f, param=p})
+    --setPos(addChild(temp, sp.bg), {cx, cy})
+    --addChild(temp, sp.bg)
+
+    local ani = createAnimation("flyNew", "fnew%d.png", 0, 3, 1, 0.3, true)
+    sp.sp:runAction(repeatForever(CCAnimate:create(ani)))
+    --sp.sp:runAction(sequence({fadeout(0), delaytime(0.8), fadein(0.25), jumpBy(0.5, 0, 0, 20, 1)}))
+    --self:moveToPoint(cx, cy)
+
+    local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="可以开发", color={0, 0, 0}, size=25, delegate=self, callback=f, param=p})
+    sp.bg:addChild(homeLabel.bg)
+    setPos(homeLabel.bg, {0, -60})
+    homeLabel.bg:runAction(repeatForever(jumpBy(1, 0, 0, 10, 1)))
+    --homeLabel.bg:runAction(sequence({disappear(homeLabel.bg), delaytime(0.8), appear(homeLabel.bg), jumpBy(0.5, 0, 20, 25, 1)}))
+    --return temp
+
+    --对于
+    local sf = checkShowFly(p)
+    if not sf then
+        setVisible(sp.bg, false)
+    end
+    return sp
+end
+
+
+function MiaoPage:showFly()
+    if self.fly == nil then
+        if Logic.curVillage < 4 then
+            print("showFly")
+            local cc = Logic.villageCenter[Logic.curVillage]
+            local cx, cy = axyToCxyWithDepth(cc[1], cc[2], self.width, self.height, MapWidth/2, FIX_HEIGHT, self.mask)
+
+            local sp = ui.newButton({image="fnew0.png", conSize={128, 128}, delegate=self, callback=self.onBut, param=1})
+            setPos(addChild(self.bg, sp.bg), {cx, cy})
+            self.fly = sp
+            local ani = createAnimation("flyNew", "fnew%d.png", 0, 3, 1, 0.3, true)
+            self.fly.sp:runAction(repeatForever(CCAnimate:create(ani)))
+
+            self.fly.sp:runAction(sequence({fadeout(0), delaytime(0.8), fadein(0.25), jumpBy(0.5, 0, 0, 20, 1)}))
+            self:moveToPoint(cx, cy)
+
+
+            local homeLabel = ui.newButton({image="info.png", conSize={130, 50}, text="可以攻略", color={0, 0, 0}, size=25, callback=self.onBut, param=1})
+            self.fly.bg:addChild(homeLabel.bg)
+            setPos(homeLabel.bg, {0, -60})
+            homeLabel.bg:runAction(repeatForever(jumpBy(1, 0, 0, 10, 1)))
+            homeLabel.bg:runAction(sequence({disappear(homeLabel.bg), delaytime(0.8), appear(homeLabel.bg), jumpBy(0.5, 0, 20, 25, 1)}))
+        end
+    end
+end
+
 
 function MiaoPage:removeOpenMapFence()
     --删除第二阶段里面 和 第一阶段里面的所有篱笆
@@ -1310,6 +1384,9 @@ end
 --点击某个建筑物 进入移动状态 
 --原地还有这个建筑物 不过 新的 替换成了这个建筑物 的 图像 可以移动 桥梁 普通建筑物   道路不能移动
 function MiaoPage:touchesBegan(touches)
+    if self.inMove then
+        return
+    end
     --self.touchBuild = nil
     --self.lastPos = convertMultiToArr(touches)
     self.touchDelegate:tBegan(touches)
@@ -1366,6 +1443,10 @@ function MiaoPage:touchesBegan(touches)
     --end
 end
 function MiaoPage:touchesMoved(touches)
+    if self.inMove then
+        return
+    end
+
     print("MiaoPage toucesMoved", self.touchBuild)
     if self.touchBuild then
         self.touchBuild:touchesMoved(touches)
@@ -1375,6 +1456,8 @@ function MiaoPage:touchesMoved(touches)
     end
 end
 function MiaoPage:moveToPoint(x, y)
+    self.inMove = true   
+
     local wp = self.bg:convertToWorldSpace(ccp(x, y))
     local vs = getVS()
     local dx, dy = vs.width/2-wp.x, vs.height/2-wp.y
@@ -1390,15 +1473,27 @@ function MiaoPage:moveToPoint(x, y)
     my = math.max(my, vs.height-sz.height*sca)
     local function finishMov()
         self.moveAct = nil
+        self.inMove = false
     end
     if self.moveAct ~= nil then
         self.bg:stopAction(self.moveAct)
         self.moveAct = nil
     end
+
+    self.touchDelegate.targetMove = {mx, my}
+    self.bg:runAction(sequence({delaytime(0.2), callfunc(nil, finishMov)}))
+    
+    --[[
     self.moveAct = sequence({moveto(0.2, mx, my), callfunc(nil, finishMov)})
     self.bg:runAction(self.moveAct)
+    --]]
 end
 function MiaoPage:touchesEnded(touches)
+    --不处理 但是有可能存在bug
+    if self.inMove then
+        return
+    end
+
     self.touchDelegate:tEnded(touches)
 
     --处理完 blockMove 之后 再清理 blockMove
@@ -1518,6 +1613,7 @@ function MiaoPage:finishBuild()
         print("finishBuild", self.curBuild.picName, self.curBuild.id)
         --桥梁建河流上
         self.curBuild:finishBuild()
+        self.curBuild:showFinishLabel()
         --table.insert(Logic.newBuild, self.curBuild)
         self.curBuild = nil
         --end

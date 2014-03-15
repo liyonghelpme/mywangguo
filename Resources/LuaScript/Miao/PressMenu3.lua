@@ -98,11 +98,23 @@ function PressMenu3:onTab(p)
         self:setSelect(p[2])
     end
 end
+
+--4 
+function PressMenu3:onNew()
+    Logic.newStage = Logic.newStage+1
+end
+
+
 function PressMenu3:onBut(p)
+    --global.director:pushView(NewPeople.new(), 1, 0)
     if p[2] == 1  then
         global.director:popView()
         local m = NewBuildMenu3.new()
         global.director:pushView(m, 1 )
+        if Logic.newStage == 3 then
+            global.director:pushView(SessionMenu.new("首先从环境中选择 农家建筑物吧", self.onNew, self, {butOk=true}), 1, 0)
+        end
+
     elseif p[2] == 2 and  self.first then
         local m = PeopleMenu3.new(self)
         self.bg:addChild(m.bg)
