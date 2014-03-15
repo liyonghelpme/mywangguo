@@ -27,11 +27,16 @@ function FightMap:ctor()
 
 
     self.mistRender = CCRenderTexture:create(vs.width, vs.height)
+    --setVisible(self.mistRender, false)
+
     self.bg:addChild(self.mistRender)
     setPos(self.mistRender, {vs.width/2, vs.height/2})
     --setVisible(self.mistRender)
     local sp = self.mistRender:getSprite()
     local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE_MINUS_SRC_ALPHA
+    sp:setBlendFunc(bf)
     
 
     self.menu = FightMenu.new(self)
@@ -43,15 +48,17 @@ function FightMap:ctor()
 end
 
 function FightMap:update(diff)
-    self.mistRender:beginWithClear(0, 0, 0, 0)
-    self.mist:visit()
-    local p = getPos(self.page.bg)
-    local sca = getScale(self.page.bg)
-    setScale(setPos(self.page.lightNode, p), sca)
+    --if not self.rend then
+    --    self.rend = true
+        self.mistRender:beginWithClear(0, 0, 0, 0)
+        self.mist:visit()
+        local p = getPos(self.page.bg)
+        local sca = getScale(self.page.bg)
+        setScale(setPos(self.page.lightNode, p), sca)
 
-    self.page.lightNode:visit()
-    self.mistRender:endToLua()
-
+        self.page.lightNode:visit()
+        self.mistRender:endToLua()
+    --end
 end
 
 

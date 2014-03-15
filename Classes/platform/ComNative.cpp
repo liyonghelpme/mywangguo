@@ -103,7 +103,9 @@ void initTextureData(char *name) {
         unsigned int height = pImage->getHeight();
 
         bool hasAlpha = pImage->hasAlpha();
+        CCLog("hasAlpha %d", hasAlpha);
         CCSize imageSize = CCSizeMake((float)(pImage->getWidth()), (float)(pImage->getHeight()));
+        
         CCTexture2DPixelFormat pixelFormat;
         pixelFormat = kCCTexture2DPixelFormat_RGB565;
         unsigned int length = width*height;
@@ -130,17 +132,22 @@ void initTextureData(char *name) {
                 (((*inPixel8++ & 0xFF) >> 2) << 5) |
                 (((*inPixel8++ & 0xFF) >> 3) << 0);
 			*/
-		
+		CCLog("length is %d", length);
+        //rgb 888  rgb565
         for(unsigned int i=0; i < length; i++) {
 			unsigned int r = *inPixel8++;
 			unsigned int g = *inPixel8++;
 			unsigned int b = *inPixel8++;
+            if(hasAlpha == 1){
+                inPixel8++;
+            }
             
 			*outPixel16++ = ((r>>3) << 11) | ((g>>2) << 5) | (b>>3);
-			
-			if(i < 1000) {
-				//CCLog("%x %x %x %x", r, g, b, *(outPixel16-1));
+			/*
+			if(i < 100) {
+				CCLog("%x %x %x %x", r, g, b, *(outPixel16-1));
 			}
+            */
 			//inPixel8++;
 			//inPixel8++;
 			
