@@ -394,6 +394,24 @@ Logic.IncCost = {
     {20, 20, 400},
     {10, 20, 500},
 }
+--升级价格遵循 等差 等差数列关系 200 + 200+n*k  n 等级 k 差值
+--200
+--200+200 = 400
+--400+200+k = 600+k
+--600+k+200+2*k = 800+3*k
+--
+-- k1* x*x + k2*x + k3 = 
+-- k3 = 200
+-- k1+k2 = 216
+-- 4k1+k2 = 448 
+-- k1 = 77
+-- k2 = 149
+-- k3 = 200
+function getIncCost(kind, level)
+    local initV = Logic.IncCost[kind][3]
+    return 77*(level-1)*(level-1)+149*(level-1)+initV
+end
+
 --等级 数量 当前训练士兵的阶梯
 Logic.soldiers = {
     [1] = {1, 50},

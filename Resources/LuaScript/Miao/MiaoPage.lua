@@ -662,8 +662,8 @@ function MiaoPage:initWoodAndMine(landId)
     end
     if landHasWood and not hasWood then
         --增加若干个木材建筑物
-        addBanner("发现了木材")
-        addBanner("新增加伐木场建筑物")
+        --addBanner("发现了木材")
+        --addBanner("新增加伐木场建筑物")
         addNewBuild(29)
         addNewBuild(19)
     end
@@ -676,8 +676,8 @@ function MiaoPage:initWoodAndMine(landId)
         end
     end
     if landHasMine and not hasMine then
-        addBanner("发现了坑道")
-        addBanner("新增加采矿场建筑物")
+        --addBanner("发现了坑道")
+        --addBanner("新增加采矿场建筑物")
         addNewBuild(28)
         addNewBuild(12)
     end
@@ -927,22 +927,6 @@ function MiaoPage:onExtendLand2(p)
             return
         end
         
-        --[[
-        if Logic.blockNeibor[landId] ~= nil then
-            local oy = false
-            for k, v in ipairs(Logic.blockNeibor[landId]) do
-                if Logic.openMap[v] then
-                    oy = true
-                    break
-                end
-            end
-            if not oy then
-                addBanner("请先开发临近的块")
-                return
-            end
-        end
-        --]]
-
 
         addBanner("开放土地块"..landId)
 

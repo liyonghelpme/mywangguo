@@ -84,7 +84,8 @@ function IncSoldierMenu:updateBut(n)
     else
         setColor(nword[1], {255, 255, 255})
         nword[2]:setString(s[2])
-        local cost = math.floor(math.pow(1.5, s[1]-1)*Logic.IncCost[n][3])
+        --local cost = math.floor(math.pow(1.5, s[1]-1)*Logic.IncCost[n][3])
+        local cost = getIncCost(n, s[1])
         nword[3]:setString(cost..'银币')
         if not checkCost(cost) then
             setColor(nword[3], {254, 7, 1})
@@ -120,7 +121,8 @@ function IncSoldierMenu:onBut(param)
         if solData[1] == 0 then
         elseif solData[2] >= 999 then
         else
-            local cost = math.floor(math.pow(1.5, solData[1]-1)*Logic.IncCost[self.selNum][3])
+            --local cost = math.floor(math.pow(1.5, solData[1]-1)*Logic.IncCost[self.selNum][3])
+            local cost = getIncCost(self.selNum, solData[1])
             if not checkCost(cost) then
                 addBanner("银币不足")
             else
