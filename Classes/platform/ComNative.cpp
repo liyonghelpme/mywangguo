@@ -218,6 +218,7 @@ int gettimeofday(struct mytimeval *tv, struct mytimezone *tz)
  
 
 //#include "stdafx.h"
+/*
 #include <time.h>
 #include <windows.h> 
 
@@ -225,16 +226,16 @@ const __int64 DELTA_EPOCH_IN_MICROSECS= 11644473600000000;
 
 struct timezone2 
 {
-  __int32  tz_minuteswest; /* minutes W of Greenwich */
-  bool  tz_dsttime;     /* type of dst correction */
+  __int32  tz_minuteswest;
+  bool  tz_dsttime;
 };
 
 struct timeval2 {
-__int32    tv_sec;         /* seconds */
-__int32    tv_usec;        /* microseconds */
+__int32    tv_sec;
+__int32    tv_usec;
 };
 
-int gettimeofday(struct timeval2 *tv/*in*/, struct timezone2 *tz/*in*/)
+int gettimeofday(struct timeval2 *tv, struct timezone2 *tz)
 {
   FILETIME ft;
   __int64 tmpres = 0;
@@ -249,9 +250,7 @@ int gettimeofday(struct timeval2 *tv/*in*/, struct timezone2 *tz/*in*/)
     tmpres = ft.dwHighDateTime;
     tmpres <<= 32;
     tmpres |= ft.dwLowDateTime;
-
-    /*converting file time to unix epoch*/
-    tmpres /= 10;  /*convert into microseconds*/
+    tmpres /= 10;  
     tmpres -= DELTA_EPOCH_IN_MICROSECS; 
     tv->tv_sec = (__int32)(tmpres*0.000001);
     tv->tv_usec =(tmpres%1000000);
@@ -264,7 +263,7 @@ int gettimeofday(struct timeval2 *tv/*in*/, struct timezone2 *tz/*in*/)
 
   return 0;
 }
-
+*/
 /*
 float getTimeOfDay() {
     float t = GetTickCount();

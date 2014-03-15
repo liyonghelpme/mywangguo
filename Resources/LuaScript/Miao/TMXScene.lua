@@ -416,9 +416,10 @@ function TMXScene:update(diff)
             self.page:stageOneToTwo()
         end
         if Logic.curVillage >= 4 and not Logic.showMapYet then
-            addBanner("大地图功能开启了")
+            --addBanner("大地图功能开启了")
             Logic.showMapYet = true
             self.menu:adjustLeftShow()
+            global.director:pushView(SessionMenu.new("大人！恭喜你统一了村落，大地图功能现在开启了！", nil, nil, {butOk=true}), 1, 0)
         end
     end
 
@@ -678,10 +679,12 @@ function TMXScene:newVillageWin(w)
             print("newPeople is who", simple.encode(Logic.newPeople), cp)
             addNewPeople(cp)
             --showPeopleInfo(cp)
+            --[[
             for k, v in ipairs(cp) do
                 local pd = Logic.people[v]
                 addBanner("可以启用"..pd.name)
             end
+            --]]
         end
 
 
@@ -691,12 +694,13 @@ function TMXScene:newVillageWin(w)
             self.page:adjustFly()
         --最后获得 工厂和商店
             if Logic.curVillage == 2 then
-                addBanner("获得小甲")
+                --addBanner("获得小甲")
                 --table.insert(Logic.ownGoods, {0, 47})
                 storeAddNewEquip(47)
+                addDialog(NewGoods.new(0, 47))
             end
         else
-            addBanner("获得工厂 和 茶屋")
+            --addBanner("获得工厂 和 茶屋")
             addNewBuild(5)
             addNewBuild(11)
             removeSelf(self.page.fly.bg)

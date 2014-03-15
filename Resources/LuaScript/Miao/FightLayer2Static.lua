@@ -233,7 +233,8 @@ function FightLayer2:oneFail()
         --global.director:popScene()
         local st = global.director.sceneStack
         local os = st[#st-1]
-        if os.name == 'FightMap' then
+        --新手村阶段
+        if os.name == 'FightMap' or Logic.newVillage then
             global.director:popScene()
         else
             global.director:replaceScene(FightMap.new())
