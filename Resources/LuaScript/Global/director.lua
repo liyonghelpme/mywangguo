@@ -15,6 +15,8 @@ function Director:ctor()
     self.emptyScene = nil
     self.controlledStack = {}
 
+    self.renderTexture = CCRenderTexture:create(vs.width, vs.height)
+    self.renderTexture:retain()
 end
 function Director:pushControlledFrag(view, dark, autoPop)
 end
@@ -127,8 +129,19 @@ function Director:replaceScene(view)
     print("replace", #self.sceneStack) 
 end
 
-function Director:pushScene(view)
-    CCDirector:sharedDirector():pushScene(view.bg)
+function Director:pushScene(view, needCapture)
+    --[[
+    if needCapture then
+        self.renderTexture:beginWithClear(0, 0, 0, 0)
+        self.curScene.bg:visit()
+        self.renderTexture:endToLua()
+    end
+    --]]
+    if needCapture then
+        CCDirector:sharedDirector():pushScene(CCTransitionFade:create(0.5, view.bg))
+    else
+        CCDirector:sharedDirector():pushScene(view.bg)
+    end
     self.curScene = view
     table.insert(self.sceneStack, view)
     print("pushScene", #self.sceneStack)

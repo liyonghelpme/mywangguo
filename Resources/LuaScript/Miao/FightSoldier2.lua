@@ -486,7 +486,7 @@ function FightSoldier2:doHarm()
         
         --距离太远不要 远离了
         if self.attackTarget ~= nil and not self.attackTarget.dead then
-            local ap = getPos(self.attackTarget)
+            local ap = getPos(self.attackTarget.bg)
             if math.abs(ap[1]-bp[1]) > 150 then
                 return
             end
@@ -1179,7 +1179,9 @@ function FightSoldier2:showSkillEffect(positive)
             local p = getPos(self.bg)
             --加亮一下图标可以么?
             --local wt = (math.sin(p[1]+p[2])+1.0)/2*0.5
-            sp:runAction(sequence({fadein(1), jumpBy(0.5, 0, 20, 20, 1), delaytime(1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
+            local en = #self.extraEffect*30
+            --相对于被动技能偏移位置
+            sp:runAction(sequence({fadein(1), jumpBy(0.5, 0+en, 20, 20, 1), delaytime(1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
             local rd = (math.sin(p[1]+p[2])+1.0)/2*0.2+0.7
             setScale(sp, rd)
             --local rot = (math.sin(p[1]+p[2])+1.0)/2*60-30
@@ -1188,7 +1190,7 @@ function FightSoldier2:showSkillEffect(positive)
             --sp:runAction(repeatForever(sequence({rotateto(0.5, 30), rotateto(0.5, -30)})))
 
             if skData.hasLevel > 0 then
-                local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {76-22+1, 54-25+8})
+                local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.00}), {76-22+1, 54-25+8})
             end
         end
     end
@@ -1199,6 +1201,8 @@ end
 --回合结束的时候也会重新初始化一下
 function FightSoldier2:initPassivitySkill()
     --敌方士兵不初始化 被动技能
+    --显示的技能的数量
+    self.skillNum = 0
     self.extraEffect = {}
     if self.color == 1 then
         return
@@ -1250,9 +1254,10 @@ function FightSoldier2:initPassivitySkill()
                 --sp:runAction(repeatForever(sequence({rotateto(0.5, 30), rotateto(0.5, -30)})))
 
                 if skData.hasLevel > 0 then
-                    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.50}), {76-22+1, 54-25+8})
+                    local w = setPos(setAnchor(addChild(sp, ui.newBMFontLabel({text=skData.hasLevel, size=17, color={255, 255, 255}, font="fonts.fnt", shadowColor={0, 0, 0}})), {0.00, 0.00}), {76-22+1, 54-25+8})
                 end
                 --发光效果?
+                self.skillNum = self.skillNum+1
             end
         end
     end

@@ -8,5 +8,5 @@ function FightHint:ctor()
 end
 function FightHint:onFight()
     global.director:popView()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
 end

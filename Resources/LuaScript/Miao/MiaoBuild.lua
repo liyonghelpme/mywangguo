@@ -1016,8 +1016,9 @@ function MiaoBuild:showFinishLabel()
     homeLabel.bg:runAction(sequence({jumpBy(4, 0, 0, 10, 4), callfunc(nil, removeSelf, homeLabel.bg)}))
 
     if Logic.newStage == 4 then
-        global.director:pushView(SessionMenu.new("太好啦！！新房子！\n一直在这里傻站着我的脚都肿啦！", onNew, nil, {butOk=true}), 1, 0)
-        Logic.lastCloseTime = Logic.date
+        Logic.newStage = 41
+        --global.director:pushView(SessionMenu.new("太好啦！！新房子！\n一直在这里傻站着我的脚都肿啦！", onNew, nil, {butOk=true}), 1, 0)
+        --Logic.lastCloseTime = Logic.date
     end
 end
 

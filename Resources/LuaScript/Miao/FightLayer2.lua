@@ -19,7 +19,7 @@ FIGHT_STATE = {
 
     FAST_BACK = 11,
     DAY = 12,
-
+    SHOW_DAY = 13,
 }
 FightLayer2 = class()
 
@@ -459,12 +459,39 @@ function FightLayer2:doFastBack(diff)
         self:adjustBattleScene(pos[1])
 
         if self.finShow then
-            self.state = FIGHT_STATE.DAY
+            self.state = FIGHT_STATE.SHOW_DAY
             self.day = 0
             self.passTime = 0
+            self.totalDay = 0
         end
     end
 end
+
+--当最后一天战斗最后一天 骑兵结束时候 回到这里
+--第三天提示合战结束了
+function FightLayer2:showDay()
+    if self.state == FIGHT_STATE.SHOW_DAY then
+        if not self.showYet then
+            self.showYet = true
+            --三天结束没有胜利
+            if self.totalDay >= 3 then
+                self:dayOver()
+            else
+                local lab = ui.newBMFontLabel({text="Day "..(self.totalDay+1), font="bound.fnt", size=40})
+                self.bg:addChild(lab)
+                local vs = getVS()
+                setPos(lab, {vs.width/2, self.HEIGHT/2})
+                local function showOver()
+                    self.showYet = false
+                    self.state = FIGHT_STATE.DAY
+                end
+                lab:runAction(sequence({fadein(0.3), jumpBy(1.5, 0, 0, 20, 1), callfunc(nil, showOver), fadeout(0.3), callfunc(nil, removeSelf, lab)}))
+                self.totalDay = self.totalDay+1
+            end
+        end
+    end
+end
+
 --士兵开始跑步 战斗 交给士兵控制
 --步兵剧本
 --弓箭手剧本
@@ -505,6 +532,7 @@ function FightLayer2:update(diff)
     self.poseRowTime = self.poseRowTime+diff
 
     self:doFree(diff)
+    self:showDay()
     self:doMove(diff)
     self:doFastBack(diff)
     self:doDay(diff)
@@ -1066,8 +1094,10 @@ function FightLayer2:initSoldier()
             print("heroData", tv.sid)
         end
     end
+    
+    --被动技能显示在 每个士兵头上
     --英雄角色的被动技能有哪些呢?
-    self:showPassivitySkill() 
+    --self:showPassivitySkill() 
 end
 
 --发动被动技能 英雄么

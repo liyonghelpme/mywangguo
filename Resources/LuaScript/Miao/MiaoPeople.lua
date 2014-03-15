@@ -566,64 +566,11 @@ function MiaoPeople:doMove(diff)
                 --首先检测目标是否移动 
                 local moved = self:checkMoved()
                 if moved or self.realTarget.deleted then
-                    --self:clearStateStack()
-                    --self:resetState()
                     self.funcPeople:buildMove()
                 elseif self.data.kind == 2 then
                     if self.actionContext ~= nil then
                         self.funcPeople:handleAction(diff)
                     end
-                    --[[
-                    --收获农作物 商店资源
-                    elseif self.goBack == nil then
-                        self.state = PEOPLE_STATE.FREE
-                        self.goBack = true
-                        self.realTarget:setOwner(nil)
-                        --开始交易 回家啦
-                        --去采矿场
-                        local getNum = 0
-                        if self.predictTarget.stone > 0 then
-                            local sp = CCSprite:create("silver.png")
-                            local p = getPos(self.predictTarget.bg)
-                            self.map.bg:addChild(sp)
-                            setPos(sp, p)
-                            local rx = math.random(20)-10
-                            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                            local pay = self.predictTarget.stone*math.floor(self.predictTarget.rate+1)
-                            local num = ui.newBMFontLabel({text=str(pay), font="bound.fnt", size=30})
-                            sp:addChild(num)
-                            setPos(num, {50, 0})
-                            doGain({silver=pay})
-                            self.predictTarget.workNum = 0
-                        --去农田
-                        --去商店
-                        --去铁匠铺
-                        elseif self.predictTarget.workNum > 0 then
-                            getNum = self.predictTarget.workNum
-                            local sp = CCSprite:create("silver.png")
-                            local p = getPos(self.predictTarget.bg)
-                            self.map.bg:addChild(sp)
-                            setPos(sp, p)
-                            local rx = math.random(20)-10
-                            sp:runAction(sequence({jumpBy(1, rx, 10, 40, 1), fadeout(0.2), callfunc(nil, removeSelf, sp)}))
-                            local num = ui.newBMFontLabel({text=str(self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)), font="bound.fnt", size=30})
-                            sp:addChild(num)
-                            setPos(num, {50, 0})
-                            doGain({silver=self.predictTarget.workNum*math.floor(self.predictTarget.rate+1)})
-                            self.predictTarget.workNum = 0
-                        end
-                        if Logic.inNew and not Logic.buyIt then
-                            Logic.buyIt = true
-                            local w = Welcome2.new(self.onBuy, self)
-                            w:updateWord("好了，那么我就收购食材<0000ff"..getNum..">个，并付给你<0000ff"..getNum.."贯>")
-                            global.director:pushView(w, 1, 0)
-                        end
-                    else
-                        print("GO AWAY Now!")
-                        self.state = PEOPLE_STATE.GO_AWAY
-                        self.changeDirNode:runAction(sequence({fadeout(1), callfunc(nil, removeSelf, self.bg)}))
-                        self.map.mapGridController:removeSoldier(self)
-                    --]]
 
                 else
                     self:beforeHandle()

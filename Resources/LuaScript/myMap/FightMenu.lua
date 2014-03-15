@@ -135,8 +135,8 @@ function FightMenu:showArenaInfo(city)
                     gid = gid+1
                 elseif rew[1] == 'gold' then
                     self['goods'..gid]:setString(rew[3])
-                    setTexOrDis(self['g'..gid], '#silverIcon.png')
-                    local sca = getSca(self['g'..gid], {21, 18})
+                    setTexOrDis(self['g'..gid], 'silverIcon.png')
+                    local sca = getSca(self['g'..gid], {40, 40})
                     setScale(self['g'..gid], sca)
                     gid = gid+1
                 end

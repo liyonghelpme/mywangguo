@@ -52,8 +52,9 @@ function ConfigMenu:initHero()
     --补全 英雄
     if #en < n then
         local inAtt = {}
+        --pid framePeople 的Id
         for k, v in ipairs(en) do
-            inAtt[v] = true 
+            inAtt[v.id] = true 
         end
         local left = n-#en
         --没有在farmPeople 中
@@ -66,6 +67,7 @@ function ConfigMenu:initHero()
                 break
             end
         end
+        Logic.attendHeroDirty = true
     end
     self:adjustAttend() 
 end
@@ -157,11 +159,11 @@ function ConfigMenu:refreshData()
 end
 
 function ConfigMenu:onArena()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
 end
 
 function ConfigMenu:onVillage()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
 end
 
 function ConfigMenu:onBut(p)

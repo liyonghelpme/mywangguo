@@ -215,7 +215,7 @@ function NewBuildMenu3:updateTab()
 
             local panel = setPos(addNode(self.flowNode), {initX+col*offX, initY-offY*row})
             local sp = setAnchor(setSize(setPos(addSprite(panel, "singleGoods.png"), {92, fixY(sz.height, 91)}), {184, 183}), {0.50, 0.50})
-            local build = setAnchor(setPos(addChild(panel, createSprite("build"..v.id..".png")), {86, fixY(sz.height, 67)}), {0.50, 0.50})
+            local build = setAnchor(setPos(addChild(panel, createSprite("#build"..v.id..".png")), {86, fixY(sz.height, 67)}), {0.50, 0.50})
             local sca = getSca(build, {130, 100})
             setScale(build, sca)
             local w = setPos(setAnchor(addChild(panel, ui.newTTFLabel({text=v.name, size=18, color={0, 255, 255}, font="f2", shadowColor={255, 255, 255}})), {0.50, 0.50}), {88, fixY(sz.height, 140)})

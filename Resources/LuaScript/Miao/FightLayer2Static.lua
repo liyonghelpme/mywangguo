@@ -9,6 +9,8 @@ function FightLayer2:finishCavalry()
         end
         self.day = 0
         self:clearState()
+        --最后一天显示day
+        self.state = FIGHT_STATE.SHOW_DAY
     end
 end
 
@@ -31,6 +33,9 @@ function FightLayer2:clearAllCamera()
     self.leftCamera:clearCamera()
     self.rightCamera:clearCamera()
     self.mainCamera:clearCamera()
+
+    self:showMiddleScene()
+
     --还原位置
     local vs = getVS()
     setPos(self.leftCamera.renderTexture, {vs.width/4-1, FIGHT_HEIGHT/2})
@@ -127,6 +132,43 @@ function FightLayer2:stopCameraMove(left, right)
         end
     end
 end
+
+--天数到了平局
+function FightLayer2:dayOver()
+    addBanner("平局")
+
+    local function checkWin()
+        print("oneFail checkWin")
+        if Logic.newVillage then
+            Logic.newVillage = false
+            print("new Village win inform", global.director.curScene.name)
+            global.director.curScene:newVillageWin(win)
+        else
+            if global.director.curScene.checkWin == nil then
+                global.director:pushScene(FightMap.new(), true)
+            end
+            global.director.curScene:checkWin()
+        end
+    end
+    local function fightOver()
+        print("fightOver")
+        --如果scene 退出完了 则 push一个新的scene
+        local st = global.director.sceneStack
+        local os = st[#st-1]
+        
+        if os.name == 'FightMap' then
+            global.director:popScene()
+        else
+            global.director:replaceScene(FightMap.new())
+        end
+
+        delayCall(0.5, checkWin)
+    end
+    print("why not call fightOver function here")
+    self.bg:runAction(sequence({delaytime(5), callfunc(nil, fightOver)}))
+end
+
+
 --获取当前的 主镜头位置 不要移动 然后 展示双方的 移动
 function FightLayer2:oneFail()
     local left = 0
@@ -160,9 +202,10 @@ function FightLayer2:oneFail()
     --self.clone = false
 
     local win = false
-    if left == right then
-        addBanner("平局")
-    elseif left > 0 then
+    --if left == right then
+    --    addBanner("平局")
+    --else
+    if left > 0 then
         addBanner("胜利")
         winCity()
         win = true
@@ -172,13 +215,14 @@ function FightLayer2:oneFail()
 
     local function checkWin()
         print("oneFail checkWin")
+        Logic.paused = false
         if Logic.newVillage then
             Logic.newVillage = false
             print("new Village win inform", global.director.curScene.name)
             global.director.curScene:newVillageWin(win)
         else
             if global.director.curScene.checkWin == nil then
-                global.director:pushScene(FightMap.new())
+                global.director:pushScene(FightMap.new(), true)
             end
             global.director.curScene:checkWin()
         end
@@ -186,7 +230,16 @@ function FightLayer2:oneFail()
     local function fightOver()
         print("fightOver")
         --如果scene 退出完了 则 push一个新的scene
-        global.director:popScene()
+        --global.director:popScene()
+        local st = global.director.sceneStack
+        local os = st[#st-1]
+        if os.name == 'FightMap' then
+            global.director:popScene()
+        else
+            global.director:replaceScene(FightMap.new())
+        end
+
+        Logic.paused = true
         delayCall(0.5, checkWin)
     end
     print("why not call fightOver function here")
@@ -574,6 +627,17 @@ function FightLayer2:showRightCamera()
     setVisible(self.mainCamera.renderTexture, false)
     self.mergeYet = false
     self.split = false
+end
+
+--显示中间屏幕位置
+function FightLayer2:showMiddleScene()
+    setVisible(self.leftCamera.renderTexture, false)
+    setVisible(self.rightCamera.renderTexture, false)
+    setVisible(self.mainCamera.renderTexture, true)
+    setVisible(self.tempNode, false)
+    local vs = getVS()
+    self.mainCamera.startPoint = {-(self.WIDTH/2-vs.width/2), 0}
+    self.mainCamera.moveTarget = self.mainCamera.startPoint[1]
 end
 
 function FightLayer2:mergeCamera()
@@ -990,6 +1054,8 @@ function FightLayer2:cavalryScript(diff)
         local ad, left, right = self:checkOneCavalryDead()
         if left == 0 and right == 0 then
             self.day = 0
+            --最后一天显示day
+            self.state = FIGHT_STATE.SHOW_DAY
             return
         end
 

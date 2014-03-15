@@ -623,6 +623,10 @@ function winCity()
             if cdata[4] == 1 then 
                 Logic.ownCity[Logic.challengeCity] = true
                 Logic.ownCityDirty = true
+            --村落记录数据
+            elseif cdata[4] == 4 then
+                Logic.ownVillage[Logic.challengeCity] = true
+                Logic.ownVillageDirty = true
             end
         end
     end

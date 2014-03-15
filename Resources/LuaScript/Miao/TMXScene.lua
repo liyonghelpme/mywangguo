@@ -6,6 +6,7 @@ require "menu.SessionMenu"
 require "Miao.LoadingView"
 require "menu.NewPeople"
 require "menu.NewBuild"
+require "menu.NewGoods"
 
 TMXScene = class()
 
@@ -214,7 +215,7 @@ function TMXScene:gotoFight()
     if Logic.catData ~= nil then
         self.showYet = false
         clearFight()
-        global.director:pushScene(FightScene.new())
+        global.director:pushScene(FightScene.new(), true)
     end
 end
 
@@ -250,7 +251,7 @@ function TMXScene:checkBattleTime(diff)
                 if not self.showYet then
                     self.showYet = true
                 --addBanner("部队到达了！")
-                    global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self), 1, 0)
+                    global.director:pushView(SessionMenu.new("服部大人,\n幕府军看来已经到达了!", self.gotoFight, self, {butOk=true}), 1, 0)
                 end
             else
                 local lastPos = path[curPoint]
@@ -329,6 +330,14 @@ function TMXScene:checkNewUser()
             --9 商人收购食材
             elseif Logic.newStage == 10 then
                 global.director:pushView(SessionMenu.new("今后我打算定期前来采购，希望你能够增加田地。", onNew, nil, {butOk=true}), 1, 0)
+            end
+
+            if Logic.newStage == 41 then
+                local function onNext()
+                    Logic.newStage = 5
+                    Logic.lastCloseTime = Logic.date
+                end
+                global.director:pushView(SessionMenu.new("太好啦！！新房子！\n一直在这里傻站着我的脚都肿啦！", onNext, nil, {butOk=true}), 1, 0)
             end
         end
 

@@ -158,7 +158,7 @@ end
 function MapCat:gotoFight()
     self.endCity:removeSword()
     clearFight()
-    global.director:pushScene(FightScene.new())
+    global.director:pushScene(FightScene.new(), true)
     removeSelf(self.bg)
 end
 

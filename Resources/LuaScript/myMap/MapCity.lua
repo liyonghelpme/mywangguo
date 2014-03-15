@@ -210,10 +210,29 @@ function MapCity:showSword()
     end
     local sword = setPos(createSprite("sword.png"), {25, ofy})
     sword:runAction(repeatForever(sequence({bounceout(rotateby(0.5, -45)), sinein(rotateby(0.5, 45))})))
+
+    local s3 = createSprite("sword.png")
+    local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE
+    s3:setBlendFunc(bf)
+    sword:addChild(s3)
+    setAnchor(s3, {0, 0})
+    s3:runAction(repeatForever(sequence({fadeto(1, 0), fadeto(1, 255)})))
+
     local s2 = setPos(createSprite("sword.png"), {-25, ofy})
     s2:runAction(repeatForever(sequence({bounceout(rotateby(0.5, 45)), sinein(rotateby(0.5, -45))})))
     self.bg:addChild(sword)
     self.bg:addChild(s2)
+
+    local s3 = createSprite("sword.png")
+    local bf = ccBlendFunc()
+    bf.src = GL_ONE
+    bf.dst = GL_ONE
+    s3:setBlendFunc(bf)
+    s2:addChild(s3)
+    setAnchor(s3, {0, 0})
+    s3:runAction(repeatForever(sequence({fadeto(1, 0), fadeto(1, 255)})))
 
     self.sword =sword
     self.s2 = s2

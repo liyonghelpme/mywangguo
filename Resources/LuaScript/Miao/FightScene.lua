@@ -101,7 +101,7 @@ function FightScene:ctor()
     --self.soldiers = {{9, 90, 0, 0}, {0, 0, 90, 0}}
     --调试弓箭手 攻击 目标
     if DEBUG_SOL then
-        self.soldiers = {{18, 15, 15, 15}, {18, 15, 15, 15}}
+        self.soldiers = {{25, 25, 25, 25}, {25, 25, 25, 25}}
         --self.soldiers = {{10, 0, 0, 0}, {50, 0, 0, 0}}
     end
     --attack defense health 前 中 后 默认都在前方布局  技能属性
@@ -121,8 +121,8 @@ function FightScene:ctor()
     self.otherHeros = {{}, {}, {}, {}}
     if DEBUG_SOL then
         --self.heros = {{{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5} }, {{attack=6*5, defense=0, health=66*5}}, {{attack=6*5, defense=0, health=66*5}}}
-        self.heros = {{{attack=6*5, defense=0, health=66*5, pos=0}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=2}}}
-        --self.heros = {{}, {}, {}, {}}
+        --self.heros = {{{attack=6*5, defense=0, health=66*5, pos=0}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=1}}, {{attack=6*5, defense=0, health=66*5, pos=2}}}
+        self.heros = {{}, {}, {}, {}}
     end
     
     if not DEBUG_SOL then
