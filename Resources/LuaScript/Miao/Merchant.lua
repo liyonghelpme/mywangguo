@@ -120,7 +120,9 @@ function Merchant:checkAllPossible()
         if Logic.newStage == 6 then
             print("goto village Entry")
             table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.backPoint, CAT_ACTION.MER_BACK})
-            table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.BUY_GOODS})
+            --商人不用占用 农田建筑物
+            --popState 时候检测这个false 参数 如果 false 则 不用占用建筑物
+            table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, k, CAT_ACTION.BUY_GOODS, false})
             --table.insert(self.people.stateStack, {PEOPLE_STATE.GO_TARGET, self.people.map.villageEntry, CAT_ACTION.MOVE_VILLAGE_ENTRY})
             self.people.predictTarget = self.people.map.villageEntry
             self.people.actionContext = CAT_ACTION.MOVE_VILLAGE_ENTRY

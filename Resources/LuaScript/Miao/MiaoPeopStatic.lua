@@ -492,7 +492,10 @@ function MiaoPeople:popState()
         self.stateContext = stop
         table.remove(self.stateStack)
         --先去农田 工厂 伐木场 可能 获取资源就不需要多次设定owner了
-        local needOcc = stop[4] or true
+        local needOcc = stop[4]
+        if needOcc == nil then
+            needOcc = true
+        end
         if needOcc then
             self.stateContext[2]:setOwner(self)
         end
