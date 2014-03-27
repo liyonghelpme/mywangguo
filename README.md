@@ -3,6 +3,7 @@
 采用ETC1 压缩方式 
 如果是 RGBA 8 8 8 8 图像 可以节约4倍率的 显存使用
 如果是 RGBA 4 4 4 4 图像 可以节约2倍率的 显存使用
+没有alpha的图片 RGB888  压缩比例6:1
 显存使用大小只和图片大小有关 因此 推荐使用 8 8 8 8 的图片来进行压缩 制作ETC1 的图片
 
 
@@ -19,3 +20,6 @@ ComNative.cpp 中增加了 setGLProgram 修改shader的代码
 Resources 中是新增的 shader 代码
 
 LuaScript 中TestScene.lua 是demo 信息
+
+
+etc1tool 是android-sdk中的工具
