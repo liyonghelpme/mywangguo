@@ -36,11 +36,12 @@ local function main()
     --require 'Miao.FightScene'
     --require 'myMap.FightMap'
     require "TestScene"
+    print("try load Lua file ")
 
     local director = CCDirector:sharedDirector()
     --local sc = TMXScene.new()
     local sc = TestScene.new()
-    director:replaceScene(sc.bg)
+    director:runWithScene(sc.bg)
     global.director:onlyRun(sc)
 
     --[[ 

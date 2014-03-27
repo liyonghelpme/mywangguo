@@ -1,5 +1,8 @@
+import sys
+import os
+fn = sys.argv[1]
 from PIL import Image
-im = Image.open('attIcon.png')
+im = Image.open(fn)
 red, green, blue, alpha = im.split()
 print alpha
 
@@ -16,4 +19,5 @@ nim.paste(rgb, (0, 0, im.size[0], im.size[1]))
 p = Image.merge('RGB', (alpha, alpha, alpha))
 nim.paste(p, (0, im.size[1], im.size[0], im.size[1]*2))
 
-nim.save('t.png')
+nim.save(fn)
+os.system('etc1tool %s --encode -o %s'%(fn, fn.replace('png', 'etc1')))

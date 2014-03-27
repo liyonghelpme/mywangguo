@@ -83,9 +83,15 @@ bool AppDelegate::applicationDidFinishLaunching()
     //if(def->getStringForKey("update") != "0")
 	//    updateFiles();
 
+    /*
     scene = UpdateScene::create();
     scene->ap = this;
     pDirector->runWithScene(scene);
+    */
+
+    std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
+    CCLog("run script in %s", path.c_str());
+    pEngine->executeScriptFile(path.c_str());
 
     CCLog("finish update read main.lua");
     /*

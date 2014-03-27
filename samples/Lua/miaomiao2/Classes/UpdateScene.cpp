@@ -108,7 +108,9 @@ void UpdateScene::update(float diff) {
 			CCLuaEngine* pEngine = CCLuaEngine::defaultEngine();
             CCLog("run main lua file");
 			std::string path = CCFileUtils::sharedFileUtils()->fullPathForFilename("main.lua");
+            CCLog("run script in %s", path.c_str());
 			pEngine->executeScriptFile(path.c_str());
+            CCLog("run finish !");
 		}else {
 			loadPoint(progress);
 		}
