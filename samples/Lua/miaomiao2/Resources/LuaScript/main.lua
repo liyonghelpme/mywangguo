@@ -28,16 +28,18 @@ local function main()
 
     ---------------
     require "Global.INCLUDE"
-    require "Miao.Logic"
+    --require "Miao.Logic"
     --require "Miao.MiaoScene"
-    require "Miao.TMXScene"
+    --require "Miao.TMXScene"
 
     --require "myMap.MapScene"
-    require 'Miao.FightScene'
-    require 'myMap.FightMap'
+    --require 'Miao.FightScene'
+    --require 'myMap.FightMap'
+    require "TestScene"
 
     local director = CCDirector:sharedDirector()
-    local sc = TMXScene.new()
+    --local sc = TMXScene.new()
+    local sc = TestScene.new()
     director:replaceScene(sc.bg)
     global.director:onlyRun(sc)
 

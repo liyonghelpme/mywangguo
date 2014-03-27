@@ -13,15 +13,17 @@ bool UpdateScene::init() {
     CCScene::init();
 	CCDirector *pDirector = CCDirector::sharedDirector();
     //背景黑框和屏幕一样大小
-    CCSprite *lm = CCSprite::create("black.png");
-    addChild(lm);
+    /*
+    //CCSprite *lm = CCSprite::create("black.png");
+    //addChild(lm);
     CCSize vs = pDirector->getVisibleSize();
     lm->setPosition(ccp(vs.width/2, vs.height/2));
     CCSize sz = lm->getContentSize();
 
     lm->setScaleX(vs.width/sz.width);
     lm->setScaleY(vs.height/sz.height);
-    
+    */
+
     CCLabelTTF *lab = CCLabelTTF::create("Loading...", "", 25);
     lab->setColor(ccc3(255, 255, 255));
     lab->enableShadow(CCSizeMake(1, 2), 1, 1, true);
@@ -29,6 +31,7 @@ bool UpdateScene::init() {
     lab->setPosition(ccp(16, 768-743));
     addChild(lab);
     
+    /*
     CCSpriteFrameCache *sf = CCSpriteFrameCache::sharedSpriteFrameCache();
     sf->addSpriteFramesWithFile("loadAni.plist");
     CCAnimation *ani = CCAnimation::create();
@@ -44,6 +47,7 @@ bool UpdateScene::init() {
     addChild(cat);
     cat->setPosition(ccp(vs.width-228, 101));
     cat->runAction(CCRepeatForever::create(CCAnimate::create(ani)));
+    */
 
 
 
