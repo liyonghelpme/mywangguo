@@ -44,3 +44,36 @@ void setFontFillColor(CCLabelTTF *lab, ccColor3B c, bool u) {
 CCTexture2D *addETCImage(char *name) {
     return CCTextureCache::sharedTextureCache()->addETCImage(name);
 }
+
+int setGLProgram(CCNode *sp, char *name, char * vert, char *frag){
+    CCShaderCache *sc = CCShaderCache::sharedShaderCache();
+    CCGLProgram *prog = (CCGLProgram*)sc->programForKey(name);
+    if(prog == NULL) {
+        GLchar *fragSource = (GLchar*)CCString::createWithContentsOfFile(CCFileUtils::sharedFileUtils()->fullPathForFilename(frag).c_str())->getCString();
+        GLchar *vertSource = (GLchar*)CCString::createWithContentsOfFile(CCFileUtils::sharedFileUtils()->fullPathForFilename(vert).c_str())->getCString();
+        //CCLog("Frag File");
+        ////CCLog("%s", fragSource);
+        //CCLog("Vert File");
+        ////CCLog("%s", vertSource);
+
+        prog = new CCGLProgram();
+        prog->initWithVertexShaderByteArray(vertSource, fragSource);
+        sp->setShaderProgram(prog);
+        prog->release();
+
+        CHECK_GL_ERROR_DEBUG();
+        prog->addAttribute(kCCAttributeNamePosition, kCCVertexAttrib_Position);
+        prog->addAttribute(kCCAttributeNameColor, kCCVertexAttrib_Color);
+        prog->addAttribute(kCCAttributeNameTexCoord, kCCVertexAttrib_TexCoords);
+        CHECK_GL_ERROR_DEBUG();
+
+        prog->link();
+        CHECK_GL_ERROR_DEBUG();
+        prog->updateUniforms();
+        CHECK_GL_ERROR_DEBUG();
+        sc->addProgram(prog, name);
+    } else {
+        sp->setShaderProgram(prog);
+    }
+    return 0;
+}

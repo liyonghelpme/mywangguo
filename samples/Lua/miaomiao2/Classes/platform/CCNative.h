@@ -35,4 +35,5 @@ void setTextureRect(CCSprite *, CCRect, bool, CCSize);
 void enableShadow(CCLabelTTF *, CCSize , float, float, bool, int r, int g, int b);
 void setFontFillColor(CCLabelTTF *, ccColor3B, bool);
 CCTexture2D *addETCImage(char *name);
+int setGLProgram(CCNode *, char *, char *, char *);
 #endif // __CC_EXTENSION_CCNATIVE_H_
