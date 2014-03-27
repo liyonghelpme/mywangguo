@@ -23,3 +23,6 @@ LuaScript 中TestScene.lua 是demo 信息
 
 
 etc1tool 是android-sdk中的工具
+
+
+adobe flash 在手机平台上也使用这种算法压缩纹理
